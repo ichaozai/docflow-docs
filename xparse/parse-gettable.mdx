@@ -1,0 +1,65 @@
+---
+title: "获取表格"
+---
+
+在RAG应用中，为了更高的信息精度或稳定性，通常需要对表格做单独处理，如将表格区域保存为图片供前端展示，或者单独为表格设置分chunk策略等。在TextIn xParse文档解析API的输出中，对每个表格都有单独的定义，您可以获取每个表格并单独保存下来。
+
+此外，我们也提供了一步到位的从PDF中提取表格并保存为Excel文件的教程，方便整合到您现有的基于Excel的业务任务流程中。
+
+## 如何获取表格
+
+您可以参考以下步骤和示例代码将解析获取到的表格保存为 md 和 json 以及 excel 格式的文件。
+
+### 将表格保存为 md 和 json 文件
+
+- 
+- 参考[快速启动](/xparse/parse-quickstart)，在 options 中设置URL参数 table_flavor 为 md 或 html，这样API会以Markdown或HTML格式输出表格。您可根据实际需要进行设置。
+- 在main函数中添加以下示例代码，解析API输出markdown中的表格，并保存为 md 和 json 文件。
+
+```python
+import re
+
+if "result" in json_response and "markdown" in json_response["result"]:
+    markdown_content = json_response["result"]["markdown"]
+    # 提取所有表格
+    tables = re.findall(r'(?:\|.*\n)+', markdown_content)
+    tables_md = '\n'.join(tables)
+    
+    # 保存为md文件
+    with open("tables.md", "w", encoding="utf-8") as f:
+        f.write(tables_md)
+
+        
+tables_json = []
+
+for page in json_response["result"]["pages"]:
+    for block in page.get("structured", []):
+        if block.get("type") == "table":
+            tables_json.append(block)
+
+# 保存为 json 文件
+with open("tables.json", "w", encoding="utf-8") as f:
+    json.dump(tables_json, f, ensure_ascii=False, indent=2)   
+```
+
+### 将表格保存为 excel 文件
+
+- 参考[快速启动](/xparse/parse-quickstart)，在 options 中设置URL参数 get_excel=1，让API返回 excel_base64 字段（Excel文件的base64编码）。
+- 在main函数中添加以下示例代码，将表格保存为excel文件。
+
+```python
+import base64
+
+if "result" in json_response and "excel_base64" in json_response["result"]:
+    excel_base64 = json_response["result"]["excel_base64"]
+    excel_bytes = base64.b64decode(excel_base64)
+    with open("result.xlsx", "wb") as f:
+        f.write(excel_bytes)
+    print("Excel 文件已保存为 result.xlsx")
+else:
+    print("未检测到 excel_base64 字段，可能 PDF 中没有表格或参数设置有误。")
+```
+
+- 参考[快速启动](/xparse/parse-quickstart)中的示例文件，保存后的表格如下图（仅截取部分作为示例）
+
+![Parse Gettable Pn](/images/parse-gettable.png)

@@ -1,0 +1,107 @@
+---
+title: "异步请求"
+---
+
+由于文档抽取是基于大模型输出的，受限于大模型的输出速度，在输出较长内容时可能会出现分钟级的响应情况。如果您不希望让用户同步等待过长时间，可以用异步请求的方式调用文档抽取API。
+
+以下为您提供一份完整的异步请求示例代码，您可根据具体需求进行调整。
+
+```python
+import json
+import aiohttp
+import asyncio
+import base64
+
+class AsyncExtractClient:
+    def __init__(self, app_id: str, secret_code: str):
+        self.app_id = app_id
+        self.secret_code = secret_code
+
+    async def extract(self, file_content: bytes, options: dict, request_body: dict) -> str:
+        # 将文件内容转换为base64
+        file_base64 = base64.b64encode(file_content).decode('utf-8')
+
+        # 构建请求参数
+        params = {}
+        for key, value in options.items():
+            params[key] = str(value)
+
+        # 设置请求头
+        headers = {
+            "x-ti-app-id": self.app_id,
+            "x-ti-secret-code": self.secret_code,
+            "Content-Type": "application/json"
+        }
+
+        # 构建完整的请求体，包含base64文件数据
+        full_request_body = {
+            **request_body,
+            "file": file_base64  # 添加base64编码的文件数据
+        }
+
+        # 发送异步请求
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                "https://api.textin.com/ai/service/v2/entity_extraction",
+                params=params,
+                headers=headers,
+                json=full_request_body
+            ) as response:
+                # 检查响应状态
+                response.raise_for_status()
+                return await response.text()
+
+async def main():
+    # 创建客户端实例，需替换你的API Key
+    client = AsyncExtractClient("你的x-ti-app-id", "你的x-ti-secret-code")
+
+    # 定义文件路径，替换为你的文件
+    file_path = "你的文件.pdf"
+
+    # 读取本地文件
+    with open(file_path, "rb") as f:
+        file_content = f.read()
+
+    # 设置URL参数，可按需设置，详情见URL参数说明
+    options = dict(
+        parse_mode="scan"
+    )
+
+    # 设置请求体参数，prompt模式
+    request_body = dict(
+        prompt="请抽取这张小票中的实付金额、消费日期、店铺名称、订单号并以字段格式返回，请抽取货号、商品名称、数量、单价，并以表格格式返回"
+    )
+
+    try:
+        response = await client.extract(file_content, options, request_body)
+
+        # 保存完整的JSON响应到result.json文件
+        with open("prompt_extract_result.json", "w", encoding="utf-8") as f:
+            f.write(response)
+
+        print(response)
+    except Exception as e:
+        print(f"Error: {e}")
+
+if __name__ == "__main__":
+    # 运行异步主函数
+    asyncio.run(main())
+```
+
+对比[**快速启动**](/xparse/extract-quickstart)中的请求方式，主要有以下修改：使用前需要安装 aiohttp 库
+
+1. **导入异步库**：添加了 aiohttp 和 asyncio 库
+2. **类名更改**：ExtractClient 改为 AsyncExtractClient
+3. **异步方法**：extract 方法改为 async def extract
+4. **异步HTTP请求**：使用 aiohttp.ClientSession() 替代 requests.post
+5. **异步上下文管理**：使用 async with 语句管理会话和请求
+6. **异步响应处理**：使用 await response.text() 获取响应内容
+7. **主函数异步化**：main 函数改为 async def main
+8. **运行方式**：使用 asyncio.run(main()) 运行异步主函数
+
+**这个异步版本的优势：**
+
+- 非阻塞I/O操作，提高性能
+- 可以更好地处理并发请求
+- 减少线程资源占用
+- 适合处理大量文件或需要并发处理的场景

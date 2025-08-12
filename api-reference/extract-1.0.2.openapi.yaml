@@ -1,0 +1,844 @@
+openapi: 3.0.1
+info:
+  title: 智能文档抽取-API文档
+  description: 智能文档抽取-API文档
+  version: 1.0.2
+
+servers:
+  # - url: https://textin-sandbox.intsig.com
+  #   description: Sandbox server
+  - url: https://api.textin.com
+    description: Production server
+
+security:
+  - AppIdAuth: []
+    SecretCodeAuth: []
+
+paths:
+  /ai/service/v2/entity_extraction:
+    post:
+      summary: 智能文档抽取
+      operationId: llm_uie
+      description: |
+        智能文档抽取-API
+      parameters:
+        - in: query
+          required: false
+          name: page_start
+          schema:
+            type: integer
+            default: 0
+          description: |
+            当上传的是pdf时，page_start 表示从第几页开始抽取，不传该参数时默认从首页开始
+
+        - in: query
+          required: false
+          name: page_count
+          schema:
+            type: integer
+          description: |
+            当上传的是pdf时，page_count 表示要进行抽取的pdf页数。
+            - Prompt模式总页数不得超过20页，默认为20页；
+            - 字段（自定义key）模式总页数不得超过100页，默认为100页。
+
+        - in: query
+          required: false
+          name: parse_mode
+          schema:
+            type: string
+            default: scan
+            enum: [auto, scan]
+          description: |
+            pdf文档的解析模式，默认为scan模式。图片不用设置，均默认按scan模式处理。
+            - auto 综合文字识别和解析模式：对pdf电子档解析，会直接提取pdf中的文字
+            - scan 仅按文字识别模式：将pdf当成图片处理
+
+        - in: query
+          required: false
+          name: get_image
+          schema:
+            type: string
+            default: objects
+            enum: [none, page, objects, both]
+          description: |
+            仅Prompt模式生效，获取图片，默认为objects，返回整页图像和图像对象。
+            - none 不返回任何图像
+            - page 返回每一页的整页图像：即pdf页的完整页图片   
+            - objects 返回页面内的子图像：即pdf页内的各个子图片
+            - both 返回整页图像和图像对象
+
+        - in: query
+          required: false
+          name: crop_image
+          schema:
+            type: integer
+            default: 0
+            enum: [0, 1]
+          description: |
+            是否进行切边矫正处理，默认为0，不进行切边矫正
+            - 0 不进行切边矫正
+            - 1 进行切边矫正
+
+        - in: query
+          required: false
+          name: remove_watermark
+          schema:
+            type: integer
+            default: 0
+            enum: [0, 1]
+          description: |
+            是否进行去水印处理，默认为0，不去水印
+            - 0 不去水印
+            - 1 去水印
+
+        - in: query
+          required: false
+          name: formula_level
+          schema:
+            type: integer
+            default: 0
+            enum: [0, 1, 2]
+          description: |
+            公式识别等级，默认为0，全识别。
+            - 0 全识别
+            - 1 仅识别行间公式，行内公式不识别
+            - 2 不识别
+
+        - name: file_name
+          in: query
+          description: |
+            待抽取样本的文件名（含后缀名）
+          schema:
+            type: string
+            example: temp_file.jpg
+        # - $ref: '#/components/parameters/XTiFormEnable'
+      requestBody:
+        description: |
+          支持的文件格式：png, jpg, jpeg, pdf, bmp, tiff, webp, doc, docx, html, mhtml, xls, xlsx, csv, ppt, pptx, txt, ofd；
+
+          * API支持的最大文档处理页数为100页，超出部分的文档信息将被忽略。
+
+          * 支持两种模式：
+            * prompt模式：
+              * 提供一个prompt，系统将根据该prompt进行抽取；
+              * 同时有prompt输入和key输入时，按prompt模式调用。
+            * 自定义key模式：
+              * 提供一个fields与table_fields列表，系统将根据该列表进行抽取。
+
+          * API支持的最大抽取字段数量为`fields`数组中的元素数量与`table_fields`数组中每个对象的`fields`子数组的元素数量之和，总计不得超过`100`个字段。
+
+          * 如果提供的字段总数超出限制，系统将优先抽取`fields`数组中的字段元素，超出部分的字段将被忽略。
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  description: |
+                    待处理的文档base64字符串
+                    例如：/9j/4AAQSk...
+                  example: "/9j/4AAQSk..."
+                prompt:
+                  type: string
+                  description: |
+                    抽取的prompt，传入此字段时以下字段将会被忽略：
+                      * `fields`
+                      * `table_fields`
+                  example: |
+                    请从提供的列表信息中提取姓名、年龄字段，以数组形式返回。
+
+                fields:
+                  type: array
+                  description: |
+                    待抽取的文本字段
+
+                  items:
+                    allOf:
+                      - $ref: "#/components/schemas/FIELD_OBJ"
+
+                table_fields:
+                  type: array
+                  description: |
+                    表格抽取时要抽取的表格信息
+
+                  items:
+                    type: object
+                    required:
+                      - title
+                      - fields
+                    properties:
+                      title:
+                        type: string
+                        example: "学生成绩表"
+                        description: |
+                          表格标题
+
+                          例如：学生成绩表
+                      description:
+                        type: string
+                        description: 表格标题的prompt
+                      fields:
+                        type: array
+                        description: 该表的表头字段信息，非必填
+                        items:
+                          allOf:
+                            - $ref: "#/components/schemas/FIELD_OBJ"
+
+      responses:
+        "200":
+          description: "抽取结果"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/CodeMessage"
+                  - $ref: "#/components/schemas/CommonResult"
+
+components:
+  securitySchemes:
+    AppIdAuth:
+      type: apiKey
+      in: header
+      name: x-ti-app-id
+      description: '请[登录Textin](https://www.textin.com/console/dashboard/setting)后前往 "工作台-账号设置-开发者信息" 查看 x-ti-app-id'
+    SecretCodeAuth:
+      type: apiKey
+      in: header
+      name: x-ti-secret-code
+      description: '请[登录Textin](https://www.textin.com/console/dashboard/setting)后前往 "工作台-账号设置-开发者信息" 查看 x-ti-secret-code'
+  parameters:
+    XTiFormEnable:
+      name: x-ti-form-enable
+      in: header
+      schema:
+        type: string
+        example: "1"
+        default: "1"
+        enum:
+          - "1"
+      description: 固定为1，启用formData模式
+  schemas:
+    FIELD_OBJ:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: 字段名
+          example: "姓名"
+        description:
+          type: string
+          description: 抽取时的prompt，非必填
+    FIELD_OBJ_TABLE:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: 字段名
+          example: "姓名"
+    CodeMessage:
+      type: object
+      required:
+        - version
+        - code
+        - message
+      properties:
+        version:
+          example: v1.6.5
+          type: string
+          description: 版本号
+        code:
+          example: 200
+          type: integer
+          description: |
+            状态码
+            - 200: OK
+            - 40101: x-ti-app-id 或 x-ti-secret-code 为空
+            - 40102: x-ti-app-id 或 x-ti-secret-code 无效，验证失败
+            - 40103: 客户端IP不在白名单
+            - 40003: 余额不足，请充值后再使用
+            - 40004: 参数错误，请查看技术文档，检查传参
+            - 40007: 机器人不存在或未发布
+            - 40008: 机器人未开通，请至市场开通后重试
+            - 40301: 图片类型不支持
+            - 40302: 上传文件大小不符，文件大小不超过 500M
+            - 40303: 文件类型不支持，接口会返回实际检测到的文件类型，如“当前文件类型为.gif”
+            - 40304: 图片尺寸不符，长宽比小于2的图片宽高需在20～20000像素范围内，其他图片的宽高需在20～10000像素范围内
+            - 40305: 识别文件未上传
+            - 40306: qps超过限制
+            - 40400: 无效的请求链接，请检查链接是否正确
+            - 30203: 基础服务故障，请稍后重试
+            - 500: 服务器内部错误
+          enum:
+            - 200
+            - 40101
+            - 40102
+            - 40103
+            - 40003
+            - 40004
+            - 40007
+            - 40008
+            - 40301
+            - 40302
+            - 40303
+            - 40304
+            - 40305
+            - 40306
+            - 40400
+            - 30203
+            - 500
+        message:
+          type: string
+          description: 错误信息
+          example: success
+    BoundingRegions:
+      type: array
+      description: 边界框信息
+      items:
+        properties:
+          page_number:
+            type: integer
+            description: 所在页码
+          value:
+            type: string
+            description: 文本内容
+          position:
+            type: array
+            description: 文本的坐标
+            maximum: 8
+            minimum: 0
+            example: [343, 56, 459, 56, 459, 90, 343, 90]
+            items:
+              type: integer
+          char_pos:
+            type: array
+            description: 每个字符的坐标
+            items:
+              example: [343, 56, 459, 56, 459, 90, 343, 90]
+              type: array
+              items:
+                type: integer
+                example: 343
+    pages_detail:
+      type: object
+      description: 文档页数据
+      properties:
+        status:
+          description: 表示当前页的引擎输出状态，或者error_message
+          type: string
+          example: success
+        page_id:
+          description: 当前页码 (若为流式文件, 页码置为0)
+          type: number
+          example: 0
+        durations:
+          description: 当前页总耗时
+          type: number
+          format: float
+          example: 612.5
+        image_id:
+          description: |
+            当前页图片id （下载方式：https://api.textin.com/ocr_image/download?image_id=xxx ,需要在headers里添加appid和key）。当输入参数image_output_type=default且get_image=page/both时返回。
+            例如使用curl下载\
+            curl 'https://api.textin.com/ocr_image/download?image_id=xxx' \
+            --header 'x-ti-app-id: c81f*************************e9ff' \
+            --header 'x-ti-secret-code: 5508********************1c17'
+          type: string
+          example: 90u12adcad08r2
+        origin_image_id:
+          description: |
+            切边或去水印前的原始页图片，仅当开启切边或去水印，image_output_type=default且get_image=page/both时返回。下载方式同image_id
+          type: string
+          example: 90u12adcad08r2
+        width:
+          type: integer
+          description: 文档页宽度
+        height:
+          type: integer
+          description: 文档页高度
+        angle:
+          type: integer
+          description: 图像（中文字）的角度（当输入为图像时，默认为0， 可选值0, 90, 180, 270)
+
+    CommonLines:
+      type: array
+      description: 抽取结果的文本行信息
+      items:
+        type: object
+        description: 文本行信息
+        properties:
+          page:
+            type: integer
+            description: 所在页数
+            example: 0
+          text:
+            type: string
+            description: 文本内容
+            example: "example"
+          pos:
+            type: array
+            description: 文本行坐标
+            items:
+              type: integer
+              example: 100
+              minimum: 0
+            maxItems: 8
+            minItems: 8
+            example:
+              - 100
+              - 200
+              - 200
+              - 200
+              - 300
+              - 200
+              - 100
+              - 300
+          angle:
+            type: integer
+            description: 文本行旋转角度
+            example: 90
+            minimum: 0
+            maximum: 270
+          char_pos:
+            type: array
+            description: 文本行字符坐标
+            items:
+              type: array
+              description: 单字符坐标
+              items:
+                type: integer
+                example: 100
+                minimum: 0
+              maxItems: 8
+              minItems: 8
+              example:
+                - 100
+                - 200
+                - 200
+                - 200
+                - 300
+                - 200
+                - 100
+                - 300
+    CommonItem:
+      properties:
+        value:
+          type: string
+          example: 字段识别结果
+          description: 字段识别结果
+        position:
+          maxItems: 8
+          description: |
+            文档被转正后，value在文档中的坐标，是一个长度为8的数组
+            [0,1,2,3,4,5,6,7]
+            - (0, 1) 左上角坐标
+            - (2, 3) 右上角坐标
+            - (4, 5) 右下角坐标
+            - (6, 7) 左下角坐标
+          items:
+            type: integer
+            example: 100
+            minimum: 0
+          minItems: 0
+          example:
+            - 100
+            - 200
+            - 200
+            - 200
+            - 300
+            - 200
+            - 100
+            - 300
+          type: array
+        description:
+          type: string
+          example: 字段中文描述
+          description: 字段中文描述
+        lines:
+          oneOf:
+            - $ref: "#/components/schemas/CommonLines"
+      type: object
+      required:
+        - value
+    CommonResult:
+      properties:
+        duration:
+          type: integer
+          description: 推理时间(ms)
+          example: 2825
+        result:
+          properties:
+            llm_json:
+              description: |
+                大模型抽取处理后的原始抽取结果，仅当传入prompt参数时返回，返回简化的键值对结构，方便直接使用。
+
+                由于使用大模型对用户输入的信息进行抽取，具体的字段名称和数据类型由用户的prompt决定，无法预先确定
+              oneOf:
+                - type: object
+                  additionalProperties: true
+                  example:
+                    确认日期: "2024/4/3"
+                    基金代码: "011892"
+                    持仓金额: "74178.80"
+                - type: array
+                  items:
+                    type: object
+                    additionalProperties: true
+            raw_json:
+              description: |
+                大模型抽取带坐标信息的抽取结果，仅当传入prompt参数时返回，包含详细的位置信息和边界框数据，用于高级处理场景。
+
+                由于使用大模型对用户输入的信息进行抽取，具体的字段名称无法预先确定，但每个字段值都遵循统一的结构格式，包含抽取值、页码信息和详细的坐标数据
+
+                - 注意这里写的object类型不是表示此字段是object，而是表示将llm_json中的字段值从string变成了以下object结构
+                - 详情可参考下面json示例中的【示例1: prompt模式-返回对象】与【示例2: prompt模式-返回数组】部分
+              required:
+                - value
+                - pages
+              type: object
+              properties:
+                value:
+                  type: string
+                  description: |
+                    字段的抽取值，即为llm_json中对应的字段值
+
+                    示例："011892"
+                  example: "011892"
+                pages:
+                  type: array
+                  items:
+                    type: integer
+                    example: 1
+                  description: |
+                    字段所在的页码列表
+
+                    示例：[1]
+                  example: [1]
+                bounding_regions:
+                  type: array
+                  description: 字段的边界框信息，包含详细的位置和字符坐标
+                  items:
+                    type: object
+                    required:
+                      - position
+                      - page_id
+                      - value
+                    properties:
+                      position:
+                        type: array
+                        description: |
+                          字段在文档中的坐标位置
+
+                          示例：[201,199,308,199,308,230,201,230]
+                        items:
+                          type: integer
+                          example: 201
+                        example: [201, 199, 308, 199, 308, 230, 201, 230]
+                      char_pos:
+                        type: array
+                        description: |
+                          每个字符的详细坐标信息
+
+                          示例：[[202,202,218,201,218,230,201,229],[220,202,235,202,236,228,220,229]]
+                        items:
+                          type: array
+                          items:
+                            type: integer
+                            example: 202
+                        example:
+                          [
+                            [202, 202, 218, 201, 218, 230, 201, 229],
+                            [220, 202, 235, 202, 236, 228, 220, 229],
+                          ]
+                      page_id:
+                        type: integer
+                        description: |
+                          所在页码ID
+
+                          示例：1
+                        example: 1
+                      value:
+                        type: string
+                        description: |
+                          该边界框内的文本内容
+
+                          示例："011892"
+                        example: "011892"
+            pages:
+              type: array
+              description: 大模型抽取带坐标信息的抽取结果，仅当传入prompt参数时返回，当文档为多页结构时，返回每一页的详细信息，用于坐标回显
+              items:
+                $ref: "#/components/schemas/pages_detail"
+            usage:
+              type: object
+              description: 大模型抽取的token消耗情况，仅当传入prompt参数时返回
+              properties:
+                prompt_tokens:
+                  type: integer
+                  description: 大模型抽取消耗输入token数量
+                  example: 100
+                completion_tokens:
+                  type: integer
+                  description: 大模型抽取消耗输出token数量
+                  example: 100
+                total_tokens:
+                  type: integer
+                  description: 大模型抽取消耗token总量
+                  example: 200
+            details:
+              type: object
+              description: 文档抽取结果
+              additionalProperties:
+                type: object
+                allOf:
+                  - $ref: "#/components/schemas/CommonItem"
+              properties:
+                row:
+                  type: array
+                  description: table_header的抽取结果
+                  items:
+                    type: object
+                    description: 表格行数据
+                    additionalProperties:
+                      type: object
+                      allOf:
+                        - $ref: "#/components/schemas/CommonItem"
+            category:
+              type: object
+              description: |
+                `details`字段里的数据类型
+                * one_to_one：表示单值抽取的key
+                * item_list：表示表格的抽取
+              additionalProperties:
+                type: string
+                enum: [one_to_one]
+                example: one_to_one
+                description: 虚拟字段，真实调用时为抽取的key
+              properties:
+                row:
+                  type: string
+                  enum: [item_list]
+                  example: item_list
+                  description: 表格类型
+            detail_structure:
+              type: array
+              description: 字段的识别信息
+              items:
+                type: object
+                description: 结构化抽取结果
+                properties:
+                  doc_type:
+                    type: string
+                    description: 文档的类型
+                    example: "doc"
+                  page_range:
+                    type: array
+                    description: 抽取的信息所在页范围
+                    items:
+                      type: integer
+                      example: 1
+                    example: [1, 2]
+                  tables:
+                    type: array
+                    description: 表格信息
+                    items:
+                      type: object
+                      properties:
+                        position:
+                          type: array
+                          description: 坐标
+                          maximum: 8
+                          minimum: 0
+                          example: [343, 56, 459, 56, 459, 90, 343, 90]
+                          items:
+                            type: integer
+                            example: 343
+                        page_number:
+                          type: number
+                          description: 所在页
+                          example: 1
+                        text:
+                          type: string
+                          description: html形式的表格
+                          example: "<table><tr><td>姓名</td><td>年龄</td></tr><tr><td>张三</td><td>18</td></tr></table>"
+                  tables_relationship:
+                    type: array
+                    description: 表格的结构化信息
+                    items:
+                      type: object
+                      properties:
+                        row_count:
+                          type: number
+                          description: 行数
+                          example: 2
+                        column_count:
+                          type: number
+                          description: 列数
+                          example: 2
+                        cells:
+                          type: array
+                          description: 单元格信息
+                          items:
+                            type: object
+                            additionalProperties:
+                              type: object
+                              properties:
+                                value:
+                                  type: string
+                                  description: 字段识别结果
+                                  example: "张三"
+                                bounding_regions:
+                                  $ref: "#/components/schemas/BoundingRegions"
+                        title:
+                          type: string
+                          description: title
+                          example: "row"
+                  category:
+                    type: array
+                    description: 结构化抽取出来的所有字段
+                    example: ["标题", "性别"]
+                    items:
+                      type: string
+                      example: "标题"
+                  fields:
+                    type: object
+                    description: 提取的字段结构化结果
+                    additionalProperties:
+                      type: array
+                      items:
+                        properties:
+                          value:
+                            type: string
+                            description: 字段识别结果
+                            example: "张三"
+                          bounding_regions:
+                            $ref: "#/components/schemas/BoundingRegions"
+                  stamps:
+                    type: array
+                    description: 印章识别结果
+                    items:
+                      properties:
+                        color:
+                          type: string
+                          description: |
+                            当前印章颜色
+                            - 红色
+                            - 蓝色
+                            - 黑色
+                            - 其他
+                          enum:
+                            - 红色
+                            - 蓝色
+                            - 黑色
+                            - 其他
+                          example: "红色"
+                        # image:
+                        #   type: string
+                        #   description: 印章图片被转为base64编码的字符串
+                        position:
+                          type: array
+                          description: 印章的坐标信息
+                          example: [956, 583, 1362, 590, 1355, 990, 950, 983]
+                          items:
+                            type: integer
+                            example: 10
+                        stamp_shape:
+                          type: string
+                          description: |
+                            当前印章形状
+                            - 圆章
+                            - 椭圆章
+                            - 方章
+                            - 三角章
+                            - 菱形章
+                            - 其他
+                          enum:
+                            - 圆章
+                            - 椭圆章
+                            - 方章
+                            - 三角章
+                            - 菱形章
+                            - 其他
+                          example: "圆章"
+                        type:
+                          type: string
+                          description: |
+                            当前印章类型
+                            - 公章
+                            - 个人章
+                            - 专用章
+                            - 其他
+                            - 合同专用章
+                            - 财务专用章
+                            - 发票专用章
+                            - 业务专用章
+                          enum:
+                            - 公章
+                            - 个人章
+                            - 专用章
+                            - 其他
+                            - 合同专用章
+                            - 财务专用章
+                            - 发票专用章
+                            - 业务专用章
+                          example: 公章
+                        value:
+                          type: string
+                          description: 印章的文本内容
+                          example: "电力公司专用章"
+            rotated_image_width:
+              exclusiveMinimum: true
+              minimum: 0
+              description: 正方向时文档的宽，仅文档为图片时其值有效
+              example: 1000
+              type: integer
+            rotated_image_height:
+              exclusiveMinimum: true
+              minimum: 0
+              description: 正方向时文档高，仅文档为图片时其值有效
+              example: 2000
+              type: integer
+            page_count:
+              exclusiveMinimum: true
+              minimum: 1
+              description: |
+                智能文档抽取处理的文档页数，超过最大页数限制时（100页），返回为最大页数
+
+              example: 10
+              type: integer
+            image_angle:
+              type: integer
+              enum:
+              - 0
+              - 90
+              - 180
+              - 270
+              example: 90
+              description: 文档角度，指原文档需要经过逆时针旋转多少度，才能得到正方向的文档，仅文档为图片时其值有效
+            finish_reason:
+              type: string
+              description: |
+                推理结束的原因
+                * stop：正常推理结束
+                * length：token超出限制而结束
+              enum:
+                - "stop"
+                - "length"
+              example: "stop"
+          type: object
+          required:
+            - details
+            - category
+            - image_angle
+            - rotated_image_width
+            - rotated_image_height
+            - detail_structure
+            - finish_reason
+      type: object

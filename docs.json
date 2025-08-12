@@ -1,0 +1,115 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Textin 智能文档解析",
+  "colors": {
+    "primary": "#1a66ff",
+    "light": "#1a66ff",
+    "dark": "#1a66ff"
+  },
+  "favicon": "/favicon.png",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "产品概览",
+            "pages": [
+              "xparse/overview",
+              "xparse/api-key",
+              "xparse/product-manual"
+            ]
+          },
+          {
+            "group": "文档解析",
+            "pages": [
+              "xparse/parse-quickstart",
+              "xparse/parse-getjson",
+              "xparse/parse-gettable",
+              "xparse/parse-getcatalog",
+              "xparse/parse-getimage",
+              "xparse/parse-getpos",
+              "xparse/parse-max-workers"
+            ]
+          },
+          {
+            "group": "文档抽取",
+            "pages": [
+              "xparse/extract-quickstart",
+              "xparse/extract-getjson",
+              "xparse/extract-gettable",
+              "xparse/extract-getpos",
+              "xparse/extract-asyncio",
+              "xparse/extract-max-concurrent"
+            ]
+          },
+          {
+            "group": "FAQ",
+            "pages": [
+              "xparse/charge"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API",
+        "groups": [
+          {
+            "group": "智能文档解析",
+            "pages": [
+              "api-reference/endpoint/parse",
+              "api-reference/endpoint/extract"
+            ]
+          }
+        ]
+      }
+    ],
+    "global": {
+      "languages": [
+        {
+          "language": "cn",
+          "default": true,
+          "href": "https://mintlify.com/docs"
+        },
+        {
+          "language": "en",
+          "href": "https://mintlify.com/docs"
+        }
+      ],
+      "anchors": []
+    }
+  },
+  "logo": {
+    "light": "/logo/light.png",
+    "dark": "/logo/dark.png"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "资讯中心",
+        "href": "https://www.textin.com/news/list"
+      },
+      {
+        "label": "技术支持",
+        "href": "https://www.textin.com/document/list"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "快速体验",
+      "href": "https://www.textin.com/console/recognition/robot_markdown?service=pdf_to_markdown"
+    }
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/intsig-textin"
+    }
+  },
+  "api": {
+    "playground": {
+      "proxy": false,
+      "display": "simple"
+    }
+  }
+}

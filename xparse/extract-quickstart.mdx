@@ -1,0 +1,371 @@
+---
+title: "快速启动"
+description: "参考示例，快速将文档抽取API接入到您的系统和应用流程中。"
+---
+
+<Tip>
+  如需查看旧版API或在线调试，请移步[Textin文档中心](https://www.textin.com/document/legacy/open_kie_vlm_engine)。
+</Tip>
+
+## 为什么使用文档抽取API ？
+
+在文档信息处理和系统录入填单场景中，人工手动录入往往意味着效率低下、易错易漏；大模型时代让智能文档处理和AI自动填单成为现实。TextIn xParse 文档抽取API正是让您解放数据处理团队的好帮手，可以让您的数据处理任务更加轻松自动化，解放人效专注于更高价值的业务增长。
+
+相比于完全依靠大模型的抽取，TextIn xParse 文档抽取API整合了文档解析处理能力和大模型语义理解能力：✅ 基于专业且行业领先的文档解析底座，为文档抽取提供速度更快、结果更准确的必要前提；✅ 基于大模型的智能语义理解，让文档抽取的泛化性更高、使用更灵活。
+
+使用文档抽取API，您可以从多种样式的同类型表单中提取统一的结构化信息，也可以根据语义理解如表单打勾字段、商品信息判断等复杂信息；另外文档抽取API使用简单，无需复杂的正则表达式、无需训练，0样本开箱即用；同时API在返回结果中提供了精确的坐标，帮助您对结果做快速的复核校验。
+
+如果您想要实现智能填单和信息录入系统自动化，或者想要完成更智能的产品AI升级，不妨试试TextIn xParse 文档抽取API。
+
+## 如何使用文档抽取API ？
+
+您可以参考以下示例文件和步骤，快速验证并将文档抽取API接入到您的系统和应用流程中。
+
+<Tip>
+  这里为您提供了一份Textin官方示例图片，您可以点击下载使用：[文档抽取png示例.png](https://web-api.textin.com/open/image/download?filename=54efc36a05cf475aa6b39137b0717726)
+
+  ![Sample Image Pn](/images/sample_image.webp)
+</Tip>
+
+### 先决条件：获取API Key
+
+使用文档抽取API处理文档时，您需要先获取API Key。请先登录后前往 [TextIn工作台 - 账号与开发者信息](https://www.textin.com/console/dashboard/setting) 获取您的x-ti-app-id 和 x-ti-secret-code
+
+### 前置准备
+
+您可以参考以下示例代码完成文档抽取API请求的前置准备工作，替换您自己的 x-ti-app-id 和 x-ti-secret-code ，后续步骤可根据实际使用场景在main函数中插入代码。
+
+```python
+import json
+import requests
+import base64
+
+class ExtractClient:
+    def __init__(self, app_id: str, secret_code: str):
+        self.app_id = app_id
+        self.secret_code = secret_code
+
+    def extract(self, file_content: bytes, options: dict, request_body: dict) -> str:
+        # 将文件内容转换为base64
+        file_base64 = base64.b64encode(file_content).decode('utf-8')
+
+		# 构建请求参数
+        params = {}
+        for key, value in options.items():
+            params[key] = str(value)
+
+        # 设置请求头
+        headers = {
+            "x-ti-app-id": self.app_id,
+            "x-ti-secret-code": self.secret_code,
+            "Content-Type": "application/json"
+        }
+
+		# 构建完整的请求体，包含base64文件数据
+        full_request_body = {
+            **request_body,
+            "file": file_base64  # 添加base64编码的文件数据
+        }
+
+        # 发送请求
+        response = requests.post(
+            "https://api.textin.com/ai/service/v2/entity_extraction",
+            params=params,
+            headers=headers,
+			json=full_request_body
+        )
+
+        # 检查响应状态
+        response.raise_for_status()
+        return response.text
+
+def main():
+    # 创建客户端实例，需替换你的API Key
+    client = ExtractClient("你的x-ti-app-id", "你的x-ti-secret-code")
+
+    # 插入下面的示例代码
+
+if __name__ == "__main__":
+    main()
+```
+
+### 请求体说明
+
+文档抽取API支持以下两种模式：prompt模式 和 自定义key模式(即字段模式)；当同时有prompt输入和key输入时，按prompt模式调用。
+
+- 支持的文件格式：png, jpg, jpeg, pdf, bmp, tiff, webp, doc, docx, html, mhtml, xls, xlsx, csv, ppt, pptx, txt, ofd, rtf；
+- 支持的最大文档处理页数：prompt模式为20页、字段模式为100页；超出部分的文档信息将被忽略。
+- 字段模式支持的最大抽取字段数量为fields数组中的元素数量与table_fields数组中每个对象的fields子数组的元素数量之和，总计不得超过100个字段。如果提供的字段总数超出限制，系统将优先抽取fields数组中的字段元素，超出部分的字段将被忽略。
+
+**入参字段说明如下：**
+
+- **file**：`string`类型，待处理的文档文件base64字符串
+- **prompt**：`string`类型，抽取的prompt，传入此字段时`fields`和`table_fields`字段将会被忽略
+- **fields**：`array`类型，待抽取的文本字段
+  - **name**：`string`类型，抽取字段名
+  - **description**：`string`类型，抽取字段描述，非必填
+- **table_fields**：`array`类型，表格抽取时要抽取的表格信息
+  - **title**：`string`类型，要抽取出来的表格标题
+  - **description**：`string`类型，表格标题的描述
+  - **fields**：`array`类型，该表的表头字段信息
+    - **name**：`string`类型，表头字段名
+    - **description**：`string`类型，表头字段描述，非必填
+
+### 抽取模式说明
+
+#### prompt模式
+
+提供一个prompt，系统将根据该prompt进行抽取。
+
+复制以下示例代码，粘贴至前置准备代码的main函数中；替换要抽取的文件和抽取prompt；运行脚本以prompt模式对文档做结构化抽取并将结果作为JSON文件保存。
+
+```python
+    # 在main函数中插入
+    # 定义文件路径，替换为你的文件
+    file_path = "你的文件.pdf"
+    
+    # 读取本地文件
+    with open(file_path, "rb") as f:
+        file_content = f.read()
+
+    # 设置URL参数，可按需设置，详情见下文URL参数说明
+    options = dict(
+        parse_mode="scan"
+    )
+
+    # 设置请求体参数，prompt模式
+    request_body = dict(
+        prompt="请抽取这张小票中的实付金额、消费日期、店铺名称、订单号并以字段格式返回，请抽取货号、商品名称、数量、单价，并以表格格式返回"
+    )
+
+    try:
+        response = client.extract(file_content, options, request_body)
+
+        # 保存完整的JSON响应到result.json文件
+        with open("prompt_extract_result.json", "w", encoding="utf-8") as f:
+            f.write(response)
+
+        print(response)
+    except Exception as e:
+        print(f"Error: {e}")
+```
+
+#### 字段模式
+
+提供一个fields与table_fields列表，系统将根据该列表进行抽取。
+
+复制以下示例代码，粘贴至前置准备代码的main函数中；替换要抽取的文件以及自定义的fields与table_fields；运行脚本以字段模式对文档做结构化抽取并将结果作为JSON文件保存。
+
+```python
+    # 在main函数中插入
+    # 定义文件路径，替换为你的文件
+    file_path = "你的文件.pdf"
+    
+    # 读取本地文件
+    with open(file_path, "rb") as f:
+        file_content = f.read()
+
+    # 设置URL参数，可按需设置，详情见下文URL参数说明
+    options = dict(
+        parse_mode="scan"
+    )
+
+    # 设置请求体参数，自定义key模式
+    request_body = dict(
+        fields=[
+            {"name": "实付金额", "description": "抽取小票中的实付金额"},
+            {"name": "消费日期", "description": "抽取小票中的消费日期"},
+            {"name": "店铺名称", "description": "抽取小票中的店铺名称"},
+            {"name": "订单号", "description": "抽取小票中的订单号"}
+        ],
+        table_fields=[
+            {
+                "title": "商品信息表",
+                "description": "抽取商品明细表格",
+                "fields": [
+                    {"name": "货号", "description": "抽取商品的货号"},
+                    {"name": "商品名称", "description": "抽取商品信息的商品名称"},
+                    {"name": "数量", "description": "抽取商品的数量"},
+                    {"name": "单价", "description": "抽取商品的单价"}
+                ]
+            }
+        ]
+    )
+
+    try:
+        response = client.extract(file_content, options, request_body)
+
+        # 保存完整的JSON响应到result.json文件
+        with open("key_extract_result.json", "w", encoding="utf-8") as f:
+            f.write(response)
+
+        print(response)
+    except Exception as e:
+        print(f"Error: {e}")
+```
+
+### URL参数说明
+
+以下是文档抽取API的URL参数，URL参数指以 参数名=参数值 形式拼接到 URL 上的键值对。它以 `?` 开头，不同参数之间使用 `&` 连接，形如 `?p1=v1&p2=v2`。URL参数会影响文档的抽取结果和JSON输出内容，您可按需进行设置。
+
+- **page_start**：当上传的是pdf时，page_start 表示从第几页开始抽取，取值范围从1开始，不传该参数时默认从首页开始。
+- **page_count**：当上传的是pdf时，page_count 表示要进行抽取的pdf页数。
+  - Prompt模式总页数不得超过20页，默认为20页。
+  - 自定义key模式总页数不得超过100页，默认为100页。
+- **parse_mode**：pdf文档的解析模式，默认为scan模式。图片不用设置，均默认按scan模式处理。
+  - auto 综合文字识别和解析模式：对pdf电子档解析，会直接提取pdf中的文字
+  - scan 仅按文字识别模式：将pdf当成图片处理
+- **get_image**：仅Prompt模式生效，获取图片，默认为objects，返回整页图像和图像对象。
+  - none 不返回任何图像
+  - page 返回每一页的整页图像：即pdf页的完整页图片
+  - objects 返回页面内的子图像：即pdf页内的各个子图片
+  - both 返回整页图像和图像对象
+- **crop_image**：是否进行切边矫正预处理，默认为0，不进行切边矫正。
+  - 0 不进行切边矫正
+  - 1 进行切边矫正
+- **remove_watermark**：是否进行去水印预处理，默认为0，不去水印。
+  - 0 不去水印
+  - 1 去水印
+- **formula_level**：公式识别等级，默认为0，全识别。
+  - 0 行间公式和行内公式都识别
+  - 1 仅识别行间公式，行内公式不识别
+  - 2 不识别公式
+- **file_name**：待抽取样本的文件名（含后缀名）
+
+### 返回结果示例
+
+抽取后的结果数据将按照以下JSON格式返回，下面为您提供了两段返回示例。如果您想了解最全面的返回结果说明，可以在[**返回JSON结构说明**](/xparse/extract-getjson)中查看，也可以在[**API**](/api-reference/endpoint/extract)中查看和调试。
+
+<CodeGroup>
+
+```json prompt模式
+{
+  "version": "v1.6.5",                    // API版本号
+  "code": 200,                            // 错误码，200表示成功
+  "message": "success",                   // 错误信息，成功时为"success"
+  "duration": 2825,                       // 推理时间(毫秒)
+  "result": {                             // 主要结果对象
+    "llm_json": {                         // prompt模式抽取的原始结果
+      "确认日期": "2024/4/3",              // 用户自定义字段，由prompt决定
+      "基金代码": "011892",                // 用户自定义字段，由prompt决定
+      "持仓金额": "74178.80"               // 用户自定义字段，由prompt决定
+    },
+    "raw_json": {                         // prompt模式抽取的带坐标信息抽取结果
+      "value": "011892",                  // 字段的抽取值
+      "pages": [1],                       // 字段所在的页码列表
+      "bounding_regions": [               // 字段的边界框信息
+        {
+          "position": [201,199,308,199,308,230,201,230],  // 字段在文档中的坐标位置
+          "char_pos": [                   // 每个字符的详细坐标信息
+            [202,202,218,201,218,230,201,229],
+            [220,202,235,202,236,228,220,229]
+          ],
+          "page_id": 1,                  // 所在页码ID
+          "value": "011892"              // 该边界框内的文本内容
+        }
+      ]
+    },
+    "pages": [                            // prompt模式抽取的页面信息，按页组织
+      {
+        "status": "success",              // 当前页的引擎输出状态
+        "page_id": 0,                    // 当前页码
+        "durations": 612.5,              // 当前页解析总耗时(毫秒)
+        "image_id": "90u12adcad08r2",    // 当前页图片id
+        "origin_image_id": "90u12adcad08r2", // 切边或去水印前的原始页图片
+        "width": 123,                    // 文档页宽度
+        "height": 123,                   // 文档页高度
+        "angle": 0                     // 图像的角度
+      }
+    ],
+    "usage": {                            // prompt模式抽取的大模型token消耗情况
+      "prompt_tokens": 100,              // 大模型抽取输入消耗token数量
+      "completion_tokens": 100,          // 大模型抽取输出消耗token数量
+      "total_tokens": 200                // 大模型抽取总消耗token数量
+    }
+  }
+}
+```
+
+
+```json 字段模式
+{
+  "version": "v1.6.5",                    // API版本号
+  "code": 200,                            // 错误码，200表示成功
+  "message": "success",                   // 错误信息，成功时为"success"
+  "duration": 2825,                       // 推理时间(毫秒)
+  "result": {                             // 主要结果对象
+    "details": {                          // 字段模式抽取的结果
+      "row": [{}]                        // 表格抽取结果
+    },
+    "category": {                         // details字段里的数据类型
+      "row": "item_list"                 // 表格类型，"item_list"表示表格抽取
+    },
+    "detail_structure": [                 // 字段的识别信息
+      {
+        "doc_type": "doc",               // 文档的类型
+        "page_range": [1,2],             // 抽取的信息所在页范围
+        "tables": [                      // 表格信息
+          {
+            "position": [343,56,459,56,459,90,343,90], // 坐标
+            "page_number": 1,            // 所在页
+            "text": "<table><tr><td>姓名</td><td>年龄</td></tr><tr><td>张三</td><td>18</td></tr></table>" // html形式的表格
+          }
+        ],
+        "tables_relationship": [          // 表格的结构化信息
+          {
+            "row_count": 2,              // 行数
+            "column_count": 2,           // 列数
+            "cells": [{}],               // 单元格信息
+            "title": "row"               // title
+          }
+        ],
+        "category": ["标题","性别"],       // 结构化抽取出来的所有字段
+        "fields": {},                    // 提取的字段结构化结果
+        "stamps": [                      // 印章识别结果
+          {
+            "color": "红色",              // 当前印章颜色
+            "position": [956,583,1362,590,1355,990,950,983], // 印章的坐标信息
+            "stamp_shape": "圆章",        // 当前印章形状
+            "type": "公章",              // 当前印章类型
+            "value": "电力公司专用章"      // 印章的文本内容
+          }
+        ]
+      }
+    ],
+    "rotated_image_width": 1000,         // 正方向时文档的宽，仅文档为图片时有效
+    "rotated_image_height": 2000,        // 正方向时文档高，仅文档为图片时有效
+    "page_count": 10,                    // 智能文档抽取处理的文档页数
+    "image_angle": 90,                   // 文档角度，指原文档需要经过逆时针旋转多少度才能得到正方向的文档
+    "finish_reason": "stop"              // 推理结束的原因，"stop"表示正常推理结束
+  }
+}
+```
+
+</CodeGroup>
+
+### 输出速度说明
+
+文档抽取API是基于大模型的智能语义理解抽取，为了保持高精度的输出结果，目前的抽取输出速度约为20token/s左右。如果您的文档或抽取要求较为复杂，可能需要比较长的时间才能得到完整输出结果。
+
+在API的返回结果中有关于大模型token消耗情况的详细统计，您可以根据大模型token消耗情况核对并大致估算所需时间。详情可在[**返回JSON结构说明**](/xparse/extract-getjson)中查看**usage**字段说明。关于抽取输出速度这一点我们也会持续优化，为您提供更好的服务。
+
+### 错误码说明
+
+| **错误码** | **描述**                                 |
+| :------ | :------------------------------------- |
+| 40101   | x-ti-app-id 或 x-ti-secret-code 为空      |
+| 40102   | x-ti-app-id 或 x-ti-secret-code 无效，验证失败 |
+| 40103   | 客户端IP不在白名单                             |
+| 40003   | 余额不足，请充值后再使用                           |
+| 40004   | 参数错误，请查看技术文档，检查传参                      |
+| 40007   | 机器人不存在或未发布                             |
+| 40008   | 机器人未开通，请至市场开通后重试                       |
+| 40301   | 图片类型不支持                                |
+| 40302   | 上传文件大小不符，文件大小不超过 500M                  |
+| 40303   | 文件类型不支持，接口会返回实际检测到的文件类型，如“当前文件类型为.gif” |
+| 40304   | 图片尺寸不符，图像宽高须介于 20 和 10000（像素）之间        |
+| 40305   | 识别文件未上传                                |
+| 40306   | qps超过限制                                |
+| 40400   | 无效的请求链接，请检查链接是否正确                      |
+| 30203   | 基础服务故障，请稍后重试                           |
+| 500     | 服务器内部错误                                |

@@ -1,0 +1,658 @@
+---
+title: "返回JSON结构说明"
+---
+
+当您使用文档解析API解析文档时，解析后的数据将按照以下结构的JSON格式返回。
+
+```json expandable
+{
+  "code": 200,
+  "message": "success",
+  "result": {
+    "markdown": "# hello markdown",
+    "detail": [
+      {
+        "page_id": 1,
+        "paragraph_id": 123,
+        "outline_level": -1,
+        "text": "hello markdown",
+        "position": [
+          217,
+          390,
+          1336,
+          390,
+          1336,
+          460,
+          217,
+          460
+        ],
+        "origin_position": [
+          217,
+          390,
+          1336,
+          390,
+          1336,
+          460,
+          217,
+          460
+        ],
+        "content": 0,
+        "type": "paragraph",
+        "sub_type": "catalog",
+        "image_url": "<string>",
+        "tags": [
+          "formula",
+          "handwritten"
+        ],
+        "caption_id": {
+          "page_id": 123,
+          "paragraph_id": 123
+        },
+        "cells": [
+          {
+            "row": 123,
+            "col": 123,
+            "row_span": 123,
+            "col_span": 123,
+            "position": [
+              10,
+              10,
+              100,
+              10,
+              100,
+              50,
+              10,
+              50
+            ],
+            "origin_position": [
+              123
+            ],
+            "text": "<string>",
+            "type": "<string>"
+          }
+        ],
+        "split_section_page_ids": [
+          1,
+          2,
+          3
+        ],
+        "split_section_positions": [
+          [
+            0,
+            0,
+            100,
+            100,
+            100,
+            200,
+            0,
+            200
+          ],
+          [
+            0,
+            0,
+            100,
+            100,
+            100,
+            200,
+            0,
+            200
+          ],
+          [
+            0,
+            0,
+            100,
+            100,
+            100,
+            200,
+            0,
+            200
+          ]
+        ],
+        "stamp": {
+          "value": "<string>",
+          "stamp_shape": "<string>",
+          "type": "<string>",
+          "color": "<string>"
+        }
+      }
+    ],
+    "pages": [
+      {
+        "status": "success",
+        "page_id": 0,
+        "durations": 612.5,
+        "image_id": "90u12adcad08r2",
+        "origin_image_id": "90u12adcad08r2",
+        "base64": "<string>",
+        "origin_base64": "<string>",
+        "width": 123,
+        "height": 123,
+        "angle": 123,
+        "content": [
+          {
+            "id": 123,
+            "type": "line",
+            "text": "<string>",
+            "angle": 0,
+            "pos": [
+              123
+            ],
+            "origin_position": [
+              123
+            ],
+            "sub_type": "handwriting",
+            "direction": 123,
+            "score": 0.5,
+            "char_pos": [
+              [
+                123
+              ]
+            ]
+          }
+        ],
+        "raw_ocr": [
+          {
+            "text": "这是一个例子。",
+            "score": 0.99,
+            "type": "text",
+            "position": [
+              10,
+              10,
+              100,
+              10,
+              100,
+              50,
+              10,
+              50
+            ],
+            "angle": 123,
+            "direction": 1,
+            "handwritten": 1,
+            "char_scores": [
+              0.99,
+              0.98,
+              0.95,
+              0.95,
+              0.99,
+              0.93,
+              0.87
+            ],
+            "char_centers": [
+              [
+                20,
+                10
+              ],
+              [
+                30,
+                10
+              ],
+              [
+                40,
+                10
+              ],
+              [
+                50,
+                10
+              ],
+              [
+                60,
+                10
+              ],
+              [
+                70,
+                10
+              ],
+              [
+                80,
+                10
+              ]
+            ],
+            "char_positions": [
+              [
+                18,
+                8,
+                22,
+                8,
+                22,
+                12,
+                18,
+                12
+              ],
+              [
+                28,
+                88,
+                32,
+                8,
+                32,
+                12,
+                28,
+                12
+              ],
+              [
+                38,
+                88,
+                42,
+                8,
+                42,
+                12,
+                38,
+                12
+              ],
+              [
+                48,
+                88,
+                52,
+                8,
+                52,
+                12,
+                48,
+                12
+              ],
+              [
+                58,
+                88,
+                62,
+                8,
+                62,
+                12,
+                58,
+                12
+              ],
+              [
+                68,
+                88,
+                72,
+                8,
+                72,
+                12,
+                68,
+                12
+              ],
+              [
+                78,
+                88,
+                82,
+                8,
+                82,
+                12,
+                78,
+                12
+              ]
+            ],
+            "char_candidates": [
+              [
+                "这"
+              ],
+              [
+                "是"
+              ],
+              [
+                "一",
+                "-"
+              ],
+              [
+                "个"
+              ],
+              [
+                "例"
+              ],
+              [
+                "子"
+              ],
+              [
+                "。",
+                "O"
+              ]
+            ],
+            "char_candidates_score": [
+              [
+                0.99
+              ],
+              [
+                0.99
+              ],
+              [
+                0.95,
+                0.05
+              ],
+              [
+                0.99
+              ],
+              [
+                0.99
+              ],
+              [
+                0.99
+              ],
+              [
+                0.89,
+                0.11
+              ]
+            ]
+          }
+        ],
+        "structured": [
+          {
+            "type": "textblock",
+            "pos": [
+              123
+            ],
+            "origin_position": [
+              123
+            ],
+            "content": [
+              0,
+              1,
+              2
+            ],
+            "sub_type": "text",
+            "continue": true,
+            "next_page_id": 2,
+            "next_para_id": 1,
+            "text": "<string>",
+            "outline_level": 123
+          }
+        ]
+      }
+    ],
+    "catalog": {
+      "toc": [
+        [
+          {
+            "hierarchy": 2,
+            "title": "1.公司简介和主要财务指标",
+            "page_id": 3,
+            "pos": [
+              10,
+              10,
+              100,
+              10,
+              100,
+              50,
+              10,
+              50
+            ]
+          },
+          {
+            "hierarchy": 3,
+            "title": "1.1 公司简介",
+            "page_id": 4,
+            "pos": [
+              10,
+              10,
+              100,
+              10,
+              100,
+              50,
+              10,
+              50
+            ]
+          }
+        ]
+      ]
+    },
+    "total_page_number": 10,
+    "valid_page_number": 3,
+    "excel_base64": ""
+  },
+  "version": "2.1.0",
+  "duration": 999,
+  "metrics": [
+    {
+      "page_image_width": 1024,
+      "page_image_height": 768,
+      "dpi": 72,
+      "durations": 123,
+      "status": "<string>",
+      "page_id": 123,
+      "angle": 90,
+      "image_id": "<string>"
+    }
+  ]
+}
+```
+
+## 常规字段说明
+
+- x_request_id：该请求的唯一标识。
+- code：错误码，200表示成功。详情见[快速启动-错误码说明](/xparse/parse-quickstart)。
+- message：错误信息，成功时为"success"。
+- version：引擎版本号，例如"3.18.9"。
+- duration：引擎耗时(毫秒)，例如"999"。
+
+## 主要结果说明：result对象
+
+文档解析API会在返回结果的result对象中包含以下关键信息。
+
+### markdown：正文字符串
+
+- **markdown**：解析结果 markdown 的正文字符串。
+
+### detail：markdown 各类型元素详细信息
+
+detail包含markdown中不同类型元素的详细信息。受URL参数**markdown_details**影响，默认返回detail字段，详情见[快速启动-URL参数说明](/xparse/parse-quickstart)。
+
+- **detail**：markdown各类型元素详细信息
+  - **page_id**：当前元素所在页码，例如"1"。
+  - **paragraph_id**：当前元素id。
+  - **outline_level**：标题级别(最多支持5级标题) -1表示正文，0表示一级标题，1表示二级标题 ...
+  - **text**：文本，例如"hello markdown"。
+  - **position**：以长度为8的整型数组表示四边形，8个数两两一组为一个点的横纵坐标，分别是左上，右上，右下，左下。 当输入是PDF时, 此坐标是基于72dpi的；当输入是图片时，此坐标是原图里的坐标。 单位：像素。例如[217, 390, 1336, 390, 1336, 460, 217, 460]
+  - **origin_position**：受URL参数**切边矫正**和**去水印**影响，详情见[快速启动-URL参数说明](/xparse/parse-quickstart)。仅当打开切边或去水印时返回，表示该段落在原图中的坐标。格式同**position**。
+  - **content**：表示元素是否为正文。0 正文(段落、图片、表格)；1 非正文(页眉、页脚、侧边栏)
+  - **type**：元素的类型。
+    - paragraph（段落类型，包括正文、标题、公式等文字信息）
+    - image（图片类型）
+    - table（表格类型）
+  - **sub_type**：元素子类型，受**type**影响。
+    - 当**type**为**paragraph**时，取值范围为catalog(目录),header(页眉),footer(页脚),sidebar(侧边栏),text(正文普通文本),text_title(文本标题),image_title(图片标题),table_title(表格标题)；
+    - 当**type**是**image**时，取值范围为stamp(印章),chart(图表),qrcode(二维码),barcode(条形码)；
+    - 当**type**为**table**时，取值范围为bordered(有线表), borderless(无线表)
+  - **image_url**：图片链接，仅在**type**为**image**时返回。受URL参数**get_image**和**image_output_type**影响，详情见[快速启动-URL参数说明](/xparse/parse-quickstart)。
+    - 当get_image = objects, image_output_type = default时，返回图片的url，图片默认保存30天；如需长久保存，请在有效期内下载图片并自行保存，可参考[获取图片并持久化](/xparse/parse-getimage)；
+    - 或者使用image_output_type = base64str，图片以base64的方式返回。
+  - **tags**：表示段落内是否存在特殊文本，类型包括公式formula和手写体handwritten，仅在**type**为**paragraph**时返回。
+  - **caption_id**：表格或图片的标题id，仅在**type**为**image**或**table**时返回。
+    - **page_id**：标题所在页码。
+    - **paragraph_id**：标题所在段落id。
+  - **cells**：单元格数组，仅在**type**为**table**时返回。
+    - **row**：单元格行号。
+    - **col**：单元格列号。
+    - **row_span**：单元格行跨度,默认为1。
+    - **col_span**：单元格列跨度,默认为1。
+    - **position**：单元格的四个角点坐标，依次为左上，右上，右下，左下。例如[10, 10, 100, 10, 100, 50, 10, 50]
+    - **origin_position**：受URL参数**切边矫正**或**去水印**影响，详情见[快速启动-URL参数说明](/xparse/parse-quickstart)。仅当打开切边或去水印时返回，表示该单元格在原图中的坐标。格式同position。
+    - **text**：单元格文本内容。
+    - **type**：类型，固定为cell，表示单元格。
+  - **split_section_page_ids**：当表格/段落有合并时，记录合并前各个子表格/段落所在的页的id
+  - **split_section_positions**：当表格/段落有合并时，记录合并前各个子表格/段落所在页的位置，位置所属的页码与split_section_page_ids按索引一一对应，如split_section_positions[2]所属的页码为split_section_page_ids[2]
+  - **stamp**：当sub_type为stamp时，返回印章识别结果
+    - **value**：印章文本内容
+    - **stamp_shape**：印章形状
+    - **type**：印章类型
+    - **color**：印章颜色
+
+### pages：每一页的详细信息
+
+文档按页为单位展开时， 存储每一页的详情和状态（适用于PDF），部分信息与**metrics**字段重复。受URL参数**page_details**影响，默认返回pages，详情见[快速启动-URL参数说明](/xparse/parse-quickstart)。
+
+- **pages**：每一页的详细信息
+  - **page_id**：当前页码 (若为流式文件, 页码置为0)，例如"0"。
+  - **status**：表示当前页的引擎输出状态，或者error_message，例如"success"。
+  - **durations**：当前页总耗时(毫秒)，例如"612.5"。
+  - **width**：文档页宽度
+  - **height**：文档页高度
+  - **angle**：图像的角度（可选值0, 90, 180, 270)
+  - **image_id**：当前页图片id 。受URL参数**get_image**和**image_output_type**影响，当URL参数image_output_type=default且get_image=page/both时返回，详情见[快速启动-URL参数说明](/xparse/parse-quickstart)。
+    - 下载方式：https://api.textin.com/ocr_image/download?image_id=xxx ,需要在headers里添加appid和key
+  - **origin_image_id**：切边或去水印前的原始页图片。受URL参数**切边矫正**或**去水印**影响，详情见[快速启动-URL参数说明](/xparse/parse-quickstart)。仅当开启切边或去水印，image_output_type=default且get_image=page/both时返回。
+    - 下载方式同image_id
+  - **base64**：当前页图片的base64字符串，受URL参数**image_output_type**影响，详情见[快速启动-URL参数说明](/xparse/parse-quickstart)。当输入参数image_output_type=base64str且get_image=page/both时返回。
+  - **origin_base64**：切边或去水印前的原始页图片base64字符串。受URL参数**切边矫正**或**去水印**影响，详情见[快速启动-URL参数说明](/xparse/parse-quickstart)。仅当开启切边或去水印，image_output_type=base64str且get_image=page/both时返回。
+  - **raw_ocr**：全部文字识别结果，只包含文字结果。受URL参数**raw_ocr**影响，默认不返回，详情见[快速启动-URL参数说明](/xparse/parse-quickstart)。
+    - **text**：识别内容字符串，例如"这是一个例子。"
+    - **score**：识别置信度（0 \<= x \<= 1），例如"0.99"。
+    - **type**：文本类型，用于表示文字的形态。 当前版本下，文本类型包括：
+      - text(文本)
+      - formula(公式)
+    - **position**：文本行的四个角点坐标，依次为左上，右上，右下，左下。例如[10, 10, 100, 10, 100, 50, 10, 50]
+    - **angle**：文本行的角度（可选值0, 90, 180, 270)
+    - **direction**：文字阅读方向。
+      - -1: 其他
+      - 0: 单字
+      - 1: 横向阅读
+      - 2: 纵向阅读
+    - **handwritten**：文字是否手写所得。
+      - -1: 未知
+      - 0: 非手写文字, 一般为印刷文字
+      - 1: 文字手写, 一般具备明显的书写特征
+    - **char_scores**：字符置信度，值域范围0-1。 受URL参数**char_details**影响，详情见[快速启动-URL参数说明](/xparse/parse-quickstart)。设置char_details=1时输出。
+    - **char_centers**：字符中心点坐标。受URL参数**char_details**影响，详情见[快速启动-URL参数说明](/xparse/parse-quickstart)。设置char_details=1时输出。
+    - **char_positions**：字符四边形点坐标，以顺时针构成闭合区域。 受URL参数**char_details**影响，详情见[快速启动-URL参数说明](/xparse/parse-quickstart)。设置char_details=1时输出。
+    - **char_candidates**：候选字数组，表示每一个字符的候选，与候选置信度配套使用。受URL参数**char_details**影响，详情见[快速启动-URL参数说明](/xparse/parse-quickstart)。 设置char_details=1时输出。
+    - **char_candidates_score**：候选字置信度数组，表示每一个候选字符的置信度，与候选字符配套使用。 受URL参数**char_details**影响，详情见[快速启动-URL参数说明](/xparse/parse-quickstart)。 设置char_details=1时输出。
+  - **content**：基础数据，为文字行、图像中的其中一种。
+    - **textline：文字行**
+      - **id**：数据id(页内唯一)
+      - **type**：数据类型,line
+      - **text**：文本行文字内容
+      - **angle**：文本行文字方向, 默认为0(angle为0时， json中可能不包含angle属性)。
+      - **pos**：文本行四个角点坐标。
+      - **origin_position**：表示文本行在原图中的坐标。受URL参数**切边矫正**或**去水印**影响，详情见[**快速启动-URL参数说明**](https://docs.textin.com/xparse/parse-quickstart)。仅当打开切边或去水印时返回，格式同pos。
+      - **sub_type**：子类型。有handwriting, formula。
+      - **direction**：文字方向, 默认为0。
+        - 0:横向文本;
+        - 1:竖向文本;
+        - 2:横向右往左文本（如阿拉伯语）
+      - **score**：文本行内每个字符的置信度(仅当输入图像做ocr时)
+      - **char_pos**：文本行内每个字符的坐标,每个item是一个由八个整数组成的数组，分别表示，左上，右上，右下，左下四个点的(x,y)坐标。受URL参数**char_details**影响，详情见[**快速启动-URL参数说明**](https://docs.textin.com/xparse/parse-quickstart)。设置char_details=1时输出。
+    - **image：图像**
+      - **id**：数据id
+      - **type**：数据类型, image
+      - **pos**：图像四个角点坐标
+      - **sub_type**：子类型, 包括stamp, chart, qrcode, barcode
+      - **size**：图像大小[width, height]
+      - **data**：图像内容
+        - **base64**：图像文件(jpg, png)的base64字符串
+        - **region**：图像在页图像中的区域（四边形4个点坐标）
+        - **path**：图像文件路径（如在zip包中的路径）
+      - **stamp**：当sub_type为stamp时，返回印章识别结果
+        - **value**：印章文本内容
+        - **stamp_shape**：印章形状
+        - **type**：印章类型
+        - **color**：印章颜色
+  - **structured**：结构化数据，为段落块、图像块、表格块、页脚块、页眉块中的一种。
+    - **textblock：段落块**
+      - **type**：段落块类型， 固定为 textblock
+      - **pos**：文本行四个角点坐标
+      - **origin_position**：表示该段落在原图中的坐标。受URL参数**切边矫正**或**去水印**影响，详情见[**快速启动-URL参数说明**](https://docs.textin.com/xparse/parse-quickstart)。仅当打开切边或去水印时返回，格式同pos。
+      - **content**：段落块内文本行id数据组
+      - **sub_type**：段落块子类型，包括catalog(目录),text(正文普通文本),text_title(文本标题),image_title(图片标题),table_title(表格标题)
+      - **continue**：段落块连续属性，用于判断完整的段落块是否被页面或栏分割，为true表示该段落块和下一个段落块连续（即两个段落块可合成一个逻辑段落块）。
+      - **next_page_id**：当且仅当continue为true时有值。表示下一个段落块的page_id。
+      - **next_para_id**：当且仅当continue为true时有值。表示下一个段落块的paragraph_id。
+      - **text**：段落块文本内容
+      - **outline_level**：标题级别: (最多支持5级标题)
+        - -1：正文
+        - 0：一级标题
+        - 1：二级标题
+        - …
+    - **imageblock：图像块**
+      - **type**：图像块类型， 值为 image
+      - **pos**：文本行四个角点坐标
+      - **origin_position**：表示该子图在原图中的坐标。受URL参数**切边矫正**或**去水印**影响，详情见[**快速启动-URL参数说明**](https://docs.textin.com/xparse/parse-quickstart)。仅当打开切边或去水印时返回，格式同pos。
+      - **lines**：图像包含的文本行id
+      - **content**：图像资源数据id数组
+      - **caption_id**：图片的标题id
+        - **page_id**：标题所在页码
+        - **paragraph_id**：标题所在段落id
+      - **text**：子图片识别得到的文本内容。受URL参数**apply_image_analysis**影响，详情见[**快速启动-URL参数说明**](https://docs.textin.com/xparse/parse-quickstart)。开启图像分析后，该字段内容会替换为大模型对子图片的分析结果。
+    - **table：表格块**
+      - **type**：表格块类型, 固定为table
+      - **sub_type**：表格子属性，取值为bordered(有线表)或borderless(无线表)，默认为bordered(即json中无该字段时，默认值为bordered)
+      - **pos**：文本行四个角点坐标
+      - **origin_position**：表示该表格在原图中的坐标。受URL参数**切边矫正**或**去水印**影响，详情见[**快速启动-URL参数说明**](https://docs.textin.com/xparse/parse-quickstart)。仅当打开切边或去水印时返回，格式同pos。
+      - **rows**：表格行数
+      - **cols**：表格列数
+      - **columns_width**：表格列宽度列表
+      - **rows_height**：表格行高度列表
+      - **text**：表格文本内容，以html或md格式展示
+      - **continue**：当前表格与后一表格连续，用来判断一个表格是否被页面分割（如果 continue为true 且该表格位于本页结尾，该表格可与下一页开头表格组合为一个表格）
+      - **caption_id**：表格的标题id
+        - **page_id**：标题所在页码
+        - **paragraph_id**：标题所在段落id
+      - **cells**：单元格数组
+        - **row**：单元格行号
+        - **col**：单元格列号
+        - **row_span**：单元格行跨度,默认为1
+        - **col_span**：单元格列跨度,默认为1
+        - **pos**：单元格的四个角点坐标，依次为左上，右上，右下，左下。
+        - **content**：单元格内容
+    - **footer：页脚块**
+      - **type**：页脚块类型，固定为 footer
+      - **pos**：文本行四个角点坐标
+      - **blocks**：footer段落内容，为textblock, imageblock, table中其中的一种
+    - **header：页眉块**
+      - **type**：页眉块类型，固定为 header
+      - **pos**：文本行四个角点坐标
+      - **blocks**：header段落内容，为textblock, imageblock, table中的其中一种
+
+### catalog：描述目录树的结构
+
+- **catalog**：目录树结构。受URL参数**catalog_details**和**apply_document_tree**影响，详情见[快速启动-URL参数说明](/xparse/parse-quickstart)。
+  - **toc**：返回的table of contents
+    - **sub_type**：标题类型 text_title、 image_title、 table_title
+    - **hierarchy**：标题层级， 1 是 一级标题, 2 是 二级标题，依次类推
+    - **title**：标题内容
+    - **page_id**：标题所在页码（最小页码为 1)
+    - **paragraph_id**：标题所在段落id
+    - **pos**：该目录区域的四个角点坐标，依次为左上，右上，右下，左下。
+    - **pos_list**：发生标题合并时，为合并前多个标题的坐标；未发生标题合并时，即为该标题的坐标。
+
+### 其他result字段
+
+- **total_count**：解析总页数
+- **success_count**：解析成功的页数
+- **total_page_number**：输入PDF时， 返回文档的总页数。
+- **valid_page_number**：记录本次解析成功的总页数。
+- **excel_base64**：excel的base64结果，受URL参数**get_excel**影响，仅当get_excel=1时返回。详情见[快速启动-URL参数说明](/xparse/parse-quickstart)。
+
+## metrics：每一页的信息
+
+部分信息跟**pages**字段重复，当URL参数**page_details**设置为不返回pages字段时，可以在**metrics**字段获取每一页的信息。
+
+- **metrics**：每一页信息
+  - **page_image_width**：当前段落所在页的图片宽或者pdf转成的图片宽，例如"1024"。
+  - **page_image_height**：当前段落所在页的图片高或者pdf转成的图片高，例如"768"。
+  - **dpi**：当前pdf页转成图片所用的dpi，例如"72"。
+  - **durations**：当前页总耗时(毫秒)
+  - **status**：当前页状态
+  - **page_id**：当前页码
+  - **angle**：图像角度， 定义0度为人类阅读文字的图像方向，称为正置图像， 本字段表示输入图像是正置图像进行顺时针若干角度的旋转所得。
+    - 0: ▲
+    - 90: ▶
+    - 180: ▼
+    - 270: ◀
+  - **image_id**：当前页图片id。
+    - 下载方式：https://api.textin.com/ocr_image/download?image_id=xxx, 需要在headers里添加appid和key, 有效期30天
+
+<Tip>
+  **另外您也可以在**[**API**](/api-reference/endpoint/parse)**中查看Response说明以及调试查看结果。**
+</Tip>
+
+## 将结果保存为JSON或markdown文件
+
+参考[快速启动](/xparse/parse-quickstart)中的使用示例，您可以将API返回的结果保存为JSON文件，也可以解析JSON响应以提取并保存markdown文件。以下示例代码在快速启动中已提供，您可以直接使用。
+
+```python
+        # 保存完整的JSON响应到result.json文件
+        with open("result.json", "w", encoding="utf-8") as f:
+            f.write(response)
+
+        # 解析JSON响应以提取markdown内容
+        json_response = json.loads(response)
+        if "result" in json_response and "markdown" in json_response["result"]:
+            markdown_content = json_response["result"]["markdown"]
+            with open("result.md", "w", encoding="utf-8") as f:
+                f.write(markdown_content)
+```

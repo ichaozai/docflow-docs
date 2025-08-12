@@ -1,0 +1,143 @@
+---
+title: "结构体说明"
+description: "各类型的结构体返回字段及字段定义说明"
+---
+
+## 结构体定义
+
+结构体是从文档中提取的结构化信息，例如：文字行、图像、段落块、图像块、表格块、页眉块、页脚块。
+
+### 结构体概述
+
+当您使用文档解析API时，系统会解析文档每一页的内容，将其分解为有意义的元素，并将每个元素作为一个结构体返回。
+
+每个结构体都包含了结构化的数据，用于描述该结构体的内容以及其在文档中的位置。这种结构化的信息组成使得提取的数据更容易理解，并可用于下游任务。
+
+提取的结构体包含在[JSON返回结果](/xparse/parse-getjson)的**pages**中。
+
+### 语义理解
+
+TextIn xParse 文档解析API在解析文档时会对文档进行语义理解，这意味着可以根据内容含义智能的对文档进行结构化解析，而不仅仅是根据布局或格式还原。
+
+文档解析API不会在任意点（如固定长度或段落分隔）分割文档，而是识别连贯的信息单元（如完整的段落逻辑、表格连续性等）并通过continue字段（详见下文字段说明）判断其连续属性。
+
+基于语义理解的文档结构化解析提高了解析内容的相关性和可用性，尤其是在搜索、检索和分析等下游任务中，这种结构化解析方式会提供极大的帮助。
+
+## 为什么创建结构体？
+
+结构体信息可以使下游任务更快、更准确、更易于拓展。创建结构体有几个关键目的：
+
+- **使下游应用能够高效处理大型文档**：结构体允许 RAG 系统和 LLM 等 AI 应用程序索引和检索较小且有意义的片段而非完整文档。这有助于避免输入大小的限制，例如 token 限制。
+- **提高检索粒度**：更小的、具有语义意义的单元可以在问答和总结等下游任务中获得更准确、更相关的结果。
+- **支持下游语义搜索和向量化嵌入(embedding)**：结构良好的结构体为向量化嵌入提供更好的输入，并使其在搜索过程中的索引和检索信息变得更容易。
+- **保持人类的文档可读性**：结构体反映了人类自然阅读文档的方式，保持了页面上元素之间的视觉和逻辑关系一致，更有利于还原文档的可读性。
+
+## 如何获取结构体？
+
+### 结构体类型
+
+每个结构体都标有一个结构体类型（type），用于标识它代表什么类型的内容。
+
+**结构体的类型有：**
+
+- **textline**：文本行。位于pages.content，type值为line。
+- **image**：图像。位于pages.content，type值为image。
+- **textblock**：段落块。位于pages.structured，type值为textblock。
+- **imageblock**：图像块。位于pages.structured，type值为image。
+- **table**：表格块。位于pages.structured，type值为table。
+- **footer**：页脚块。位于pages.structured，type值为footer。
+- **header**：页眉块。位于pages.structured，type值为header。
+
+### **textline**：文字行
+
+- **id**：数据id(页内唯一)
+- **type**：数据类型,line
+- **text**：文本行文字内容, 当sub_type=stamp时， text为印章上的文字。
+- **angle**：文本行文字方向, 默认为0(angle为0时， json中可能不包含angle属性)。
+- **pos**：文本行四个角点坐标。
+- **origin_position**：表示文本行在原图中的坐标。受URL参数切边矫正影响，详情见[快速启动-URL参数说明](/xparse/parse-quickstart)。仅当打开切边时返回，格式同pos。
+- **sub_type**：子类型。
+  - 当type为line时，取值范围有handwriting, formula;
+  - 当type为image时，取值范围有stamp(印章),chart(图表),qrcode(二维码),barcode(条形码)
+- **direction**：文字方向, 默认为0。
+  - 0:横向文本;
+  - 1:竖向文本;
+  - 2:横向右往左文本（如阿拉伯语）
+- **score**：文本行内每个字符的置信度(仅当输入图像做ocr时)
+- **char_pos**：文本行内每个字符的坐标,每个item是一个由八个整数组成的数组，分别表示，左上，右上，右下，左下四个点的(x,y)坐标。受URL参数**char_details**影响，详情见[快速启动-URL参数说明](/xparse/parse-quickstart)。设置char_details=1时输出。
+
+### **image**：图像
+
+- **id**：数据id
+- **type**：数据类型, image
+- **pos**：图像四个角点坐标
+- **sub_type**：子类型, 包括stamp, chart, qrcode, barcode
+- **size**：图像大小[width, height]
+- **data**：图像内容
+  - **base64**：图像文件(jpg, png)的base64字符串
+  - **region**：图像在页图像中的区域（四边形4个点坐标）
+  - **path**：图像文件路径（如在zip包中的路径）
+
+### **textblock**：段落块
+
+- **type**：段落块类型， 固定为 textblock
+- **pos**：文本行四个角点
+- **origin_position**：表示该段落在原图中的坐标。受URL参数切边矫正影响，详情见[快速启动-URL参数说明](/xparse/parse-quickstart)。仅当打开切边时返回，格式同pos。
+- **content**：段落块内文本行id数据组
+- **sub_type**：段落块子类型，包括catalog(目录),text(正文普通文本),text_title(文本标题),image_title(图片标题),table_title(表格标题)
+- **continue**：段落块连续属性，用于判断完整的段落块是否被页面或栏分割，为true表示该段落块和下一个段落块连续（即两个段落块可合成一个逻辑段落块）。
+- **next_page_id**：当且仅当continue为true时有值。表示下一个段落块的page_id。
+- **next_para_id**：当且仅当continue为true时有值。表示下一个段落块的paragraph_id。
+- **text**：段落块文本内容
+- **outline_level**：标题级别: (最多支持5级标题)
+  - -1：正文
+  - 0：一级标题
+  - 1：二级标题
+  - ...
+
+### **imageblock**：图像块
+
+- **type**：图像块类型， 值为 image
+- **pos**：文本行四个角点坐标
+- **origin_position**：表示该子图在原图中的坐标。受URL参数切边矫正影响，详情见[快速启动-URL参数说明](/xparse/parse-quickstart)。仅当打开切边时返回，格式同pos。
+- **lines**：图像包含的文本行id
+- **content**：图像资源数据id数组
+- **caption_id**：图片的标题id
+  - **page_id**：标题所在页码
+  - **paragraph_id**：标题所在段落id
+- **text**：子图片识别得到的文本内容
+
+### **table**：表格块
+
+- **type**：表格块类型, 固定为table
+- **sub_type**：表格子属性，取值为bordered(有线表)或borderless(无线表)，默认为bordered(即json中无该字段时，默认值为bordered)
+- **pos**：文本行四个角点坐标
+- **origin_position**：表示该表格在原图中的坐标。受URL参数切边矫正影响，详情见[快速启动-URL参数说明](/xparse/parse-quickstart)。仅当打开切边时返回，格式同pos。
+- **rows**：表格行数
+- **cols**：表格列数
+- **columns_width**：表格列宽度列表
+- **rows_height**：表格行高度列表
+- **text**：表格文本内容，以html或md格式展示
+- **continue**：当前表格与后一表格连续，用来判断一个表格是否被页面分割（如果 continue为true 且该表格位于本页结尾，该表格可与下一页开头表格组合为一个表格）
+- **caption_id**：表格的标题id
+  - **page_id**：标题所在页码
+  - **paragraph_id**：标题所在段落id
+- **cells**：单元格数组
+  - **row**：单元格行号
+  - **col**：单元格列号
+  - **row_span**：单元格行跨度,默认为1
+  - **col_span**：单元格列跨度,默认为1
+  - **pos**：单元格的四个角点坐标，依次left-top,right-top,right-bottom,left-bottom。
+  - **content**：单元格内容
+
+### **footer**：页脚块
+
+- **type**：页脚块类型，固定为 footer
+- **pos**：文本行四个角点坐标
+- **blocks**：footer段落内容，为textblock, imageblock, table中其中的一种
+
+### **header**：页眉块
+
+- **type**：页眉块类型，固定为 header
+- **pos**：文本行四个角点坐标
+- **blocks**：header段落内容，为textblock, imageblock, table中的其中一种

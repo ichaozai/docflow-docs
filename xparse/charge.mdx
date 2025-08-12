@@ -1,0 +1,74 @@
+---
+title: "计费说明"
+---
+
+您可以[在此处](https://www.textin.com/market/chager/pdf_to_markdown?cache=7919)查看定价选项及购买套餐。
+
+## 具体使用计费规则说明
+
+TextIn xParse智能文档解析采用「按量计费」制，计费单位为“T币/页”。在实际使用时，您可以选择[购买页数套餐](https://www.textin.com/market/chager/pdf_to_markdown?cache=7921)包，也可以直接[充值T币](https://www.textin.com/console/dashboard/userCenter/charge)使用。套餐和T币的计费规则为：
+
+- 扣费顺序：优先消耗即将到期的套餐包，未购买套餐包则按实际使用量扣减T币余额。
+- 购买套餐后，会自动开启按量计费模式；当套餐额度使用完毕后，如果未购买新套餐包，则会按实际使用量扣减T币余额，扣减T币余额时按[套餐](https://www.textin.com/market/chager/pdf_to_markdown?cache=7921)中的最高单价进行扣减。
+- 可以在【[工作台-我的套餐](https://www.textin.com/console/dashboard/userCenter/package_management)】中查看套餐使用情况，可以在【[工作台-充值与消费明细](https://www.textin.com/console/dashboard/userCenter/finance)】中查看T币订单和消费情况。
+
+TextIn xParse智能文档解析的使用方式包括：在线Web平台使用、API使用、第三方Agent平台使用。需要注意的是：[**文档解析**](https://docs.textin.com/api-reference/endpoint/parse)和[**文档抽取**](https://docs.textin.com/api-reference/endpoint/extract)是2个独立的API，其使用计费和消耗额度也是独立区分开的。
+
+下面会为您详细介绍不同使用方式的计费说明。
+
+### 在线Web平台使用
+
+在Web平台使用时，可以直接在页面左下角账号信息处看到当前拥有的总额度和已消耗额度。
+
+![Charge Web Pn](/images/charge_web.png)
+
+<Tip>
+  在平台上使用示例文件进行解析和抽取是**完全免费**的！您可以先通过示例文件快速感受效果。
+</Tip>
+
+同时我们为每位新注册的用户朋友**免费赠送100页**使用额度，添加TextIn福利官还可获得**免费加赠1000页**使用额度和其他超多福利！您可以自行上传文档进行解析和抽取，验证TextIn xParse智能文档解析在您实际业务场景中的表现。
+
+当您的免费额度使用完毕后，需要[购买页数套餐](https://www.textin.com/market/chager/pdf_to_markdown?cache=7921)包或[充值T币](https://www.textin.com/console/dashboard/userCenter/charge)使用。
+
+- 文档解析会根据您实际解析成功的文件页数进行计费扣减，解析失败的页数不计费。
+  - 您可以通过`page_start`和`page_count`这两个参数控制要解析的页数范围。
+  - 文档解析成功后，在返回的JSON结果中有`success_count`字段，即为解析成功的页数。
+  - 文档解析成功后，解析结果会在Web平台缓存；无论您何时重新查看解析结果，还是修改参数配置后重新解析识别，都是**限时免费**的！
+
+<Tip>
+  在文档解析Web页面使用智能抽取功能**限时免费**！您可以充分体验，感受文档抽取能力的应用价值。
+</Tip>
+
+### 通过API使用
+
+通过API使用时，仍然是根据实际解析和抽取的文件页数进行计费扣减。API请求失败不会计费。
+
+<Warning>
+  与Web平台使用不同的是：无论何种文件，每次成功调用API进行解析或抽取后均会产生计费扣减。
+</Warning>
+
+您可以通过以下字段进行核验
+
+- 文档解析：[**返回JSON结构说明**](https://docs.textin.com/xparse/parse-getjson)；`success_count`字段，解析成功的页数
+- 文档抽取：[**返回JSON结构说明**](https://docs.textin.com/xparse/extract-getjson)；
+  - prompt模式抽取：`success_count`字段，智能抽取处理的页数
+  - 自定义字段抽取：`page_count`字段，智能抽取处理的页数
+
+另外还需要特殊注意的是：由于文档抽取API整合了文档解析处理能力和大模型语义理解能力，会先对文档进行解析预处理再进行语义理解抽取，因此在计费上：**文档抽取API的消耗是文档解析API的2倍**。这样做是为了更好的保障文档抽取的结果准确性，以及可以提供精确的原文坐标，便于对结果做快速复核校验。
+
+<Info>
+  **例如一份10页的文档，对10页全部解析和抽取且均成功，那么：**
+
+  - 单独调用文档解析API时消耗页数额度为10页，单独调用文档抽取API时消耗页数额度为20页。
+  - 如果是T币扣减，单独使用文档解析扣减0.5T币(单价0.05T币/页)，单独使用文档抽取扣减1T币。
+</Info>
+
+### 第三方Agent平台使用
+
+TextIn xParse智能文档解析在Coze、Dify等主流Agent平台上架了文档解析官方插件。
+
+<Tip>
+  详情可见：[TextIn官方插件使用教程](https://vrk3wty1lu.feishu.cn/docx/Mhh2dJJFLoFjl2x7i2Ic7VrBnyc)
+</Tip>
+
+在Agent平台使用文档解析插件时，需要先前往【[**工作台 - 账号与开发者信息**](https://www.textin.com/console/dashboard/setting)】获取 `x-ti-app-id` 和 `x-ti-secret-code`；当插件运行后，会根据账号信息进行套餐页数额度和T币余额扣减。

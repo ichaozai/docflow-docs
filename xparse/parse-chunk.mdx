@@ -1,0 +1,55 @@
+---
+title: "分CHUNK"
+---
+
+当您想要对解析结果分块，应用于下游RAG系统、文档问答、知识库构建等场景时，您可以参考以下示例代码。
+
+- 参考[快速启动](/xparse/parse-quickstart)，通过文档解析API获取markdown文件
+
+```python
+import re
+from typing import List
+
+### 替换你的 md 文件
+with open("markdown_example.md", "r", encoding="utf-8") as f:
+    markdown_text = f.read()
+
+### 根据使用需要插入下方示例代码
+```
+
+### 固定大小分chunk（按句或字符）
+
+```python
+### 固定大小分块（按句或字符）
+def fixed_size_chunk(text: str, size: int = 100) -> List[str]:
+    return [text[i:i+size] for i in range(0, len(text), size)]
+
+### 运行示例
+print("📌 固定大小分块:")
+for i, c in enumerate(fixed_size_chunk(markdown_text, 80)):
+    print(f"Chunk {i+1}:\n{c}\n")
+```
+
+### 基于结构分chunk（按 Markdown 标题层级）
+
+```python
+### 基于结构分块（按 Markdown 标题层级）
+def structure_based_chunk(text: str) -> List[str]:
+    lines = text.strip().split("\n")
+    chunks = []
+    current_chunk = []
+    for line in lines:
+        if line.startswith("#"):
+            if current_chunk:
+                chunks.append("\n".join(current_chunk))
+                current_chunk = []
+        current_chunk.append(line)
+    if current_chunk:
+        chunks.append("\n".join(current_chunk))
+    return chunks
+
+### 运行示例
+print("📌 基于结构分块:")
+for i, c in enumerate(structure_based_chunk(markdown_text)):
+    print(f"Chunk {i+1}:\n{c}\n")
+```

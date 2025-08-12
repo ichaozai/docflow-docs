@@ -1,0 +1,1575 @@
+openapi: 3.0.1
+info:
+  title: 通用文档解析
+  description: "各种文档格式转markdown"
+  version: 1.0.1
+
+servers:
+  - url: https://api.textin.com
+    description: Production server
+
+security:
+  - AppIdAuth: []
+    SecretCodeAuth: []
+
+paths:
+  /ai/service/v1/pdf_to_markdown:
+    post:
+      tags:
+        - "文档解析"
+      summary: 文档解析
+      description: 上传图片/pdf/word/html/excel/ppt/txt，进行版面检测，文字识别，表格识别，版面分析等操作，并生成markdown文档及结构化数据
+      operationId: pdf_to_markdown
+      parameters:
+        - in: query
+          required: false
+          name: pdf_pwd
+          schema:
+            type: string
+          description: |
+            当pdf为加密文档时，需要提供密码。 
+            备注：对前端封装该接口时，需要自行对密码进行安全防护
+
+        - in: query
+          required: false
+          name: page_start
+          schema:
+            type: integer
+            default: 0
+          description: |
+            当上传的是pdf时，表示从第几页开始解析，不传该参数时默认从首页开始
+
+        - in: query
+          required: false
+          name: page_count
+          schema:
+            type: integer
+            default: 1000
+          description: |
+            当上传的是pdf时，page_count 表示要进行转换的pdf页数，总页数不得超过1000页，默认为1000页
+
+        - in: query
+          required: false
+          name: parse_mode
+          schema:
+            type: string
+            default: scan
+            enum: [auto, scan]
+          description: |
+            pdf文档的解析模式，默认为scan模式。图片不用设置，均默认按scan模式处理。
+            - auto 综合文字识别和解析模式：对pdf电子档解析，会直接提取pdf中的文字
+            - scan 仅按文字识别模式：将pdf当成图片处理
+
+        - in: query
+          required: false
+          name: dpi
+          schema:
+            type: integer
+            default: 144
+            enum: [72, 144, 216]
+          description: |
+            pdf文档的坐标基准，默认144dpi，与parse_mode参数联动：
+            - 当parse_mode=auto时，默认动态，支持72，144，216；
+            - 当parse_mode=scan时，默认144，支持72，144，216；
+
+        - in: query
+          required: false
+          name: apply_document_tree
+          schema:
+            type: integer
+            default: 1
+            enum: [0, 1]
+          description: |
+            markdown中是否生成标题层级，默认为1，生成标题。
+            - 0 不生成标题，同时也不会返回catalog字段
+            - 1 生成标题
+
+        - in: query
+          required: false
+          name: table_flavor
+          schema:
+            type: string
+            default: html
+            enum: [md, html, none]
+          description: |
+            markdown里的表格格式，默认为html，按html语法输出表格 
+            - md 按md语法输出表格
+            - html 按html语法输出表格
+            - none 不进行表格识别，把表格图像当成普通文字段落来识别
+
+        - in: query
+          required: false
+          name: get_image
+          schema:
+            type: string
+            default: objects
+            enum: [none, page, objects, both]
+          description: |
+            获取markdown里的图片，默认为none，不返回任何图像
+            - none 不返回任何图像
+            - page 返回每一页的整页图像：即pdf页的完整页图片   
+            - objects 返回页面内的子图像：即pdf页内的各个子图片
+            - both 返回整页图像和图像对象
+
+        - in: query
+          required: false
+          name: image_output_type
+          schema:
+            type: string
+            default: default
+            enum: [base64str, default]
+          description: |
+            指定引擎返回的图片对象输出类型，默认返回子图片url和页图片id
+            - base64str 指定所有图片对象为base64字符串，适用于没有云存储的用户，但是引擎返回结果体积会很大。识别页数page_count超过1000页时，不支持base64返回，只会以default格式返回。
+            - default 指定子图片对象为图片url,页图片对象为图片id
+
+        - in: query
+          required: false
+          name: paratext_mode
+          schema:
+            type: string
+            enum: [none, annotation, body]
+          description: |
+            markdown中非正文文本内容展示模式。默认为annotation。非正文内容包括页眉页脚，子图中的文本。
+            - none 不展示
+            - annotation 以注释格式插入到markdown中。页眉页脚中的图片只保留文本，图片base64或url不保留。
+            - body 以正文格式插入到markdown中
+
+        - in: query
+          required: false
+          name: formula_level
+          schema:
+            type: integer
+            default: 0
+            enum: [0, 1, 2]
+          description: |
+            公式识别等级，默认为0，全识别。
+            - 0 全识别
+            - 1 仅识别行间公式，行内公式不识别
+            - 2 不识别
+
+        - in: query
+          required: false
+          name: apply_merge
+          schema:
+            type: integer
+            default: 1
+            enum: [0, 1]
+            description: |
+             是否进行段落合并和表格合并。默认为1，合并段落和表格。
+             - 0 不合并
+             - 1 合并
+
+        - in: query
+          required: false
+          name: apply_image_analysis
+          schema:
+            type: integer
+            default: 0
+            enum: [0, 1]
+          description: |
+            利用大模型对文档中的子图进行分析。分析结果以markdown格式输出，并替换掉子图的文本识别内容。默认为0，不进行图像分析。
+            - 0 不进行图像分析
+            - 1 进行图像分析
+
+        - in: query
+          required: false
+          name: markdown_details
+          schema:
+            type: integer
+            default: 1
+            enum: [0, 1]
+          description: |
+            是否返回结果中的detail字段。默认为1，返回detail字段，保存markdown各类型元素的详细信息。
+            - 0 不生成
+            - 1 生成
+
+        - in: query
+          required: false
+          name: page_details
+          schema:
+            type: integer
+            default: 1
+            enum: [0, 1]
+          description: |
+            是否返回结果中的pages字段。默认为1，返回pages字段，保存每一页更加详细的解析结果。
+
+        - in: query
+          required: false
+          name: raw_ocr
+          schema:
+            type: integer
+            default: 0
+            enum: [0, 1]
+          description: |
+            是否返回全部文字识别结果(包含字符坐标信息)，结果字段为raw_ocr。默认为0，不返回。与page_details参数联动，当page_details为0或false时不返回。
+            - 0 不返回
+            - 1 返回
+
+        - in: query
+          required: false
+          name: char_details
+          schema:
+            type: integer
+            default: 0
+            enum: [0, 1]
+          description: |
+            是否返回结果中的char_pos字段（保存每个字符的位置信息）和raw_ocr中的char_相关字段。默认为0，不返回。
+            - 0 不返回
+            - 1 返回
+
+        - in: query
+          required: false
+          name: catalog_details
+          schema:
+            type: integer
+            default: 0
+            enum: [0, 1]
+          description: |
+            是否返回结果中的catalog字段，保存目录相关信息。与apply_document_tree参数联动，当apply_document_tree为0时不返回。
+            - 0 不返回
+            - 1 返回
+
+        - in: query
+          required: false
+          name: get_excel
+          schema:
+            type: integer
+            default: 0
+            enum: [0, 1]
+          description: |
+            是否返回excel的base64结果，结果字段为excel_base64，可以根据该字段进行后处理保存excel文件。默认为0，不返回。
+            - 0 不返回
+            - 1 返回
+
+        - in: query
+          required: false
+          name: crop_dewarp
+          schema:
+            type: integer
+            default: 0
+            enum: [0, 1]
+          description: |
+            是否进行切边矫正处理，默认为0，不进行切边矫正
+            - 0 不进行切边矫正
+            - 1 进行切边矫正
+
+        - in: query
+          required: false
+          name: remove_watermark
+          schema:
+            type: integer
+            default: 0
+            enum: [0, 1]
+          description: |
+            是否进行去水印处理，默认为0，不去水印
+            - 0 不去水印
+            - 1 去水印
+
+        - in: query
+          required: false
+          name: apply_chart
+          schema:
+            type: integer
+            default: 0
+            enum: [0, 1]
+          description: |
+            是否开启图表识别，开启图表识别会将识别到的图表以表格形式输出。默认为0，不进行图表识别。
+            - 0 不开启图表识别
+            - 1 开启图表识别
+
+        # - in: query
+        #   required: false
+        #   name: recognize_question
+        #   schema:
+        #     type:  string
+        #   description: |
+        #     是否开启题目识别，开启题目识别会将识别到的题目输出。默认不进行题目识别。
+        #     - off 不开启题目识别
+        #     - llm 利用大模型进行题目识别
+        #     - no-llm-1 利用ocr方法进行题目识别
+        # - in: query
+        #   required: false
+        #   name: subject
+        #   schema:
+        #     type:  string
+        #     default: default
+        #   description: |
+        #     需要识别题目的科目，仅当开启题目识别时生效。默认为default。
+        #     - default:默认,
+        #     - math:数学,
+        #     - primary_math:小学数学,
+        #     - junior_math: 初中数学,
+        #     - chinese:语文,
+        #     - primary_chinese:小学语文,
+        #     - junior_chinese:初中语文,
+        #     - english:英语,
+        #     - primary_english:小学英语,
+        #     - junior_english:初中英语,
+        #     - physics:物理,
+        #     - junior_physics:初中物理,
+        #     - chemistry: 化学,
+        #     - junior_chemistry:初中化学,
+        #     - biology:生物,
+        #     - junior_biology:初中生物,
+        #     - history:历史,
+        #     - junior_history:初中历史,
+        #     - geography:地理,
+        #     - junior_geography:初中地理,
+        #     - politics:政治,
+        #     - junior_politics:初中政治
+
+      requestBody:
+        description: |
+          支持以下两种请求格式：
+
+          1. Content-Type: application/octet-stream
+
+             支持的文件格式：png, jpg, jpeg, pdf, bmp, tiff, webp, doc, docx, html, mhtml, xls, xlsx, csv, ppt, pptx, txt, ofd, rtf。
+             - 如果是xls/xlsx/csv文件，每个sheet行数不能超过2000，列数不能超过100。
+             - 如果是txt文件，文件大小不超过100k。
+             - 请求体为本地文件的二进制流，非 FormData 或其他格式。
+             - 文件大小不超过500M。
+             - 长宽比小于2的图片宽高需在20～20000像素范围内，其他图片的宽高需在20～10000像素范围内。
+
+          2. Content-Type: text/plain
+
+             请求体为文本，内容为在线文件的URL链接（支持http以及https协议）。
+             - 在线文件大小不超过500M。
+             - 长宽比小于2的图片宽高需在20～20000像素范围内，其他图片的宽高需在20～10000像素范围内。
+
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+            examples:
+              file:
+                summary: 本地文件二进制流
+                description: 上传本地文件的二进制内容
+          text/plain:
+            schema:
+              type: string
+            examples:
+              url:
+                summary: 在线文件URL
+                description: 提供在线文件的URL链接（http/https）
+        required: true
+      responses:
+        "200":
+          description: "解析结果"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/codemessage"
+                  - $ref: "#/components/schemas/image_to_markdown_output"
+
+components:
+  securitySchemes:
+    AppIdAuth:
+      type: apiKey
+      in: header
+      name: x-ti-app-id
+      description: '请[登录Textin](https://www.textin.com/console/dashboard/setting)后前往 "工作台-账号设置-开发者信息" 查看 x-ti-app-id'
+    SecretCodeAuth:
+      type: apiKey
+      in: header
+      name: x-ti-secret-code
+      description: '请[登录Textin](https://www.textin.com/console/dashboard/setting)后前往 "工作台-账号设置-开发者信息" 查看 x-ti-secret-code'
+
+  schemas:
+    codemessage:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          default: 200
+          description: |
+            状态码
+            - 200: Success
+            - 40101: x-ti-app-id 或 x-ti-secret-code 为空
+            - 40102: x-ti-app-id 或 x-ti-secret-code 无效，验证失败
+            - 40103: 客户端IP不在白名单
+            - 40003: 余额不足，请充值后再使用
+            - 40004: 参数错误，请查看技术文档，检查传参
+            - 40007: 机器人不存在或未发布
+            - 40008: 机器人未开通，请至市场开通后重试
+            - 40301: 图片类型不支持
+            - 40302: 上传文件大小不符，文件大小不超过 500M
+            - 40303: 文件类型不支持，接口会返回实际检测到的文件类型，如“当前文件类型为.gif”
+            - 40304: 图片尺寸不符，长宽比小于2的图片宽高需在20～20000像素范围内，其他图片的宽高需在20～10000像素范围内
+            - 40305: 识别文件未上传
+            - 40422: 文件损坏（The file is corrupted.）
+            - 40423: PDF密码错误（Password required or incorrect password.）
+            - 40424: 页数设置超出文件范围（Page number out of range.）
+            - 40425: 文件格式不支持（The input file format is not supported.）
+            - 40427: DPI参数不在支持列表中（Input DPI is not in the allowed DPIs list(72,144,216).）
+            - 40428: word和ppt转pdf失败或者超时（Process office file failed.）
+            - 50207: 部分页面解析失败（Partial failed）
+            - 40400: 无效的请求链接，请检查链接是否正确
+            - 30203: 基础服务故障，请稍后重试
+            - 500: 服务器内部错误
+          enum:
+            - 200
+            - 40101
+            - 40102
+            - 40103
+            - 40003
+            - 40004
+            - 40007
+            - 40008
+            - 40301
+            - 40302
+            - 40303
+            - 40304
+            - 40305
+            - 40422
+            - 40423
+            - 40424
+            - 40425
+            - 40427
+            - 40428
+            - 50207
+            - 40400
+            - 30203
+            - 500
+        message:
+          type: string
+          description: 错误信息
+          example: success
+    image_to_markdown_output:
+      type: object
+      description: 返回markdown及结构化数据
+      properties:
+        result:
+          required:
+            - markdown
+          #- catalog
+          type: object
+          properties:
+            markdown:
+              type: string
+              description: 完整 markdown 正文文本。
+              example: "# hello markdown"
+            detail:
+              type: array
+              description: markdown分块后各类型元素详细信息， 入参markdown_details=1时返回（1式返回（默认））
+              items:
+                $ref: "#/components/schemas/markdown_details"
+            pages:
+              type: array
+              description: 文档按页为单位展开时，存储每一页的详情和状态（适用于PDF），部分信息与metrics字段重复。入参page_details=1式返回（默认）
+              items:
+                $ref: "#/components/schemas/pages_detail"
+            catalog:
+              type: object
+              description: 目录树结构。受参数catalog_details和apply_document_tree影响。
+              properties:
+                toc:
+                  type: array
+                  description: |
+                    返回的table of contents
+                  items:
+                    type: object
+                    properties:
+                      sub_type:
+                        type: string
+                        description: 标题类型 text_title、 image_title、 table_title
+                      hierarchy:
+                        type: integer
+                        description: 标题层级， 1 是 1级标题, 2 是 2级标题，依次类推
+                      title:
+                        type: string
+                        description: 标题内容
+                      page_id:
+                        type: integer
+                        description: 标题所在页码 （最小页码为 1)
+                      pos:
+                        type: array
+                        description: 目录区域的四个角点坐标，依次为左上，右上，右下，左下
+                        maxItems: 8
+                        minItems: 8
+                        items:
+                          type: integer
+                          example: [10, 10, 100, 10, 100, 50, 10, 50]
+                    required:
+                      - hierarchy
+                      - title
+                      - page_id
+                      - pos
+                    example:
+                      - hierarchy: 2
+                        title: "1.公司简介和主要财务指标"
+                        page_id: 3
+                        pos: [10, 10, 100, 10, 100, 50, 10, 50]
+                      - hierarchy: 3
+                        title: "1.1 公司简介"
+                        page_id: 4
+                        pos: [10, 10, 100, 10, 100, 50, 10, 50]
+            total_page_number:
+              type: integer
+              description: 输入PDF时， 返回文档的总页数
+              example: 10
+            # document_type:
+            #   type: string
+            #   description: 记录文档类型，若引擎判断文档类型非法，则无法进行正确的解析过程
+            #   example: pdf
+            #   default: unknown
+            #   enum:
+            #     - unknown
+            #     - image
+            #     - pdf
+            valid_page_number:
+              type: integer
+              description: 记录本次解析成功的总页数
+              example: 3
+            # paragraph_number:
+            #   type: integer
+            #   description: 记录本次解析文档的段落数，适用于所有文件类型
+            #   example: 18
+            # character_number:
+            #   type: integer
+            #   description: 记录本次解析文档的字符数，适用于所有文件类型
+            #   example: 3280
+           
+            # questions:
+            #   type: array
+            #   description: 识别出的题目信息，开启题目识别时返回。
+            #   items:
+            #     $ref: "#/components/schemas/questions_detail"
+            #     tree:
+            #       type: array
+            #       description: 树节点
+            #       items:
+            #         $ref: "#/components/schemas/Node"
+
+            excel_base64:
+              type: string
+              description: excel的base64结果，仅当get_excel=1时返回。
+              example: ""
+        version:
+          type: string
+          description: doc_restore 引擎版本号
+          example: 2.1.0
+        duration:
+          type: integer
+          description: 引擎耗时 （毫秒）
+          example: 999
+        metrics:
+          type: array
+          description: 每一页的信息
+          items:
+            type: object
+            description: 状态情况
+            properties:
+              page_image_width:
+                type: integer
+                description: 当前段落所在页的图片宽或者pdf转成的图片宽
+                example: 1024
+              page_image_height:
+                type: integer
+                description: 当前段落所在页的图片高或者pdf转成的图片高
+                example: 768
+              dpi:
+                type: integer
+                description: 当前pdf页转成图片所用的dpi
+                example: 72
+              durations:
+                description: 当前页总耗时
+                type: number
+                format: float
+              status:
+                description: 当前页状态
+                type: string
+              page_id:
+                description: 当前页码
+                type: number
+              angle:
+                type: integer
+                description: |
+                  图像角度，
+                  定义0度为人类阅读文字的图像方向，称为正置图像，
+                  本字段表示输入图像是正置图像进行顺时针若干角度的旋转所得。
+                  - 0: ▲
+                  - 90: ▶
+                  - 180: ▼
+                  - 270: ◀
+                enum:
+                  - 0
+                  - 90
+                  - 180
+                  - 270
+                example: 90
+              image_id:
+                description: |
+                  当前页图片id （下载方式：https://api.textin.com/ocr_image/download?image_id=xxx, 需要在headers里添加appid和key, 有效期30天） \
+                  例如使用curl下载: \
+                  curl 'https://api.textin.com/ocr_image/download?image_id=xxx' \
+                  --header 'x-ti-app-id: c81f*************************e9ff' \
+                  --header 'x-ti-secret-code: 5508***********************1c17'
+
+                type: string
+            required:
+              - page_image_width
+              - page_image_height
+              - durations
+              - status
+              - page_id
+              - angle
+
+      required:
+        - result
+        - version
+        - duration
+        - metrics
+
+    pages_detail:
+      type: object
+      description: 每一页的详细信息
+      properties:
+        status:
+          description: 表示当前页的引擎输出状态，或者error_message
+          type: string
+          example: success
+        page_id:
+          description: 当前页码 (若为流式文件, 页码置为0)
+          type: number
+          example: 0
+        durations:
+          description: 当前页总耗时
+          type: number
+          format: float
+          example: 612.5
+        image_id:
+          description: |
+            当前页图片id （下载方式：https://api.textin.com/ocr_image/download?image_id=xxx ,需要在headers里添加appid和key）。当输入参数image_output_type=default且get_image=page/both时返回。
+            例如使用curl下载\
+            curl 'https://api.textin.com/ocr_image/download?image_id=xxx' \
+            --header 'x-ti-app-id: c81f*************************e9ff' \
+            --header 'x-ti-secret-code: 5508********************1c17'
+          type: string
+          example: 90u12adcad08r2
+        origin_image_id:
+          description: |
+            切边或去水印前的原始页图片，仅当开启切边或去水印，image_output_type=default且get_image=page/both时返回。下载方式同image_id
+          type: string
+          example: 90u12adcad08r2
+        base64:
+          description: |
+            当前页图片的base64字符串，当输入参数image_output_type=base64str且get_image=page/both时返回。
+          type: string
+        origin_base64:
+          description: |
+            切边或去水印前的原始页图片base64字符串，仅当开启切边或去水印，image_output_type=base64str且get_image=page/both时返回
+          type: string
+        width:
+          type: integer
+          description: 文档页宽度
+        height:
+          type: integer
+          description: 文档页高度
+        angle:
+          type: integer
+          description: 图像（中文字）的角度（当输入为图像时，默认为0， 可选值0, 90, 180, 270)
+        content:
+          type: array
+          description: "基础数据: 文字行, 图像中的其中一种，请参考textline和image的说明"
+          items:
+            oneOf:
+              - $ref: "#/components/schemas/textline"
+              - $ref: "#/components/schemas/image"
+        raw_ocr:
+          type: array
+          description: "全部文字识别结果，只包含文字结果。受URL参数page_details和raw_ocr影响，默认不返回"
+          items:
+            $ref: "#/components/schemas/ocrline"
+        structured:
+          type: array
+          description: 结构化数据, 为textblock, table, imageblock, footer, header中的一种
+          items:
+            oneOf:
+              - $ref: "#/components/schemas/textblock"
+              - $ref: "#/components/schemas/table"
+              - $ref: "#/components/schemas/imageblock"
+              - $ref: "#/components/schemas/footer"
+              - $ref: "#/components/schemas/header"
+
+    #Node:
+    #  type: object
+    #  description: 树节点
+    #  required:
+    #    - guid
+    #    - label
+    #    - ori_id
+    #    - line_heights
+    #    - pos
+    #    - content
+    #    - children
+    #    - pos_list
+    #    - page_num
+    #  properties:
+    #    guid:
+    #       type: string
+    #       description: |
+    #         节点唯一标识，0表示根节点，0.1表示根节点的第2个孩子，0.0.15表示根节点第1个孩子的第16个孩子
+    #       example: "0.0"
+    #    label:
+    #      type: string
+    #      description: |
+    #        节点类型，共有5种
+    #        - ROOT: 根节点
+    #        - MainTitle: 主标题一份文档的最高层次的标题，其父节点只能是ROOT
+    #        - Heading: 标题，其父节点只能是MainTitle,Heading
+    #        - Text: 段落，其父节点可以是 MainTitle,Heading，没有子节点
+    #        - Table: 表格，父节点可以是 Heading，MainTitle
+    #      enum:
+    #        - "ROOT"
+    #        - "MainTitle"
+    #        - "Text"
+    #        - "Heading"
+    #        - "Table"
+    #      example: Heading
+    #    ori_id:
+    #      type: array
+    #      description: |
+    #         由段落ori_id构成，例如 0,1 表示 page_index为0，structure_id为1
+    #      example:
+    #        - "0.1"
+    #        - "0,2"
+    #    line_height:
+    #            type: integer
+    #            description: |
+    #              段落高度
+    #            example: 21
+    #    page_num:
+    #      type: number
+    #      format: integer
+    #      minimum: 0
+    #      description: |
+    #        页码，根节点为0，其余从1开始
+    #      example: 2
+    #     content:
+    #      type: array
+    #      description: |
+    #       节点内容,一个节点可能是由多个段落拼接而成
+    #      example:
+    #        - "山东海洋科技股份有限公司"
+    #        - "关于法院裁定受理公司重整并指定管理人的公告"
+    #    pos:
+    #      type: array
+    #      description: 合并段落的坐标
+    #      maxItems: 8
+    #      minItems: 8
+    #      items:
+    #        type: integer
+    #      example: [216,174,778,174,778,253,216,253]
+    #    pos_list:
+    #      type: array
+    #      description: 各个段落的坐标
+    #      items:
+    #        type: array
+    #      example:
+    #        - [310,174,684,174,684,201,310,201]
+    #        - [216,227,778,227,778,253,216,253 ]
+    #    children:
+    #      type: array
+    #      description: |
+    #       孩子节点列表，注意，孩子节点的children为空
+    #      items:
+    #        oneOf:
+    #          - $ref: "#/components/schemas/Node"
+    markdown_details:
+      type: object
+      description: markdown各类型元素详细信息
+      properties:
+        page_id:
+          type: integer
+          description: 当前元素所在页码，例如”1”
+          example: 1
+        paragraph_id:
+          type: integer
+          description: 当前元素id
+        outline_level:
+          type: integer
+          description: |
+            标题级别(最多支持5级标题) -1表示正文，0表示一级标题，1表示二级标题 …
+          default: -1
+          enum:
+            - -1
+            - 0
+            - 1
+            - 2
+            - 3
+            - 4
+        text:
+          type: string
+          description: 文本
+          example: "hello markdown"
+        position:
+          type: array
+          description: |
+            以长度为8的整型数组表示四边形，8个数两两一组为一个点的横纵坐标，分别是左上，右上，右下，左下。
+            当输入是PDF时, 此坐标是基于72dpi的;当输入是图片时，此坐标是原图里的坐标。
+            单位：像素
+          items:
+            type: integer
+          example: [217, 390, 1336, 390, 1336, 460, 217, 460]
+        origin_position:
+          type: array
+          description: |
+            仅当打开切边时返回，表示该段落在原图中的坐标。格式同position。
+          items:
+            type: integer
+          example: [217, 390, 1336, 390, 1336, 460, 217, 460]
+        content:
+          type: integer
+          description: |
+            内容类型
+            - 0 正文(段落、图片、表格)
+            - 1 非正文(页眉、页脚、侧边栏)
+          default: 0
+          enum:
+            - 0 正文(段落、图片、表格)
+            - 1 非正文(页眉、页脚、侧边栏)
+        type:
+          type: string
+          description: 类型, paragraph（段落类型，包括正文、标题、公式等文字信息）、image（图片类型）、table（表格类型）
+          default: paragraph
+          enum:
+            - image
+            - table
+            - paragraph
+        sub_type:
+          type: string
+          description: |
+            子类型。当type为paragraph时，取值范围为catalog(目录),header(页眉),footer(页脚),sidebar(侧边栏),text(正文普通文本),text_title(文本标题),image_title(图片标题),table_title(表格标题)；当type是image时，取值范围为stamp(印章),chart(图表),qrcode(二维码),barcode(条形码)；当type为table时，取值范围为bordered(有线表), borderless(无线表)。
+          example: "catalog"
+          enum:
+            - catalog
+            - header
+            - footer
+            - sidebar
+            - text
+            - text_title
+            - image_title
+            - table_title
+            - stamp
+            - chart
+            - qrcode
+            - barcode
+            - bordered
+            - borderless
+        image_url:
+          type: string
+          description: 图片链接，仅在type为image时返回，当get_image = objects 时，返回图片的公共连接,图片默认保存30天，如需长久保存，请在有效期内下载图片并保存;或者使用image_output_type=base64str,图片以base64的方式返回
+        tags:
+          type: array
+          description: 表示段落内是否存在特殊文本，类型包括公式formula和手写体handwritten
+          items:
+            type: string
+          example: ["formula", "handwritten"]
+        caption_id:
+          type: object
+          description: 表格或图片的标题id，仅在type为image或table时返回
+          properties:
+            page_id:
+              type: integer
+              description: 标题所在页码
+            paragraph_id:
+              type: integer
+              description: 标题所在段落id
+        cells:
+          type: array
+          description: 单元格数组, 仅在type为table时返回
+          items:
+            type: object
+            description: 单元格数据
+            required:
+              - "row"
+              - "col"
+            properties:
+              row:
+                type: integer
+                description: 单元格行号
+              col:
+                type: integer
+                description: 单元格列号
+              row_span:
+                type: integer
+                description: 单元格行跨度,默认为1
+              col_span:
+                type: integer
+                description: 单元格列跨度,默认为1
+              position:
+                type: array
+                description: 单元格的四个角点坐标，依次为左上，右上，右下，左下
+                maxItems: 8
+                minItems: 8
+                items:
+                  type: integer
+                example: [10, 10, 100, 10, 100, 50, 10, 50]
+              origin_position:
+                type: array
+                description: |
+                  受URL参数切边矫正或去水印影响，仅当打开切边或去水印时返回，表示该单元格在原图中的坐标，格式同position。
+                items:
+                  type: integer
+              text:
+                type: string
+                description: 单元格文本内容
+              type:
+                type: string
+                description: 类型，固定为cell，表示单元格
+        split_section_page_ids:
+          type: array
+          description: 当表格/段落有合并时，记录合并前各个子表格/段落所在的页的id
+          example: [1, 2, 3]
+          items:
+            type: integer
+        split_section_positions:
+          type: array
+          description: 当表格/段落有合并时，记录合并前各个子表格/段落所在页的位置，位置所属的页码与split_section_page_ids按索引一一对应，如split_section_positions[2]所属的页码为split_section_page_ids[2]
+          items:
+            type: array
+            items:
+              maxItems: 8
+              minItems: 8
+              type: integer
+          example:
+            [
+              [0, 0, 100, 100, 100, 200, 0, 200],
+              [0, 0, 100, 100, 100, 200, 0, 200],
+              [0, 0, 100, 100, 100, 200, 0, 200],
+            ]
+        stamp:
+          type: object
+          description: 当sub_type为stamp时，返回印章识别结果
+          properties:
+            value:
+              type: string
+              description: 印章文本内容
+            stamp_shape:
+              type: string
+              description: 印章形状
+            type:
+              type: string
+              description: 印章类型
+            color:
+              type: string
+              description: 印章颜色
+
+      required:
+        - page_id
+        - paragraph_id
+        - outline_level
+        - text
+        - type
+        - content
+        - position
+
+    textline:
+      type: object
+      description: 文本行数据
+      required:
+        - "id"
+        - "type"
+        - "pos"
+        - "text"
+      properties:
+        id:
+          type: integer
+          description: 数据id(页内唯一)
+        type:
+          type: string
+          description: 数据类型,line
+          example: line
+        text:
+          type: string
+          description: 文本行文字内容, 当sub_type=stamp时， text为印章上的文字.
+        angle:
+          type: integer
+          description: 文本行文字方向。文本行方向是基于转正后的页面计算，即angle=0表示文本行方向和页面方向一致。
+          enum: [0, 90, 180, 270]
+        pos:
+          type: array
+          description: 文本行四个角点坐标
+          maxItems: 8
+          minItems: 8
+          items:
+            type: integer
+        origin_position:
+          type: array
+          description: |
+            仅当打开切边时返回，表示文本行在原图中的坐标。格式同pos。
+          items:
+            type: integer
+        sub_type:
+          type: string
+          description: 子类型, 有handwriting, formula
+          enum: ["handwriting", "formula"]
+
+        direction:
+          type: integer
+          description: "文字方向, 默认为0. 0:横向文本; 1:竖向文本; 2:横向右往左文本（如阿拉伯语）"
+        score:
+          type: number
+          description: 文本行内每个字符的置信度(仅当输入图像做ocr时)
+          maximum: 1.0
+          minimum: 0.0
+        char_pos:
+          type: array
+          description: 文本行内每个字符的坐标,每个item是一个由八个整数组成的数组，分别表示，左上，右上，右下，左下四个点的（x,y)坐标
+          items:
+            type: array
+            maxItems: 8
+            minItems: 8
+            items:
+              type: integer
+    image:
+      type: object
+      description: 图像数据
+      required:
+        - "id"
+        - "type"
+        - "pos"
+        - "data"
+      properties:
+        id:
+          type: integer
+          description: 数据id
+        type:
+          type: string
+          description: 数据类型, image
+          example: image
+        pos:
+          type: array
+          description: 图像四个角点坐标
+          maxItems: 8
+          minItems: 8
+          items:
+            type: integer
+        sub_type:
+          type: string
+          description: 子类型, 包括stamp, chart, qrcode, barcode
+        size:
+          description: 图像大小[width, height]
+          type: array
+          maxItems: 2
+          minItems: 2
+          items:
+            type: integer
+        data:
+          type: object
+          description: 图像内容
+          $ref: "#/components/schemas/imagedata"
+        stamp:
+          type: object
+          description: 仅当sub_type为stamp时有值，为印章识别结果
+          properties:
+            value:
+              type: string
+              description: 印章文本内容
+            stamp_shape:
+              type: string
+              description: 印章形状
+            type:
+              type: string
+              description: 印章类型
+            color:
+              type: string
+              description: 印章颜色
+
+    imageblock:
+      type: object
+      description: 图像块
+      required:
+        - "type"
+        - "pos"
+        - "content"
+      properties:
+        type:
+          description: 图像块类型， 值为 image
+          type: string
+          example: image
+        pos:
+          type: array
+          description: 文本行四个角点坐标
+          maxItems: 8
+          minItems: 8
+          items:
+            type: integer
+        origin_position:
+          type: array
+          description: |
+            仅当打开切边时返回，表示该子图在原图中的坐标。格式同pos。
+          items:
+            type: integer
+        lines:
+          type: array
+          description: 图像包含的文本行id,
+          items:
+            type: integer
+          example: [1]
+        content:
+          type: array
+          items:
+            type: integer
+          description: 图像资源数据id数组
+          maxItems: 1
+        caption_id:
+          type: object
+          description: 图片的标题id
+          properties:
+            page_id:
+              type: integer
+              description: 标题所在页码
+            paragraph_id:
+              type: integer
+              description: 标题所在段落id
+        text:
+          type: string
+          description: 子图片识别得到的文本内容
+    textblock:
+      type: object
+      description: 段落块
+      required:
+        - "type"
+        - "pos"
+        - "content"
+      properties:
+        type:
+          description: 段落块类型， 固定为 textblock
+          type: string
+          example: textblock
+        pos:
+          type: array
+          description: 文本行四个角点
+          maxItems: 8
+          minItems: 8
+          items:
+            type: integer
+        origin_position:
+          type: array
+          description: |
+            仅当打开切边时返回，表示该段落在原图中的坐标。格式同pos。
+          items:
+            type: integer
+        content:
+          description: 段落块内文本行id数据组
+          type: array
+          items:
+            type: integer
+          example: [0, 1, 2]
+        sub_type:
+          description: 段落块字类型，包括catalog(目录),text(正文普通文本),text_title(文本标题),image_title(图片标题),table_title(表格标题)
+          type: string
+          enum:
+            - catalog
+            - text
+            - text_title
+            - image_title
+            - table_title
+          example: text
+        continue:
+          description: 段落块连续属性，用于判断完整的段落块是否被页面或栏分割，为true表示该段落块和下一个段落块连续（即两个段落块可合成一个逻辑段落块）。
+          type: boolean
+          example: true
+        next_page_id:
+          description: 当且仅当continue为true时有值。表示下一个段落块的page_id。
+          type: integer
+          example: 2
+        next_para_id:
+          description: 当且仅当continue为true时有值。表示下一个段落块的paragraph_id。
+          type: integer
+          example: 1
+        text:
+          type: string
+          description: 段落块文本内容
+        outline_level:
+          type: integer
+          description: |
+            标题级别: (最多支持5级标题)
+              -1.正文 0.一级标题 1.二级标题 ...
+          default: -1
+    table:
+      type: object
+      description: 表格块
+      required:
+        - "type"
+        - "pos"
+        - "rows"
+        - "cols"
+        - "columns_width"
+        - "rows_height"
+        - "cells"
+      properties:
+        type:
+          description: 表格块类型, 固定为table
+          type: string
+          example: table
+        sub_type:
+          description: 表格子属性，取值为bordered(有线表)或borderless(无线表)，默认为bordered(即json中无该字段时，默认值为bordered)
+          type: string
+          enum: ["bordered", "borderless"]
+          example: "bordered"
+        pos:
+          type: array
+          description: 文本行四个角点坐标
+          maxItems: 8
+          minItems: 8
+          items:
+            type: integer
+        origin_position:
+          type: array
+          description: |
+            仅当打开切边时返回，表示该表格在原图中的坐标。格式同pos。
+          items:
+            type: integer
+        rows:
+          type: integer
+          description: 表格行数
+        cols:
+          type: integer
+          description: 表格列数
+        columns_width:
+          type: array
+          description: 表格列宽度列表
+          items:
+            type: integer
+        rows_height:
+          type: array
+          description: 表格行高度列表
+          items:
+            type: integer
+        text:
+          type: string
+          description: 表格文本内容，以html或md格式展示
+        continue:
+          description: 当前表格与后一表格连续，用来判断一个表格是否被页面分割（如果 continue为true 且该表格位于本页结尾，该表格可与下一页开头表格组合为一个表格）
+          type: boolean
+          example: true
+        caption_id:
+          type: object
+          description: 表格的标题id
+          properties:
+            page_id:
+              type: integer
+              description: 标题所在页码
+            paragraph_id:
+              type: integer
+              description: 标题所在段落id
+        cells:
+          description: 单元格数组
+          type: array
+          items:
+            type: object
+            description: 单元格数据
+            required:
+              - "row"
+              - "col"
+            properties:
+              row:
+                type: integer
+                description: 单元格行号
+              col:
+                type: integer
+                description: 单元格列号
+              row_span:
+                type: integer
+                description: 单元格行跨度,默认为1
+              col_span:
+                type: integer
+                description: 单元格列跨度,默认为1
+              pos:
+                type: array
+                description: 单元格的四个角点坐标，依次left-top,right-top,right-bottom,left-bottom.
+                maxItems: 8
+                minItems: 8
+                items:
+                  type: integer
+                example: [10, 10, 100, 10, 100, 50, 10, 50]
+              content:
+                type: array
+                description: 单元格内容
+                items:
+                  oneOf:
+                    - $ref: "#/components/schemas/textblock"
+                    - $ref: "#/components/schemas/imageblock"
+    footer:
+      type: object
+      description: 页脚
+      required:
+        - "type"
+        - "pos"
+        - "blocks"
+      properties:
+        type:
+          description: 页脚块类型，固定为 footer
+          type: string
+          example: footer
+        pos:
+          type: array
+          description: 文本行四个角点坐标
+          maxItems: 8
+          minItems: 8
+          items:
+            type: integer
+        blocks:
+          type: array
+          description: footer段落内容，为textblock, imageblock, table中其中的一种
+          items:
+            oneOf:
+              - $ref: "#/components/schemas/textblock"
+              - $ref: "#/components/schemas/imageblock"
+              - $ref: "#/components/schemas/table"
+    header:
+      type: object
+      description: 页眉
+      required:
+        - "type"
+        - "pos"
+        - "blocks"
+      properties:
+        type:
+          description: 页眉块类型，固定为 header
+          type: string
+          example: header
+        pos:
+          type: array
+          description: 文本行四个角点坐标
+          maxItems: 8
+          minItems: 8
+          items:
+            type: integer
+        blocks:
+          type: array
+          description: header段落内容，为textblock, imageblock, table中的其中一种
+          items:
+            oneOf:
+              - $ref: "#/components/schemas/textblock"
+              - $ref: "#/components/schemas/imageblock"
+              - $ref: "#/components/schemas/table"
+    imagedata:
+      type: object
+      description: 图像数据, 下面3种方式之一
+      properties:
+        base64:
+          description: 图像文件(jpg, png)的base64字符串
+          type: string
+        region:
+          description: 图像在页图像中的区域（四边形4个点坐标）
+          type: array
+          maxItems: 8
+          minItems: 8
+          items:
+            type: integer
+        path:
+          description: 图像文件路径（如在zip包中的路径）
+          type: string
+    ocrline:
+      type: object
+      description: orc文字识别数据
+      required:
+        - text
+        - score
+        - type
+        - position
+        - angle
+        - direction
+        - handwritten
+      properties:
+        text:
+          type: string
+          description: |
+            识别内容字符串
+          example: 这是一个例子。
+        score:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+          description: |
+            识别置信度（0 <= x <= 1）
+          example: 0.99
+        type:
+          type: string
+          description: |
+            文本类型，用于表示文字的形态。
+            当前版本下，文本类型包括：
+            - text(文本)
+            - formula(公式)
+          enum:
+            - text
+            - formula
+          example: text
+        position:
+          type: array
+          description: 文本行的四个角点坐标，依次为左上，右上，右下，左下
+          maxItems: 8
+          minItems: 8
+          items:
+            type: integer
+          example: [10, 10, 100, 10, 100, 50, 10, 50]
+        angle:
+          type: integer
+          description: 图像（中文字）的角度（当输入为图像时，默认为0， 可选值0, 90, 180, 270)
+        direction:
+          type: integer
+          description: |
+            文字阅读方向。
+            - -1: 其他
+            - 0: 单字
+            - 1: 横向
+            - 2: 纵向
+          enum:
+            - -1
+            - 0
+            - 1
+            - 2
+          example: 1
+        handwritten:
+          type: integer
+          description: |
+            文字是否手写所得。
+            - -1: 未知
+            - 0: 非手写文字, 一般为印刷文字
+            - 1: 文字手写, 一般具备明显的书写特征
+          enum:
+            - -1
+            - 0
+            - 1
+          example: 1
+        char_scores:
+          type: array
+          description: |
+            字符置信度，值域范围0-1。
+            设置char_details=1时输出。
+          items:
+            type: number
+            format: float
+            example: 0.98
+          example: [0.99, 0.98, 0.95, 0.95, 0.99, 0.93, 0.87]
+        char_centers:
+          type: array
+          description: |
+            字符中心点。
+            设置character=1时输出。
+          items:
+            type: array
+            minItems: 2
+            maxItems: 2
+            items:
+              type: integer
+              example: 10
+          example:
+            [
+              [20, 10],
+              [30, 10],
+              [40, 10],
+              [50, 10],
+              [60, 10],
+              [70, 10],
+              [80, 10],
+            ]
+        char_positions:
+          type: array
+          description: |
+            字符四边形点坐标，以顺时针构成闭合区域。
+            设置char_details=1时输出。
+          items:
+            type: array
+            minItems: 8
+            maxItems: 8
+            items:
+              type: integer
+              example: 18
+          example:
+            [
+              [18, 8, 22, 8, 22, 12, 18, 12],
+              [28, 88, 32, 8, 32, 12, 28, 12],
+              [38, 88, 42, 8, 42, 12, 38, 12],
+              [48, 88, 52, 8, 52, 12, 48, 12],
+              [58, 88, 62, 8, 62, 12, 58, 12],
+              [68, 88, 72, 8, 72, 12, 68, 12],
+              [78, 88, 82, 8, 82, 12, 78, 12],
+            ]
+        char_candidates:
+          type: array
+          description: |
+            候选字数组，表示每一个字符的候选，与候选置信度配套使用。
+            设置char_details=1时输出。
+          items:
+            type: array
+            items:
+              type: string
+              example: "这"
+            example: ["这"]
+          example:
+            [["这"], ["是"], ["一", "-"], ["个"], ["例"], ["子"], ["。", "O"]]
+        char_candidates_score:
+          type: array
+          description: |
+            候选字置信度数组，表示每一个候选字符的置信度，与候选字符配套使用。
+            设置char_details=1时输出。
+          items:
+            type: array
+            items:
+              type: number
+              format: float
+              example: 0.99
+          example:
+            [[0.99], [0.99], [0.95, 0.05], [0.99], [0.99], [0.99], [0.89, 0.11]]
+    # questions_detail:
+    #   type: object
+    #   description: 题目信息
+    #   properties:
+    #     type:
+    #       type: integer
+    #       description: 题目类型（0：选择题；1：填空题；2：阅读理解（阅读+问答选择）；3：完型填空（阅读+选择）；4：阅读填空（阅读+填空）；5：问答题；6：选择题，多选多；7：填空、选择题混合；8：应用题；9：判断题；10：作图题；11：材料题；12：计算题；13：连线题；14：作文题；15：解答题；16：其他；17：图；18：表格）
+    #       default: paragraph
+    #     pos_list:
+    #       type: array
+    #       description: 题目坐标框的集合，每个坐标框是长度为8的整型数组，8个数两两一组为一个点的横纵坐标，分别是左上，右上，右下，左下。
+    #       example: [[252, 1085, 1380, 1086, 1380, 1349, 252, 1349]]
+    #     element_list:
+    #       type: array
+    #       items:
+    #         $ref: "#/components/schemas/element_detail"
+    #     image_list:
+    #       type: array
+    #       description: 题目图片坐标框的集合，每个坐标框是长度为8的整型数组，8个数两两一组为一个点的横纵坐标，分别是左上，右上，右下，左下。
+    #       example: [[252, 1085, 1380, 1086, 1380, 1349, 252, 1349]]
+    #     table_list:
+    #       type: object
+    #       description: 题目表格信息
+    #       properties:
+    #         content:
+    #           type: string
+    #           description: 识别得到的表格内容，以markdown格式输出
+    #         pos:
+    #           type: array
+    #           description: 题目表格坐标框的集合，每个坐标框是长度为8的整型数组，8个数两两一组为一个点的横纵坐标，分别是左上，右上，右下，左下。
+    #           example: [[252, 1085, 1380, 1086, 1380, 1349, 252, 1349]]
+    #     text:
+    #       type: string
+    #       description: 题目文本内容
+    #     page_id:
+    #       type: integer
+    #       description: 题目所在的页码
+    #       example: 1
+    # element_detail:
+    #   type:
+    #     type: string
+    #     description: 题目内容的类型，包括题干stem和选项option
+    #     example: stem
+    #   pos_list:
+    #     type: array
+    #     description: 题干或选项坐标框的集合，每个坐标框是长度为8的整型数组，8个数两两一组为一个点的横纵坐标，分别是左上，右上，右下，左下。
+    #     example: [[252, 1085, 1380, 1086, 1380, 1349, 252, 1349]]
+    #   text:
+    #     type: string
+    #     description: 题干或选项的文本内容

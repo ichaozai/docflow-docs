@@ -1,0 +1,78 @@
+---
+title: "获取表格"
+---
+
+在TextIn xParse文档抽取API中，抽取结果的输出是JSON格式；如果您的系统或任务中更常见的文件格式是Excel格式，则可以参考以下教程，将抽取结果保存为Excel文件。这里提供一个简单的实现方式：
+
+## 如何获取表格
+
+参考[**快速启动**](/xparse/extract-quickstart)中的示例文件和示例代码（使用字段模式抽取），您可以参考以下代码将抽取结果保存为Excel文件。
+
+```python
+import pandas as pd
+import os
+
+# 其余部分代码不变
+
+# 新增 save_tables_to_excel 函数
+def save_tables_to_excel(json_response: str, original_file_path: str):
+    """将JSON响应中的表格数据保存为Excel文件"""
+    # 解析JSON响应
+    data = json.loads(json_response)
+    
+    # 获取表格数据
+    tables = data.get('result', {}).get('detail_structure', [{}])[0].get('tables_relationship', [])
+    
+    if not tables:
+        print("未找到表格数据")
+        return
+    
+    # 获取原始文件的目录路径
+    original_dir = os.path.dirname(original_file_path)
+    original_filename = os.path.splitext(os.path.basename(original_file_path))[0]
+    excel_path = os.path.join(original_dir, f"{original_filename}_tables.xlsx")
+    
+    # 创建Excel写入器
+    with pd.ExcelWriter(excel_path, engine='openpyxl') as writer:
+        for i, table in enumerate(tables):
+            # 提取表格标题
+            table_title = table.get('title', f'表格{i+1}')
+            
+            # 提取表格行数据
+            rows = []
+            for cell in table.get('cells', []):
+                row_data = {}
+                for field_name, field_data in cell.items():
+                    row_data[field_name] = field_data.get('value', '')
+                rows.append(row_data)
+            
+            if rows:
+                # 创建DataFrame
+                df = pd.DataFrame(rows)
+                
+                # 写入Excel，使用表格标题作为工作表名称
+                # 清理工作表名称（Excel工作表名称不能包含特殊字符）
+                sheet_name = "".join(c for c in table_title if c.isalnum() or c in (' ', '-', '_'))[:31]
+                df.to_excel(writer, sheet_name=sheet_name, index=False)
+                
+                print(f"已保存表格 '{table_title}' 到工作表 '{sheet_name}'")
+    
+    print(f"Excel文件已保存到: {excel_path}")
+
+
+def main():
+
+# main函数中其余部分代码不变，在print(response)后添加以下代码
+
+        # 保存表格数据到Excel文件
+        save_tables_to_excel(response, file_path)
+
+
+
+if __name__ == "__main__":
+    main()
+```
+
+- 保存后的表格如下图，表格文件位置在抽取的原始文件同目录下。
+
+![Extract Getexcel Pn](/images/extract-getexcel.png)

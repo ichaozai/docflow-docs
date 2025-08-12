@@ -1,0 +1,423 @@
+---
+title: "快速启动"
+description: "参考示例，快速将文档解析API接入到您的系统和应用流程中。"
+---
+
+<Tip>
+  本教程基于python示例分步讲解如何使用文档解析API。我们另外提供了完整的多语言示例代码包，可在本地一键运行，助您10s跑通接口示例，请[点击下载](https://static.textin.com/docs/%E9%80%9A%E7%94%A8%E6%96%87%E6%A1%A3%E8%A7%A3%E6%9E%90-%E7%A4%BA%E4%BE%8B%E4%BB%A3%E7%A0%81.zip)。如需在线快捷调试API，请参考[Textin文档中心](https://www.textin.com/document/legacy/pdf_to_markdown)。
+</Tip>
+
+## 为什么使用文档解析API ？
+
+大模型时代，文档(尤其是复杂文档)中蕴含着海量高价值的数据内容，借助文档解析API将其结构化为大模型更容易理解的格式(如markdown)，可以更大程度上增强大模型的能力、发挥更大价值，快速实现业务AI升级。
+
+TextIn xParse 文档解析API 是专为大模型重新设计的文档理解引擎，可以满足AI开发者的核心需求：✅ 文档结构完整保持 ✅ 语义关系准确理解 ✅ 大模型原生友好
+
+使用文档解析API解析一个或多个文档，您可以选择将输出结果作为markdown或JSON文件保存在指定的目录中，也可以对输出结果做进一步的处理以满足您的业务需求。如果您正在进行知识库、RAG、大模型原生应用、Agent等业务方向的产品建设，文档解析API会为您提供帮助。
+
+## 如何使用文档解析API ？
+
+您可以参考以下示例文件和步骤，快速验证并将文档解析API接入到您的系统和应用流程中。
+
+<Tip>
+  这里为您提供了一份Textin官方pdf示例文件，您可以点击下载或使用该链接：[文档解析pdf示例.pdf](https://dllf.intsig.net/download/2025/Solution/textin/sample/pdf_to_markdown/sample_02.pdf)
+
+  <iframe src="https://dllf.intsig.net/download/2025/Solution/textin/sample/pdf_to_markdown/sample_02.pdf" width="100%" height="600px" />
+</Tip>
+
+### 先决条件：获取API Key
+
+使用文档解析API处理文档时，您需要先获取API Key。请先登录后前往 [TextIn工作台 - 账号与开发者信息](https://www.textin.com/console/dashboard/setting) 获取您的 x-ti-app-id 和 x-ti-secret-code 。
+
+### 前置准备
+
+您可以参考以下示例代码完成文档解析API请求的前置准备工作，替换您自己的 x-ti-app-id 和 x-ti-secret-code ，后续步骤可根据实际使用场景在main函数中插入代码。
+
+```python
+import json
+import requests
+
+class OCRClient:
+    def __init__(self, app_id: str, secret_code: str):
+        self.app_id = app_id
+        self.secret_code = secret_code
+
+    def recognize(self, file_content: bytes, options: dict) -> str:
+        # 构建请求参数
+        params = {}
+        for key, value in options.items():
+            params[key] = str(value)
+
+        # 设置请求头
+        headers = {
+            "x-ti-app-id": self.app_id,
+            "x-ti-secret-code": self.secret_code,
+            # 方式一：读取本地文件
+            "Content-Type": "application/octet-stream"
+            # 方式二：使用URL方式
+            # "Content-Type": "text/plain"
+        }
+
+        # 发送请求
+        response = requests.post(
+            f"https://api.textin.com/ai/service/v1/pdf_to_markdown",
+            params=params,
+            headers=headers,
+            data=file_content
+        )
+
+        # 检查响应状态
+        response.raise_for_status()
+        return response.text
+
+def main():
+    # 创建客户端实例，需替换你的API Key
+    client = OCRClient("你的x-ti-app-id", "你的x-ti-secret-code")
+
+	# 插入下面的示例代码
+
+if __name__ == "__main__":
+    main()
+```
+
+### 解析单个本地文件并保存结果
+
+复制以下示例代码，粘贴至前置准备代码的main函数中；替换要解析的文件；运行脚本来解析本地目录中的文件并将结果作为markdown和JSON文件保存。
+
+<Tip>
+  请注意：请求体的数据格式为本地文件的二进制流，非 FormData 或其他格式。文件大小不超过 500M，长宽比小于2的图片宽高需在20～20000像素范围内，其他图片的宽高需在20～10000像素范围内。
+
+  - 支持的文件格式：png, jpg, jpeg, pdf, bmp, tiff, webp, doc, docx, html, mhtml, xls, xlsx, csv, ppt, pptx, txt, ofd, rtf
+  - 如果是xls/xlsx/csv文件，每个sheet行数不能超过2000，列数不能超过100。
+  - 如果是txt文件，文件大小不超过100k。
+</Tip>
+
+```python
+    # 在main函数中插入
+    # 读取本地文件
+    with open("你的文件.pdf", "rb") as f:
+        file_content = f.read()
+
+    # 设置URL参数，可按需设置，这里已为你默认设置了一些参数
+    options = dict(
+        dpi=144,
+        get_image="objects",
+        markdown_details=1,
+        page_count=10,
+        parse_mode="auto",
+        table_flavor="html"
+    )
+
+    try:
+        response = client.recognize(file_content, options)
+
+        # 保存完整的JSON响应到result.json文件
+        with open("result.json", "w", encoding="utf-8") as f:
+            f.write(response)
+
+        # 解析JSON响应以提取markdown内容
+        json_response = json.loads(response)
+        if "result" in json_response and "markdown" in json_response["result"]:
+            markdown_content = json_response["result"]["markdown"]
+            with open("result.md", "w", encoding="utf-8") as f:
+                f.write(markdown_content)
+
+        print(response)
+    except Exception as e:
+        print(f"Error: {e}")
+```
+
+### 解析多个本地文件并保存结果至指定目录
+
+复制以下示例代码，粘贴至前置准备代码的main函数中；替换要解析的文件夹和输出结果文件夹；运行脚本来解析本地目录中的多个文件并将结果作为markdown和JSON文件保存至指定目录中。
+
+```python
+ 	# 在main函数中插入
+    # 读取本地文件夹
+    input_dir = "./tmp"  # 你可以修改为自己的文件夹
+    output_dir = "./output"  # 输出结果的文件夹
+	import os
+    os.makedirs(output_dir, exist_ok=True)
+
+    # 支持的文件类型
+    exts = (".pdf",".png",".jpg",".jpeg",".bmp",".tiff",".webp",".doc",".docx",".html",".mhtml",".xls",".xlsx",".csv",".ppt",".pptx",".txt",".ofd",".rtf")
+    files = [f for f in os.listdir(input_dir) if f.lower().endswith(exts)]
+
+    # 设置URL参数，可按需设置，这里已为你默认设置了一些参数
+    options = dict(
+        dpi=144,
+        get_image="objects",
+        markdown_details=1,
+        page_count=10,
+        parse_mode="auto",
+        table_flavor="html"
+    )
+
+    #循环处理
+    for filename in files:
+        file_path = os.path.join(input_dir, filename)
+        with open(file_path, "rb") as f:
+            file_content = f.read()
+        try:
+            response = client.recognize(file_content, options)
+            base_name = os.path.splitext(filename)[0]
+            # 保存JSON
+            with open(os.path.join(output_dir, f"{base_name}.json"), "w", encoding="utf-8") as fw:
+                fw.write(response)
+            # 保存Markdown
+            json_response = json.loads(response)
+            if "result" in json_response and "markdown" in json_response["result"]:
+                markdown_content = json_response["result"]["markdown"]
+                with open(os.path.join(output_dir, f"{base_name}.md"), "w", encoding="utf-8") as fw:
+                    fw.write(markdown_content)
+            print(f"{filename} 处理完成")
+        except Exception as e:
+            print(f"{filename} 处理出错: {e}")
+```
+
+### 解析位于URL的文件并保存结果
+
+您可以参考以下步骤，解析位于URL的文件。
+
+<Tip>
+  请注意：请求体的数据格式为文本，内容为在线文件的URL链接（支持http以及https协议）。在线文件大小不超过 500M，长宽比小于2的图片宽高需在20～20000像素范围内，其他图片的宽高需在20～10000像素范围内。为了快速验证接入，这里为您提供了示例文件URL。
+</Tip>
+
+- 步骤一：在前置准备代码中修改请求头设置。
+
+```python
+        # 在前置准备中修改请求头设置
+        headers = {
+            "x-ti-app-id": self.app_id,
+            "x-ti-secret-code": self.secret_code,
+            # 方式：使用URL方式
+            "Content-Type": "text/plain"
+        }
+```
+
+- 步骤二：复制以下示例代码，粘贴至前置准备代码的main函数中；替换要解析的文件URL或直接使用示例URL；运行脚本来解析位于URL的文件并将结果作为markdown和JSON文件保存。
+
+```python
+    # 在main函数中插入
+    # 文件URL，这里为你提供了一份真实可用的示例URL
+    file_content = "https://dllf.intsig.net/download/2025/Solution/textin/sample/pdf_to_markdown/sample_02.pdf"
+
+    # 设置URL参数，可按需设置，这里已为你默认设置了一些参数
+    options = dict(
+        dpi=144,
+        get_image="objects",
+        markdown_details=1,
+        page_count=10,
+        parse_mode="auto",
+        table_flavor="html"
+    )
+
+    try:
+        response = client.recognize(file_content, options)
+
+        # 保存完整的JSON响应到result.json文件
+        with open("result.json", "w", encoding="utf-8") as f:
+            f.write(response)
+
+        # 解析JSON响应以提取markdown内容
+        json_response = json.loads(response)
+        if "result" in json_response and "markdown" in json_response["result"]:
+            markdown_content = json_response["result"]["markdown"]
+            with open("result.md", "w", encoding="utf-8") as f:
+                f.write(markdown_content)
+
+        print(response)
+    except Exception as e:
+        print(f"Error: {e}")
+```
+
+### URL参数说明
+
+以下是文档解析API的URL参数，URL参数指以 参数名=参数值 形式拼接到 URL 上的键值对。它以 `?` 开头，不同参数之间使用 `&` 连接，形如 `?p1=v1&p2=v2`。URL参数会影响文档的解析结果和JSON输出内容，您可按需进行设置。
+
+- **pdf_pwd**：当pdf为加密文档时，需要提供密码。
+  - 备注：对前端封装该接口参数时，需要自行对密码进行安全防护。
+- **page_start**：当上传的是pdf时，表示从第几页开始解析，取值范围从1开始，不传该参数时默认从首页开始。
+- **page_count**：当上传的是pdf时，表示要进行解析的pdf页数。总页数不得超过1000页，默认为1000页。
+- **parse_mode**：pdf文档的解析模式，默认为scan模式。图片不用设置，均默认按scan模式处理。
+  - auto 综合文字识别和解析模式：对pdf电子档解析，会直接提取pdf中的文字
+  - scan 仅按文字识别模式：将pdf当成图片处理
+- **dpi**：pdf文档的坐标基准，默认144 dpi。 与**parse_mode**参数联动
+  - 当parse_mode=auto时，默认动态，支持72，144，216；
+  - 当parse_mode=scan时，默认144，支持72，144，216。
+- **apply_document_tree**：**markdown**中是否生成标题层级，默认为1，生成标题。
+  - 0 不生成标题：同时也不会返回**catalog**字段
+  - 1 生成标题
+- **table_flavor**：**markdown**里的表格格式，默认为html，按html语法输出表格。
+  - md 按md语法输出表格
+  - html 按html语法输出表格
+  - none 不进行表格识别，把表格图像当成普通文字段落来识别。
+- **get_image**：获取**markdown**里的图片，默认为none，不返回任何图像。
+  - none 不返回任何图像
+  - page 返回每一页的整页图像：即pdf页的完整页图片
+  - objects 返回页面内的子图像：即pdf页内的各个子图片
+  - both 返回整页图像和图像对象
+- **image_output_type**：指定返回的图片对象输出类型，默认返回子图片url和页图片id。
+  - base64str 指定所有图片对象为base64字符串，适用于没有云存储的用户，但是引擎返回结果体积会很大。
+  - default 指定子图片对象为图片url，页图片对象为图片id
+- **apply_image_analysis**：图像分析参数。利用大模型对文档中的子图片进行分析，分析结果以markdown格式输出，并替换掉子图片的文本识别内容。默认为0，不进行图像分析。
+  - 0 不进行图像分析
+  - 1 进行图像分析
+- **paratext_mode**：**markdown**中非正文文本内容展示模式。默认为annotation。非正文内容包括页眉页脚、子图中的文本。
+  - none 不展示
+  - annotation 以注释格式插入到markdown中。页眉页脚中的图片只保留文本，图片base64或url不保留
+  - body 以正文格式插入到markdown中
+- **formula_level**：公式识别等级，默认为0，全识别。
+  - 0 行间公式和行内公式都识别
+  - 1 仅识别行间公式，行内公式不识别
+  - 2 不识别公式
+- **apply_merge**：是否进行段落合并和表格合并。默认为1，合并段落和表格。
+  - 0 不合并
+  - 1 合并
+- **markdown_details**：是否返回结果中的**detail**字段。默认为1，返回detail字段，保存markdown各类型元素的详细信息。
+  - 0 不返回
+  - 1 返回
+- **page_details**：是否返回结果中的**pages**字段。默认为1，返回pages字段，保存每一页更加详细的解析结果。
+  - 0 不返回
+  - 1 返回
+- **raw_ocr**：是否返回全部文字识别结果(包含字符坐标信息)，结果字段为**raw_ocr**。默认为0，不返回。与**page_details**参数联动，当page_details为0或false时不返回。
+  - 0 不返回
+  - 1 返回
+- **char_details**：是否返回结果中的**char_pos**字段（保存每个字符的位置信息）和**raw_ocr**中的**char\_**相关字段。默认为0，不返回。
+  - 0 不返回
+  - 1 返回
+- **catalog_details**：是否返回结果中的**catalog**字段，保存目录相关信息。与**apply_document_tree**参数联动，当apply_document_tree为0时不返回。
+  - 0 不返回
+  - 1 返回
+- **get_excel**：是否返回excel的base64结果，结果字段为**excel_base64**，可以根据该字段进行后处理保存excel文件。默认为0，不返回。
+  - 0 不返回
+  - 1 返回
+- **crop_dewarp**（**切边矫正**）：是否进行切边矫正预处理，默认为0，不进行切边矫正。
+  - 0 不进行切边矫正
+  - 1 进行切边矫正
+- **remove_watermark**（**去水印**）：是否进行去水印预处理，默认为0，不去水印。
+  - 0 不去水印
+  - 1 去水印
+- **apply_chart**（**图表识别**）：是否开启图表识别，开启图表识别会将识别到的图表以表格形式输出。默认为0，不进行图表识别。
+  - 0 不开启图表识别
+  - 1 开启图表识别
+
+### 返回结果示例
+
+解析后的结果数据将按照以下JSON格式返回，下面为您提供了一段节选的返回示例。如果您想了解最全面的返回结果说明，可以在[返回JSON结构说明](/xparse/parse-getjson)中查看，也可以在[API](/api-reference/endpoint/parse)中查看和调试。
+
+```json
+{
+  "code": 200, // 响应状态码，200表示成功
+  "result": {
+    "markdown": "# 劳动人事争议仲裁申请书\n\n致:广东省劳动人事争议调解仲裁院\n\n[完整表格内容...]", // 生成的markdown格式文档内容正文字符串
+    "success_count": 5, // 成功处理的页面数量
+    "pages": [
+      {
+        "angle": 0, // 页面旋转角度，0表示无旋转
+        "page_id": 1, // 页面ID
+        "content": [
+          {
+            "pos": [276, 243, 970, 243, 970, 291, 276, 291], // 文本行四个角点坐标
+            "id": 0, // 内容块ID
+            "score": 1, // 识别置信度分数
+            "type": "line", // 内容类型，line表示文本行
+            "text": "劳动人事争议仲裁申请书" // 识别的文本内容
+          },
+          {
+            "pos": [181, 400, 560, 400, 560, 424, 181, 424], // 文本行四个角点坐标
+            "id": 1, // 内容块ID
+            "score": 1, // 识别置信度分数
+            "type": "line", // 内容类型，line表示文本行
+            "text": "致:广东省劳动人事争议调解仲裁院" // 识别的文本内容
+          }
+          // [更多content条目...]
+        ],
+        "status": "success", // 页面处理状态，success表示成功
+        "height": 1684, // 页面高度
+        "structured": [
+          {
+            "pos": [278, 244, 967, 242, 967, 293, 278, 295], // 结构化内容的位置坐标
+            "type": "textblock", // 结构化内容类型，textblock表示文本块
+            "id": 0, // 结构化内容ID
+            "content": [0], // 关联的content数组索引
+            "text": "劳动人事争议仲裁申请书", // 结构化文本内容
+            "outline_level": 0, // 大纲级别，0表示顶级标题
+            "sub_type": "text_title" // 子类型，text_title表示文本标题
+          }
+          // [更多structured条目...]
+        ],
+        "durations": 459.98861694336, // 页面处理耗时（毫秒）
+        "image_id": "", // 页面图像ID
+        "width": 1191 // 页面宽度
+      }
+      // [更多pages条目...]
+    ],
+    "valid_page_number": 5, // 有效页面数量
+    "total_page_number": 5, // 总页面数量
+    "total_count": 5, // 总处理数量
+    "detail": [
+      {
+        "paragraph_id": 0, // 段落ID
+        "page_id": 1, // 所属页面ID
+        "tags": [], // 标签数组
+        "outline_level": 0, // 大纲级别
+        "text": "劳动人事争议仲裁申请书", // 段落文本内容
+        "type": "paragraph", // 内容类型，paragraph表示段落
+        "position": [278, 244, 967, 242, 967, 293, 278, 295], // 段落位置坐标
+        "content": 0, // 关联的content索引
+        "sub_type": "text_title" // 子类型，text_title表示文本标题
+      }
+      // [更多detail条目...]
+    ]
+  },
+  "x_request_id": "f36effda6a0141ed0583bea0d596f597", // 请求唯一标识符
+  "metrics": [
+    {
+      "angle": 0, // 页面旋转角度
+      "status": "success", // 处理状态
+      "dpi": 144, // 图像DPI值
+      "image_id": "", // 图像ID
+      "page_id": 1, // 页面ID
+      "duration": 464.10571289062, // 处理耗时（毫秒）
+      "page_image_width": 1191, // 页面图像宽度
+      "page_image_height": 1684 // 页面图像高度
+    }
+    // [更多metrics条目...]
+  ],
+  "duration": 1459, // 引擎耗时（毫秒）
+  "message": "success", // 响应消息
+  "version": "3.17.12" // 引擎版本号
+}
+```
+
+### 错误码说明
+
+| **错误码** | **描述**                                                               |
+| :------ | :------------------------------------------------------------------- |
+| 40101   | x-ti-app-id 或 x-ti-secret-code 为空                                    |
+| 40102   | x-ti-app-id 或 x-ti-secret-code 无效，验证失败                               |
+| 40103   | 客户端IP不在白名单                                                           |
+| 40003   | 余额不足，请充值后再使用                                                         |
+| 40004   | 参数错误，请查看技术文档，检查传参                                                    |
+| 40007   | 机器人不存在或未发布                                                           |
+| 40008   | 机器人未开通，请至市场开通后重试                                                     |
+| 40301   | 图片类型不支持                                                              |
+| 40302   | 上传文件大小不符，文件大小不超过 500M                                                |
+| 40303   | 文件类型不支持，接口会返回实际检测到的文件类型，如“当前文件类型为.gif”                               |
+| 40304   | 图片尺寸不符，长宽比小于2的图片宽高需在20～20000像素范围内，其他图片的宽高需在20～10000像素范围内             |
+| 40305   | 识别文件未上传                                                              |
+| 40422   | 文件损坏（The file is corrupted.）                                         |
+| 40423   | PDF密码错误（Password required or incorrect password.）                    |
+| 40424   | 页数设置超出文件范围（Page number out of range.）                                |
+| 40425   | 文件格式不支持（The input file format is not supported.）                     |
+| 40427   | DPI参数不在支持列表中（Input DPI is not in the allowed DPIs list(72,144,216).） |
+| 40428   | word和ppt转pdf失败或者超时（Process office file failed.）                      |
+| 50207   | 部分页面解析失败（Partial failed）                                             |
+| 40400   | 无效的请求链接，请检查链接是否正确                                                    |
+| 30203   | 基础服务故障，请稍后重试                                                         |
+| 500     | 服务器内部错误                                                              |
+
+### 示例代码下载
+
+我们提供了完整的多语言示例代码包，助您10s跑通接口示例，[点击下载](https://static.textin.com/docs/%E9%80%9A%E7%94%A8%E6%96%87%E6%A1%A3%E8%A7%A3%E6%9E%90-%E7%A4%BA%E4%BE%8B%E4%BB%A3%E7%A0%81.zip)。

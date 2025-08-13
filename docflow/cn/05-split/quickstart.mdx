@@ -1,0 +1,53 @@
+---
+title: "快速启动"
+description: "参考示例，快速用API集成文档拆分功能"
+---
+
+文档拆分包括两类能力：
+
+- 自动拆分长文档为单页或子文档（`split_flag`）。
+- 多图切分（`crop_flag`），用于一页包含多张独立照片时的切分。
+
+两者均通过上传接口的查询参数触发。
+
+## 触发文件拆分
+
+在上传时加入 `split_flag=true` 可以触发系统拆分：
+
+```bash curl icon=terminal wrap
+curl -X POST \
+  -H "x-ti-app-id: <your-app-id>" \
+  -H "x-ti-secret-code: <your-secret-code>" \
+  -F "file=@/path/to/long.pdf" \
+  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&batch_number=<your-batch-number>&split_flag=true"
+```
+
+拆分完成后，父任务下会产生多个子任务（`child_files` 字段）。
+
+## 触发多图切分
+
+当一页包含多张图片（如手机拍的多张票据拼在一起），可加入 `crop_flag=true`：
+
+```bash curl icon=terminal wrap
+curl -X POST \
+  -H "x-ti-app-id: <your-app-id>" \
+  -H "x-ti-secret-code: <your-secret-code>" \
+  -F "file=@/path/to/multi-photo.jpg" \
+  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&batch_number=<your-batch-number>&crop_flag=true"
+```
+
+## 查询拆分结果
+
+使用 `file/fetch` 查询。响应中父文件的 `child_files` 字段用于描述子任务信息；如果进行了多图切分，可在 `from_parent_position_list` 查看切分结果在原文件中的坐标：
+
+```bash curl icon=terminal wrap
+curl \
+  -H "x-ti-app-id: <your-app-id>" \
+  -H "x-ti-secret-code: <your-secret-code>" \
+  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/fetch?workspace_id=<your-workspace-id>&batch_number=<your-batch-number>"
+```
+
+返回结构关键字段包括：
+
+- `files[].child_files[]`: 子任务列表（当拆分或切图时存在）
+- `files[].from_parent_position_list`: 切图结果在原图中的坐标序列

@@ -1,0 +1,78 @@
+---
+title: "快速启动"
+description: "参考示例，快速用API集成文档抽取功能"
+---
+
+文档抽取会输出结构化的字段、表格、印章与手写体信息等。本文展示如何触发抽取并解析核心结果。
+
+## 触发抽取
+
+上传时加入 `target_process=extract`，或不设置 `target_process` 由系统按默认流程处理：
+
+```bash curl icon=terminal wrap
+curl -X POST \
+  -H "x-ti-app-id: <your-app-id>" \
+  -H "x-ti-secret-code: <your-secret-code>" \
+  -F "file=@/path/to/invoice.pdf" \
+  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&batch_number=<your-batch-number>&target_process=extract"
+```
+
+也可以结合 `category` 指定文档类别，以便匹配相应的字段模板：
+
+```bash curl icon=terminal wrap
+curl -X POST \
+  -H "x-ti-app-id: <your-app-id>" \
+  -H "x-ti-secret-code: <your-secret-code>" \
+  -F "file=@/path/to/invoice.pdf" \
+  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&category=invoice&batch_number=<your-batch-number>&target_process=extract"
+```
+
+## 获取并解析抽取结果
+
+```bash curl icon=terminal wrap
+curl \
+  -H "x-ti-app-id: <your-app-id>" \
+  -H "x-ti-secret-code: <your-secret-code>" \
+  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/fetch?workspace_id=<your-workspace-id>&batch_number=<your-batch-number>"
+```
+
+字段与表格数据位于 `files[].data` 中：
+
+- `fields[]`: 关键键值对，每项包含 `key`、`value` 与 `position[]`（可用于画坐标）
+- `items[][]`: 表格行的键值对集合
+- `tables[]`: 完整表格结构，含表名、类型与各单元格的 `textInLines`
+- `stamps[]`: 印章信息
+- `handwritings[]`: 手写体信息
+- `document`: 文档级别的 OCR 文本与坐标（行与字符粒度）
+
+### Python 示例：打印字段和表格
+
+```python Python icon=python lines
+import requests, json
+
+host = "https://docflow.textin.com"
+url = "/api/app-api/sip/platform/v2/file/fetch"
+
+resp = requests.get(
+    f"{host}{url}",
+    params={"workspace_id": "<your-workspace-id>", "batch_number": "<your-batch-number>"},
+    headers={"x-ti-app-id": "<your-app-id>", "x-ti-secret-code": "<your-secret-code>"},
+    timeout=60,
+)
+
+data = resp.json()
+for file in data.get("result", {}).get("files", []):
+    print("==>", file.get("name"))
+    # 基础字段
+    for kv in (file.get("data", {}).get("fields", []) or []):
+        print(kv.get("key"), ":", kv.get("value"))
+
+    # 表格（items 按行）
+    for row in (file.get("data", {}).get("items", []) or []):
+        row_dict = {cell.get("key"): cell.get("value") for cell in row}
+        print("ROW:", json.dumps(row_dict, ensure_ascii=False))
+```
+
+### 关联页面坐标进行可视化
+
+结合 `files[].pages[]` 的 `width/height/angle/dpi` 与 `fields[].position[].vertices`，可在前端精确绘制字段框，详见《解析结果可视化》。

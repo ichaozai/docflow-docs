@@ -1,0 +1,84 @@
+---
+title: "快速启动"
+description: "参考示例，快速用API集成文档分类功能"
+---
+
+DocFlow 支持在上传时直接进行分类处理。本文展示如何触发分类并获取分类结果。
+
+## 触发分类
+
+在上传接口中加入 `target_process=classify` 参数即可触发分类：
+
+<CodeGroup>
+
+```bash curl icon=terminal wrap
+curl -X POST \
+  -H "x-ti-app-id: <your-app-id>" \
+  -H "x-ti-secret-code: <your-secret-code>" \
+  -F "file=@/path/to/file.pdf" \
+  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&target_process=classify&batch_number=<your-batch-number>"
+```
+
+```python Python icon=python expandable lines
+import requests
+from requests_toolbelt.multipart.encoder import MultipartEncoder
+import os
+
+host = "https://docflow.textin.com"
+url = "/api/app-api/sip/platform/v2/file/upload"
+
+payload = MultipartEncoder(fields={
+    "file": (os.path.basename("/path/to/file.pdf"), open("/path/to/file.pdf", "rb"), "application/pdf")
+})
+
+resp = requests.post(
+    url=f"{host}{url}",
+    params={"workspace_id": "<your-workspace-id>", "target_process": "classify", "batch_number": "<your-batch-number>"},
+    data=payload.to_string(),
+    headers={
+        "Content-Type": payload.content_type,
+        "x-ti-app-id": "<your-app-id>",
+        "x-ti-secret-code": "<your-secret-code>",
+    },
+    timeout=60,
+)
+print(resp.status_code, resp.text)
+```
+
+</CodeGroup>
+
+## 获取分类结果
+
+分类完成后，可通过 `file/fetch` 查询。分类成功状态为 `recognition_status=10`：
+
+<CodeGroup>
+
+```bash curl icon=terminal wrap
+curl \
+  -H "x-ti-app-id: <your-app-id>" \
+  -H "x-ti-secret-code: <your-secret-code>" \
+  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/fetch?workspace_id=<your-workspace-id>&batch_number=<your-batch-number>&recognition_status=10"
+```
+
+```python Python icon=python expandable lines
+import requests
+
+resp = requests.get(
+    "https://docflow.textin.com/api/app-api/sip/platform/v2/file/fetch",
+    params={
+        "workspace_id": "<your-workspace-id>",
+        "batch_number": "<your-batch-number>",
+        "recognition_status": 10,
+    },
+    headers={"x-ti-app-id": "<your-app-id>", "x-ti-secret-code": "<your-secret-code>"},
+    timeout=60,
+)
+
+data = resp.json()
+for f in data.get("result", {}).get("files", []):
+    print(f["id"], f.get("name"), "分类:", f.get("category"))
+```
+
+</CodeGroup>
+
+如需按类别筛选结果，可在查询中增加 `category=<类别名>` 参数。

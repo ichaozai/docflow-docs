@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Textin 智能文档解析",
+  "name": "Textin API",
   "colors": {
     "primary": "#1a66ff",
     "light": "#1a66ff",
@@ -9,20 +9,149 @@
   },
   "favicon": "/favicon.png",
   "navigation": {
-    "tabs": [
+    "dropdowns": [
       {
-        "tab": "Guides",
-        "groups": [
+        "dropdown": "xParse",
+        "icon": "book",
+        "tabs": [
           {
-            "group": "产品概览",
-            "pages": [
-              "xparse/overview",
-              "xparse/api-key",
-              "xparse/product-manual"
+            "tab": "Guides",
+            "groups": [
+              {
+                "group": "产品概览",
+                "pages": [
+                  "xparse/overview",
+                  "xparse/api-key",
+                  "xparse/product-manual"
+                ]
+              },
+              {
+                "group": "文档解析",
+                "pages": [
+                  "xparse/parse-quickstart",
+                  "xparse/parse-getjson",
+                  "xparse/parse-gettable",
+                  "xparse/parse-getcatalog",
+                  "xparse/parse-getimage",
+                  "xparse/parse-getpos",
+                  "xparse/parse-max-workers"
+                ]
+              },
+              {
+                "group": "文档抽取",
+                "pages": [
+                  "xparse/extract-quickstart",
+                  "xparse/extract-getjson",
+                  "xparse/extract-gettable",
+                  "xparse/extract-getpos",
+                  "xparse/extract-asyncio",
+                  "xparse/extract-max-concurrent"
+                ]
+              },
+              {
+                "group": "FAQ",
+                "pages": [
+                  "xparse/charge"
+                ]
+              }
             ]
           },
           {
-            "group": "文档解析",
+            "tab": "API",
+            "groups": [
+              {
+                "group": "智能文档解析",
+                "pages": [
+                  "api-reference/endpoint/parse",
+                  "api-reference/endpoint/extract"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "dropdown": "Docflow",
+        "icon": "books",
+        "tabs": [
+          {
+            "tab": "Guides",
+            "groups": [
+              {
+                "group": "产品概览",
+                "pages": [
+                  "docflow/cn/00-overview/intro",
+                  "docflow/cn/00-overview/quickstart",
+                  "docflow/cn/00-overview/auth"
+                ]
+              },
+              {
+                "group": "文档上传",
+                "pages": [
+                  "docflow/cn/01-upload/quickstart",
+                  "docflow/cn/01-upload/support_format"
+                ]
+              },
+              {
+                "group": "文件类别配置",
+                "pages": [
+                  "docflow/cn/02-workspace/quickstart"
+                ]
+              },
+              {
+                "group": "文档解析",
+                "pages": [
+                  "docflow/cn/03-parse/quickstart",
+                  "docflow/cn/03-parse/visualization"
+                ]
+              },
+              {
+                "group": "文档分类",
+                "pages": [
+                  "docflow/cn/04-classify/quickstart"
+                ]
+              },
+              {
+                "group": "文档拆分",
+                "pages": [
+                  "docflow/cn/05-split/quickstart"
+                ]
+              },
+              {
+                "group": "文档抽取",
+                "pages": [
+                  "docflow/cn/06-extract/quickstart"
+                ]
+              },
+              {
+                "group": "文档审核",
+                "pages": [
+                  "docflow/cn/07-review/quickstart"
+                ]
+              },
+              {
+                "group": "FAQ",
+                "pages": [
+                  "docflow/cn/08-faq/faq"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "API",
+            "openapi": "docflow/cn/rest-api/openapi.yaml"
+          }
+
+        ]
+      }
+
+    ],
+    "comment-languages": [
+      {
+        "language": "cn",
+        "groups": [
+          {
+            "group": "智能文档解析",
             "pages": [
               "xparse/parse-quickstart",
               "xparse/parse-getjson",
@@ -32,9 +161,14 @@
               "xparse/parse-getpos",
               "xparse/parse-max-workers"
             ]
-          },
+          }
+        ]
+      },
+      {
+        "language": "en",
+        "groups": [
           {
-            "group": "文档抽取",
+            "group": "智能文档解析",
             "pages": [
               "xparse/extract-quickstart",
               "xparse/extract-getjson",
@@ -42,24 +176,6 @@
               "xparse/extract-getpos",
               "xparse/extract-asyncio",
               "xparse/extract-max-concurrent"
-            ]
-          },
-          {
-            "group": "FAQ",
-            "pages": [
-              "xparse/charge"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "API",
-        "groups": [
-          {
-            "group": "智能文档解析",
-            "pages": [
-              "api-reference/endpoint/parse",
-              "api-reference/endpoint/extract"
             ]
           }
         ]

@@ -89,13 +89,8 @@
                 "group": "文档上传",
                 "pages": [
                   "docflow/cn/01-upload/quickstart",
+                  "docflow/cn/01-upload/response",
                   "docflow/cn/01-upload/support_format"
-                ]
-              },
-              {
-                "group": "文件类别配置",
-                "pages": [
-                  "docflow/cn/02-workspace/quickstart"
                 ]
               },
               {
@@ -121,12 +116,6 @@
                 "group": "文档抽取",
                 "pages": [
                   "docflow/cn/06-extract/quickstart"
-                ]
-              },
-              {
-                "group": "文档审核",
-                "pages": [
-                  "docflow/cn/07-review/quickstart"
                 ]
               },
               {

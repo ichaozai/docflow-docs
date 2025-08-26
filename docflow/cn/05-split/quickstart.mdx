@@ -3,42 +3,66 @@ title: "快速启动"
 description: "参考示例，快速用API集成文档拆分功能"
 ---
 
-文档拆分包括两类能力：
+## 功能概览
 
-- 自动拆分长文档为单页或子文档（`split_flag`）。
-- 多图切分（`crop_flag`），用于一页包含多张独立照片时的切分。
+文档拆分可以处理一个多页文件中包含多种不同分类的文档、或在一页上铺贴多个票据的场景。
 
-两者均通过上传接口的查询参数触发。
+文档拆分包括两类能力：**拆套**(split)和**多图切分**(crop)
 
-## 触发文件拆分
+### 拆套
 
-在上传时加入 `split_flag=true` 可以触发系统拆分：
+自动拆分长文档为单页或子文档。
+
+使用场景：
+
+1. 医疗保险理赔场景，一份多页文件，在第1-2页是保单，第3-5页是发票，第6-10页是住院记录。
+2. 物流进出口场景，第1页是出口报关单，第2页是发票，第3页是装箱单(packing list)，第4页是销售合同。
+
+### 多图切分
+
+用于一页包含多张独立照片时的切分。
+
+使用场景：
+
+1. 报销贴发票的场景，一张A4纸上平铺贴有火车票、飞机行程单、多个出租车发票
+
+<img
+  src="../images/crop_example.jpg"
+  alt="crop example"
+  width="50"
+/>
+
+
+通过拆套和多图切分，将文件中不同的文件分类拆分出来，可以帮助后续的抽取流程更精确地提取各类文件的信息。
+
+
+## 功能启用参数
+
+拆套和多图切分功能默认关闭。  
+上传接口中，通过以下两个参数控制是否启用拆套和切分功能：
+
+- `split_flag` 是否进行文件拆分，默认 `false`
+- `crop_flag` 是否进行多图切分，默认 `false`
+
+拆套和多图切分功能可以组合使用，例如只启用拆套或只启用多图切分，或者同时启用拆套和多图切分。
+
+请求示例：
+
+<CodeGroup>
 
 ```bash curl icon=terminal wrap
 curl -X POST \
   -H "x-ti-app-id: <your-app-id>" \
   -H "x-ti-secret-code: <your-secret-code>" \
   -F "file=@/path/to/long.pdf" \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&batch_number=<your-batch-number>&split_flag=true"
+  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&split_flag=true"
 ```
 
-拆分完成后，父任务下会产生多个子任务（`child_files` 字段）。
-
-## 触发多图切分
-
-当一页包含多张图片（如手机拍的多张票据拼在一起），可加入 `crop_flag=true`：
-
-```bash curl icon=terminal wrap
-curl -X POST \
-  -H "x-ti-app-id: <your-app-id>" \
-  -H "x-ti-secret-code: <your-secret-code>" \
-  -F "file=@/path/to/multi-photo.jpg" \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&batch_number=<your-batch-number>&crop_flag=true"
-```
+</CodeGroup>
 
 ## 查询拆分结果
 
-使用 `file/fetch` 查询。响应中父文件的 `child_files` 字段用于描述子任务信息；如果进行了多图切分，可在 `from_parent_position_list` 查看切分结果在原文件中的坐标：
+使用 `file/fetch` 查询。响应中的 `child_files` 字段用于描述子任务信息：
 
 ```bash curl icon=terminal wrap
 curl \
@@ -50,4 +74,36 @@ curl \
 返回结构关键字段包括：
 
 - `files[].child_files[]`: 子任务列表（当拆分或切图时存在）
-- `files[].from_parent_position_list`: 切图结果在原图中的坐标序列
+
+其中`files[].child_files[].task_type`表示该拆分任务类型：
+- `task_type=0`，表示该子文件由拆套产生
+- `task_type=3`，表示该子文件有多图切分产生
+
+当文件由多图切分产生时，字段`child_files[].from_parent_position_list`表示切图结果在原图中的坐标。坐标的表示可以参考[坐标系说明](../03-parse/coordinate)。
+
+### 返回示例（节选）
+
+```json expandable
+{
+  "code": 200,
+  "result": {
+    "files": [
+      {
+        "id": "parent-001",
+        "name": "multi-photo.pdf",
+        "child_files": [
+          {
+            "id": "child-001",
+            "task_id": "t-1",
+            "task_type": 0,
+            "name": "multi-photo.pdf#1",
+            "format": "pdf",
+            "category": "invoice",
+            "from_parent_position_list": [12, 30, 420, 30, 420, 320, 12, 320]
+          }
+        ],
+      }
+    ]
+  }
+}
+```

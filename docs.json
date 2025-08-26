@@ -97,6 +97,7 @@
                 "group": "文档解析",
                 "pages": [
                   "docflow/cn/03-parse/quickstart",
+                  "docflow/cn/03-parse/coordinate",
                   "docflow/cn/03-parse/visualization"
                 ]
               },

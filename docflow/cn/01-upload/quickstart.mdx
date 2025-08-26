@@ -7,6 +7,10 @@ description: "参考示例，快速用API集成文档上传功能"
 本文演示如何通过 REST API 上传文件到 DocFlow。更多支持的文件格式见《[文件格式支持](./support_format.mdx)》。
 </Tip>
 
+Docflow 的业务处理流程是异步流程，上传接口可以上传一个或多个文件至Docflow，一旦上传成功，将会获得一个批次编码(`batch_number`)和若干文件标识(`file_id`)，用于后续业务流程查询业务处理结果。
+
+Docflow 支持常见图片格式、PDF和Office文件格式，多页文档最大**支持1000页**。可以参考更详细的[文件格式支持和限制](./support_format)页面。
+
 ## 上传单个文件
 
 <CodeGroup>

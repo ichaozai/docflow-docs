@@ -254,9 +254,7 @@ paths:
                                 description: 任务ID
                                 example: 202412190001
                               task_type:
-                                type: integer
-                                description: 任务类型（0：文件拆分子任务、1:普通任务、2:父任务、3:切图子任务）
-                                example: 1
+                                $ref: '#/components/schemas/TaskType'
                               batch_number:
                                 type: string
                                 description: 批次编号
@@ -1252,9 +1250,7 @@ components:
           description: 任务ID
           example: 202412190001
         task_type:
-          type: integer
-          description: 任务类型（0：文件拆分子任务、1:普通任务、2:父任务、3:切图子任务）
-          example: 1
+          $ref: '#/components/schemas/TaskType'
         parent_task_id:
           type: string
           description: 父任务ID（不为0时有意义）
@@ -2513,6 +2509,16 @@ components:
           type: string
           description: 分类名称
           example: 身份证
+    TaskType:
+      type: integer
+      description: |
+        任务类型
+        - `0`: **文件拆分子任务**：打开“文件拆分”开关的文件任务执行成功后，该文件批次任务中因文件拆分操作产生的子任务即为拆分子任务，按照文件类别下实际文件套数区分子任务
+        - `1`: **普通任务**：未打开“文件拆分”和“多图切分”开关的文件任务
+        - `2`: **父任务**：打开“文件拆分”或“多图切分”开关的文件任务执行后，该文件批次任务中的每份文件即为父任务
+        - `3`: **切图子任务**：打开“多图切分”开关的文件任务执行成功后，该文件批次任务中因多图切分操作产生的子任务即为切分子任务，按照文件类别下实际切图结果数量区分子任务
+      example: 1
+
   securitySchemes:
     ApiId: # arbitrary name for the security scheme
       type: apiKey

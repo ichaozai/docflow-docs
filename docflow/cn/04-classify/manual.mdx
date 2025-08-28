@@ -1,5 +1,5 @@
 ---
-title: "手动分类"
+title: "手动分类(上传时指定分类)"
 description: "在上传时指定文件类别，跳过自动分类过程直接进入抽取"
 ---
 
@@ -216,3 +216,38 @@ for f in data.get("result", {}).get("files", []):
   }
 }
 ```
+
+## 中文文件类别传参
+
+当您需要指定中文或其他非英语的文件类别时，需要对 `category` 参数进行 UTF-8 URL 编码。
+
+### 编码示例
+
+<Tip>
+使用 `urllib.parse.quote()` 函数对中文类别名称进行 URL 编码。
+</Tip>
+
+<CodeGroup>
+
+```bash curl icon=terminal wrap
+# 使用编码后的中文类别
+curl -X POST \
+  -H "x-ti-app-id: <your-app-id>" \
+  -H "x-ti-secret-code: <your-secret-code>" \
+  -F "file=@/path/to/invoice.pdf" \
+  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&category=%E5%8F%91%E7%A5%A8"
+```
+
+```python Python icon=python expandable lines
+import urllib.parse
+
+# 中文类别名称
+chinese_category = "发票"
+encoded_category = urllib.parse.quote(chinese_category)
+print(f"原始类别: {chinese_category}")
+print(f"编码后: {encoded_category}")
+# 输出: 原始类别: 发票
+# 输出: 编码后: %E5%8F%91%E7%A5%A8
+```
+
+</CodeGroup>

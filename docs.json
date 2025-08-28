@@ -131,7 +131,8 @@
                 "group": "常见问题",
                 "pages": [
                   "docflow/cn/08-faq/get_workspace_id",
-                  "docflow/cn/08-faq/setup_category"
+                  "docflow/cn/08-faq/setup_category",
+                  "docflow/cn/08-faq/chinese_category_param"
                 ]
               }
             ]

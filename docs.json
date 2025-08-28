@@ -105,7 +105,8 @@
                 "group": "文档分类",
                 "pages": [
                   "docflow/cn/04-classify/quickstart",
-                  "docflow/cn/04-classify/target_process"
+                  "docflow/cn/04-classify/target_process",
+                  "docflow/cn/04-classify/manual"
                 ]
               },
               {

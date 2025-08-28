@@ -104,25 +104,33 @@
               {
                 "group": "文档分类",
                 "pages": [
-                  "docflow/cn/04-classify/quickstart"
+                  "docflow/cn/04-classify/quickstart",
+                  "docflow/cn/04-classify/target_process"
                 ]
               },
               {
                 "group": "文档拆分",
                 "pages": [
-                  "docflow/cn/05-split/quickstart"
+                  "docflow/cn/05-split/quickstart",
+                  "docflow/cn/05-split/split",
+                  "docflow/cn/05-split/crop"
                 ]
               },
               {
                 "group": "文档抽取",
                 "pages": [
-                  "docflow/cn/06-extract/quickstart"
+                  "docflow/cn/06-extract/quickstart",
+                  "docflow/cn/06-extract/fields",
+                  "docflow/cn/06-extract/tables",
+                  "docflow/cn/06-extract/stamps",
+                  "docflow/cn/06-extract/handwritings"
                 ]
               },
               {
-                "group": "FAQ",
+                "group": "常见问题",
                 "pages": [
-                  "docflow/cn/08-faq/faq"
+                  "docflow/cn/08-faq/get_workspace_id",
+                  "docflow/cn/08-faq/setup_category"
                 ]
               }
             ]

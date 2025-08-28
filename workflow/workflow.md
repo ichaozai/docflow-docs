@@ -1,5 +1,5 @@
 ---
-icon: arrow-progress
+icon: "arrow-progress"
 ---
 
 # 业务流程

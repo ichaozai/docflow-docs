@@ -1648,7 +1648,7 @@ components:
   schemas: 
     RecognitionStatus:
       type: integer
-      description: "文件识别状态 0: 待识别 1: 识别成功 2: 识别失败 3: 分类中 4:抽取中 5:准备中 6:拆套中 7:切图中 10: 分类完成(当upload接口的target_process为classify时才有此状态)"
+      description: "文件识别状态 0: 待识别 1: 识别成功 2: 识别失败 3: 分类中 4:抽取中 5:准备中 6:文件拆分中 7:切图中 10: 分类完成(当upload接口的target_process为classify时才有此状态)"
       enum:
       - 0
       - 1
@@ -2996,7 +2996,7 @@ components:
           example: 文件名称1
         taskStatus:
           type: integer
-          description: 任务状态 0待识别 1识别成功 2识别失败 3分类中 4抽取中 5准备中 6拆套中
+          description: 任务状态 0待识别 1识别成功 2识别失败 3分类中 4抽取中 5准备中 6文件拆分中
           example: 1
         taskClassificationIdNo:
           type: integer

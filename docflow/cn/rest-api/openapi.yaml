@@ -12,7 +12,7 @@ paths:
   /api/app-api/sip/platform/v2/file/upload:
     post:
       summary: 上传文件
-      description: 上传文件
+      description: ""
       operationId: uploadFile
       parameters:
         - name: workspace_id
@@ -139,7 +139,7 @@ paths:
   /api/app-api/sip/platform/v2/file/fetch:
     get:
       summary: 获取文件处理结果列表
-      description: 获取文件处理结果列表
+      description: ""
       operationId: getFiles
       parameters:
         - name: page
@@ -661,7 +661,7 @@ paths:
         - 文件审核
       summary: 审核规则列表
       description: |-
-        审核规则列表(一般不传分类获取批次下所有规则)，部分请求参数需从前置接口获取。 
+        审核规则列表，部分请求参数需从前置接口获取。 
 
         > 前置接口：/api/app-api/sip/platform/v2/review/listByFileBatchNo 
         作用：根据workspaceIdNo获取批次列表信息，workspaceIdNo从页面获取 

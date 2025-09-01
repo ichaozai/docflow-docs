@@ -183,6 +183,7 @@ if __name__ == "__main__":
             "format": "pdf",
             "category": "invoice",
             "from_parent_position_list": [12, 30, 420, 30, 420, 320, 12, 320],
+            "crop_info":{"page":0,"imageAngle":"0"}
             "status": "success"
           },
           {
@@ -193,6 +194,7 @@ if __name__ == "__main__":
             "format": "pdf",
             "category": "receipt",
             "from_parent_position_list": [450, 30, 800, 30, 800, 200, 450, 200],
+            "crop_info":{"page":0,"imageAngle":"0"}
             "status": "success"
           }
         ]
@@ -211,3 +213,4 @@ if __name__ == "__main__":
 | `child_files[].task_type` | integer | 任务类型，3表示多图切分产生 |
 | `child_files[].category` | string | 文档分类结果 |
 | `child_files[].from_parent_position_list` | array | 切分区域在原图中的坐标，可以参考[坐标系说明](../03-parse/coordinate) |
+| `child_files[].crop_info` | object | 多图切分的详细信息，包含页面索引和角度信息 |

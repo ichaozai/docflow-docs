@@ -1238,6 +1238,15 @@ components:
         index:
           type: integer
           description: 索引
+    TaskCropResult:
+      type: object
+      properties:
+        page:
+          type: integer
+          description: Page index of the original file, 0 represents the first page of the source file
+        imageAngle:
+          type: string
+          description: Angle information of the cropped image
     SubFileDetailInfo:
       type: object
       properties:
@@ -1437,6 +1446,9 @@ components:
             type: integer
             description: 位置信息
             example: 1
+        crop_info:
+          description: Detailed information of multi-image cropping
+          $ref: '#/components/schemas/TaskCropResult'
     WorkspaceId:
       type: string
       description: 空间ID

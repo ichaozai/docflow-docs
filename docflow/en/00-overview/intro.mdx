@@ -1,0 +1,122 @@
+---
+title: "Product Introduction"
+---
+
+## 01 Product Overview
+
+**Docflow Document Automation Platform** is an AI-driven enterprise-level document automation processing platform launched by TextIn by HeHe Information.
+
+Leveraging HeHe Information's industry-leading document parsing and understanding capabilities, it supports **intelligent collection**, **document parsing**, **document classification**, **information extraction**, and **intelligent review** of various format documents from both domestic and international sources. It provides efficient and accurate document processing solutions for banking credit, financial shared service centers, logistics customs clearance, insurance claims, and other industry enterprises. Through stable and easy-to-use APIs, you can efficiently integrate DocFlow into various business systems to achieve full-process automation from document collection to information extraction, significantly reducing manual input and review costs.
+
+![product](../images/01.png)
+
+## 02 Core Value
+
+In the era of information explosion, enterprises need to process massive amounts of contracts, invoices, reports, application forms, and other documents daily. Traditional manual methods are not only time-consuming and labor-intensive but also prone to errors. **Docflow Document Automation Platform** helps enterprises easily address document management challenges and significantly improve work efficiency and data accuracy.
+
+### 2.1 Full-Process Automation
+
+- From file upload to result retrieval, the entire process is intelligently completed by the system with almost zero manual intervention, greatly improving document processing efficiency.
+
+### 2.2 Efficient and Accurate Extraction
+
+- Massive documents are parsed and extracted in seconds, greatly shortening processing cycles and improving document processing efficiency.
+- Based on specialized large model capabilities, through document preprocessing mechanisms such as optimizing image quality and intelligently analyzing document structure, recognition accuracy is greatly improved to meet document processing needs in different scenarios.
+
+### 2.3 Intelligent Document Splitting
+
+- For complex files with multiple categories and multiple documents scanned together, as well as single-page documents with multiple tickets pasted together, automatic document splitting, category separation, and recognition are completed, effectively reducing manual splitting costs and improving document processing results.
+
+### 2.4 Intelligent Document Review
+
+- Automated document review is achieved based on document extraction information and review rules. Review results support key review basis echo, effectively improving review result verification efficiency.
+
+### 2.5 Multiple Document Format Compatibility
+
+- Supports processing of ultra-long documents up to 1000 pages
+- Supports file formats including JPEG, JPG, PNG, PDF, OFD, DOC, DOCX, XLS, XLSX, TXT, etc.
+
+### 2.6 On-Demand Customization, Ready to Use
+
+- Personalized configuration: Through uploading custom samples and configuring fields, the system intelligently recognizes file categories and completes structured information extraction
+- Efficient comparison and verification: Supports side-by-side viewing of original files and recognition results to ensure information verification and supplementation, meeting personalized needs of different industries.
+
+### 2.7 Powerful Plugin Integration Capabilities
+
+- Supports receiving documents through multiple channels such as scanners, email, API interfaces, and seamlessly transferring extracted data to various automation systems and business processes such as ERP, RPA, OMS, etc.
+
+## 03 Usage Process
+
+**Docflow Document Automation Platform** aims to simplify document management processes and improve enterprise document processing efficiency. Enterprises only need to complete category information configuration to achieve automated document processing workflow. The specific process is as follows:
+
+![process of using](../images/02.png)
+
+### 3.1 Workspace Creation
+
+After users complete login, they can create corresponding workspaces according to different business scenarios to manage file categories and documents under different business scenarios.
+
+### 3.2 File Category Configuration
+
+After completing workspace creation, users can select specific business spaces and configure the following according to business scenario requirements to help the system achieve more accurate automatic classification and field extraction:
+
+1. Create file categories and upload samples
+2. Maintain file category classification prompts, field extraction information, etc.
+
+   ![Document category configuration](../images/03.png)
+
+### 3.3 File Upload
+
+After completing workspace creation and file category configuration, users can upload documents that need to be processed to the specified workspace through the system platform or API interface. We support automated processing of multiple file format documents, including but not limited to JPEG, JPG, PNG, PDF, OFD, DOC, DOCX, XLS, XLSX, TXT, etc.
+
+![File upload](../images/04.png)
+
+### 3.4 Document Parsing
+
+Docflow uses [xParse](https://www.textin.com/market/detail/pdf_to_markdown) as its core document parsing service, which can automatically convert user-uploaded PDF, Word, and common image format documents into structured data containing text, tables, title hierarchies, formulas, handwritten characters, and image information for subsequent automated processing and analysis.
+
+![Document parsing](../images/05.png)
+
+### 3.5 File Splitting & Multi-Image Cropping
+
+In practical application scenarios, a document may contain multiple file types. DocFlow provides file splitting and multi-image cropping functions. Users can customize and enable related functions through the system platform or API interface to ensure the accuracy and completeness of document classification and extraction content. For example:
+
+1. Insurance claims scenario: A multi-page PDF may contain identity cards, invoices, bank statements, and other materials at the same time, requiring document page-by-page splitting processing.
+2. Financial reimbursement scenario: An A4 paper may have multiple taxi invoices, flight itineraries, and other tickets laid flat, requiring document image cropping processing.
+
+   ![Document splitting](../images/06.png)
+
+### 3.6 Document Classification
+
+DocFlow automatically classifies parsed documents according to workspace file category configuration information, facilitating users to quickly find and manage, as well as subsequent information extraction and review. Users can also obtain classification results through API interfaces for application in other downstream scenarios.
+
+![Document classification](../images/07.png)
+
+### 3.7 Information Extraction
+
+DocFlow automatically extracts and displays parsed and classified documents according to field information configured in workspace file categories. Users can obtain document extraction results through the system platform or API interface.
+
+![Information extraction](../images/08.png)
+
+### 3.8 Intelligent Review
+
+Users can create and maintain workspace review rules through the system platform or API interface and initiate review tasks. DocFlow will conduct batch rule review on review task files according to document parsing extraction results and review rules and output review results.
+
+![Intelligent review](../images/09.png)
+
+## 04 Try It Now
+
+
+<CardGroup cols={2}>
+  <Card title="SaaS Platform" icon="sparkles" href="https://docflow.textin.com/">
+    One-stop rapid experience of document automation processing workflow
+  </Card>
+  <Card title="API" icon="sparkles" href="/api-reference/%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6">
+    Flexible use of different programming languages, supports highly customized interfaces
+  </Card>
+  <Card title="Docflow Official Website" icon="sparkles" href="https://www.textin.com/product/textin_docflow">
+    More abundant product information, welcome to click to learn more
+  </Card>
+  <Card title="Contact Us" icon="sparkles" href="https://www.textin.com/contact?type=27&sub_type=1">
+    More cooperation information, welcome to inquire
+  </Card>
+</CardGroup>

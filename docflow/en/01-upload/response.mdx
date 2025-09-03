@@ -1,10 +1,10 @@
 ---
-title: Response JSON Structure Description
+title: "Response JSON Structure Description"
 ---
 
 <Tip>
-Docflow file upload is an asynchronous interface.  
-When the interface call is successful, it returns result identifiers (`batch_number` and `file ID`) for subsequent result retrieval.
+  Docflow file upload is an asynchronous interface.\
+  When the interface call is successful, it returns result identifiers (`batch_number` and `file ID`) for subsequent result retrieval.
 </Tip>
 
 After a successful upload interface request, the response will be returned in JSON format according to the following structure:
@@ -28,7 +28,7 @@ After a successful upload interface request, the response will be returned in JS
 
 ## Important Field Description
 
-- `batch_number`: File batch number. Can associate multiple files from the same batch.
+- `batch_number`: File batch number. Can be associated with multiple files within the same batch.
 - `files[].id`: File ID for this upload.
 
 Both `batch_number` and `files[].id` can be used as query conditions for subsequent result retrieval.

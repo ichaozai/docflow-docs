@@ -293,66 +293,6 @@
         "language": "en",
         "dropdowns": [
           {
-            "dropdown": "xParse",
-            "icon": "book",
-            "tabs": [
-              {
-                "tab": "Guides",
-                "groups": [
-                  {
-                    "group": "Overview",
-                    "pages": [
-                      "xparse/overview",
-                      "xparse/api-key",
-                      "xparse/product-manual"
-                    ]
-                  },
-                  {
-                    "group": "Parse",
-                    "pages": [
-                      "xparse/parse-quickstart",
-                      "xparse/parse-getjson",
-                      "xparse/parse-gettable",
-                      "xparse/parse-getcatalog",
-                      "xparse/parse-getimage",
-                      "xparse/parse-getpos",
-                      "xparse/parse-max-workers"
-                    ]
-                  },
-                  {
-                    "group": "Extract",
-                    "pages": [
-                      "xparse/extract-quickstart",
-                      "xparse/extract-getjson",
-                      "xparse/extract-gettable",
-                      "xparse/extract-getpos",
-                      "xparse/extract-asyncio",
-                      "xparse/extract-max-concurrent"
-                    ]
-                  },
-                  {
-                    "group": "FAQ",
-                    "pages": [
-                      "xparse/charge"
-                    ]
-                  }
-                ]
-              },
-              {
-                "tab": "API",
-                "groups": [
-                  {
-                    "group": "API",
-                    "pages": [
-                      "api-reference/endpoint/parse",
-                      "api-reference/endpoint/extract"
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-          {
             "dropdown": "Docflow",
             "icon": "books",
             "tabs": [

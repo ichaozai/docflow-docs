@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: DocFlow API
-  description: DocFlow REST API，提供文件上传和获取文件处理结果能力
+  description: DocFlow REST API, providing file upload and file processing result retrieval capabilities
   version: 2.0.0
 servers:
   - url: https://docflow.textin.com
@@ -11,20 +11,20 @@ x-codeSamples: custom
 paths:
   /api/app-api/sip/platform/v2/file/upload:
     post:
-      summary: 上传文件
+      summary: Upload File
       description: ""
       operationId: uploadFile
       parameters:
         - name: workspace_id
           in: query
-          description: 空间ID
+          description: Workspace ID
           required: true
           schema:
             type: string
             example: 1234567890
         - name: category
           in: query
-          description: 文件类别
+          description: File Category
           required: false
           schema:
             type: string
@@ -32,30 +32,30 @@ paths:
         - name: batch_number
           in: query
           description: |
-            批次编号。  
-            可以用同一个批次编号上传多次，后续可以用批次编号获取该批次多个文件处理结果。  
-            如果值为空，则系统自动生成最长20位字符串
+            Batch Number.  
+            You can upload multiple times with the same batch number, and later retrieve processing results for multiple files in that batch using the batch number.  
+            If the value is empty, the system automatically generates a string up to 20 characters long.
           required: false
           schema:
             type: string
             example: 202412190001
         - name: auto_verify_vat
           in: query
-          description: 是否自动进行发票验真
+          description: Whether to automatically verify VAT invoice
           required: false
           schema:
             type: boolean
             default: false
         - name: split_flag
           in: query
-          description: 是否进行文件拆分
+          description: Whether to perform file splitting
           required: false
           schema:
             type: boolean
             default: false
         - name: crop_flag
           in: query
-          description: 是否进行多图切分
+          description: Whether to perform multi-image cropping
           required: false
           schema:
             type: boolean
@@ -63,10 +63,10 @@ paths:
         - name: target_process
           in: query
           description: |
-            目标处理类型。  
-            可选值：  
-            - `classify`: 分类  
-            - `extract`: 抽取  
+            Target processing type.  
+            Optional values:  
+            - `classify`: Classification  
+            - `extract`: Extraction  
           required: false
           schema:
             type: string
@@ -86,7 +86,7 @@ paths:
                   format: binary
       responses:
         '200':
-          description: 文件上传成功
+          description: File upload successful
           content:
             application/json:
               schema:
@@ -99,7 +99,7 @@ paths:
                       properties:
                         batch_number:
                           type: string
-                          description: 批次编号
+                          description: Batch Number
                           example: 202412190001
                         files:
                           type: array   
@@ -108,15 +108,15 @@ paths:
                             properties:
                               id:
                                 type: string
-                                description: 文件ID
+                                description: File ID
                                 example: 202412190001
                               name:
                                 type: string
-                                description: 文件名
+                                description: File Name
                                 example: invoice.pdf
                               format:
                                 type: string
-                                description: 文件格式
+                                description: File Format
                                 example: pdf
                             required:
                             - id
@@ -138,63 +138,63 @@ paths:
 
   /api/app-api/sip/platform/v2/file/fetch:
     get:
-      summary: 获取文件处理结果列表
+      summary: Get File Processing Result List
       description: ""
       operationId: getFiles
       parameters:
         - name: page
           in: query
-          description: 页码，默认1
+          description: Page number, default 1
           required: false
           schema:
             type: integer
             default: 1
         - name: page_size
           in: query
-          description: 每页数量，默认1000
+          description: Number of items per page, default 1000
           required: false
           schema:
             type: integer
             default: 1000
         - name: workspace_id
           in: query
-          description: 空间ID
+          description: Workspace ID
           required: true
           schema:
             type: string
         - name: batch_number
           in: query
-          description: 批次编号
+          description: Batch Number
           required: false
           schema:
             type: string
         - name: file_id
           in: query
-          description: 文件ID
+          description: File ID
           required: false
           schema:
             type: string
         - name: category
           in: query
-          description: 文件类别
+          description: File Category
           required: false
           schema:
             type: string
         - name: recognition_status
           in: query
-          description: "文件识别状态 0: 待识别 1: 识别成功 2: 识别失败"
+          description: "File recognition status 0: Pending recognition 1: Recognition successful 2: Recognition failed"
           required: false
           schema:
             $ref: '#/components/schemas/RecognitionStatus'
         - name: verification_status
           in: query
-          description: "文件核对状态 0: 待核对 2: 已确认 3: 已拒绝 4: 已删除 5: 推迟处理"
+          description: "File verification status 0: Pending verification 2: Confirmed 3: Rejected 4: Deleted 5: Deferred processing"
           required: false
           schema:
             $ref: '#/components/schemas/VerificationStatus'
         - name: start_time
           in: query
-          description: 以更新时间搜索的开始时间, RFC3339格式(YYYY-MM-DDTHH:MM:SSZ)
+          description: Start time for search by update time, RFC3339 format (YYYY-MM-DDTHH:MM:SSZ)
           required: false
           schema:
             type: string
@@ -202,7 +202,7 @@ paths:
             example: 2024-01-01T00:00:00Z
         - name: end_time
           in: query
-          description: 以更新时间搜索的结束时间, RFC3339格式(YYYY-MM-DDTHH:MM:SSZ)
+          description: End time for search by update time, RFC3339 format (YYYY-MM-DDTHH:MM:SSZ)
           required: false
           schema:
             type: string
@@ -210,14 +210,14 @@ paths:
             example: 2024-01-01T10:00:00Z
         - name: with_document
           in: query
-          description: 是否返回文档的全部文字识别结果
+          description: Whether to return the complete text recognition result of the document
           required: false
           schema:
             type: boolean
             default: false
       responses:
         '200':
-          description: 成功获取文件列表
+          description: Successfully retrieved file list
           content:
             application/json:
               schema:
@@ -230,15 +230,15 @@ paths:
                       properties:
                         total:
                           type: integer
-                          description: 文件总数
+                          description: Total number of files
                           example: 100
                         page:
                           type: integer
-                          description: 当前页码
+                          description: Current page number
                           example: 1
                         page_size:
                           type: integer
-                          description: 每页数量 
+                          description: Number of items per page
                           example: 20
                         files:
                           type: array
@@ -247,25 +247,25 @@ paths:
                             properties:
                               id:
                                 type: string
-                                description: 文件ID
+                                description: File ID
                                 example: 202412190001
                               task_id:
                                 type: string
-                                description: 任务ID
+                                description: Task ID
                                 example: 202412190001
                               task_type:
                                 $ref: '#/components/schemas/TaskType'
                               batch_number:
                                 type: string
-                                description: 批次编号
+                                description: Batch Number
                                 example: 202412190001
                               name:
                                 type: string
-                                description: 文件名
+                                description: File Name
                                 example: invoice.pdf
                               format:
                                 type: string
-                                description: 文件格式
+                                description: File Format
                               recognition_status: 
                                 $ref: '#/components/schemas/RecognitionStatus'
                               verification_status:
@@ -277,14 +277,14 @@ paths:
                               pages:
                                 type: array
                                 description: |
-                                  文件每页用于渲染的数据。  
-                                  配合`data.fields`中的`page`和`position`字段，可以准确画出字段在页面上的位置。
+                                  Data for rendering each page of the file.  
+                                  Combined with the `page` and `position` fields in `data.fields`, you can accurately draw the position of fields on the page.
                                 items:
                                   type: object
                                   properties:
                                     angle:
                                       type: integer
-                                      description: 旋转角度
+                                      description: Rotation angle
                                       enum:
                                         - 0
                                         - 90
@@ -292,76 +292,76 @@ paths:
                                         - 270
                                     width:
                                       type: integer
-                                      description: 转正后的页宽
+                                      description: Page width after correction
                                       example: 1024
                                     height:
                                       type: integer
-                                      description: 转正后的页高
+                                      description: Page height after correction
                                       example: 1024
                                     dpi:
                                       type: integer
-                                      description: PDF转图片时的分辨率。非PDF文件该值为`0`.
+                                      description: Resolution when converting PDF to image. For non-PDF files, this value is `0`.
                                       example: 144
                               data:
                                 type: object
-                                description: 处理结果
+                                description: Processing result
                                 properties:
                                   fields:
-                                    description: 字段列表
+                                    description: Field list
                                     type: array
                                     items:
                                       $ref: '#/components/schemas/KeyValue'
                                     example:
-                                    - key: 发票代码
+                                    - key: Invoice Code
                                       value: "3100231130"
                                       position:
                                       - page: 0
                                         vertices: [0, 0, 100, 0, 100, 100, 0, 100]
-                                    - key: 发票号码
+                                    - key: Invoice Number
                                       value: "28737000"
                                       position:
                                       - page: 0
                                         vertices: [0, 0, 100, 0, 100, 100, 0, 100]
                                   items:
-                                    description: 表格数据列表
+                                    description: Table data list
                                     type: array
                                     items:
                                       type: array
                                       items:
                                         $ref: '#/components/schemas/KeyValue'
                                     example:
-                                    - - key: 货物劳务名称
-                                        value: ＊电子计算机＊微型计算机主机
+                                    - - key: Goods and Services Name
+                                        value: ＊Electronic Computer＊Microcomputer Host
                                         position:
                                         - page: 0
                                           vertices: [0, 0, 100, 0, 100, 100, 0, 100]
-                                      - key: 规格型号
+                                      - key: Specification Model
                                         value: DMS-SC68
                                         position:
                                         - page: 0
                                           vertices: [0, 0, 100, 0, 100, 100, 0, 100]
-                                    - - key: 货物劳务名称
-                                        value: ＊机械计算机＊巨型计算机主机
+                                    - - key: Goods and Services Name
+                                        value: ＊Mechanical Computer＊Supercomputer Host
                                         position:
                                         - page: 0
                                           vertices: [0, 0, 100, 0, 100, 100, 0, 100]
-                                      - key: 规格型号
+                                      - key: Specification Model
                                         value: AN/FSQ-7
                                         position:
                                         - page: 0
                                           vertices: [0, 0, 100, 0, 100, 100, 0, 100]
                                   tables:
-                                    description: 全部表格数据列表（含系统表格和手动配置表格）
+                                    description: Complete table data list (including system tables and manually configured tables)
                                     type: array
                                     items:
                                       type: object
                                       properties:
                                         tableName:
-                                          description: 表格名称
+                                          description: Table name
                                           type: string
                                           example: table1
                                         tableType:
-                                          description: 表格类型， 0， 系统配置， 1 手动添加。
+                                          description: Table type, 0: system configured, 1: manually added.
                                           type: string
                                           example: 0
                                         items:
@@ -371,67 +371,67 @@ paths:
                                             items:
                                               $ref: '#/components/schemas/CommonFieldDetailRespVO'
                                   stamps:
-                                    description: 印章信息
+                                    description: Stamp information
                                     type: array
                                     items:
                                       $ref: '#/components/schemas/StampValue'
                                     example:
                                       - angel: 0
                                         page: 0
-                                        text: 全国统一发票监制章
-                                        type: 其他
-                                        color: 红色
-                                        shape: 椭圆章
+                                        text: National Unified Invoice Supervision Seal
+                                        type: Other
+                                        color: Red
+                                        shape: Oval Seal
                                         position: [ 0, 0, 100, 0, 100, 100, 0, 100 ]
                                       - angel: 0
                                         page: 0
-                                        text: 税务局章
-                                        type: 其他
-                                        color: 红色
-                                        shape: 椭圆章
+                                        text: Tax Bureau Seal
+                                        type: Other
+                                        color: Red
+                                        shape: Oval Seal
                                         position: [ 0, 0, 100, 0, 100, 100, 0, 100 ]
                                   handwritings:
-                                    description: 手写体信息
+                                    description: Handwriting information
                                     type: array
                                     items:
                                       $ref: '#/components/schemas/HandWritingValue'
                                     example:
                                       - angel: 0
                                         page: 0
-                                        text: 3月1日
+                                        text: March 1st
                                         position:
                                           - page: 0
                                             vertices: [ 0, 0, 100, 0, 100, 100, 0, 100 ]
                                       - angel: 0
                                         page: 0
-                                        text: 张三
+                                        text: Zhang San
                                         position:
                                           - page: 0
                                             vertices: [ 0, 0, 100, 0, 100, 100, 0, 100 ]
                                   invoiceVerifyResult:
-                                    description: 发票验真结果
+                                    description: Invoice verification result
                                     type: object
                                     properties:
                                       invoiceVerifyStatus:
                                         type: integer
-                                        description: 发票验真是否成功(0:否,1:是, null:未验真)
+                                        description: Whether invoice verification is successful (0: No, 1: Yes, null: Not verified)
                                         example: 0
                                       invoiceVerifyErrorCode:
                                         type: integer
-                                        description: 发票验真错误码
+                                        description: Invoice verification error code
                                         example: 0
                                       invoiceVerifyCanRetry:
                                         type: integer
-                                        description: 发票验真是否可以重试/发起(0:否,1:是)
+                                        description: Whether invoice verification can be retried/initiated (0: No, 1: Yes)
                                         example: 0
                                       invoiceVerifyFailMsg:
                                         type: string
-                                        description: 发票验真失败原因
-                                        example: 超过当天次数上限
+                                        description: Invoice verification failure reason
+                                        example: Exceeded daily limit
                               document:
                                 $ref: '#/components/schemas/Document'
                               child_files:
-                                description: 子任务信息
+                                description: Sub-task information
                                 type: array
                                 items:
                                   $ref: '#/components/schemas/SubFileDetailInfo'
@@ -452,8 +452,8 @@ paths:
             'https://docflow.textin.com/api/app-api/sip/platform/v2/file/fetch?workspace_id=1234567890&batch_number=202412190001'
   /api/app-api/sip/platform/v2/file/update:
     post:
-      summary: 更新文件处理结果
-      description: 更新文件处理结果。通常用于人工审核校对后，上传修改后的key-value，覆盖自动识别的结果。
+      summary: Update File Processing Result
+      description: Update file processing result. Usually used after manual review and proofreading to upload modified key-value pairs, overriding automatically recognized results.
       operationId: updateFile
       requestBody:
         required: true
@@ -466,20 +466,20 @@ paths:
                 properties:
                   workspace_id:
                     type: string
-                    description: 空间ID
+                    description: Workspace ID
                     example: 1234567890
                   file_id:
                     type: string
-                    description: 文件ID
+                    description: File ID
                     example: 202412190001
                   data:
                     description: |
-                      全量更新字段。  
-                      注意，即使只更新部分字段，也必须包含所有字段。  
-                      如果传入的字段较原字段多，则多出的字段会被添加。  
-                      如果传入的字段较原字段少，则缺少的字段会被删除。  
-                      如果传入的字段值较原字段值有变化，则字段值会被更新。  
-                      如果传入的字段与原字段完全相同，则字段会被保留。
+                      Full field update.  
+                      Note: Even if only updating partial fields, all fields must be included.  
+                      If the incoming fields are more than the original fields, the additional fields will be added.  
+                      If the incoming fields are fewer than the original fields, the missing fields will be deleted.  
+                      If the incoming field values differ from the original field values, the field values will be updated.  
+                      If the incoming fields are identical to the original fields, the fields will be preserved.
                     type: object
                     properties:
                       fields:
@@ -530,7 +530,7 @@ paths:
                 - data
       responses:
         '200':
-          description: 成功更新文件处理结果
+          description: Successfully updated file processing result
           content:
             application/json:
               schema:
@@ -542,18 +542,18 @@ paths:
                       type: object
                       properties:
                         files:
-                          description: 更新后的文件列表
+                          description: Updated file list
                           type: array
                           items:
                             type: object
                             properties:
                               workspace_id:
                                 type: string
-                                description: 空间ID
+                                description: Workspace ID
                                 example: 1234567890
                               id:
                                 type: string
-                                description: 文件ID
+                                description: File ID
                                 example: 202412190001
       x-codeSamples:
         - lang: 'bash'
@@ -567,9 +567,9 @@ paths:
   /api/app-api/sip/platform/v2/review/listByFileBatchNo:
     get:
       tags:
-        - 文件审核
-      summary: 文件批次列表
-      description: 文件批次列表，请求参数workspaceIdNo从页面获取
+        - File Review
+      summary: File Batch List
+      description: File batch list, request parameter workspaceIdNo is obtained from the page
       operationId: listByFileBatchNo
       parameters:
         - name: workspaceIdNo
@@ -577,14 +577,14 @@ paths:
           required: true
           schema:
             type: string
-            description: 工作空间唯一编号
+            description: Workspace unique number
             example: 123456
         - name: fileBatchNo
           in: query
           required: false
           schema:
             type: string
-            description: 文件批次号
+            description: File batch number
             example: abcd
         - name: x-ti-app-id
           in: header

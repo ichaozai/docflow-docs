@@ -1,25 +1,26 @@
 ---
-title: Parsing Result Visualization
-description: How to obtain precise coordinates from parsing results and display them on the interface
+title: "Parsing Result Visualization"
+description: "How to obtain precise coordinates from parsing results and display them on the interface"
 ---
 
 <Tip>
-This document continues from the [previous section](./quickstart), explaining how to process parsing results after obtaining them and draw text boxes at corresponding positions on the original file.
-</Tip>
-<Tip>
-This document uses [this sample document](https://dllf.intsig.net/download/2025/Solution/20250829/simple.pdf) as an example to explain how to draw text boxes on the original file image.
+  This document continues from the [previous section](./quickstart), explaining how to process parsing results after obtaining them and draw text boxes at corresponding positions on the original file.
 </Tip>
 
 <Tip>
-Please install dependencies before running the example code:
-`pip install PyMuPDF pillow requests`
+  This document uses [this sample document](https://dllf.intsig.net/download/2025/Solution/20250829/simple.pdf) as an example to explain how to draw text boxes on the original file image.
+</Tip>
+
+<Tip>
+  Please install dependencies before running the example code:
+  `pip install PyMuPDF pillow requests`
 </Tip>
 
 ## Example Code
 
 <CodeGroup>
 
-```python Python icon=python expandable lines
+```python Python expandable icon=python lines
 import requests
 import json
 import os
@@ -117,13 +118,15 @@ for i, page in enumerate(pages):
 
 print("Annotated images output:", annotated)
 ```
+
 </CodeGroup>
 
 In the output directory, you can see the rendering effect of text boxes:
+
 ![visualization](../images/page_1_boxed.png)
 
 ## Example Code Logic
- 
+
 - **Get parsing results**: Call the result retrieval interface with `with_document=true` enabled to get `result.files[].document`.
 - **Extract pages and coordinates**: Read `width/height/angle` and `lines[]` from `document.pages[]`; each `line.position` is `[x1,y1,x2,y2,x3,y3,x4,y4]` clockwise four-point coordinates.
 - **Prepare base image**: Use the same file as parsing to generate page images. If converting images yourself, remember to record the rendered `img_width/img_height`.

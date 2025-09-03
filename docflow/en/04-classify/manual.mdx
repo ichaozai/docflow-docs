@@ -1,16 +1,16 @@
 ---
 title: "Specify Classification Upload"
-description: "Specify file category during upload to skip automatic classification process and go directly to extraction"
+description: "Specify the file category during upload to skip the automatic classification process and proceed directly to extraction."
 ---
 
 When you already know the document category, you can specify the file category through the `category` parameter during file upload, so DocFlow will skip the automatic classification process and go directly to the extraction stage.
 
 <Tip>
-The specified `category` must be a file category that has been configured in the DocFlow workspace, otherwise processing will fail.
+  The specified `category` must be a file category that has been configured in the DocFlow workspace, otherwise processing will fail.
 </Tip>
 
 <Tip>
-Manual classification can save processing time and is particularly suitable for batch processing scenarios with the same type of documents.
+  Manual classification can save processing time and is particularly suitable for batch processing scenarios with the same type of documents.
 </Tip>
 
 ## Use Cases
@@ -33,7 +33,8 @@ curl -X POST \
   "https://docflow.textin.com/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&category=invoice"
 ```
 
-```python Python icon=python expandable lines
+
+```python Python expandable icon=python lines
 import requests
 import os
 from requests_toolbelt.multipart.encoder import MultipartEncoder
@@ -91,7 +92,8 @@ curl -X POST \
   "https://docflow.textin.com/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&category=invoice&batch_number=INV-2024-001"
 ```
 
-```python Python icon=python expandable lines
+
+```python Python expandable icon=python lines
 import requests
 import os
 from requests_toolbelt.multipart.encoder import MultipartEncoder
@@ -144,11 +146,13 @@ print(resp.status_code, resp.text)
 ## Processing Workflow Comparison
 
 ### Automatic Classification Workflow
+
 ```
 Upload → Parse → Automatic Classification → Extract → Complete
 ```
 
 ### Manual Classification Workflow
+
 ```
 Upload (specify category) → Parse → Extract → Complete
 ```
@@ -173,7 +177,8 @@ curl \
   "https://docflow.textin.com/api/app-api/sip/platform/v2/file/fetch?workspace_id=<your-workspace-id>&file_id=<your-file-id>"
 ```
 
-```python Python icon=python expandable lines
+
+```python Python expandable icon=python lines
 import requests
 
 resp = requests.get(
@@ -224,7 +229,7 @@ When you need to specify Chinese or other non-English file categories, you need 
 ### Encoding Example
 
 <Tip>
-Use the `urllib.parse.quote()` function to URL encode Chinese category names.
+  Use the `urllib.parse.quote()` function to URL encode Chinese category names.
 </Tip>
 
 <CodeGroup>
@@ -238,7 +243,8 @@ curl -X POST \
   "https://docflow.textin.com/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&category=%E5%8F%91%E7%A5%A8"
 ```
 
-```python Python icon=python expandable lines
+
+```python Python expandable icon=python lines
 import urllib.parse
 
 # Chinese category name

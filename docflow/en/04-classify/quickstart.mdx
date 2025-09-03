@@ -11,23 +11,23 @@ File classification use cases:
 2. Logistics import/export scenarios have materials such as import customs declarations, export customs declarations, freight insurance policies, certificates of origin that need classification
 
 <Tip>
-Classification templates must be configured in the Docflow workspace to use the classification function.
+  Classification templates must be configured in the Docflow workspace to use the classification function.
 </Tip>
 
 <Tip>
-Docflow performs the complete parsing->classification->extraction workflow by default.  
-If you only want classification results, please refer to the [Classification Only](./target_process) documentation.
+  Docflow performs the complete parsing-\>classification-\>extraction workflow by default.\
+  If you only want classification results, please refer to the [Classification Only](./target_process) documentation.
 </Tip>
 
 ## Classification Principle
 
-After configuring classification sample files in Docflow, the sample files are first parsed, then the title, file type, field configuration, classification prompts, etc. of the sample files are vectorized and analyzed.
+After configuring sample files for classification in Docflow, the files are first parsed. The title, file type, field configuration, classification prompts, and other attributes of the sample files are then vectorized and analyzed.
 
-After new files are uploaded and parsing is completed, algorithms are used to compare the new files with configured classifications to obtain the most matching classification results.
+Once new files are uploaded and their parsing is completed, algorithms compare them with the configured classification samples to determine the best-matching classification result.
 
 ## Get Classification Results
 
-You can query through the result retrieval interface `file/fetch`.  
+You can query through the result retrieval interface `file/fetch`.\
 The interface returns a JSON structure, with file classification information in the `result.files[].category` field.
 
 <CodeGroup>
@@ -39,7 +39,8 @@ curl \
   "https://docflow.textin.com/api/app-api/sip/platform/v2/file/fetch?workspace_id=<your-workspace-id>&file_id=<your-file-id>"
 ```
 
-```python Python icon=python expandable lines
+
+```python Python expandable icon=python lines
 import requests
 
 resp = requests.get(

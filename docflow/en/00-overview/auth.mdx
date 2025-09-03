@@ -11,7 +11,7 @@ DocFlow uses [TextIn](https://www.textin.com/) accounts.
 
 Please register on [TextIn](https://www.textin.com/) first, then obtain `x-ti-app-id` and `x-ti-secret-code` on the [TextIn Homepage - Account & Billing - Account & Developer Information](https://www.textin.com/console/dashboard/setting) page for request authentication.
 
-### 1.2 On-prem Usage
+### 1.2 **Private Cloud Usage**
 
 Please contact the technical support personnel you are working with to obtain API call credentials for on-prem deployment.
 
@@ -43,11 +43,11 @@ curl \
 
 Authenticate requests using signatures, requiring 3 HTTP Headers:
 
-| Header           | Description                             |
-| ---------------- | ------------------------------ |
+| Header           | Description                                              |
+| ---------------- | -------------------------------------------------------- |
 | `x-ti-app-id`    | `x-ti-app-id` obtained from TextIn developer information |
-| `x-ti-timestamp` | Unix Epoch timestamp, in seconds               |
-| `x-ti-signature` | Request signature, calculation method described below.                  |
+| `x-ti-timestamp` | Unix Epoch timestamp, in seconds                         |
+| `x-ti-signature` | Request signature, calculation method described below    |
 
 #### Signature Calculation
 
@@ -57,7 +57,7 @@ The signature calculation method is:
 signature = lower(hex(HMAC_SHA256(signing_key, string_to_sign)))
 ```
 
-Where:
+Notes:
 
 1. `lower()` is the lowercase letter conversion function
 2. `hex()` converts byte array to hexadecimal string
@@ -76,16 +76,16 @@ Where:
 "sha256(HTTP Request Body)"
 ```
 
-Where:
+Notes:
 
 1. HTTP method is uppercase, e.g., `GET`, `POST`
 2. Request URL, the path part of the URL (excluding protocol and domain), e.g., `/api/app-api/sip/platform/v2/file/upload`
 3. URL parameter sorting sorts all request parameters in ascending order by parameter name dictionary order (ASCII code). Parameter values do not participate in sorting. For example:
 
-   Suppose the parameters are `workspace_id=12345&batch_num=54321&file_name=invoice.pdf`,
+   Suppose the parameters are `workspace_id=12345&batch_num=54321&file_name=invoice.pdf`,\
    The sorted result is `batch_num=54321&file_name=invoice.pdf&workspace_id=12345`.
 
-   Note:
+   Important:
    1. Parameter values do not need url encoding when performing signature calculation
    2. Parameters are joined with `&`, with no `&` at the end
 

@@ -1,8 +1,8 @@
 ---
-title: Classification Only Usage
+title: "Classification Only"
 ---
 
-Docflow performs the complete parsing->classification->extraction workflow by default.  
+Docflow performs the complete parsing-\>classification-\>extraction workflow by default.\
 If business requirements only need classification results, you can add the `target_process=classify` parameter to the upload interface, and the workflow will terminate after completing classification, skipping the extraction process.
 
 ## Upload Files for Classification Only
@@ -17,7 +17,8 @@ curl -X POST \
   "https://docflow.textin.com/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&target_process=classify"
 ```
 
-```python Python icon=python expandable lines
+
+```python Python expandable icon=python lines
 import requests
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 import os
@@ -71,7 +72,8 @@ curl \
   "https://docflow.textin.com/api/app-api/sip/platform/v2/file/fetch?workspace_id=<your-workspace-id>&file_id=<your-file-id>"
 ```
 
-```python Python icon=python expandable lines
+
+```python Python expandable icon=python lines
 import requests
 
 resp = requests.get(
@@ -108,9 +110,11 @@ When using `target_process=classify` for classification only, the `recognition_s
 ### Difference from Complete Workflow
 
 **Complete workflow (default)** status changes:
+
 - `0` → `3` → `4` → `1` (Pending recognition → Classifying → Extracting → Recognition successful)
 
 **Classification-only workflow** status changes:
+
 - `0` → `3` → `10` (Pending recognition → Classifying → Classification complete)
 
 ### Return Example

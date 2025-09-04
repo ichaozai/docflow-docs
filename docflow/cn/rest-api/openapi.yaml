@@ -616,7 +616,8 @@ paths:
         文件任务类别列表，请求参数需从前置接口获取。 
 
         > 前置接口：/api/app-api/sip/platform/v2/review/listByFileBatchNo  
-        作用：根据workspaceIdNo获取批次列表信息，workspaceIdNo从页面获取关键返回结果字段：fileBatchNo
+        作用：根据workspaceIdNo获取批次列表信息，workspaceIdNo从页面获取  
+        关键返回结果字段：fileBatchNo
       operationId: listExecuteTasksByFileBatchNo
       parameters:
         - name: workspaceIdNo
@@ -663,7 +664,7 @@ paths:
         审核规则列表，部分请求参数需从前置接口获取。 
 
         > 前置接口：/api/app-api/sip/platform/v2/review/listByFileBatchNo 
-        作用：根据workspaceIdNo获取批次列表信息，workspaceIdNo从页面获取 
+        作用：根据workspaceIdNo获取批次列表信息，workspaceIdNo从页面获取  
         关键返回结果字段：fileBatchNo
       operationId: getRulesByClassificationIdNo
       parameters:
@@ -703,7 +704,7 @@ paths:
         文件任务列表，请求参数需从前置接口获取。 
 
         > 前置接口：/api/app-api/sip/platform/v2/review/listByFileBatchNo 
-        作用：根据workspaceIdNo获取批次列表信息，workspaceIdNo从页面获取
+        作用：根据workspaceIdNo获取批次列表信息，workspaceIdNo从页面获取  
         关键返回结果字段：fileBatchNo
       operationId: listTaskDetailInfoByClassificationIdNo
       parameters:
@@ -746,14 +747,13 @@ paths:
         >
         前置接口：/api/app-api/sip/platform/v2/review/listExecuteTasksByFileBatchNo 
 
-        作用：用于创建规则时的前置接口，获取批次下的所有分类id，可以从返回结果中选择需要用于创建规则的分类 
-
+        作用：用于创建规则时的前置接口，获取批次下的所有分类id，可以从返回结果中选择需要用于创建规则的分类  
         关键返回结果字段：taskClassificationIdNo（分类id）
 
 
         > 前置接口：/api/app-api/sip/platform/v2/review/getRulesByClassificationIdNo 
 
-        作用：用于修改规则时的前置接口，获取规则的分类id信息 
+        作用：用于修改规则时的前置接口，获取规则的分类id信息  
 
         关键返回结果字段：classificationIdNoList（当前规则配置的分类id列表）
       operationId: listModelFieldInfoByClassificationIdNoList
@@ -797,7 +797,7 @@ paths:
         >
         前置接口：/api/app-api/sip/platform/v2/review/listExecuteTasksByFileBatchNo 
 
-        作用：获取批次下的所有分类id 
+        作用：获取批次下的所有分类id  
 
         关键返回结果字段：taskClassificationIdNo（分类id）
 
@@ -805,7 +805,7 @@ paths:
         >
         前置接口：/api/app-api/sip/platform/v2/review/listModelFieldInfoByClassificationIdNoList 
 
-        作用：获取分类下的字段信息 
+        作用：获取分类下的字段信息  
 
         关键返回结果字段：id（含义同fieldId）、fieldName、blockType（区分是普通字段还是表格字段）、classificationIdNo（区分字段属于哪个分类）、
         tableIdNo（表格id，如果字段是表格字段）、tableName（表格名称，如果字段是表格字段）
@@ -850,7 +850,7 @@ paths:
         >
         前置接口：/api/app-api/sip/platform/v2/review/listModelFieldInfoByClassificationIdNoList 
 
-        作用：获取分类下的字段信息 
+        作用：获取分类下的字段信息  
 
         关键返回结果字段：id（含义同fieldId）、fieldName、blockType（区分是普通字段还是表格字段）、classificationIdNo（区分字段属于哪个分类）、
         tableIdNo（表格id，如果字段是表格字段）、tableName（表格名称，如果字段是表格字段）
@@ -936,7 +936,7 @@ paths:
         >
         前置接口：/api/app-api/sip/platform/v2/review/listTaskDetailInfoByClassificationIdNo 
 
-        作用：获取任务id 
+        作用：获取任务id  
 
         关键返回结果字段：executeTaskId（任务id）
       operationId: runRule
@@ -980,7 +980,7 @@ paths:
         >
         前置接口：/api/app-api/sip/platform/v2/review/listTaskDetailInfoByClassificationIdNo 
 
-        作用：获取任务id 
+        作用：获取任务id  
 
         关键返回结果字段：executeTaskId（任务id）
       operationId: submitReviewTask
@@ -1023,7 +1023,7 @@ paths:
 
         > 前置接口：/api/app-api/sip/platform/v2/review/listByFileBatchNo 
 
-        作用：根据workspaceIdNo获取批次列表信息，workspaceIdNo从页面获取 
+        作用：根据workspaceIdNo获取批次列表信息，workspaceIdNo从页面获取  
 
         关键返回结果字段：fileBatchNo
 
@@ -1031,7 +1031,7 @@ paths:
         >
         前置接口：/api/app-api/sip/platform/v2/review/listExecuteTasksByFileBatchNo 
 
-        作用：获取批次下的所有分类id 
+        作用：获取批次下的所有分类id  
 
         关键返回结果字段：taskClassificationIdNo（分类id）
       operationId: listReviewRuleAndTask

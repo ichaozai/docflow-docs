@@ -704,7 +704,7 @@ paths:
         文件任务列表，请求参数需从前置接口获取。 
 
         > 前置接口：/api/app-api/sip/platform/v2/review/listByFileBatchNo 
-        作用：根据workspaceIdNo获取批次列表信息，workspaceIdNo从页面获取 
+        作用：根据workspaceIdNo获取批次列表信息，workspaceIdNo从页面获取
         关键返回结果字段：fileBatchNo
       operationId: listTaskDetailInfoByClassificationIdNo
       parameters:

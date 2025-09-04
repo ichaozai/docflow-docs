@@ -7,7 +7,7 @@ Document extraction outputs structured field, table, stamp, and handwriting info
 
 ## Trigger Extraction
 
-Docflow's default business workflow is parsing->classification->extraction.  
+Docflow's default business workflow is parsing-\>classification-\>extraction.\
 Therefore, after uploading files, extraction results can be obtained by default in the final step.
 
 <CodeGroup>
@@ -25,6 +25,7 @@ curl -X POST \
 You can also combine with `category` to specify document category, which will skip automatic classification to match corresponding field templates:
 
 <CodeGroup>
+
 ```bash curl icon=terminal wrap
 curl -X POST \
   -H "x-ti-app-id: <your-app-id>" \
@@ -32,28 +33,31 @@ curl -X POST \
   -F "file=@/path/to/invoice.pdf" \
   "https://docflow.textin.com/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&category=invoice"
 ```
+
 </CodeGroup>
 
 ## Get and Parse Extraction Results
 
 <CodeGroup>
+
 ```bash curl icon=terminal wrap
 curl \
   -H "x-ti-app-id: <your-app-id>" \
   -H "x-ti-secret-code: <your-secret-code>" \
   "https://docflow.textin.com/api/app-api/sip/platform/v2/file/fetch?workspace_id=<your-workspace-id>&batch_number=<your-batch-number>"
 ```
+
 </CodeGroup>
 
 Results are returned in JSON structure.
 
-Where `result.files[].recognition_status` indicates file recognition status. Extraction-related statuses include:
+`result.files[].recognition_status` indicates the file recognition status.Extraction-related statuses include:
 
 - `0`: Pending recognition
 - `1`: Extraction successful
 - `2`: Extraction failed
 
-Field and table data are located in `result.files[].data`, with key fields as follows:
+Field and table data are located in `result.files[].data`. Key properties include:
 
 - `fields[]`: Key-value pairs, each containing `key`, `value`, and `position[]` (can be used for drawing coordinates)
 - `items[][]`: Table row key-value pair collections
@@ -162,6 +166,6 @@ Combining `files[].pages[]`'s `width/height/angle/dpi` with `fields[].position[]
 ## Related Pages
 
 - [Basic Field Information](./fields) - Detailed explanation of basic field information structure and processing methods
-- [Table Field Information](./tables) - Detailed explanation of table field information structure and processing methods  
+- [Table Field Information](./tables) - Detailed explanation of table field information structure and processing methods
 - [Stamp Information](./stamps) - Detailed explanation of stamp information structure and processing methods
 - [Handwriting Information](./handwritings) - Detailed explanation of handwriting information structure and processing methods

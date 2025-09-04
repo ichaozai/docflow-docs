@@ -92,6 +92,10 @@ for file in data.get("result", {}).get("files", []):
         print("ROW:", json.dumps(row_dict, ensure_ascii=False))
 ```
 
+### Linking Page Coordinates for Visualization
+
+By combining `files[].pages[]` properties (`width`, `height`, `angle`, `dpi`) with `fields[].position[].vertices`, you can accurately draw field bounding boxes on the frontend.Refer to [Parsing Result Visualization](../03-parse/visualization) for details.
+
 ### Associate Page Coordinates for Visualization
 
 Combining `files[].pages[]`'s `width/height/angle/dpi` with `fields[].position[].vertices`, you can accurately draw field boxes on the frontend. See [Parsing Result Visualization](../03-parse/visualization) for details.

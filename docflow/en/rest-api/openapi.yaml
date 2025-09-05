@@ -4,8 +4,8 @@ info:
   description: DocFlow REST API, providing file upload and file processing result retrieval capabilities
   version: 2.0.0
 servers:
-  - url: https://docflow.textin.com
-
+- url: https://docflow.textin.com
+  
 x-codeSamples: custom
 
 paths:
@@ -32,9 +32,7 @@ paths:
         - name: batch_number
           in: query
           description: |
-            Batch Number.  
-            You can upload multiple times with the same batch number, and later retrieve processing results for multiple files in that batch using the batch number.  
-            If the value is empty, the system automatically generates a string up to 20 characters long.
+            Batch Number.            You can upload multiple times with the same batch number, and later retrieve processing results for multiple files in that batch using the batch number.            If the value is empty, the system automatically generates a string up to 20 characters long.
           required: false
           schema:
             type: string
@@ -63,11 +61,7 @@ paths:
         - name: target_process
           in: query
           description: |
-            Target processing type.  
-            Optional values:  
-            - `classify`: Classification  
-            - `extract`: Extraction  
-          required: false
+            Target processing type.            Optional values:            - classify: Classification            - extract: Extraction          required: false
           schema:
             type: string
             enum:
@@ -102,8 +96,7 @@ paths:
                           description: Batch Number
                           example: 202412190001
                         files:
-                          type: array   
-                          items:
+                          type: array                          items:
                             type: object
                             properties:
                               id:
@@ -128,7 +121,7 @@ paths:
       x-codeSamples:
         - lang: 'bash'
           label: cURL
-          source: | 
+          source: |
             curl -X POST \
             -H 'x-ti-app-id: 1234567890' \
             -H 'x-ti-secret-code: 1234567890' \
@@ -266,7 +259,7 @@ paths:
                               format:
                                 type: string
                                 description: File Format
-                              recognition_status: 
+                              recognition_status:
                                 $ref: '#/components/schemas/RecognitionStatus'
                               verification_status:
                                 $ref: '#/components/schemas/VerificationStatus'
@@ -277,8 +270,7 @@ paths:
                               pages:
                                 type: array
                                 description: |
-                                  Data for rendering each page of the file.  
-                                  Combined with the `page` and `position` fields in `data.fields`, you can accurately draw the position of fields on the page.
+                                  Data for rendering each page of the file.                                  Combined with the page and position fields in data.fields, you can accurately draw the position of fields on the page.
                                 items:
                                   type: object
                                   properties:
@@ -300,7 +292,7 @@ paths:
                                       example: 1024
                                     dpi:
                                       type: integer
-                                      description: Resolution when converting PDF to image. For non-PDF files, this value is `0`.
+                                      description: Resolution when converting PDF to image. For non-PDF files, this value is 0.
                                       example: 144
                               data:
                                 type: object
@@ -561,7 +553,7 @@ paths:
       x-codeSamples:
         - lang: 'bash'
           label: cURL
-          source: | 
+          source: |
             curl -X POST \
             -H 'x-ti-app-id: 1234567890' \
             -H 'x-ti-secret-code: 1234567890' \
@@ -616,11 +608,10 @@ paths:
         - File Review
       summary: File Task Category List
       description: |-
-        File task category list, request parameters need to be obtained from the prerequisite interface. 
+        File task category list, request parameters need to be obtained from the **Prerequisite interface**. 
 
-        > Prerequisite interface: /api/app-api/sip/platform/v2/review/listByFileBatchNo 
-        Purpose: Get batch list information based on workspaceIdNo, workspaceIdNo is obtained from the page 
-        Key return result field: fileBatchNo
+      > Prerequisite interface: /api/app-api/sip/platform/v2/review/listByFileBatchNo        
+Purpose : Get batch list information based on workspaceIdNo, workspaceIdNo is obtained from the page        Key return result field : fileBatchNo
       operationId: listExecuteTasksByFileBatchNo
       parameters:
         - name: workspaceIdNo
@@ -666,9 +657,9 @@ paths:
       description: |-
         Review rule list, some request parameters need to be obtained from the prerequisite interface. 
 
-        > Prerequisite interface: /api/app-api/sip/platform/v2/review/listByFileBatchNo 
-        Purpose: Get batch list information based on workspaceIdNo, workspaceIdNo is obtained from the page 
-        Key return result field: fileBatchNo
+      > Prerequisite interface : /api/app-api/sip/platform/v2/review/listByFileBatchNo        
+Purpose : Get batch list information based on workspaceIdNo, workspaceIdNo is obtained from the page        
+Key return result field : fileBatchNo
       operationId: getRulesByClassificationIdNo
       parameters:
         - name: x-ti-app-id
@@ -706,9 +697,9 @@ paths:
       description: |-
         File task list, request parameters need to be obtained from the prerequisite interface. 
 
-        > Prerequisite interface: /api/app-api/sip/platform/v2/review/listByFileBatchNo 
-        Purpose: Get batch list information based on workspaceIdNo, workspaceIdNo is obtained from the page 
-        Key return result field: fileBatchNo
+      > Prerequisite interface : /api/app-api/sip/platform/v2/review/listByFileBatchNo        
+Purpose : Get batch list information based on workspaceIdNo, workspaceIdNo is obtained from the page        
+Key return result field : fileBatchNo
       operationId: listTaskDetailInfoByClassificationIdNo
       parameters:
         - name: x-ti-app-id
@@ -747,19 +738,18 @@ paths:
         Model field list, request parameters need to be obtained from the prerequisite interface. 
 
 
-        >
-        Prerequisite interface: /api/app-api/sip/platform/v2/review/listExecuteTasksByFileBatchNo 
+        >Prerequisite interface : /api/app-api/sip/platform/v2/review/listExecuteTasksByFileBatchNo      
 
-        Purpose: Prerequisite interface for creating rules, get all classification IDs under the batch, can select classifications needed for creating rules from the return results 
+        Purpose : Prerequisite interface for creating rules, get all classification IDs under the batch, can select classifications needed for creating rules from the return results      
 
-        Key return result field: taskClassificationIdNo (classification ID)
+        Key return result field : taskClassificationIdNo (classification ID)
 
 
-        > Prerequisite interface: /api/app-api/sip/platform/v2/review/getRulesByClassificationIdNo 
+      > Prerequisite interface : /api/app-api/sip/platform/v2/review/getRulesByClassificationIdNo     
 
-        Purpose: Prerequisite interface for modifying rules, get classification ID information of the rules 
+        Purpose : Prerequisite interface for modifying rules, get classification ID information of the rules      
 
-        Key return result field: classificationIdNoList (list of classification IDs currently configured in the rules)
+        Key return result field : classificationIdNoList (list of classification IDs currently configured in the rules)
       operationId: listModelFieldInfoByClassificationIdNoList
       parameters:
         - name: x-ti-app-id
@@ -798,21 +788,23 @@ paths:
         Create review rule, need to call some prerequisite interfaces before calling this interface. 
 
 
-        >
-        Prerequisite interface: /api/app-api/sip/platform/v2/review/listExecuteTasksByFileBatchNo 
+        >Prerequisite interface : /api/app-api/sip/platform/v2/review/listExecuteTasksByFileBatchNo     
 
-        Purpose: Get all classification IDs under the batch 
+        Purpose : Get all classification IDs under the batch     
 
-        Key return result field: taskClassificationIdNo (classification ID)
+        Key return result field : taskClassificationIdNo (classification ID)
 
 
-        >
-        Prerequisite interface: /api/app-api/sip/platform/v2/review/listModelFieldInfoByClassificationIdNoList 
+        >Prerequisite interface : /api/app-api/sip/platform/v2/review/listModelFieldInfoByClassificationIdNoList    
 
-        Purpose: Get field information under the classification 
+        Purpose : Get field information under the classification     
 
-        Key return result field: id (same meaning as fieldId), fieldName, blockType (distinguish between regular fields and table fields), classificationIdNo (distinguish which classification the field belongs to),
-        tableIdNo (table ID, if the field is a table field), tableName (table name, if the field is a table field)
+        Key return result field :        
+*id (same meaning as fieldId)        
+*fieldName, blockType (distinguish between regular fields and table fields)        
+*classificationIdNo (distinguish which classification the field belongs to)  
+*tableIdNo (table ID, if the field is a table field)        
+*tableName (table name, if the field is a table field)
       operationId: createReviewRule
       parameters:
         - name: x-ti-app-id
@@ -851,20 +843,26 @@ paths:
         Update review rule, need to call some prerequisite interfaces before calling this interface. 
 
 
-        >
-        Prerequisite interface: /api/app-api/sip/platform/v2/review/listModelFieldInfoByClassificationIdNoList 
+        >Prerequisite interface : /api/app-api/sip/platform/v2/review/listModelFieldInfoByClassificationIdNoList    
 
-        Purpose: Get field information under the classification 
+        Purpose : Get field information under the classification    
 
-        Key return result field: id (same meaning as fieldId), fieldName, blockType (distinguish between regular fields and table fields), classificationIdNo (distinguish which classification the field belongs to),
-        tableIdNo (table ID, if the field is a table field), tableName (table name, if the field is a table field)
+        Key return result field:        
+*id (same meaning as fieldId)        
+*fieldName, blockType (distinguish between regular fields and table fields)        
+*classificationIdNo (distinguish which classification the field belongs to)  
+        *tableIdNo (table ID, if the field is a table field)        
+*tableName (table name, if the field is a table field)
 
 
-        > Prerequisite interface: /api/app-api/sip/platform/v2/review/getRulesByClassificationIdNo 
+      > Prerequisite interface : /api/app-api/sip/platform/v2/review/getRulesByClassificationIdNo      
 
-        Purpose: Get all review rules of the current batch based on workspaceIdNo and fileBatchNo 
+        Purpose : Get all review rules of the current batch based on workspaceIdNo and fileBatchNo     
 
-        Key return result field: classificationIdNoList (list of classification IDs currently configured in the rules), fieldInfoList (list of field information currently configured in the rules), reviewRuleIdNo (review rule ID)
+        Key return result field :          
+*classificationIdNoList (list of classification IDs currently configured in the rules)      
+*fieldInfoList (list of field information currently configured in the rules)           
+*reviewRuleIdNo (review rule ID)      
       operationId: updateReviewRule
       parameters:
         - name: x-ti-app-id
@@ -937,12 +935,11 @@ paths:
         Test run review rule, some request parameters need to be obtained from the prerequisite interface. 
 
 
-        >
-        Prerequisite interface: /api/app-api/sip/platform/v2/review/listTaskDetailInfoByClassificationIdNo 
+        >Prerequisite interface : /api/app-api/sip/platform/v2/review/listTaskDetailInfoByClassificationIdNo 
 
-        Purpose: Get task ID 
+        Purpose : Get task ID 
 
-        Key return result field: executeTaskId (task ID)
+        Key return result field : executeTaskId (task ID)
       operationId: runRule
       parameters:
         - name: x-ti-app-id
@@ -981,12 +978,11 @@ paths:
         Submit review task, some request parameters need to be obtained from the prerequisite interface.
 
 
-        >
-        Prerequisite interface: /api/app-api/sip/platform/v2/review/listTaskDetailInfoByClassificationIdNo 
+        >Prerequisite interface : /api/app-api/sip/platform/v2/review/listTaskDetailInfoByClassificationIdNo 
 
-        Purpose: Get task ID 
+        Purpose : Get task ID 
 
-        Key return result field: executeTaskId (task ID)
+        Key return result field : executeTaskId (task ID)
       operationId: submitReviewTask
       parameters:
         - name: x-ti-app-id
@@ -1025,19 +1021,18 @@ paths:
         Review rule task list, request parameters need to be obtained from the prerequisite interface. 
 
 
-        > Prerequisite interface: /api/app-api/sip/platform/v2/review/listByFileBatchNo 
+      > Prerequisite interface : /api/app-api/sip/platform/v2/review/listByFileBatchNo 
 
-        Purpose: Get batch list information based on workspaceIdNo, workspaceIdNo is obtained from the page 
+        Purpose : Get batch list information based on workspaceIdNo, workspaceIdNo is obtained from the page 
 
-        Key return result field: fileBatchNo
+        Key return result field : fileBatchNo
 
 
-        >
-        Prerequisite interface: /api/app-api/sip/platform/v2/review/listExecuteTasksByFileBatchNo 
+        >Prerequisite interface : /api/app-api/sip/platform/v2/review/listExecuteTasksByFileBatchNo 
 
-        Purpose: Get all classification IDs under the batch 
+        Purpose : Get all classification IDs under the batch 
 
-        Key return result field: taskClassificationIdNo (classification ID)
+        Key return result field : taskClassificationIdNo (classification ID)
       operationId: listReviewRuleAndTask
       parameters:
         - name: x-ti-app-id
@@ -1068,7 +1063,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/CommonResultListApiReviewRuleAndTaskRespVO'
 components:
-  schemas: 
+  schemas:
     RecognitionStatus:
       type: integer
       description: "File recognition status 0: Pending recognition 1: Recognition successful 2: Recognition failed 3: Classifying 4: Extracting 5: Preparing 6: File splitting 7: Image cropping 10: Classification completed (only available when upload interface target_process is classify)"
@@ -1121,7 +1116,7 @@ components:
             properties:
               page:
                 type: integer
-                description: Page where the field is located. It is the index of the `pages` array
+                description: Page where the field is located. It is the index of the pages array
               vertices:
                 type: array
                 description: Bounding quadrilateral coordinates of the field value. The image uses the top-left as origin, array values are [top-left x, top-left y, top-right x, top-right y, bottom-right x, bottom-right y, bottom-left x, bottom-left y]
@@ -1176,7 +1171,7 @@ components:
             properties:
               page:
                 type: integer
-                description: Page where the field is located. It is the index of the `pages` array
+                description: Page where the field is located. It is the index of the pages array
               vertices:
                 type: array
                 description: Bounding quadrilateral coordinates of the field value. The image uses the top-left as origin, array values are [top-left x, top-left y, top-right x, top-right y, bottom-right x, bottom-right y, bottom-left x, bottom-left y]
@@ -1289,8 +1284,7 @@ components:
         pages:
           type: array
           description: |
-            Data for rendering each page of the file.  
-            Combined with the `page` and `position` fields in `data.fields`, you can accurately draw the position of fields on the page.
+            Data for rendering each page of the file.            Combined with the page and position fields in data.fields, you can accurately draw the position of fields on the page.
           items:
             type: object
             properties:
@@ -1312,7 +1306,7 @@ components:
                 example: 1024
               dpi:
                 type: integer
-                description: Resolution when converting PDF to image. For non-PDF files, this value is `0`.
+                description: Resolution when converting PDF to image. For non-PDF files, this value is 0.
                 example: 144
         data:
           type: object
@@ -2543,10 +2537,10 @@ components:
       type: integer
       description: |
         Task type
-        - `0`: **File split subtask**: When a file task with "File split" switch enabled executes successfully, the subtasks generated by file split operations in that file batch task are split subtasks, divided according to the actual number of file sets under the file category
-        - `1`: **Regular task**: File tasks without "File split" and "Multi-image crop" switches enabled
-        - `2`: **Parent task**: After file tasks with "File split" or "Multi-image crop" switches enabled execute, each file in that file batch task becomes a parent task
-        - `3`: **Crop subtask**: When a file task with "Multi-image crop" switch enabled executes successfully, the subtasks generated by multi-image crop operations in that file batch task are crop subtasks, divided according to the actual number of crop results under the file category
+        - 0: **File split subtask**: When a file task with "File split" switch enabled executes successfully, the subtasks generated by file split operations in that file batch task are split subtasks, divided according to the actual number of file sets under the file category
+        - 1: **Regular task**: File tasks without "File split" and "Multi-image crop" switches enabled
+        - 2: **Parent task**: After file tasks with "File split" or "Multi-image crop" switches enabled execute, each file in that file batch task becomes a parent task
+        - 3: **Crop subtask**: When a file task with "Multi-image crop" switch enabled executes successfully, the subtasks generated by multi-image crop operations in that file batch task are crop subtasks, divided according to the actual number of crop results under the file category
       example: 1
 
   securitySchemes:
@@ -2560,5 +2554,5 @@ components:
       name: x-ti-secret-code
 
 security:
-  - ApiId: []
-    SecretCode: []
+- ApiId: []
+SecretCode: []

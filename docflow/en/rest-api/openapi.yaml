@@ -842,7 +842,7 @@ paths:
         >**Prerequisite interface**: /api/app-api/sip/platform/v2/review/listModelFieldInfoByClassificationIdNoList  
         >**Purpose**: Get field information under the classification  
         >**Key return result field**:
-        >- id (same meaning as fieldId)
+        >- id: same meaning as fieldId
         >- fieldName, blockType: distinguish between regular fields and table fields
         >- classificationIdNo: distinguish which classification the field belongs to
         >- tableIdNo: table ID, if the field is a table field

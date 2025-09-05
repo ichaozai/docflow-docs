@@ -608,10 +608,9 @@ paths:
         - File Review
       summary: File Task Category List
       description: |-
-        File task category list, request parameters need to be obtained from the **Prerequisite interface**. 
+        File task category list, request parameters need to be obtained from the prerequisite interface. 
 
-      > Prerequisite interface: /api/app-api/sip/platform/v2/review/listByFileBatchNo        
-Purpose : Get batch list information based on workspaceIdNo, workspaceIdNo is obtained from the page        Key return result field : fileBatchNo
+        > **Prerequisite interface** : /api/app-api/sip/platform/v2/review/listByFileBatchNo        **Purpose** : Get batch list information based on workspaceIdNo, workspaceIdNo is obtained from the page        **Key return result field**: fileBatchNo
       operationId: listExecuteTasksByFileBatchNo
       parameters:
         - name: workspaceIdNo
@@ -657,9 +656,7 @@ Purpose : Get batch list information based on workspaceIdNo, workspaceIdNo is ob
       description: |-
         Review rule list, some request parameters need to be obtained from the prerequisite interface. 
 
-      > Prerequisite interface : /api/app-api/sip/platform/v2/review/listByFileBatchNo        
-Purpose : Get batch list information based on workspaceIdNo, workspaceIdNo is obtained from the page        
-Key return result field : fileBatchNo
+        > **Prerequisite interface** : /api/app-api/sip/platform/v2/review/listByFileBatchNo        **Purpose** : Get batch list information based on workspaceIdNo, workspaceIdNo is obtained from the page        **Key return result field**: fileBatchNo
       operationId: getRulesByClassificationIdNo
       parameters:
         - name: x-ti-app-id
@@ -697,9 +694,8 @@ Key return result field : fileBatchNo
       description: |-
         File task list, request parameters need to be obtained from the prerequisite interface. 
 
-      > Prerequisite interface : /api/app-api/sip/platform/v2/review/listByFileBatchNo        
-Purpose : Get batch list information based on workspaceIdNo, workspaceIdNo is obtained from the page        
-Key return result field : fileBatchNo
+        > **Prerequisite interface** : /api/app-api/sip/platform/v2/review/listByFileBatchNo        
+        **Purpose** : Get batch list information based on workspaceIdNo, workspaceIdNo is obtained from the page        **Key return result field**: fileBatchNo
       operationId: listTaskDetailInfoByClassificationIdNo
       parameters:
         - name: x-ti-app-id
@@ -738,18 +734,18 @@ Key return result field : fileBatchNo
         Model field list, request parameters need to be obtained from the prerequisite interface. 
 
 
-        >Prerequisite interface : /api/app-api/sip/platform/v2/review/listExecuteTasksByFileBatchNo      
+        >**Prerequisite interface** : /api/app-api/sip/platform/v2/review/listExecuteTasksByFileBatchNo      
 
-        Purpose : Prerequisite interface for creating rules, get all classification IDs under the batch, can select classifications needed for creating rules from the return results      
+        **Purpose**  : Prerequisite interface for creating rules, get all classification IDs under the batch, can select classifications needed for creating rules from the return results      
 
-        Key return result field : taskClassificationIdNo (classification ID)
+        **Key return result field**: taskClassificationIdNo (classification ID)
 
 
-      > Prerequisite interface : /api/app-api/sip/platform/v2/review/getRulesByClassificationIdNo     
+        > **Prerequisite interface** : /api/app-api/sip/platform/v2/review/getRulesByClassificationIdNo     
 
-        Purpose : Prerequisite interface for modifying rules, get classification ID information of the rules      
+        **Purpose** : Prerequisite interface for modifying rules, get classification ID information of the rules      
 
-        Key return result field : classificationIdNoList (list of classification IDs currently configured in the rules)
+        **Key return result field**: classificationIdNoList (list of classification IDs currently configured in the rules)
       operationId: listModelFieldInfoByClassificationIdNoList
       parameters:
         - name: x-ti-app-id
@@ -788,23 +784,23 @@ Key return result field : fileBatchNo
         Create review rule, need to call some prerequisite interfaces before calling this interface. 
 
 
-        >Prerequisite interface : /api/app-api/sip/platform/v2/review/listExecuteTasksByFileBatchNo     
+        >**Prerequisite interface** : /api/app-api/sip/platform/v2/review/listExecuteTasksByFileBatchNo     
 
-        Purpose : Get all classification IDs under the batch     
+        **Purpose** : Get all classification IDs under the batch     
 
-        Key return result field : taskClassificationIdNo (classification ID)
+        **Key return result field**: taskClassificationIdNo (classification ID)
 
 
-        >Prerequisite interface : /api/app-api/sip/platform/v2/review/listModelFieldInfoByClassificationIdNoList    
+        >**Prerequisite interface** : /api/app-api/sip/platform/v2/review/listModelFieldInfoByClassificationIdNoList    
 
-        Purpose : Get field information under the classification     
+        **Purpose** : Get field information under the classification     
 
-        Key return result field :        
-*id (same meaning as fieldId)        
-*fieldName, blockType (distinguish between regular fields and table fields)        
-*classificationIdNo (distinguish which classification the field belongs to)  
-*tableIdNo (table ID, if the field is a table field)        
-*tableName (table name, if the field is a table field)
+        **Key return result field**:        
+        *id (same meaning as fieldId)        
+        *fieldName, blockType (distinguish between regular fields and table fields)        
+        *classificationIdNo (distinguish which classification the field belongs to)  
+        *tableIdNo (table ID, if the field is a table field)        
+        *tableName (table name, if the field is a table field)
       operationId: createReviewRule
       parameters:
         - name: x-ti-app-id
@@ -840,29 +836,26 @@ Key return result field : fileBatchNo
         - File Review
       summary: Update Review Rule
       description: >-
-        Update review rule, need to call some prerequisite interfaces before calling this interface. 
+        Update review rule, need to call some Prerequisite interfaces before calling this interface. 
 
 
-        >Prerequisite interface : /api/app-api/sip/platform/v2/review/listModelFieldInfoByClassificationIdNoList    
+        >**Prerequisite interface** : /api/app-api/sip/platform/v2/review/listModelFieldInfoByClassificationIdNoList    
 
-        Purpose : Get field information under the classification    
+        **Purpose** : Get field information under the classification    
 
-        Key return result field:        
-*id (same meaning as fieldId)        
-*fieldName, blockType (distinguish between regular fields and table fields)        
-*classificationIdNo (distinguish which classification the field belongs to)  
+        **Key return result field**:        
+        *id (same meaning as fieldId)        
+        *fieldName, blockType (distinguish between regular fields and table fields)        
+        *classificationIdNo (distinguish which classification the field belongs to)    
         *tableIdNo (table ID, if the field is a table field)        
-*tableName (table name, if the field is a table field)
+        *tableName (table name, if the field is a table field)
 
 
-      > Prerequisite interface : /api/app-api/sip/platform/v2/review/getRulesByClassificationIdNo      
+        > **Prerequisite interface** : /api/app-api/sip/platform/v2/review/getRulesByClassificationIdNo      
 
-        Purpose : Get all review rules of the current batch based on workspaceIdNo and fileBatchNo     
+        **Purpose** : Get all review rules of the current batch based on workspaceIdNo and fileBatchNo     
 
-        Key return result field :          
-*classificationIdNoList (list of classification IDs currently configured in the rules)      
-*fieldInfoList (list of field information currently configured in the rules)           
-*reviewRuleIdNo (review rule ID)      
+        **Key return result field**:        classificationIdNoList (list of classification IDs currently configured in the rules), fieldInfoList (list of field information currently configured in the rules), reviewRuleIdNo (review rule ID)
       operationId: updateReviewRule
       parameters:
         - name: x-ti-app-id
@@ -935,11 +928,11 @@ Key return result field : fileBatchNo
         Test run review rule, some request parameters need to be obtained from the prerequisite interface. 
 
 
-        >Prerequisite interface : /api/app-api/sip/platform/v2/review/listTaskDetailInfoByClassificationIdNo 
+        >**Prerequisite interface** : /api/app-api/sip/platform/v2/review/listTaskDetailInfoByClassificationIdNo 
 
-        Purpose : Get task ID 
+        **Purpose** : Get task ID 
 
-        Key return result field : executeTaskId (task ID)
+        **Key return result field**: executeTaskId (task ID)
       operationId: runRule
       parameters:
         - name: x-ti-app-id
@@ -978,11 +971,11 @@ Key return result field : fileBatchNo
         Submit review task, some request parameters need to be obtained from the prerequisite interface.
 
 
-        >Prerequisite interface : /api/app-api/sip/platform/v2/review/listTaskDetailInfoByClassificationIdNo 
+        >**Prerequisite interface** : /api/app-api/sip/platform/v2/review/listTaskDetailInfoByClassificationIdNo 
 
-        Purpose : Get task ID 
+        **Purpose** : Get task ID 
 
-        Key return result field : executeTaskId (task ID)
+        **Key return result field**: executeTaskId (task ID)
       operationId: submitReviewTask
       parameters:
         - name: x-ti-app-id
@@ -1021,18 +1014,18 @@ Key return result field : fileBatchNo
         Review rule task list, request parameters need to be obtained from the prerequisite interface. 
 
 
-      > Prerequisite interface : /api/app-api/sip/platform/v2/review/listByFileBatchNo 
+        > **Prerequisite interface** : /api/app-api/sip/platform/v2/review/listByFileBatchNo 
 
-        Purpose : Get batch list information based on workspaceIdNo, workspaceIdNo is obtained from the page 
+        **Purpose** : Get batch list information based on workspaceIdNo, workspaceIdNo is obtained from the page 
 
-        Key return result field : fileBatchNo
+        **Key return result field**: fileBatchNo
 
 
-        >Prerequisite interface : /api/app-api/sip/platform/v2/review/listExecuteTasksByFileBatchNo 
+        >**Prerequisite interface** : /api/app-api/sip/platform/v2/review/listExecuteTasksByFileBatchNo 
 
-        Purpose : Get all classification IDs under the batch 
+        **Purpose** : Get all classification IDs under the batch 
 
-        Key return result field : taskClassificationIdNo (classification ID)
+        **Key return result field**: taskClassificationIdNo (classification ID)
       operationId: listReviewRuleAndTask
       parameters:
         - name: x-ti-app-id

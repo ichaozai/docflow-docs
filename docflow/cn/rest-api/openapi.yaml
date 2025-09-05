@@ -745,15 +745,13 @@ paths:
 
 
         >
-        前置接口：/api/app-api/sip/platform/v2/review/listExecuteTasksByFileBatchNo 
-
-        作用：用于创建规则时的前置接口，获取批次下的所有分类id，可以从返回结果中选择需要用于创建规则的分类 
+        前置接口：/api/app-api/sip/platform/v2/review/listExecuteTasksByFileBatchNo  
+        作用：用于创建规则时的前置接口，获取批次下的所有分类id，可以从返回结果中选择需要用于创建规则的分类  
         关键返回结果字段：taskClassificationIdNo（分类id）
 
 
         > 前置接口：/api/app-api/sip/platform/v2/review/getRulesByClassificationIdNo  
         作用：用于修改规则时的前置接口，获取规则的分类id信息  
-
         关键返回结果字段：classificationIdNoList（当前规则配置的分类id列表）
       operationId: listModelFieldInfoByClassificationIdNoList
       parameters:
@@ -1028,8 +1026,7 @@ paths:
 
 
         >
-        前置接口：/api/app-api/sip/platform/v2/review/listExecuteTasksByFileBatchNo 
-
+        前置接口：/api/app-api/sip/platform/v2/review/listExecuteTasksByFileBatchNo  
         作用：获取批次下的所有分类id  
 
         关键返回结果字段：taskClassificationIdNo（分类id）

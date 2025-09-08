@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Textin API",
+  "name": "Docflow API",
   "colors": {
     "primary": "#1a66ff",
     "light": "#1a66ff",

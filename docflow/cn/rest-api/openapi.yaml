@@ -275,33 +275,7 @@ paths:
                                 description: 文件类别
                                 example: invoice
                               pages:
-                                type: array
-                                description: |
-                                  文件每页用于渲染的数据。  
-                                  配合`data.fields`中的`page`和`position`字段，可以准确画出字段在页面上的位置。
-                                items:
-                                  type: object
-                                  properties:
-                                    angle:
-                                      type: integer
-                                      description: 旋转角度
-                                      enum:
-                                        - 0
-                                        - 90
-                                        - 180
-                                        - 270
-                                    width:
-                                      type: integer
-                                      description: 转正后的页宽
-                                      example: 1024
-                                    height:
-                                      type: integer
-                                      description: 转正后的页高
-                                      example: 1024
-                                    dpi:
-                                      type: integer
-                                      description: PDF转图片时的分辨率。非PDF文件该值为`0`.
-                                      example: 144
+                                $ref: '#/components/schemas/PagesInfo'
                               data:
                                 type: object
                                 description: 处理结果
@@ -1276,33 +1250,7 @@ components:
           description: 文件类别
           example: invoice
         pages:
-          type: array
-          description: |
-            文件每页用于渲染的数据。  
-            配合`data.fields`中的`page`和`position`字段，可以准确画出字段在页面上的位置。
-          items:
-            type: object
-            properties:
-              angle:
-                type: integer
-                description: 旋转角度
-                enum:
-                  - 0
-                  - 90
-                  - 180
-                  - 270
-              width:
-                type: integer
-                description: 转正后的页宽
-                example: 1024
-              height:
-                type: integer
-                description: 转正后的页高
-                example: 1024
-              dpi:
-                type: integer
-                description: PDF转图片时的分辨率。非PDF文件该值为`0`.
-                example: 144
+          $ref: '#/components/schemas/PagesInfo'
         data:
           type: object
           description: 处理结果
@@ -2521,6 +2469,38 @@ components:
         - `2`: **父任务**：打开“文件拆分”或“多图切分”开关的文件任务执行后，该文件批次任务中的每份文件即为父任务
         - `3`: **切图子任务**：打开“多图切分”开关的文件任务执行成功后，该文件批次任务中因多图切分操作产生的子任务即为切分子任务，按照文件类别下实际切图结果数量区分子任务
       example: 1
+    PagesInfo:
+      type: array
+      description: |
+        文件每页用于渲染的数据。  
+        配合`data.fields`中的`page`和`position`字段，可以准确画出字段在页面上的位置。
+      items:
+        type: object
+        properties:
+          page:
+            type: integer
+            description: 页码,从1开始
+            example: 1
+          angle:
+            type: integer
+            description: 旋转角度
+            enum:
+              - 0
+              - 90
+              - 180
+              - 270
+          width:
+            type: integer
+            description: 转正后的页宽
+            example: 1024
+          height:
+            type: integer
+            description: 转正后的页高
+            example: 1024
+          dpi:
+            type: integer
+            description: PDF转图片时的分辨率。非PDF文件该值为`0`.
+            example: 144
 
   securitySchemes:
     ApiId: # arbitrary name for the security scheme

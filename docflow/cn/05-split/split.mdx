@@ -145,8 +145,6 @@ if __name__ == "__main__":
             "name": "multi-document.pdf#1",
             "format": "pdf",
             "category": "invoice",
-            "page_count": 2,
-            "status": "success"
           },
           {
             "id": "child-002", 
@@ -155,8 +153,6 @@ if __name__ == "__main__":
             "name": "multi-document.pdf#2",
             "format": "pdf",
             "category": "contract",
-            "page_count": 3,
-            "status": "success"
           }
         ]
       }
@@ -173,3 +169,4 @@ if __name__ == "__main__":
 | `child_files[].id` | string | 子文件唯一标识 |
 | `child_files[].task_type` | integer | 任务类型，0表示文件拆分产生 |
 | `child_files[].category` | string | 文档分类结果 |
+| `child_files[].pages` | string | 拆分后的子文件页面信息，含子文件在原文件中的页码 |

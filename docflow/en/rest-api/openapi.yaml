@@ -2485,7 +2485,7 @@ components:
         properties:
           page:
             type: integer
-            description: Page number, starting from 1
+            description: Page number, starting from 0
             example: 1
           angle:
             type: integer

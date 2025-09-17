@@ -2479,7 +2479,7 @@ components:
         properties:
           page:
             type: integer
-            description: 页码,从1开始
+            description: 页码,从0开始
             example: 1
           angle:
             type: integer

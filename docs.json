@@ -67,12 +67,18 @@
                 ]
               },
               {
+                "group": "文档删除",
+                "pages": [
+                  "docflow/cn/08-delete/quickstart"
+                ]
+              },
+              {
                 "group": "常见问题",
                 "pages": [
-                  "docflow/cn/08-faq/get_workspace_id",
-                  "docflow/cn/08-faq/setup_category",
-                  "docflow/cn/08-faq/chinese_category_param",
-                  "docflow/cn/08-faq/product_charge"
+                  "docflow/cn/100-faq/get_workspace_id",
+                  "docflow/cn/100-faq/setup_category",
+                  "docflow/cn/100-faq/chinese_category_param",
+                  "docflow/cn/100-faq/product_charge"
                 ]
               }
             ]
@@ -141,12 +147,18 @@
                 ]
               },
               {
+                "group": "Delete Tasks",
+                "pages": [
+                  "docflow/en/08-delete/quickstart"
+                ]
+              },
+              {
                 "group": "FAQ",
                 "pages": [
-                  "docflow/en/08-faq/get_workspace_id",
-                  "docflow/en/08-faq/setup_category",
-                  "docflow/en/08-faq/chinese_category_param",
-                  "docflow/en/08-faq/product_charge"
+                  "docflow/en/100-faq/get_workspace_id",
+                  "docflow/en/100-faq/setup_category",
+                  "docflow/en/100-faq/chinese_category_param",
+                  "docflow/en/100-faq/product_charge"
                 ]
               }
             ]

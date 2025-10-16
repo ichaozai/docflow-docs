@@ -424,6 +424,67 @@ paths:
             -H 'x-ti-app-id: 1234567890' \
             -H 'x-ti-secret-code: 1234567890' \
             'https://docflow.textin.com/api/app-api/sip/platform/v2/file/fetch?workspace_id=1234567890&batch_number=202412190001'
+  /api/app-api/sip/platform/v2/file/delete:
+    post:
+      summary: 删除任务接口
+      description: 按条件删除文件，满足任一条件即可删除。
+      operationId: deleteFile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: 空间ID
+                  example: 1234567890
+                batch_number:
+                  type: array
+                  items:
+                    type: string
+                  description: 批次编号列表
+                  example: ["202412190001", "202412190002"]
+                task_id:
+                  type: array
+                  items:
+                    type: string
+                  description: 任务ID列表
+                  example: ["1978297791713619968", "1978297791713619969"]
+                file_id:
+                  type: array
+                  items:
+                    type: string
+                  description: 文件ID列表
+                  example: ["1978297792124661760", "1978297792124661761"]
+                start_time:
+                  type: integer
+                  description: 开始时间（epoch时间戳，单位：秒）
+                  example: 1760523600
+                end_time:
+                  type: integer
+                  description: 结束时间(epoch时间戳，单位：秒)
+                  example: 1760523600
+              required:
+                - workspace_id
+      responses:
+        '200':
+          description: 成功删除任务
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          deleted_count:
+                            type: integer
+                            description: 删除的文件数量
+                            example: 1
   /api/app-api/sip/platform/v2/file/update:
     post:
       summary: 更新文件处理结果

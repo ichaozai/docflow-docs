@@ -535,6 +535,67 @@ paths:
             -H 'x-ti-secret-code: 1234567890' \
             -d '[{"workspace_id": "1234567890", "file_id": "202412190001", "data": {"fields": [{"key": "Invoice Code", "value": "3100231130"}]}}]' \
             'https://docflow.textin.com/api/app-api/sip/platform/v2/file/update'
+  /api/app-api/sip/platform/v2/file/delete:
+    post:
+      summary: Delete Task Interface
+      description: Delete files by conditions. Files matching any condition will be deleted.
+      operationId: deleteFile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: Workspace ID
+                  example: 1234567890
+                batch_number:
+                  type: array
+                  items:
+                    type: string
+                  description: Batch number list
+                  example: ["202412190001", "202412190002"]
+                task_id:
+                  type: array
+                  items:
+                    type: string
+                  description: Task ID list
+                  example: ["1978297791713619968", "1978297791713619969"]
+                file_id:
+                  type: array
+                  items:
+                    type: string
+                  description: File ID list
+                  example: ["1978297792124661760", "1978297792124661761"]
+                start_time:
+                  type: integer
+                  description: "Start time (epoch timestamp, unit: seconds)"
+                  example: 1760523600
+                end_time:
+                  type: integer
+                  description: "End time (epoch timestamp, unit: seconds)"
+                  example: 1760523600
+              required:
+                - workspace_id
+      responses:
+        '200':
+          description: Successfully deleted tasks
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          deleted_count:
+                            type: integer
+                            description: Number of deleted files
+                            example: 1
   /api/app-api/sip/platform/v2/review/listByFileBatchNo:
     get:
       tags:

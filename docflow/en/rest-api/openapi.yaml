@@ -537,7 +537,7 @@ paths:
             'https://docflow.textin.com/api/app-api/sip/platform/v2/file/update'
   /api/app-api/sip/platform/v2/file/delete:
     post:
-      summary: Delete Task Interface
+      summary: Delete Tasks
       description: Delete files by conditions. Files matching any condition will be deleted.
       operationId: deleteFile
       requestBody:

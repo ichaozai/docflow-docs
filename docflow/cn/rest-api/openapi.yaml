@@ -426,7 +426,7 @@ paths:
             'https://docflow.textin.com/api/app-api/sip/platform/v2/file/fetch?workspace_id=1234567890&batch_number=202412190001'
   /api/app-api/sip/platform/v2/file/delete:
     post:
-      summary: 删除任务接口
+      summary: 删除任务
       description: 按条件删除文件，满足任一条件即可删除。
       operationId: deleteFile
       requestBody:

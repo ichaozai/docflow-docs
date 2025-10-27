@@ -288,6 +288,11 @@ paths:
                                 description: 文件格式
                               recognition_status: 
                                 $ref: '#/components/schemas/RecognitionStatus'
+                              failure_causes:
+                                type: string
+                                description: |
+                                  任务失败原因。  
+                                  当recognition_status为2时，有此字段。
                               verification_status:
                                 $ref: '#/components/schemas/VerificationStatus'
                               category:
@@ -429,6 +434,12 @@ paths:
                                 type: array
                                 items:
                                   $ref: '#/components/schemas/SubFileDetailInfo'
+                              duration_ms:
+                                type: integer
+                                description: |
+                                  任务处理时间，单位：毫秒
+                                  计算的是从任务开始至完成(成功或失败)的时间，不包括排队等待时间。
+                                example: 10000
                             required:
                               - id
                               - name

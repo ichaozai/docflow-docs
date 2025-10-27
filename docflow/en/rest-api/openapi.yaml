@@ -282,6 +282,11 @@ paths:
                                 description: File Format
                               recognition_status:
                                 $ref: '#/components/schemas/RecognitionStatus'
+                              failure_causes:
+                                type: string
+                                description: |
+                                  Task failure reason.  
+                                  When recognition_status is 2, this field is present.
                               verification_status:
                                 $ref: '#/components/schemas/VerificationStatus'
                               category:
@@ -426,6 +431,12 @@ paths:
                                 type: array
                                 items:
                                   $ref: '#/components/schemas/SubFileDetailInfo'
+                              duration_ms:
+                                type: integer
+                                description: |
+                                  Task processing time, unit: milliseconds
+                                  Calculated from the start of the task to completion (success or failure), excluding queue waiting time.
+                                example: 10000
                             required:
                               - id
                               - name

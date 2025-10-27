@@ -1129,21 +1129,7 @@ components:
           type: string
           description: Field value
         position:
-          description: Position of the field value. Field values may span pages or rows, so they are displayed as arrays.
-          type: array
-          items:
-            type: object
-            properties:
-              page:
-                type: integer
-                description: Page where the field is located. It is the index of the pages array
-              vertices:
-                type: array
-                description: Bounding quadrilateral coordinates of the field value. The image uses the top-left as origin, array values are [top-left x, top-left y, top-right x, top-right y, bottom-right x, bottom-right y, bottom-left x, bottom-left y]
-                items:
-                  type: integer
-                minItems: 8
-                maxItems: 8
+          $ref: "#/components/schemas/KeyValuePosition"
     StampValue:
       type: object
       properties:
@@ -1184,21 +1170,7 @@ components:
           type: string
           description: Handwriting text content
         position:
-          description: Position of the field value. Field values may span pages or rows, so they are displayed as arrays.
-          type: array
-          items:
-            type: object
-            properties:
-              page:
-                type: integer
-                description: Page where the field is located. It is the index of the pages array
-              vertices:
-                type: array
-                description: Bounding quadrilateral coordinates of the field value. The image uses the top-left as origin, array values are [top-left x, top-left y, top-right x, top-right y, bottom-right x, bottom-right y, bottom-left x, bottom-left y]
-                items:
-                  type: integer
-                minItems: 8
-                maxItems: 8
+          $ref: "#/components/schemas/KeyValuePosition"
     Document:
       type: object
       properties:
@@ -1249,10 +1221,15 @@ components:
           type: string
           description: Field value
         textInLines:
+          deprecated: true
           type: array
-          description: Field coordinates
+          description: |
+            **Deprecated**, please use position field instead
+            Field coordinates
           items:
             $ref: '#/components/schemas/TextInLines'
+        position:
+          $ref: "#/components/schemas/KeyValuePosition"
         index:
           type: integer
           description: Index
@@ -2228,6 +2205,22 @@ components:
               description: Character coordinates
               example: 1
       description: Field coordinates
+    KeyValuePosition:
+      description: Position of the field value. Field values may span pages or rows, so they are displayed as arrays.
+      type: array
+      items:
+        type: object
+        properties:
+          page:
+            type: integer
+            description: Page where the field is located. It is the index of the pages array
+          vertices:
+            type: array
+            description: Bounding quadrilateral coordinates of the field value. The image uses the top-left as origin, array values are [top-left x, top-left y, top-right x, top-right y, bottom-right x, bottom-right y, bottom-left x, bottom-left y]
+            items:
+              type: integer
+            minItems: 8
+            maxItems: 8
     CommonResultListApiReviewRuleVO:
       type: object
       properties:

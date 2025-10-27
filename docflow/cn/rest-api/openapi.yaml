@@ -1138,21 +1138,7 @@ components:
           type: string
           description: 字段值
         position:
-          description: 字段值的位置。字段值可能跨页或跨行，因此用数组展示。
-          type: array
-          items:
-            type: object
-            properties:
-              page:
-                type: integer
-                description: 字段所在页。是`pages`数组的索引
-              vertices:
-                type: array
-                description: 字段值的外接四边形坐标。图像以左上为原点，数组值为 [左上角x, 左上角y, 右上角x, 右上角y, 右下角x, 右下角y, 左下角x, 左下角y]
-                items:
-                  type: integer
-                minItems: 8
-                maxItems: 8
+          $ref: "#/components/schemas/KeyValuePosition"
     StampValue:
       type: object
       properties:
@@ -1193,21 +1179,23 @@ components:
           type: string
           description: 印章文本内容
         position:
-          description: 字段值的位置。字段值可能跨页或跨行，因此用数组展示。
-          type: array
-          items:
-            type: object
-            properties:
-              page:
-                type: integer
-                description: 字段所在页。是`pages`数组的索引
-              vertices:
-                type: array
-                description: 字段值的外接四边形坐标。图像以左上为原点，数组值为 [左上角x, 左上角y, 右上角x, 右上角y, 右下角x, 右下角y, 左下角x, 左下角y]
-                items:
-                  type: integer
-                minItems: 8
-                maxItems: 8
+          $ref: "#/components/schemas/KeyValuePosition"
+    KeyValuePosition:
+      description: 字段值的位置。字段值可能跨页或跨行，因此用数组展示。
+      type: array
+      items:
+        type: object
+        properties:
+          page:
+            type: integer
+            description: 字段所在页。是`pages`数组的索引
+          vertices:
+            type: array
+            description: 字段值的外接四边形坐标。图像以左上为原点，数组值为 [左上角x, 左上角y, 右上角x, 右上角y, 右下角x, 右下角y, 左下角x, 左下角y]
+            items:
+              type: integer
+            minItems: 8
+            maxItems: 8
     Document:
       type: object
       properties:
@@ -1267,10 +1255,15 @@ components:
           type: string
           description: 字段值
         textInLines:
+          deprecated: true
           type: array
-          description: 字段坐标
+          description: |
+            **已废弃**，请使用position字段替代
+            字段坐标
           items:
             $ref: '#/components/schemas/TextInLines'
+        position:
+          $ref: "#/components/schemas/KeyValuePosition"
         index:
           type: integer
           description: 索引

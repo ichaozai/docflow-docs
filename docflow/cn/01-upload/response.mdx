@@ -18,6 +18,7 @@ Docflow 文件上传是一个异步接口。
       "files":[
          {
             "id":"1955840505753140508",
+            "task_id":"1981692246135111680",
             "name":"企业信用报告.pdf",
             "format":"pdf"
          }
@@ -30,5 +31,6 @@ Docflow 文件上传是一个异步接口。
 
 - `batch_number`: 文件批次编号。可以关联多个同一批次的文件。
 - `files[].id`: 本次上传的文件ID。
+- `files[].task_id`: 任务ID，用于标识文件处理任务。
 
-`batch_number`和`files[].id`都可以作为查询条件用于后续结果获取。
+`batch_number`、`files[].id`和`files[].task_id`都可以作为查询条件用于后续结果获取。

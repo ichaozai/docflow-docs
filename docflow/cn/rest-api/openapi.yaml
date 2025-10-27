@@ -127,6 +127,10 @@ paths:
                                 type: string
                                 description: 文件ID
                                 example: 202412190001
+                              task_id:
+                                type: string
+                                description: 任务ID
+                                example: 1981692246135111680
                               name:
                                 type: string
                                 description: 文件名

@@ -121,6 +121,10 @@ paths:
                                 type: string
                                 description: File ID
                                 example: 202412190001
+                              task_id:
+                                type: string
+                                description: Task ID
+                                example: 1981692246135111680
                               name:
                                 type: string
                                 description: File Name

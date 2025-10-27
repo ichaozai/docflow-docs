@@ -1271,7 +1271,7 @@ components:
                         type: integer
                         minItems: 8
                         maxItems: 8
-                    char_positions:
+                    charPositions:
                       type: array
                       items:
                         type: array

@@ -78,6 +78,23 @@ paths:
                 file:
                   type: string
                   format: binary
+          application/json:
+            schema:
+              type: object
+              properties:
+                urls:
+                  description: |
+                    File URL list
+                    Supports up to 10 file URLs per upload, each file maximum 50MB
+                  type: array
+                  items:
+                    type: string
+                    description: File URL
+                    example: https://example.com/file.pdf
+                    pattern: ^https?://.*$
+                  maxItems: 10
+              required:
+              - urls
       responses:
         '200':
           description: File upload successful

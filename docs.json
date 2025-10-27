@@ -28,6 +28,7 @@
                 "group": "文档上传",
                 "pages": [
                   "docflow/cn/01-upload/quickstart",
+                  "docflow/cn/01-upload/upload_by_urls",
                   "docflow/cn/01-upload/response",
                   "docflow/cn/01-upload/support_format"
                 ]
@@ -108,6 +109,7 @@
                 "group": "Upload",
                 "pages": [
                   "docflow/en/01-upload/quickstart",
+                  "docflow/en/01-upload/upload_by_urls",
                   "docflow/en/01-upload/response",
                   "docflow/en/01-upload/support_format"
                 ]

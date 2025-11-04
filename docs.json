@@ -47,7 +47,8 @@
                 "pages": [
                   "docflow/cn/04-classify/quickstart",
                   "docflow/cn/04-classify/target_process",
-                  "docflow/cn/04-classify/manual"
+                  "docflow/cn/04-classify/manual",
+                  "docflow/cn/04-classify/amend_category"
                 ]
               },
               {
@@ -55,7 +56,9 @@
                 "pages": [
                   "docflow/cn/05-split/quickstart",
                   "docflow/cn/05-split/split",
-                  "docflow/cn/05-split/crop"
+                  "docflow/cn/05-split/crop",
+                  "docflow/cn/05-split/amend_category_split",
+                  "docflow/cn/05-split/amend_category_crop"
                 ]
               },
               {
@@ -129,7 +132,8 @@
                 "pages": [
                   "docflow/en/04-classify/quickstart",
                   "docflow/en/04-classify/target_process",
-                  "docflow/en/04-classify/manual"
+                  "docflow/en/04-classify/manual",
+                  "docflow/en/04-classify/amend_category"
                 ]
               },
               {
@@ -137,7 +141,9 @@
                 "pages": [
                   "docflow/en/05-split/quickstart",
                   "docflow/en/05-split/split",
-                  "docflow/en/05-split/crop"
+                  "docflow/en/05-split/crop",
+                  "docflow/en/05-split/amend_category_split",
+                  "docflow/en/05-split/amend_category_crop"
                 ]
               },
               {

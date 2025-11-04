@@ -630,6 +630,75 @@ paths:
             -H 'x-ti-secret-code: 1234567890' \
             -d '[{"workspace_id": "1234567890", "file_id": "202412190001", "data": {"fields": [{"key": "发票代码", "value": "3100231130"}]}}]' \
             'https://docflow.textin.com/api/app-api/sip/platform/v2/file/update'
+  /api/app-api/sip/platform/v2/file/amend_category:
+    post:
+      summary: 修改文件类别
+      description: |
+        - 对于普通任务，修改普通任务文件类别
+        - 对于文档拆分任务，修改拆分后的文件类型和页码
+        - 对于多图切分任务，修改切分后的文件类型
+      operationId: amendCategory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: 空间ID
+                  example: 1234567890
+                task_id:
+                  type: string
+                  description: 任务ID
+                  example: 1234567890
+                category:
+                  type: string
+                  description: |
+                    新文件类别。
+                    只有当任务类型为普通任务时，才支持更新文件类别。
+                  example: 电子发票（普通发票）
+                split_tasks:
+                  description: 文件拆分任务列表
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      category:
+                        type: string
+                        description: 子任务文件类别
+                        example: 电子发票（普通发票）
+                      pages:
+                        type: array
+                        items:
+                          type: integer
+                          description: 子文件页码，从0开始计数
+                        example: [0, 1]
+                crop_tasks:
+                  description: 多图切分任务列表
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      crop_child_task_id:
+                        type: string
+                        description: 多图切分子任务ID
+                        example: 1234567890
+                      category:
+                        type: string
+                        description: 子任务文件类别
+                        example: 电子发票（普通发票）
+              required:
+                - workspace_id
+                - task_id
+      responses:
+        '200':
+          description: 成功更新文件类别
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
   /api/app-api/sip/platform/v2/review/listByFileBatchNo:
     get:
       tags:

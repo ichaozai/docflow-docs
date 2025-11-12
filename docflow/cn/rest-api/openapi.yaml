@@ -309,15 +309,17 @@ paths:
                                     description: 字段列表
                                     type: array
                                     items:
-                                      $ref: '#/components/schemas/KeyValue'
+                                      $ref: '#/components/schemas/FieldRespKeyValue'
                                     example:
                                     - key: 发票代码
+                                      identifier: 发票代码标识
                                       value: "3100231130"
                                       position:
                                       - page: 0
                                         vertices: [0, 0, 100, 0, 100, 100, 0, 100]
                                     - key: 发票号码
                                       value: "28737000"
+                                      identifier: 发票号码标识
                                       position:
                                       - page: 0
                                         vertices: [0, 0, 100, 0, 100, 100, 0, 100]
@@ -1251,6 +1253,20 @@ components:
           description: 字段值
         position:
           $ref: "#/components/schemas/KeyValuePosition"
+    FieldRespKeyValue:
+      type: object
+      properties:
+        key:
+          type: string
+          description: 字段名
+        identifier:
+          type: string
+          description: 导出字段名
+        value:
+          type: string
+          description: 字段值
+        position:
+          $ref: "#/components/schemas/KeyValuePosition"
     StampValue:
       type: object
       properties:
@@ -1363,6 +1379,9 @@ components:
         key:
           type: string
           description: 字段key
+        identifier:
+          type: string
+          description: 导出字段名
         value:
           type: string
           description: 字段值
@@ -1425,14 +1444,16 @@ components:
               description: 字段列表
               type: array
               items:
-                $ref: '#/components/schemas/KeyValue'
+                $ref: '#/components/schemas/FieldRespKeyValue'
               example:
                 - key: 发票代码
+                  identifier: 发票代码标识
                   value: "3100231130"
                   position:
                     - page: 0
                       vertices: [ 0, 0, 100, 0, 100, 100, 0, 100 ]
                 - key: 发票号码
+                  identifier: 发票号码标识
                   value: "28737000"
                   position:
                     - page: 0

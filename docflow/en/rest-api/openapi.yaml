@@ -303,14 +303,16 @@ paths:
                                     description: Field list
                                     type: array
                                     items:
-                                      $ref: '#/components/schemas/KeyValue'
+                                      $ref: '#/components/schemas/FieldRespKeyValue'
                                     example:
                                     - key: Invoice Code
+                                      identifier: Invoice Code Identifier
                                       value: "3100231130"
                                       position:
                                       - page: 0
                                         vertices: [0, 0, 100, 0, 100, 100, 0, 100]
                                     - key: Invoice Number
+                                      identifier: Invoice Number Identifier
                                       value: "28737000"
                                       position:
                                       - page: 0
@@ -1173,6 +1175,20 @@ components:
           description: Field value
         position:
           $ref: "#/components/schemas/KeyValuePosition"
+    FieldRespKeyValue:
+      type: object
+      properties:
+        key:
+          type: string
+          description: Field name
+        identifier:
+          type: string
+          description: Identifier(from export field name)
+        value:
+          type: string
+          description: Field value
+        position:
+          $ref: "#/components/schemas/KeyValuePosition"
     StampValue:
       type: object
       properties:
@@ -1260,6 +1276,9 @@ components:
         key:
           type: string
           description: Field key
+        identifier:
+          type: string
+          description: Identifier(from export field name)
         value:
           type: string
           description: Field value
@@ -1331,14 +1350,16 @@ components:
               description: Field list
               type: array
               items:
-                $ref: '#/components/schemas/KeyValue'
+                $ref: '#/components/schemas/FieldRespKeyValue'
               example:
                 - key: Invoice Code
+                  identifier: Invoice Code Identifier
                   value: "3100231130"
                   position:
                     - page: 0
                       vertices: [ 0, 0, 100, 0, 100, 100, 0, 100 ]
                 - key: Invoice Number
+                  identifier: Invoice Number Identifier
                   value: "28737000"
                   position:
                     - page: 0

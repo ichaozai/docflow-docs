@@ -78,6 +78,12 @@
                 ]
               },
               {
+                "group": "文档重试",
+                "pages": [
+                  "docflow/cn/09-retry/quickstart"
+                ]
+              },
+              {
                 "group": "常见问题",
                 "pages": [
                   "docflow/cn/100-faq/get_workspace_id",
@@ -160,6 +166,12 @@
                 "group": "Delete Tasks",
                 "pages": [
                   "docflow/en/08-delete/quickstart"
+                ]
+              },
+              {
+                "group": "Retry Tasks",
+                "pages": [
+                  "docflow/en/09-retry/quickstart"
                 ]
               },
               {

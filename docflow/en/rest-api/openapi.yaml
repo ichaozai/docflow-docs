@@ -629,6 +629,37 @@ paths:
                             type: integer
                             description: Number of deleted files
                             example: 1
+  /api/app-api/sip/platform/v2/file/retry:
+    post:
+      summary: Retry File Processing
+      description: Retry processing a file.
+      operationId: retryFile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: Workspace ID
+                  example: 1234567890
+                task_id:
+                  type: string
+                  description: Task ID
+                  example: 1234567890
+              required:
+                - workspace_id
+                - task_id
+      responses:
+        '200':
+          description: Successfully retried file processing
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
   /api/app-api/sip/platform/v2/review/listByFileBatchNo:
     get:
       tags:

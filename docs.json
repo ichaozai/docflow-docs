@@ -21,7 +21,8 @@
                 "pages": [
                   "docflow/cn/00-overview/intro",
                   "docflow/cn/00-overview/quickstart",
-                  "docflow/cn/00-overview/auth"
+                  "docflow/cn/00-overview/auth",
+                  "docflow/cn/00-overview/enterprise_multi_tenant"
                 ]
               },
               {
@@ -87,6 +88,7 @@
                 "group": "常见问题",
                 "pages": [
                   "docflow/cn/100-faq/get_workspace_id",
+                  "docflow/cn/100-faq/get_enterprise_id",
                   "docflow/cn/100-faq/setup_category",
                   "docflow/cn/100-faq/chinese_category_param",
                   "docflow/cn/100-faq/product_charge"
@@ -112,7 +114,8 @@
                 "pages": [
                   "docflow/en/00-overview/intro",
                   "docflow/en/00-overview/quickstart",
-                  "docflow/en/00-overview/auth"
+                  "docflow/en/00-overview/auth",
+                  "docflow/en/00-overview/enterprise_multi_tenant"
                 ]
               },
               {
@@ -178,6 +181,7 @@
                 "group": "FAQ",
                 "pages": [
                   "docflow/en/100-faq/get_workspace_id",
+                  "docflow/en/100-faq/get_enterprise_id",
                   "docflow/en/100-faq/setup_category",
                   "docflow/en/100-faq/chinese_category_param",
                   "docflow/en/100-faq/product_charge"

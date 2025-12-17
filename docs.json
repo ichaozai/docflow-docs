@@ -69,7 +69,8 @@
                   "docflow/cn/06-extract/fields",
                   "docflow/cn/06-extract/tables",
                   "docflow/cn/06-extract/stamps",
-                  "docflow/cn/06-extract/handwritings"
+                  "docflow/cn/06-extract/handwritings",
+                  "docflow/cn/06-extract/extract_specific_fields"
                 ]
               },
               {
@@ -162,7 +163,8 @@
                   "docflow/en/06-extract/fields",
                   "docflow/en/06-extract/tables",
                   "docflow/en/06-extract/stamps",
-                  "docflow/en/06-extract/handwritings"
+                  "docflow/en/06-extract/handwritings",
+                  "docflow/en/06-extract/extract_specific_fields"
                 ]
               },
               {

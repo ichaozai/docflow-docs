@@ -31,6 +31,7 @@
                   "docflow/cn/01-upload/quickstart",
                   "docflow/cn/01-upload/upload_by_urls",
                   "docflow/cn/01-upload/response",
+                  "docflow/cn/01-upload/upload_sync",
                   "docflow/cn/01-upload/support_format",
                   "docflow/cn/01-upload/task_status"
                 ]
@@ -125,6 +126,7 @@
                   "docflow/en/01-upload/quickstart",
                   "docflow/en/01-upload/upload_by_urls",
                   "docflow/en/01-upload/response",
+                  "docflow/en/01-upload/upload_sync",
                   "docflow/en/01-upload/support_format",
                   "docflow/en/01-upload/task_status"
                 ]

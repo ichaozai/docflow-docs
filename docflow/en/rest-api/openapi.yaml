@@ -15,86 +15,15 @@ paths:
       description: ""
       operationId: uploadFile
       parameters:
-        - name: workspace_id
-          in: query
-          description: Workspace ID
-          required: true
-          schema:
-            type: string
-            example: 1234567890
-        - name: category
-          in: query
-          description: File Category
-          required: false
-          schema:
-            type: string
-            example: invoice
-        - name: batch_number
-          in: query
-          description: |
-            Batch Number.            You can upload multiple times with the same batch number, and later retrieve processing results for multiple files in that batch using the batch number.            If the value is empty, the system automatically generates a string up to 20 characters long.
-          required: false
-          schema:
-            type: string
-            example: 202412190001
-        - name: auto_verify_vat
-          in: query
-          description: Whether to automatically verify VAT invoice
-          required: false
-          schema:
-            type: boolean
-            default: false
-        - name: split_flag
-          in: query
-          description: Whether to perform file splitting
-          required: false
-          schema:
-            type: boolean
-            default: false
-        - name: crop_flag
-          in: query
-          description: Whether to perform multi-image cropping
-          required: false
-          schema:
-            type: boolean
-            default: false
-        - name: target_process
-          in: query
-          description: |
-            Target processing type.            Optional values:            - classify: Classification            - extract: Extraction          required: false
-          schema:
-            type: string
-            enum:
-              - classify
-              - extract
-            example: classify
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/Category'
+        - $ref: '#/components/parameters/BatchNumber'
+        - $ref: '#/components/parameters/AutoVerifyVat'
+        - $ref: '#/components/parameters/SplitFlag'
+        - $ref: '#/components/parameters/CropFlag'
+        - $ref: '#/components/parameters/TargetProcess'
       requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                file:
-                  type: string
-                  format: binary
-          application/json:
-            schema:
-              type: object
-              properties:
-                urls:
-                  description: |
-                    File URL list
-                    Supports up to 10 file URLs per upload, each file maximum 50MB
-                  type: array
-                  items:
-                    type: string
-                    description: File URL
-                    example: https://example.com/file.pdf
-                    pattern: ^https?://.*$
-                  maxItems: 10
-              required:
-              - urls
+        $ref: '#/components/requestBodies/FileUploadRequestBody'
       responses:
         '200':
           description: File upload successful
@@ -150,6 +79,31 @@ paths:
             -F 'file=@invoice.pdf'
             -F 'file=@another.pdf'
             'https://docflow.textin.com/api/app-api/sip/platform/v2/file/upload?workspace_id=1234567890&category=invoice&batch_number=202412190001'
+
+  /api/app-api/sip/platform/v2/file/upload/sync:
+    post:
+      summary: Upload File Synchronously
+      description: Upload file and wait for processing to complete, returning processing results directly
+      operationId: uploadFileSync
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/Category'
+        - $ref: '#/components/parameters/BatchNumber'
+        - $ref: '#/components/parameters/AutoVerifyVat'
+        - $ref: '#/components/parameters/SplitFlag'
+        - $ref: '#/components/parameters/CropFlag'
+        - $ref: '#/components/parameters/TargetProcess'
+      requestBody:
+        $ref: '#/components/requestBodies/FileUploadRequestBody'
+      responses:
+        '200':
+          description: File uploaded and processed successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/CodeMessage'
+                - $ref: '#/components/schemas/TaskProcessResult'
 
   /api/app-api/sip/platform/v2/file/fetch:
     get:
@@ -1147,6 +1101,97 @@ paths:
               schema:
                 $ref: '#/components/schemas/CommonResultListApiReviewRuleAndTaskRespVO'
 components:
+  parameters:
+    WorkspaceId:
+      name: workspace_id
+      in: query
+      description: Workspace ID
+      required: true
+      schema:
+        type: string
+        example: 1234567890
+    Category:
+      name: category
+      in: query
+      description: File Category
+      required: false
+      schema:
+        type: string
+        example: invoice
+    BatchNumber:
+      name: batch_number
+      in: query
+      description: |
+        Batch Number.            You can upload multiple times with the same batch number, and later retrieve processing results for multiple files in that batch using the batch number.            If the value is empty, the system automatically generates a string up to 20 characters long.
+      required: false
+      schema:
+        type: string
+        example: 202412190001
+    AutoVerifyVat:
+      name: auto_verify_vat
+      in: query
+      description: Whether to automatically verify VAT invoice
+      required: false
+      schema:
+        type: boolean
+        default: false
+    SplitFlag:
+      name: split_flag
+      in: query
+      description: Whether to perform file splitting
+      required: false
+      schema:
+        type: boolean
+        default: false
+    CropFlag:
+      name: crop_flag
+      in: query
+      description: Whether to perform multi-image cropping
+      required: false
+      schema:
+        type: boolean
+        default: false
+    TargetProcess:
+      name: target_process
+      in: query
+      description: |
+        Target processing type.            Optional values:            - classify: Classification            - extract: Extraction
+      required: false
+      schema:
+        type: string
+        enum:
+          - classify
+          - extract
+        example: classify
+  requestBodies:
+    FileUploadRequestBody:
+      description: File upload request body
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              file:
+                type: string
+                format: binary
+        application/json:
+          schema:
+            type: object
+            properties:
+              urls:
+                description: |
+                  File URL list
+                  Supports up to 10 file URLs per upload, each file maximum 50MB
+                type: array
+                items:
+                  type: string
+                  description: File URL
+                  example: https://example.com/file.pdf
+                  pattern: ^https?://.*$
+                maxItems: 10
+            required:
+            - urls
   schemas:
     RecognitionStatus:
       type: integer

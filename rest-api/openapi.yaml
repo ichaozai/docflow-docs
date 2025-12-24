@@ -2224,7 +2224,7 @@ components:
             type: string
             description: 任务ID列表
             example: 123
-      description: 提交审核任务 Request VO
+      description: 新建审核任务 Request VO
     CommonResultListApiReviewTaskSubmitRespVO:
       type: object
       properties:

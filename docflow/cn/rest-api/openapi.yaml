@@ -1014,10 +1014,104 @@ paths:
               schema:
                 allOf:
                   - $ref: '#/components/schemas/CodeMessage'
+  /api/app-api/sip/platform/v2/review/rule_repo/list:
+    get:
+      summary: 获取审核规则库列表
+      description: 获取审核规则库列表, 包含规则库下的规则组和规则信息
+      operationId: listReviewRuleRepo
+      tags:
+        - 智能审核
+      parameters:
+        - name: workspace_id
+          in: query
+          description: 空间ID
+          required: true
+          schema:
+            type: string
+            example: "1234567890"
+        - name: page
+          in: query
+          description: 页码
+          required: false
+          schema:
+            type: integer
+            example: 1
+            default: 1
+        - name: page_size
+          in: query
+          description: 每页条数
+          required: false
+          schema:
+            type: integer
+            example: 10
+            default: 10
+      responses:
+        '200':
+          description: 成功获取审核规则库列表
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          repos:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/ReviewRuleRepo'
+                          total:
+                            type: integer
+                            description: 总条数
+                            example: 100
+                          page:
+                            type: integer
+                            description: 页码
+                            example: 1
+                          page_size:
+                            type: integer
+                            description: 每页条数
+                            example: 10
+  /api/app-api/sip/platform/v2/review/rule_repo/get:
+    get:
+      summary: 获取审核规则库
+      description: 获取审核规则库
+      operationId: getReviewRuleRepo
+      tags:
+        - 智能审核
+      parameters:
+        - name: workspace_id
+          in: query
+          description: 空间ID
+          required: true
+          schema:
+            type: string
+            example: "1234567890"
+        - name: repo_id
+          in: query
+          description: 审核规则库ID
+          required: true
+          schema:
+            type: string
+            example: "31415926"
+      responses:
+        '200':
+          description: 成功获取审核规则库
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        $ref: '#/components/schemas/ReviewRuleRepo'
   /api/app-api/sip/platform/v2/review/task/submit:
     post:
-      summary: 提交审核任务
-      description: 提交审核任务
+      summary: 新建审核任务
+      description: 新建审核任务
       operationId: submitReviewTask
       tags:
         - 智能审核
@@ -1054,7 +1148,7 @@ paths:
                 - extract_task_ids
       responses:
         '200':
-          description: 成功提交审核任务
+          description: 成功新建审核任务
           content:
             application/json:
               schema:
@@ -1106,8 +1200,8 @@ paths:
                   - $ref: '#/components/schemas/CodeMessage'
   /api/app-api/sip/platform/v2/review/task/result:
     post:
-      summary: 获取审核任务结果
-      description: 获取审核任务结果
+      summary: 获取审核结果
+      description: 获取审核结果
       operationId: getReviewTaskResult
       tags:
         - 智能审核
@@ -1221,27 +1315,7 @@ paths:
                                         description: 审核规则提示词
                                         example: "审核规则提示词"
                                       review_result:
-                                        type: integer
-                                        description: |
-                                          审核结果
-                                          - 0: 待审核
-                                          - 1: 审核通过
-                                          - 2: 审核失败
-                                          - 3: 审核中
-                                          - 4: 审核不通过
-                                          - 5: 识别中
-                                          - 6: 排队中
-                                          - 7: 识别失败
-                                        example: 1
-                                        enum:
-                                          - 0
-                                          - 1
-                                          - 2
-                                          - 3
-                                          - 4
-                                          - 5
-                                          - 6
-                                          - 7
+                                        $ref: '#/components/schemas/ReviewTaskStatus'
                                       reasoning:
                                         type: string
                                         description: 审核依据
@@ -1279,6 +1353,109 @@ paths:
                                               type: integer
                                               description: 所在文件中的页码
                                               example: 1
+                                            source:
+                                              type: string
+                                              description: |
+                                                位置回溯来源
+                                                - "ocr": 识别
+                                                - "extract_field": 关联字段
+                                              example: "ocr"
+                                              enum:
+                                                - ocr
+                                                - extract_field
+                                            file_category:
+                                              type: string
+                                              description: 文件类别
+                                              example: "发票"
+                                            field_name:
+                                              type: string
+                                              description: 关联字段名称
+                                              example: "发票代码"
+                                      audit_result:
+                                        type: integer
+                                        description: |
+                                          人工复核结果
+                                          - 0: 人工复核不通过
+                                          - 1: 人工复核通过
+                                        example: 1
+                                        enum:
+                                          - 0
+                                          - 1
+                                      audit_message:
+                                        type: string
+                                        description: 人工复核批注
+                                        example: "人工复核批注"
+  /api/app-api/sip/platform/v2/review/task/retry:
+    post:
+      summary: 重新审核任务
+      description: 重新审核任务
+      operationId: retryReviewTask
+      tags:
+        - 智能审核
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: 空间ID
+                  example: "1234567890"
+                task_id:
+                  type: string
+                  description: 审核任务ID
+                  example: "31415926"
+              required:
+                - workspace_id
+                - task_id
+      responses:
+        '200':
+          description: 成功重新审核任务
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+  /api/app-api/sip/platform/v2/review/task/rule/retry:
+    post:
+      summary: 重新审核任务中的某条规则
+      description: 重新审核任务中的某条规则。
+      operationId: retryReviewTaskRule
+      tags:
+        - 智能审核
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: 空间ID
+                  example: "1234567890"
+                task_id:
+                  type: string
+                  description: 审核任务ID
+                  example: "31415926"
+                rule_id:
+                  type: string
+                  description: 审核规则ID
+                  example: "31415926"
+              required:
+                - workspace_id
+                - task_id
+                - rule_id
+      responses:
+        '200':
+          description: 成功重新审核任务中的某条规则
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
 components:
   parameters:
     WorkspaceId:
@@ -1418,17 +1595,82 @@ components:
             required:
             - urls
   schemas: 
+    ReviewRuleRepo:
+      type: object
+      properties:
+        repo_id:
+          type: string
+          description: 审核规则库ID
+          example: "31415926"
+        name:
+          type: string
+          description: 审核规则库名称
+          example: "审核规则库1"
+        groups:
+          description: 规则库下的规则组列表
+          type: array
+          items:
+            $ref: '#/components/schemas/ReviewRuleGroup'
+        category_ids:
+          type: array
+          items:
+            type: string
+            description: 分类ID
+            example: "1234567890"
+    ReviewRuleGroup:
+      type: object
+      properties:
+        group_id:
+          type: string
+          description: 规则组ID
+          example: "31415926"
+        name:
+          type: string
+          description: 规则组名称
+          example: "审核规则组1"
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReviewRule'
+    ReviewRule:
+      type: object
+      properties:
+        rule_id:
+          type: string
+          description: 规则ID
+          example: "31415926"
+        name:
+          type: string
+          description: 规则名称
+          example: "审核规则1"
+        prompt:
+          type: string
+          description: 规则提示词
+          example: "审核规则提示词"
+        category_ids:
+          type: array
+          items:
+            type: string
+            description: 分类ID
+            example: "1234567890"
+        risk_level:
+          $ref: '#/components/schemas/RiskLevel'
+        referenced_fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReviewRuleReferencedField'
     ReviewTaskStatus:
       type: integer
       description: |
         任务状态
-        - 0: 待审核
-        - 1: 审核成功
+        - 0: 未审核
+        - 1: 审核通过
         - 2: 审核失败
         - 3: 审核中
-        - 4: 识别中，参与审核任务的文件有部分识别中
-        - 5: 排队中
-        - 6: 识别失败，参与审核任务的文件有部分识别失败
+        - 4: 审核不通过
+        - 5: 识别中
+        - 6: 排队中
+        - 7: 识别失败
       enum:
         - 0
         - 1
@@ -1437,6 +1679,7 @@ components:
         - 4
         - 5
         - 6
+        - 7
     ReviewRuleProperties:
       type: object
       properties:
@@ -1452,7 +1695,7 @@ components:
           type: string
           description: 规则提示词
           example: "审核规则提示词"
-        catetory_ids:
+        category_ids:
           type: array
           items:
             type: string

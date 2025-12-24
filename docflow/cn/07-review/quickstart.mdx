@@ -1,115 +1,376 @@
 ---
 title: "快速启动"
-description: "参考示例，快速用API集成文档审核功能"
+description: "了解如何在界面上使用智能审核功能"
 ---
 
-本文概览 DocFlow 审核相关接口的基本调用顺序：获取批次与任务 → 查询模型字段 → 创建/更新规则 → 试运行 → 提交审核任务。
-
 <Tip>
-审核接口需要额外的 `workspaceIdNo`、`fileBatchNo` 等参数，这些通常来自页面或前置接口返回。请先通过“批次列表”和“任务类别列表”接口获取。
+  智能审核功能可以帮助您自动检查文档抽取结果的准确性和合规性。本文介绍如何在界面上使用审核功能，让您快速了解审核功能的基本使用流程。
 </Tip>
 
-## 获取批次列表（前置）
+智能审核是 DocFlow 提供的一项自动化审核功能，它基于您配置的审核规则，自动对文档抽取结果进行审核，帮助您快速发现潜在问题。
 
-```bash curl icon=terminal wrap
-curl \
-  -H "x-ti-app-id: <your-app-id>" \
-  -H "x-ti-secret-code: <your-secret-code>" \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/review/listByFileBatchNo?workspaceIdNo=<workspaceIdNo>"
+## 审核功能概述
+
+智能审核功能的核心流程包括：
+
+1. **配置审核规则** - 在规则库中创建规则组和规则，定义审核标准
+2. **创建审核任务** - 选择需要审核的抽取任务，提交审核任务
+3. **查看审核结果** - 获取审核结果，查看哪些规则通过、哪些不通过，以及审核依据
+
+## 界面使用流程
+
+### 步骤 1: 创建规则库
+
+在审核管理界面，首先需要创建一个**规则库**（Rule Repository）。规则库是审核规则的容器，用于组织和管理相关的审核规则。
+
+- 点击"创建规则库"按钮
+- 输入规则库名称（例如："发票审核规则库"）
+- 保存后获得规则库ID
+
+### 步骤 2: 创建规则组
+
+在规则库下创建**规则组**（Rule Group），用于对规则进行分类管理。
+
+- 选择已创建的规则库
+- 点击"创建规则组"
+- 输入规则组名称（例如："发票合规性检查"）
+- 保存后获得规则组ID
+
+### 步骤 3: 创建审核规则
+
+在规则组下创建具体的**审核规则**（Rule），定义审核的具体标准。
+
+创建规则时需要配置：
+
+- **规则名称**：规则的标识名称
+- **规则提示词**：描述审核规则的提示词，用于指导AI进行审核判断
+- **适用分类**：规则适用于哪些文档分类（如：发票、合同等）
+- **风险等级**：规则的风险等级（高风险、中风险、低风险）
+- **关联字段**：规则需要关联的抽取字段，用于审核时获取字段值
+
+示例规则：
+- 规则名称："发票金额校验"
+- 规则提示词："检查发票金额是否大于0且小于1000000"
+- 适用分类：发票
+- 风险等级：高风险
+- 关联字段：发票金额
+
+### 步骤 4: 创建审核任务
+
+当您有已完成抽取的任务时，可以创建审核任务进行审核。
+
+- 选择需要审核的抽取任务（extract_task_ids）
+- 选择要使用的规则库（repo_id）
+- 输入任务名称
+- 提交审核任务
+
+系统会自动将规则库中的规则与抽取任务进行匹配，对匹配的规则执行审核。
+
+### 步骤 5: 查看审核结果
+
+审核任务提交后，系统会自动执行审核。您可以查看审核结果：
+
+- **任务状态**：查看审核任务的整体状态（待审核、审核中、审核成功、审核失败等）
+- **规则组结果**：查看每个规则组的审核情况
+- **规则结果**：查看每个具体规则的审核结果（通过/不通过）
+- **审核依据**：查看AI给出的审核依据，了解为什么通过或不通过
+- **位置回溯**：查看审核依据在原文中的位置，便于定位问题
+
+## 审核结果说明
+
+审核结果包含以下信息：
+
+- **审核状态**：
+  - `0`: 未审核
+  - `1`: 审核通过
+  - `2`: 审核失败
+  - `3`: 审核中
+  - `4`: 审核不通过
+
+- **审核依据**：AI给出的审核理由，说明为什么得出该审核结果
+
+- **位置回溯**：审核依据在原文中的位置坐标，可用于在文档中高亮显示相关区域
+
+## 术语解释
+
+本文介绍智能审核功能中的核心概念，帮助您更好地理解和使用审核功能。
+
+### 规则库管理
+
+规则库管理采用三层结构：**规则库（Rule Repository）** → **规则组（Rule Group）** → **规则（Rule）**
+
+#### 规则库（Rule Repository）
+
+规则库是审核规则的顶层容器，用于组织和管理相关的审核规则。一个工作空间可以创建多个规则库，每个规则库可以包含多个规则组。
+
+**特点：**
+- 规则库是规则的逻辑分组，便于管理不同业务场景的审核规则
+- 创建审核任务时需要指定使用的规则库
+- 规则库可以独立创建、更新和删除
+
+**示例：**
+- "发票审核规则库" - 包含所有发票相关的审核规则
+- "合同审核规则库" - 包含所有合同相关的审核规则
+
+#### 规则组（Rule Group）
+
+规则组是规则库下的二级分类，用于对规则进行更细粒度的分组管理。一个规则库可以包含多个规则组，一个规则组可以包含多个规则。
+
+**特点：**
+- 规则组用于对规则进行分类，便于查找和管理
+- 在审核结果中，规则组是结果展示的一个维度
+- 规则组可以独立创建、更新和删除
+
+**示例：**
+在"发票审核规则库"下可以创建：
+- "发票合规性检查" - 检查发票是否符合合规要求
+- "发票金额校验" - 检查发票金额的合理性
+- "发票日期校验" - 检查发票日期的有效性
+
+#### 规则（Rule）
+
+规则是审核的最小执行单元，定义了具体的审核标准和逻辑。一个规则组可以包含多个规则。
+
+**规则组成：**
+
+1. **规则名称**：规则的标识名称，便于识别和管理
+2. **规则提示词（Prompt）**：描述审核规则的提示词，用于指导AI进行审核判断。这是规则的核心，需要清晰描述审核的标准和逻辑
+3. **适用分类（Category IDs）**：规则适用于哪些文档分类。只有匹配到这些分类的抽取任务才会应用该规则
+4. **风险等级（Risk Level）**：
+   - `10`: 高风险
+   - `20`: 中风险
+   - `30`: 低风险
+5. **关联字段（Referenced Fields）**：规则需要关联的抽取字段，用于审核时获取字段值
+
+**规则示例：**
+
+```json
+{
+  "name": "发票金额校验",
+  "prompt": "检查发票金额是否大于0且小于1000000，如果不在范围内则审核不通过",
+  "category_ids": ["invoice_category_id"],
+  "risk_level": 10,
+  "referenced_fields": [
+    {
+      "category_id": "invoice_category_id",
+      "category_name": "发票",
+      "fields": [
+        {
+          "field_id": "amount_field_id",
+          "field_name": "发票金额"
+        }
+      ]
+    }
+  ]
+}
 ```
 
-从响应中获得 `fileBatchNo`。
+### 审核对象
 
-## 获取任务类别列表（前置）
+审核对象是**抽取任务（Extract Task）**，即已完成文档抽取的任务。
 
-```bash curl icon=terminal wrap
-curl \
-  -H "x-ti-app-id: <your-app-id>" \
-  -H "x-ti-secret-code: <your-secret-code>" \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/review/listExecuteTasksByFileBatchNo?workspaceIdNo=<workspaceIdNo>&fileBatchNo=<fileBatchNo>"
+**抽取任务的特点：**
+- 抽取任务由文档上传和抽取流程产生
+- 每个抽取任务对应一个或多个文件
+- 抽取任务包含抽取结果，包括字段、表格、印章等信息
+- 只有已完成抽取的任务才能作为审核对象
+
+**获取抽取任务ID：**
+- 通过文件上传接口返回的 `task_id` 
+- 通过文件查询接口获取已完成抽取的文件对应的任务ID
+
+### 审核任务
+
+审核任务（Review Task）是将规则库应用到抽取任务上的一次审核执行。
+
+**审核任务的组成：**
+- **任务名称**：审核任务的标识名称
+- **规则库ID**：指定使用的规则库
+- **抽取任务ID列表**：需要审核的抽取任务ID
+
+**审核任务的执行流程：**
+
+1. **规则匹配**：系统根据规则库中的规则，与抽取任务的分类进行匹配
+   - 匹配标准：规则的 `category_ids` 中的所有分类都必须存在于抽取任务的分类列表中
+   - 匹配结果：只有匹配成功的规则才会被执行
+2. **字段获取**：对于匹配的规则，如果规则配置了关联字段，系统会从抽取结果中获取这些字段的值
+   - 关联字段可以为空，如果为空则只使用文档原始内容
+   - 如果字段缺失，该字段值为空，但审核仍会执行
+3. **AI审核**：基于规则提示词和字段值（如果有），AI进行审核判断
+4. **结果生成**：生成审核结果，包括审核状态、审核依据、位置回溯等信息
+
+### 审核规则和抽取任务的匹配方法
+
+系统通过**分类匹配**的方式将审核规则与抽取任务进行匹配。**关联字段与规则匹配无关**，关联字段只是说明在审核该分类时，如果需要使用抽取字段，则使用哪些字段。关联字段可以为空。
+
+#### 匹配规则
+
+规则匹配的判断标准：
+
+- 规则配置了 `category_ids`（适用分类列表）
+- 抽取任务包含一个或多个文档分类
+- **如果规则的 `category_ids` 中的所有分类都在抽取任务的分类列表中，则规则匹配成功**
+- **如果规则的 `category_ids` 中有任何一个分类不在抽取任务的分类列表中，则规则不匹配**
+
+#### 匹配示例
+
+假设待审核的抽取任务中包含 **A、B、C** 三个分类：
+
+- **审核规则一**：关联分类 `["A", "B"]`
+- **审核规则二**：关联分类 `["C"]`
+- **审核规则三**：关联分类 `["C", "D"]`
+
+匹配结果：
+- ✅ **审核规则一**：匹配成功（A 和 B 都在抽取任务的分类列表中）
+- ✅ **审核规则二**：匹配成功（C 在抽取任务的分类列表中）
+- ❌ **审核规则三**：匹配失败（D 不在抽取任务的分类列表中）
+
+#### 关联字段的作用
+
+**重要说明**：关联字段（`referenced_fields`）与规则匹配无关。
+
+关联字段的作用是：
+- 当规则匹配成功后，系统需要执行审核时，如果规则提示词中需要使用抽取字段的值，则从关联字段中获取
+- 关联字段可以为空，如果为空，则审核时只使用文档的原始内容，不使用抽取字段
+- 如果规则关联了字段，但抽取任务中该字段缺失，审核仍然会执行，只是该字段的值为空
+
+**示例：**
+
+```json
+{
+  "name": "发票金额校验",
+  "prompt": "检查发票金额是否大于0且小于1000000",
+  "category_ids": ["invoice"],
+  "referenced_fields": [
+    {
+      "category_id": "invoice",
+      "fields": [
+        {
+          "field_id": "amount_field_id",
+          "field_name": "发票金额"
+        }
+      ]
+    }
+  ]
+}
 ```
 
-从响应中获得 `taskClassificationIdNo`（分类 id）。
+在这个例子中：
+- 规则匹配：只要抽取任务的分类包含 `invoice`，规则就会匹配
+- 关联字段：如果规则匹配成功，审核时会从抽取结果中获取"发票金额"字段的值，用于审核判断
+- 如果"发票金额"字段缺失，审核仍然会执行，只是该字段值为空
 
-## 获取模型字段（用于规则配置）
+### 关联字段
 
-```bash curl icon=terminal wrap
-curl -X POST \
-  -H "x-ti-app-id: <your-app-id>" \
-  -H "x-ti-secret-code: <your-secret-code>" \
-  -H "Content-Type: application/json" \
-  -d '{"classificationIdNoList": ["<taskClassificationIdNo>"]}' \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/review/listModelFieldInfoByClassificationIdNoList"
+关联字段（Referenced Fields）用于指定在审核时需要使用哪些抽取字段的值。**关联字段与规则匹配无关**，它只是在规则匹配成功后，用于告诉系统在审核该分类时应该使用哪些字段的值。
+
+**重要说明：**
+- 关联字段可以为空，如果为空，审核时只使用文档的原始内容
+- 关联字段不影响规则匹配，规则匹配只基于分类（`category_ids`）
+- 如果关联的字段在抽取结果中缺失，审核仍然会执行，只是该字段的值为空
+
+**关联字段的结构：**
+
+关联字段按分类组织，每个分类下可以包含：
+- **普通字段（Fields）**：文档中的键值对字段
+- **表格字段（Tables）**：文档中的表格字段
+
+**关联字段的作用：**
+- 当规则匹配成功并执行审核时，系统会从抽取结果中获取关联字段的值
+- 字段值会作为上下文信息提供给AI，结合规则提示词进行审核判断
+- 如果字段值缺失，审核仍然会执行，但可能影响审核的准确性（取决于规则提示词是否依赖该字段）
+
+**关联字段示例：**
+
+```json
+{
+  "referenced_fields": [
+    {
+      "category_id": "invoice_category_id",
+      "category_name": "发票",
+      "fields": [
+        {
+          "field_id": "invoice_code_id",
+          "field_name": "发票代码"
+        },
+        {
+          "field_id": "invoice_amount_id",
+          "field_name": "发票金额"
+        }
+      ],
+      "tables": [
+        {
+          "table_id": "invoice_items_table_id",
+          "table_name": "发票明细",
+          "fields": [
+            {
+              "field_id": "item_name_id",
+              "field_name": "货物名称"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
 ```
 
-返回的 `data[]` 中包含字段、表格及其坐标等信息。
+### 审核依据
 
-## 创建审核规则
+审核依据（Reasoning）是AI给出的审核理由，说明为什么得出该审核结果。
 
-```bash curl icon=terminal wrap
-curl -X POST \
-  -H "x-ti-app-id: <your-app-id>" \
-  -H "x-ti-secret-code: <your-secret-code>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "ruleName": "规则名称",
-    "rulePrompt": "规则提示",
-    "classificationIdNoList": ["<taskClassificationIdNo>"],
-    "fileBatchNo": "<fileBatchNo>",
-    "workspaceIdNo": "<workspaceIdNo>"
-  }' \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/review/create"
+**审核依据的特点：**
+- 审核依据是文本形式，描述审核的判断过程
+- 审核依据中会引用相关的字段值或文档内容
+- 审核依据可以帮助用户理解审核结果
+
+**位置回溯（Anchors）：**
+
+位置回溯是审核依据在原文中的位置信息，用于定位审核依据在文档中的具体位置。
+
+**位置回溯的结构：**
+
+```json
+{
+  "anchors": [
+    {
+      "start_pos": 0,      // 在reasoning中的起始字符位置
+      "end_pos": 10,       // 在reasoning中的结束字符位置
+      "text": "原文内容",   // 原文内容
+      "vertices": [        // 原文内容的外接四边形坐标
+        0, 0, 100, 0, 100, 100, 0, 100
+      ],
+      "file_id": "file_id" // 文件ID
+    }
+  ]
+}
 ```
 
-响应返回 `ruleIdNo`。
+**位置回溯的作用：**
+- 可以在文档中高亮显示审核依据的位置
+- 帮助用户快速定位问题所在
+- 提供可视化的审核结果展示
 
-## 更新审核规则（可选）
+### 审核结果状态
 
-```bash curl icon=terminal wrap
-curl -X POST \
-  -H "x-ti-app-id: <your-app-id>" \
-  -H "x-ti-secret-code: <your-secret-code>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "ruleIdNo": "<ruleIdNo>",
-    "ruleName": "新的规则名",
-    "rulePrompt": "新的规则提示"
-  }' \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/review/update"
-```
+审核结果有多种状态，表示审核的不同阶段和结果：
 
-## 试运行审核规则（评估）
+- `0`: 未审核
+- `1`: 审核通过
+- `2`: 审核失败
+- `3`: 审核中
+- `4`: 审核不通过
+- `5`: 识别中
+- `6`: 排队中
+- `7`: 识别失败
 
-先通过 `listTaskDetailInfoByClassificationIdNo` 获取 `executeTaskId`，再进行试运行：
+### 总结
 
-```bash curl icon=terminal wrap
-curl -X POST \
-  -H "x-ti-app-id: <your-app-id>" \
-  -H "x-ti-secret-code: <your-secret-code>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "ruleIdNo": "<ruleIdNo>",
-    "executeTaskIdList": ["<executeTaskId>"]
-  }' \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/review/runRule"
-```
+智能审核功能通过规则库、规则组、规则的三层结构管理审核标准，通过分类匹配和字段关联将规则应用到抽取任务上，使用AI进行审核判断，并生成包含审核依据和位置回溯的审核结果，帮助用户快速发现文档中的潜在问题。
 
-返回 `evalResult`、`resultHighlights` 等。
 
-## 提交审核任务
+## 下一步
 
-当规则评估通过后，可提交正式审核任务：
-
-```bash curl icon=terminal wrap
-curl -X POST \
-  -H "x-ti-app-id: <your-app-id>" \
-  -H "x-ti-secret-code: <your-secret-code>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "ruleIdNoList": [<ruleIdNo>],
-    "executeTaskIdList": ["<executeTaskId>"]
-  }' \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/review/submitReviewTask"
-```
-
-响应返回 `reviewTaskId` 列表。
+- 学习[通过 API 管理规则库](./rule_management) - 使用 REST API 进行规则库管理
+- 学习[通过 API 创建审核任务](./create_task) - 使用 REST API 创建审核任务
+- 学习[获取和使用审核结果](./get_result) - 使用 REST API 获取审核结果并处理

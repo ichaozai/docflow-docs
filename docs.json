@@ -75,6 +75,16 @@
                 ]
               },
               {
+                "group": "智能审核",
+                "pages": [
+                  "docflow/cn/07-review/quickstart",
+                  "docflow/cn/07-review/rule_management",
+                  "docflow/cn/07-review/create_task",
+                  "docflow/cn/07-review/get_result",
+                  "docflow/cn/07-review/retry_task"
+                ]
+              },
+              {
                 "group": "文档删除",
                 "pages": [
                   "docflow/cn/08-delete/quickstart"
@@ -167,6 +177,16 @@
                   "docflow/en/06-extract/stamps",
                   "docflow/en/06-extract/handwritings",
                   "docflow/en/06-extract/extract_specific_fields"
+                ]
+              },
+              {
+                "group": "Review",
+                "pages": [
+                  "docflow/en/07-review/quickstart",
+                  "docflow/en/07-review/rule_management",
+                  "docflow/en/07-review/create_task",
+                  "docflow/en/07-review/get_result",
+                  "docflow/en/07-review/retry_task"
                 ]
               },
               {

@@ -670,6 +670,251 @@ paths:
                                   type: array
                                   items:
                                     $ref: '#/components/schemas/CategoryField'
+  /api/app-api/sip/platform/v2/review/task/submit:
+    post:
+      summary: 新建审核任务
+      description: 新建审核任务
+      operationId: submitReviewTask
+      tags:
+        - 智能审核
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: 空间ID
+                  example: "1234567890"
+                name:
+                  type: string
+                  description: 任务名称
+                  example: "审核任务1"
+                  maxLength: 100
+                repo_id:
+                  type: string
+                  description: 审核规则库ID
+                  example: "31415926"
+                extract_task_ids:
+                  type: array
+                  items:
+                    type: string
+                    description: 抽取任务ID
+                    example: "1234567890"
+                batch_number:
+                  type: string
+                  description: 批次号
+                  example: "1234567890"
+              required:
+                - workspace_id
+                - name
+                - repo_id
+      responses:
+        '200':
+          description: 成功新建审核任务
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          task_id:
+                            type: string
+                            description: 审核任务ID
+                            example: "31415926"
+  /api/app-api/sip/platform/v2/review/task/result:
+    post:
+      summary: 获取审核结果
+      description: 获取审核结果
+      operationId: getReviewTaskResult
+      tags:
+        - 智能审核
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: 空间ID
+                  example: "1234567890"
+                task_id:
+                  type: string
+                  description: 审核任务ID
+                  example: "31415926"
+              required:
+                - workspace_id
+                - task_id
+      responses:
+        '200':
+          description: 成功获取审核任务结果
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          task_id:
+                            type: string
+                            description: 审核任务ID
+                            example: "31415926"
+                          task_name:
+                            type: string
+                            description: 任务名称
+                            example: "审核任务1"
+                          status:
+                            $ref: '#/components/schemas/ReviewTaskStatus'
+                          rule_repo:
+                            type: object
+                            properties:
+                              repo_id:
+                                type: string
+                                description: 审核规则库ID
+                                example: "31415926"
+                              name:
+                                type: string
+                                description: 审核规则库名称
+                                example: "审核规则库1"
+                          extract_task_ids:
+                            type: array
+                            items:
+                              type: string
+                              description: 抽取任务ID
+                              example: "1234567890"
+                          statistics:
+                            type: object
+                            properties:
+                              pass_count:
+                                type: integer
+                                description: 通过数
+                                example: 100
+                              failure_count:
+                                type: integer
+                                description: 不通过数
+                                example: 100
+                              error_count:
+                                type: integer
+                                description: 任务执行异常数
+                                example: 100
+                          groups:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                group_id:
+                                  type: string
+                                  description: 审核规则组ID
+                                  example: "31415926"
+                                group_name:
+                                  type: string
+                                  description: 审核规则组名称
+                                  example: "审核规则组1"
+                                review_tasks:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      rule_task_id:
+                                        type: string
+                                        description: 审核子任务ID
+                                        example: "31415926"
+                                      rule_id:
+                                        type: string
+                                        description: 审核规则ID
+                                        example: "31415926"
+                                      rule_name:
+                                        type: string
+                                        description: 审核规则名称
+                                        example: "审核规则1"
+                                      risk_level:
+                                        $ref: '#/components/schemas/RiskLevel'
+                                      prompt:
+                                        type: string
+                                        description: 审核规则提示词
+                                        example: "审核规则提示词"
+                                      review_result:
+                                        $ref: '#/components/schemas/ReviewTaskStatus'
+                                      reasoning:
+                                        type: string
+                                        description: 审核依据
+                                        example: "审核依据"
+                                      anchors:
+                                        type: array
+                                        description: 审核依据的位置回溯信息，用于定位审核依据在原文中的位置
+                                        items:
+                                          type: object
+                                          properties:
+                                            start_pos:
+                                              type: integer
+                                              description: 在`reasoning`中的起始字符位置
+                                            end_pos:
+                                              type: integer
+                                              description: 在`reasoning`中的结束字符位置
+                                            text:
+                                              type: string
+                                              description: 原文内容
+                                            vertices:
+                                              type: array
+                                              items:
+                                                type: integer
+                                                description: 原文内容的外接四边形坐标
+                                                example: [0, 0, 100, 0, 100, 100, 0, 100]
+                                            file_id:
+                                              type: string
+                                              description: 文件ID
+                                              example: "1234567890"
+                                            extract_task_id:
+                                              type: string
+                                              description: 抽取任务ID
+                                              example: "1234567890"
+                                            page:
+                                              type: integer
+                                              description: 所在文件中的页码
+                                              example: 1
+                                            source:
+                                              type: string
+                                              description: |
+                                                位置回溯来源
+                                                - "ocr": 识别
+                                                - "extract_field": 关联字段
+                                              example: "ocr"
+                                              enum:
+                                                - ocr
+                                                - extract_field
+                                            file_category:
+                                              type: string
+                                              description: 文件类别
+                                              example: "发票"
+                                            field_name:
+                                              type: string
+                                              description: 关联字段名称
+                                              example: "发票代码"
+                                      audit_result:
+                                        type: integer
+                                        description: |
+                                          人工复核结果
+                                          - 0: 人工复核不通过
+                                          - 1: 人工复核通过
+                                        example: 1
+                                        enum:
+                                          - 0
+                                          - 1
+                                      audit_message:
+                                        type: string
+                                        description: 人工复核批注
+                                        example: "人工复核批注"
   /api/app-api/sip/platform/v2/review/rule_repo/create:
     post:
       summary: 创建审核规则库
@@ -1108,61 +1353,6 @@ paths:
                     properties:
                       result:
                         $ref: '#/components/schemas/ReviewRuleRepo'
-  /api/app-api/sip/platform/v2/review/task/submit:
-    post:
-      summary: 新建审核任务
-      description: 新建审核任务
-      operationId: submitReviewTask
-      tags:
-        - 智能审核
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                workspace_id:
-                  type: string
-                  description: 空间ID
-                  example: "1234567890"
-                name:
-                  type: string
-                  description: 任务名称
-                  example: "审核任务1"
-                  maxLength: 100
-                repo_id:
-                  type: string
-                  description: 审核规则库ID
-                  example: "31415926"
-                extract_task_ids:
-                  type: array
-                  items:
-                    type: string
-                    description: 抽取任务ID
-                    example: "1234567890"
-              required:
-                - workspace_id
-                - name
-                - repo_id
-                - extract_task_ids
-      responses:
-        '200':
-          description: 成功新建审核任务
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/CodeMessage'
-                  - type: object
-                    properties:
-                      result:
-                        type: object
-                        properties:
-                          task_id:
-                            type: string
-                            description: 审核任务ID
-                            example: "31415926"
   /api/app-api/sip/platform/v2/review/task/delete:
     post:
       summary: 删除审核任务
@@ -1198,193 +1388,6 @@ paths:
               schema:
                 allOf:
                   - $ref: '#/components/schemas/CodeMessage'
-  /api/app-api/sip/platform/v2/review/task/result:
-    post:
-      summary: 获取审核结果
-      description: 获取审核结果
-      operationId: getReviewTaskResult
-      tags:
-        - 智能审核
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                workspace_id:
-                  type: string
-                  description: 空间ID
-                  example: "1234567890"
-                task_id:
-                  type: string
-                  description: 审核任务ID
-                  example: "31415926"
-              required:
-                - workspace_id
-                - task_id
-      responses:
-        '200':
-          description: 成功获取审核任务结果
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/CodeMessage'
-                  - type: object
-                    properties:
-                      result:
-                        type: object
-                        properties:
-                          task_id:
-                            type: string
-                            description: 审核任务ID
-                            example: "31415926"
-                          task_name:
-                            type: string
-                            description: 任务名称
-                            example: "审核任务1"
-                          status:
-                            $ref: '#/components/schemas/ReviewTaskStatus'
-                          rule_repo:
-                            type: object
-                            properties:
-                              repo_id:
-                                type: string
-                                description: 审核规则库ID
-                                example: "31415926"
-                              name:
-                                type: string
-                                description: 审核规则库名称
-                                example: "审核规则库1"
-                          extract_task_ids:
-                            type: array
-                            items:
-                              type: string
-                              description: 抽取任务ID
-                              example: "1234567890"
-                          statistics:
-                            type: object
-                            properties:
-                              pass_count:
-                                type: integer
-                                description: 通过数
-                                example: 100
-                              failure_count:
-                                type: integer
-                                description: 不通过数
-                                example: 100
-                              error_count:
-                                type: integer
-                                description: 任务执行异常数
-                                example: 100
-                          groups:
-                            type: array
-                            items:
-                              type: object
-                              properties:
-                                group_id:
-                                  type: string
-                                  description: 审核规则组ID
-                                  example: "31415926"
-                                group_name:
-                                  type: string
-                                  description: 审核规则组名称
-                                  example: "审核规则组1"
-                                review_tasks:
-                                  type: array
-                                  items:
-                                    type: object
-                                    properties:
-                                      rule_task_id:
-                                        type: string
-                                        description: 审核子任务ID
-                                        example: "31415926"
-                                      rule_id:
-                                        type: string
-                                        description: 审核规则ID
-                                        example: "31415926"
-                                      rule_name:
-                                        type: string
-                                        description: 审核规则名称
-                                        example: "审核规则1"
-                                      risk_level:
-                                        $ref: '#/components/schemas/RiskLevel'
-                                      prompt:
-                                        type: string
-                                        description: 审核规则提示词
-                                        example: "审核规则提示词"
-                                      review_result:
-                                        $ref: '#/components/schemas/ReviewTaskStatus'
-                                      reasoning:
-                                        type: string
-                                        description: 审核依据
-                                        example: "审核依据"
-                                      anchors:
-                                        type: array
-                                        description: 审核依据的位置回溯信息，用于定位审核依据在原文中的位置
-                                        items:
-                                          type: object
-                                          properties:
-                                            start_pos:
-                                              type: integer
-                                              description: 在`reasoning`中的起始字符位置
-                                            end_pos:
-                                              type: integer
-                                              description: 在`reasoning`中的结束字符位置
-                                            text:
-                                              type: string
-                                              description: 原文内容
-                                            vertices:
-                                              type: array
-                                              items:
-                                                type: integer
-                                                description: 原文内容的外接四边形坐标
-                                                example: [0, 0, 100, 0, 100, 100, 0, 100]
-                                            file_id:
-                                              type: string
-                                              description: 文件ID
-                                              example: "1234567890"
-                                            extract_task_id:
-                                              type: string
-                                              description: 抽取任务ID
-                                              example: "1234567890"
-                                            page:
-                                              type: integer
-                                              description: 所在文件中的页码
-                                              example: 1
-                                            source:
-                                              type: string
-                                              description: |
-                                                位置回溯来源
-                                                - "ocr": 识别
-                                                - "extract_field": 关联字段
-                                              example: "ocr"
-                                              enum:
-                                                - ocr
-                                                - extract_field
-                                            file_category:
-                                              type: string
-                                              description: 文件类别
-                                              example: "发票"
-                                            field_name:
-                                              type: string
-                                              description: 关联字段名称
-                                              example: "发票代码"
-                                      audit_result:
-                                        type: integer
-                                        description: |
-                                          人工复核结果
-                                          - 0: 人工复核不通过
-                                          - 1: 人工复核通过
-                                        example: 1
-                                        enum:
-                                          - 0
-                                          - 1
-                                      audit_message:
-                                        type: string
-                                        description: 人工复核批注
-                                        example: "人工复核批注"
   /api/app-api/sip/platform/v2/review/task/retry:
     post:
       summary: 重新审核任务

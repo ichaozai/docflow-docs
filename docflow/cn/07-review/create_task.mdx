@@ -16,6 +16,7 @@ description: "通过 REST API 新建审核任务"
 <CodeGroup>
 
 ```bash curl icon=terminal wrap
+# 使用 extract_task_ids
 curl -X POST \
   -H "Content-Type: application/json" \
   -H "x-ti-app-id: <your-app-id>" \
@@ -27,6 +28,19 @@ curl -X POST \
     "extract_task_ids": ["1234567890", "1234567891"]
   }' \
   "https://docflow.textin.com/api/app-api/sip/platform/v2/review/task/submit"
+
+# 使用 batch_number
+# curl -X POST \
+#   -H "Content-Type: application/json" \
+#   -H "x-ti-app-id: <your-app-id>" \
+#   -H "x-ti-secret-code: <your-secret-code>" \
+#   -d '{
+#     "workspace_id": "<your-workspace-id>",
+#     "name": "审核任务1",
+#     "repo_id": "31415926",
+#     "batch_number": "202412190001"
+#   }' \
+#   "https://docflow.textin.com/api/app-api/sip/platform/v2/review/task/submit"
 ```
 
 ```python Python expandable icon=python lines
@@ -39,12 +53,30 @@ workspace_id = "<your-workspace-id>"
 host = "https://docflow.textin.com"
 url = "/api/app-api/sip/platform/v2/review/task/submit"
 
+# 方式1: 使用 extract_task_ids
 payload = {
     "workspace_id": workspace_id,
     "name": "审核任务1",
     "repo_id": "31415926",
     "extract_task_ids": ["1234567890", "1234567891"]
 }
+
+# 方式2: 使用 batch_number
+# payload = {
+#     "workspace_id": workspace_id,
+#     "name": "审核任务1",
+#     "repo_id": "31415926",
+#     "batch_number": "202412190001"
+# }
+
+# 方式3: 同时使用 batch_number 和 extract_task_ids（系统会自动并集去重）
+# payload = {
+#     "workspace_id": workspace_id,
+#     "name": "审核任务1",
+#     "repo_id": "31415926",
+#     "batch_number": "202412190001",
+#     "extract_task_ids": ["1234567890", "1234567891"]
+# }
 
 resp = requests.post(
     url=f"{host}{url}",
@@ -70,7 +102,8 @@ else:
 - `workspace_id` (必填): 工作空间ID
 - `name` (必填): 任务名称，最大长度100
 - `repo_id` (必填): 审核规则库ID
-- `extract_task_ids` (必填): 抽取任务ID数组，需要审核的抽取任务ID列表
+- `extract_task_ids` (可选): 抽取任务ID数组，需要审核的抽取任务ID列表
+- `batch_number` (可选): 批次号，系统会取该批次下的所有任务，与 `extract_task_ids` 做并集（去重）
 
 **响应示例：**
 
@@ -98,9 +131,21 @@ else:
 
 抽取任务ID是已完成文档抽取的任务标识。只有已完成抽取的任务才能作为审核对象。
 
+**重要说明：**
+- 如果传入的是父任务ID（如文件拆分或多图切分产生的父任务），系统会自动查出该父任务的所有子任务作为输入
+- 如果同时提供了 `batch_number` 和 `extract_task_ids`，系统会取批次下的所有任务与 `extract_task_ids` 做并集（自动去重）
+
 **获取抽取任务ID：**
 - 通过文件上传接口返回的 `task_id`
 - 通过文件查询接口 (`/api/app-api/sip/platform/v2/file/fetch`) 获取文件信息，其中的 `task_id` 即为抽取任务ID
+
+### 批次号 (batch_number)
+
+批次号用于批量指定需要审核的任务。当传入 `batch_number` 时，系统会获取该批次下的所有任务用于审核。
+
+**使用场景：**
+- 批量审核同一批次上传的所有文件
+- 与 `extract_task_ids` 配合使用，实现更灵活的任务选择
 
 **示例：获取抽取任务ID**
 
@@ -287,9 +332,11 @@ print(result)
 ## 注意事项
 
 1. **抽取任务状态**：只有已完成抽取的任务（`recognition_status == 1`）才能作为审核对象
-2. **规则匹配**：系统会根据规则的 `category_ids` 和抽取任务的分类进行匹配，只有匹配的规则才会执行审核
-3. **字段关联**：确保规则关联的字段在抽取结果中存在，否则可能影响审核的准确性
-4. **异步执行**：审核任务是异步执行的，创建任务后需要通过[获取审核结果](./get_result)接口查询审核状态和结果
+2. **父任务处理**：如果传入的是父任务ID（如文件拆分或多图切分产生的父任务），系统会自动查出该父任务的所有子任务作为输入进行审核
+3. **批次号与任务ID组合**：如果同时提供了 `batch_number` 和 `extract_task_ids`，系统会取批次下的所有任务与 `extract_task_ids` 做并集（自动去重）
+4. **规则匹配**：系统会根据规则的 `category_ids` 和抽取任务的分类进行匹配，只有匹配的规则才会执行审核
+5. **字段关联**：确保规则关联的字段在抽取结果中存在，否则可能影响审核的准确性
+6. **异步执行**：审核任务是异步执行的，创建任务后需要通过[获取审核结果](./get_result)接口查询审核状态和结果
 
 ## 相关页面
 

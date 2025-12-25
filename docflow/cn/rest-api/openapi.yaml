@@ -22,6 +22,11 @@ paths:
         - $ref: '#/components/parameters/SplitFlag'
         - $ref: '#/components/parameters/CropFlag'
         - $ref: '#/components/parameters/TargetProcess'
+        - $ref: '#/components/parameters/ParserRemoveWatermark'
+        - $ref: '#/components/parameters/ParserCropDewarp'
+        - $ref: '#/components/parameters/ParserApplyMerge'
+        - $ref: '#/components/parameters/ParserFormulaLevel'
+        - $ref: '#/components/parameters/ParserTableTextSplitMode'
       requestBody:
         $ref: '#/components/requestBodies/FileUploadRequestBody'
       responses:
@@ -83,6 +88,11 @@ paths:
         - $ref: '#/components/parameters/SplitFlag'
         - $ref: '#/components/parameters/CropFlag'
         - $ref: '#/components/parameters/TargetProcess'
+        - $ref: '#/components/parameters/ParserRemoveWatermark'
+        - $ref: '#/components/parameters/ParserCropDewarp'
+        - $ref: '#/components/parameters/ParserApplyMerge'
+        - $ref: '#/components/parameters/ParserFormulaLevel'
+        - $ref: '#/components/parameters/ParserTableTextSplitMode'
       requestBody:
         $ref: '#/components/requestBodies/FileUploadRequestBody'
       responses:
@@ -446,6 +456,8 @@ paths:
                   type: string
                   description: 任务ID
                   example: 1234567890
+                parser_params:
+                  $ref: '#/components/schemas/DocumentParserParam'
               required:
                 - workspace_id
                 - task_id
@@ -1068,6 +1080,47 @@ components:
           - classify
           - extract
         example: classify
+    ParserRemoveWatermark:
+      name: parser_remove_watermark
+      in: query
+      description: 是否去水印（0:不去水印、1:去水印）
+      required: false
+      schema:
+        type: integer
+        default: 0
+    ParserCropDewarp:
+      name: parser_crop_dewarp
+      in: query
+      description: 是否进行切边矫正（0:不进行切边矫正、1:进行切边矫正）
+      required: false
+      schema:
+        type: integer
+        default: 0
+    ParserApplyMerge:
+      name: parser_apply_merge
+      in: query
+      description: 是否进行跨页段落表格合并（0:不合并、1:合并）
+      required: false
+      schema:
+        type: integer
+        default: 1
+    ParserFormulaLevel:
+      name: parser_formula_level
+      in: query
+      description: 公式识别等级(0 行间公式和行内公式都识别、1 仅识别行间公式，行内公式不识别、2 不识别公式)
+      required: false
+      schema:
+        type: integer
+        default: 0
+    ParserTableTextSplitMode:
+      name: parser_table_text_split_mode
+      in: query
+      description: 表格线是否分割ocr文本（0:不切割、1:切割）
+      required: false
+      schema:
+        type: integer
+        default: 0
+
   requestBodies:
     FileUploadRequestBody:
       description: 文件上传请求体
@@ -2809,6 +2862,29 @@ components:
             type: integer
             description: PDF转图片时的分辨率。非PDF文件该值为`0`.
             example: 144
+    DocumentParserParam:
+      type: object
+      properties:
+        formula_level:
+          type: integer
+          description: 公式识别等级(0 行间公式和行内公式都识别、1 仅识别行间公式，行内公式不识别、2 不识别公式)
+          example: 0
+        apply_merge:
+          type: integer
+          description: 跨页段落表格合并(0 不合并、1 合并)
+          example: 1
+        table_text_split_mode:
+          type: integer
+          description: 切分被表格线穿过的文本块(0 不切分、1 切分)
+          example: 0
+        crop_dewarp:
+          type: integer
+          description: 是否进行切边矫正(0 不进行切边矫正、1 进行切边矫正)
+          example: 0
+        remove_watermark:
+          type: integer
+          description: 是否去水印(0 不去水印、1 去水印)
+          example: 0
 
   securitySchemes:
     ApiId: # arbitrary name for the security scheme

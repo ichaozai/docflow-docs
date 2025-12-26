@@ -2758,23 +2758,23 @@ components:
       properties:
         formula_level:
           type: integer
-          description: 公式识别等级(0 行间公式和行内公式都识别、1 仅识别行间公式，行内公式不识别、2 不识别公式)
+          description: Formula recognition level (0 recognizes both display and inline formulas, 1 recognizes display formulas only, 2 recognizes no formulas)
           example: 0
         apply_merge:
           type: integer
-          description: 跨页段落表格合并(0 不合并、1 合并)
+          description: Merge cross-page paragraphs and tables (0 no, 1 yes)
           example: 1
         table_text_split_mode:
           type: integer
-          description: 切分被表格线穿过的文本块(0 不切分、1 切分)
+          description: Split text blocks crossed by table lines (0 no, 1 yes)
           example: 0
         crop_dewarp:
           type: integer
-          description: 是否进行切边矫正(0 不进行切边矫正、1 进行切边矫正)
+          description: Crop and dewarp (0 no, 1 yes)
           example: 0
         remove_watermark:
           type: integer
-          description: 是否去水印(0 不去水印、1 去水印)
+          description: Remove watermark (0 no, 1 yes)
           example: 0
 
   securitySchemes:

@@ -201,223 +201,7 @@ paths:
               schema:
                 allOf:
                 - $ref: '#/components/schemas/CodeMessage'
-                - type: object
-                  properties:
-                    result:
-                      type: object
-                      properties:
-                        total:
-                          type: integer
-                          description: Total number of files
-                          example: 100
-                        page:
-                          type: integer
-                          description: Current page number
-                          example: 1
-                        page_size:
-                          type: integer
-                          description: Number of items per page
-                          example: 20
-                        files:
-                          type: array
-                          items:
-                            type: object
-                            properties:
-                              id:
-                                type: string
-                                description: File ID
-                                example: 202412190001
-                              task_id:
-                                type: string
-                                description: Task ID
-                                example: 202412190001
-                              task_type:
-                                $ref: '#/components/schemas/TaskType'
-                              batch_number:
-                                type: string
-                                description: Batch Number
-                                example: 202412190001
-                              name:
-                                type: string
-                                description: File Name
-                                example: invoice.pdf
-                              format:
-                                type: string
-                                description: File Format
-                              recognition_status:
-                                $ref: '#/components/schemas/RecognitionStatus'
-                              failure_causes:
-                                type: string
-                                description: |
-                                  Task failure reason.  
-                                  When recognition_status is 2, this field is present.
-                              verification_status:
-                                $ref: '#/components/schemas/VerificationStatus'
-                              category:
-                                type: string
-                                description: File Category
-                                example: invoice
-                              pages:
-                                $ref: '#/components/schemas/PagesInfo'
-                              data:
-                                type: object
-                                description: Processing result
-                                properties:
-                                  fields:
-                                    description: Field list
-                                    type: array
-                                    items:
-                                      $ref: '#/components/schemas/FieldRespKeyValue'
-                                    example:
-                                    - key: Invoice Code
-                                      identifier: Invoice Code Identifier
-                                      value: "3100231130"
-                                      position:
-                                      - page: 0
-                                        vertices: [0, 0, 100, 0, 100, 100, 0, 100]
-                                    - key: Invoice Number
-                                      identifier: Invoice Number Identifier
-                                      value: "28737000"
-                                      position:
-                                      - page: 0
-                                        vertices: [0, 0, 100, 0, 100, 100, 0, 100]
-                                  items:
-                                    description: Table data list
-                                    type: array
-                                    items:
-                                      type: array
-                                      items:
-                                        $ref: '#/components/schemas/KeyValue'
-                                    example:
-                                    - - key: Goods and Services Name
-                                        value: ＊Electronic Computer＊Microcomputer Host
-                                        position:
-                                        - page: 0
-                                          vertices: [0, 0, 100, 0, 100, 100, 0, 100]
-                                      - key: Specification Model
-                                        value: DMS-SC68
-                                        position:
-                                        - page: 0
-                                          vertices: [0, 0, 100, 0, 100, 100, 0, 100]
-                                    - - key: Goods and Services Name
-                                        value: ＊Mechanical Computer＊Supercomputer Host
-                                        position:
-                                        - page: 0
-                                          vertices: [0, 0, 100, 0, 100, 100, 0, 100]
-                                      - key: Specification Model
-                                        value: AN/FSQ-7
-                                        position:
-                                        - page: 0
-                                          vertices: [0, 0, 100, 0, 100, 100, 0, 100]
-                                  tables:
-                                    description: Complete table data list (including system tables and manually configured tables)
-                                    type: array
-                                    items:
-                                      type: object
-                                      properties:
-                                        tableName:
-                                          description: Table name
-                                          type: string
-                                          example: table1
-                                        tableType:
-                                          description: |
-                                            Table type, 0: system configured, 1: manually added.
-                                          type: string
-                                          example: 0
-                                        items:
-                                          type: array
-                                          items:
-                                            type: array
-                                            items:
-                                              $ref: '#/components/schemas/CommonFieldDetailRespVO'
-                                  stamps:
-                                    description: Stamp information
-                                    type: array
-                                    items:
-                                      $ref: '#/components/schemas/StampValue'
-                                    example:
-                                      - angel: 0
-                                        page: 0
-                                        text: National Unified Invoice Supervision Seal
-                                        type: Other
-                                        color: Red
-                                        shape: Oval Seal
-                                        position: [ 0, 0, 100, 0, 100, 100, 0, 100 ]
-                                      - angel: 0
-                                        page: 0
-                                        text: Tax Bureau Seal
-                                        type: Other
-                                        color: Red
-                                        shape: Oval Seal
-                                        position: [ 0, 0, 100, 0, 100, 100, 0, 100 ]
-                                  handwritings:
-                                    description: Handwriting information
-                                    type: array
-                                    items:
-                                      $ref: '#/components/schemas/HandWritingValue'
-                                    example:
-                                      - angel: 0
-                                        page: 0
-                                        text: March 1st
-                                        position:
-                                          - page: 0
-                                            vertices: [ 0, 0, 100, 0, 100, 100, 0, 100 ]
-                                      - angel: 0
-                                        page: 0
-                                        text: Zhang San
-                                        position:
-                                          - page: 0
-                                            vertices: [ 0, 0, 100, 0, 100, 100, 0, 100 ]
-                                  invoiceVerifyResult:
-                                    description: Invoice verification result
-                                    type: object
-                                    properties:
-                                      invoiceVerifyStatus:
-                                        type: integer
-                                        description: |
-                                          Whether invoice verification is successful (0: No, 1: Yes, null: Not verified)
-                                        example: 0
-                                      invoiceVerifyErrorCode:
-                                        type: integer
-                                        description: Invoice verification error code
-                                        example: 0
-                                      invoiceVerifyCanRetry:
-                                        type: integer
-                                        description: |
-                                          Whether invoice verification can be retried/initiated (0: No, 1: Yes)
-                                        example: 0
-                                      invoiceVerifyFailMsg:
-                                        type: string
-                                        description: Invoice verification failure reason
-                                        example: Exceeded daily limit
-                              document:
-                                $ref: '#/components/schemas/Document'
-                              child_files:
-                                description: Sub-task information
-                                type: array
-                                items:
-                                  $ref: '#/components/schemas/SubFileDetailInfo'
-                              duration_ms:
-                                type: integer
-                                description: |
-                                  Task processing time, unit: milliseconds
-                                  Calculated from the start of the task to completion (success or failure), excluding queue waiting time.
-                                example: 10000
-                            required:
-                              - id
-                              - name
-                              - format
-                              - recognition_status
-                              - verification_status
-                              - category
-      x-codeSamples:
-        - lang: 'bash'
-          label: cURL
-          source: | 
-            curl \
-            -H 'x-ti-app-id: 1234567890' \
-            -H 'x-ti-secret-code: 1234567890' \
-            'https://docflow.textin.com/api/app-api/sip/platform/v2/file/fetch?workspace_id=1234567890&batch_number=202412190001'
+                - $ref: '#/components/schemas/TaskProcessResult'
   /api/app-api/sip/platform/v2/file/update:
     post:
       summary: Update File Processing Result
@@ -626,6 +410,67 @@ paths:
               schema:
                 allOf:
                   - $ref: '#/components/schemas/CodeMessage'
+  /api/app-api/sip/platform/v2/file/extract_fields:
+    post:
+      summary: Extract Specific Fields
+      description: |
+        For tasks that have completed extraction, extract additional fields for the task, or re-extract some existing fields.  
+        Returns the complete extraction result of all fields. The return structure is the same as `/api/app-api/sip/platform/v2/file/fetch`.
+      operationId: extractFields
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: Workspace ID
+                  example: 1234567890
+                task_id:
+                  type: string
+                  description: Task ID
+                  example: 1234567890
+                fields:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ExtractFieldReqVO'
+                tables:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        description: Table name
+                        example: Table1
+                      fields:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ExtractFieldReqVO'
+              required:
+                - workspace_id
+                - task_id
+      responses:
+        '200':
+          description: Successfully extracted fields
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - $ref: '#/components/schemas/TaskProcessResult'
+      x-codeSamples:
+        - lang: 'bash'
+          label: cURL
+          source: |
+            curl -X POST \
+            -H 'x-ti-app-id: 1234567890' \
+            -H 'x-ti-secret-code: 1234567890' \
+            -H 'Content-Type: application/json' \
+            -d '{"workspace_id": "1234567890", "task_id": "1234567890", "fields": [{"key": "Invoice Code", "prompt": "Only keep the year part"}]}' \
+            'https://docflow.textin.com/api/app-api/sip/platform/v2/file/extract_fields'
   /api/app-api/sip/platform/v2/review/listByFileBatchNo:
     get:
       tags:
@@ -1292,6 +1137,227 @@ components:
       required:
       - code
       - msg
+    ExtractFieldReqVO:
+      type: object
+      properties:
+        key:
+          type: string
+          description: Field name
+          example: Invoice Code
+        prompt:
+          type: string
+          description: Field prompt
+          example: Only keep the year part
+    TaskProcessResult:
+      type: object
+      properties:
+        result:
+          type: object
+          properties:
+            total:
+              type: integer
+              description: Total number of files
+              example: 100
+            page:
+              type: integer
+              description: Current page number
+              example: 1
+            page_size:
+              type: integer
+              description: Number of items per page
+              example: 20
+            files:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: File ID
+                    example: 202412190001
+                  task_id:
+                    type: string
+                    description: Task ID
+                    example: 202412190001
+                  task_type:
+                    $ref: '#/components/schemas/TaskType'
+                  batch_number:
+                    type: string
+                    description: Batch Number
+                    example: 202412190001
+                  name:
+                    type: string
+                    description: File Name
+                    example: invoice.pdf
+                  format:
+                    type: string
+                    description: File Format
+                  recognition_status:
+                    $ref: '#/components/schemas/RecognitionStatus'
+                  failure_causes:
+                    type: string
+                    description: |
+                      Task failure reason.  
+                      When recognition_status is 2, this field is present.
+                  verification_status:
+                    $ref: '#/components/schemas/VerificationStatus'
+                  category:
+                    type: string
+                    description: File Category
+                    example: invoice
+                  pages:
+                    $ref: '#/components/schemas/PagesInfo'
+                  data:
+                    type: object
+                    description: Processing result
+                    properties:
+                      fields:
+                        description: Field list
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/FieldRespKeyValue'
+                        example:
+                        - key: Invoice Code
+                          identifier: Invoice Code Identifier
+                          value: "3100231130"
+                          position:
+                          - page: 0
+                            vertices: [0, 0, 100, 0, 100, 100, 0, 100]
+                        - key: Invoice Number
+                          value: "28737000"
+                          identifier: Invoice Number Identifier
+                          position:
+                          - page: 0
+                            vertices: [0, 0, 100, 0, 100, 100, 0, 100]
+                      items:
+                        description: Table data list
+                        type: array
+                        items:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/KeyValue'
+                        example:
+                        - - key: Goods and Services Name
+                            value: ＊Electronic Computer＊Microcomputer Host
+                            position:
+                            - page: 0
+                              vertices: [0, 0, 100, 0, 100, 100, 0, 100]
+                          - key: Specification Model
+                            value: DMS-SC68
+                            position:
+                            - page: 0
+                              vertices: [0, 0, 100, 0, 100, 100, 0, 100]
+                        - - key: Goods and Services Name
+                            value: ＊Mechanical Computer＊Supercomputer Host
+                            position:
+                            - page: 0
+                              vertices: [0, 0, 100, 0, 100, 100, 0, 100]
+                          - key: Specification Model
+                            value: AN/FSQ-7
+                            position:
+                            - page: 0
+                              vertices: [0, 0, 100, 0, 100, 100, 0, 100]
+                      tables:
+                        description: Complete table data list (including system tables and manually configured tables)
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            tableName:
+                              description: Table name
+                              type: string
+                              example: table1
+                            tableType:
+                              description: |
+                                Table type, 0: system configured, 1: manually added.
+                              type: string
+                              example: 0
+                            items:
+                              type: array
+                              items:
+                                type: array
+                                items:
+                                  $ref: '#/components/schemas/CommonFieldDetailRespVO'
+                      stamps:
+                        description: Stamp information
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/StampValue'
+                        example:
+                          - angel: 0
+                            page: 0
+                            text: National Unified Invoice Supervision Seal
+                            type: Other
+                            color: Red
+                            shape: Oval Seal
+                            position: [ 0, 0, 100, 0, 100, 100, 0, 100 ]
+                          - angel: 0
+                            page: 0
+                            text: Tax Bureau Seal
+                            type: Other
+                            color: Red
+                            shape: Oval Seal
+                            position: [ 0, 0, 100, 0, 100, 100, 0, 100 ]
+                      handwritings:
+                        description: Handwriting information
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/HandWritingValue'
+                        example:
+                          - angel: 0
+                            page: 0
+                            text: March 1st
+                            position:
+                              - page: 0
+                                vertices: [ 0, 0, 100, 0, 100, 100, 0, 100 ]
+                          - angel: 0
+                            page: 0
+                            text: Zhang San
+                            position:
+                              - page: 0
+                                vertices: [ 0, 0, 100, 0, 100, 100, 0, 100 ]
+                      invoiceVerifyResult:
+                        description: Invoice verification result
+                        type: object
+                        properties:
+                          invoiceVerifyStatus:
+                            type: integer
+                            description: |
+                              Whether invoice verification is successful (0: No, 1: Yes, null: Not verified)
+                            example: 0
+                          invoiceVerifyErrorCode:
+                            type: integer
+                            description: Invoice verification error code
+                            example: 0
+                          invoiceVerifyCanRetry:
+                            type: integer
+                            description: |
+                              Whether invoice verification can be retried/initiated (0: No, 1: Yes)
+                            example: 0
+                          invoiceVerifyFailMsg:
+                            type: string
+                            description: Invoice verification failure reason
+                            example: Exceeded daily limit
+                  document:
+                    $ref: '#/components/schemas/Document'
+                  child_files:
+                    description: Sub-task information
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SubFileDetailInfo'
+                  duration_ms:
+                    type: integer
+                    description: |
+                      Task processing time, unit: milliseconds
+                      Calculated from the start of the task to completion (success or failure), excluding queue waiting time.
+                    example: 10000
+                required:
+                  - id
+                  - name
+                  - format
+                  - recognition_status
+                  - verification_status
+                  - category
     KeyValue:
       type: object
       properties:

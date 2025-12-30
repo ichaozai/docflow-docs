@@ -7,7 +7,7 @@ description: "Reference examples to quickly integrate document retry functionali
   This document demonstrates how to retry file tasks in DocFlow through REST API. When file processing fails or needs to be reprocessed, you can use the retry interface.
 </Tip>
 
-DocFlow provides a file retry interface that supports reprocessing specified tasks. The retry operation will re-execute the complete processing flow including upload, parsing, classification, splitting, extraction, etc.
+DocFlow provides a file retry interface that supports reprocessing specified tasks. The retry operation will re-execute the complete processing flow including parsing, classification, splitting, extraction, etc.
 
 <Warning>
 **Important Restriction**: Only tasks that have extraction succeeded or failed, and are main tasks or parent tasks, can be retried. Child tasks do not support retry operations.

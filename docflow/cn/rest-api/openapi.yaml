@@ -528,11 +528,11 @@ paths:
                 allOf:
                   - $ref: '#/components/schemas/CodeMessage'
                   - $ref: '#/components/schemas/TaskProcessResult'
-  /api/app-api/sip/platform/v2/token/pick:
+  /api/app-api/sip/platform/v2/auth/token:
     get:
-      summary: 获取有效token(用于iframe场景)
-      description: 获取有效token(用于iframe场景)
-      operationId: pickToken
+      summary: 生成短时间有效的token
+      description: 生成短时间有效的token(用于iframe场景)
+      operationId: authToken
       responses:
         '200':
           description: 成功获取文件列表
@@ -2542,7 +2542,12 @@ components:
           properties:
             token:
               type: string
-              description: 用于iframe场景的有效token
+              description: 有效的token
+              example: abcd
+            expiresTime:
+              type: string
+              description: 过期时间
+              example: 2026-01-01 00:00:00
 
   securitySchemes:
     ApiId: # arbitrary name for the security scheme

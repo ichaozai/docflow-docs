@@ -436,11 +436,11 @@ paths:
                 allOf:
                   - $ref: '#/components/schemas/CodeMessage'
                   - $ref: '#/components/schemas/TaskProcessResult'
-  /api/app-api/sip/platform/v2/token/pick:
+  /api/app-api/sip/platform/v2/auth/token:
     get:
-      summary: Obtain a valid token (for iframe scenarios)
-      description: Obtain a valid token (for iframe scenarios)
-      operationId: pickToken
+      summary: Generate a short-lived token
+      description: Generate a short-lived token (for iframe scenarios)
+      operationId: authToken
       responses:
         '200':
           description: Token information successfully retrieved
@@ -2086,6 +2086,11 @@ components:
             token:
               type: string
               description: Valid token for iframe scenarios
+              example: abcd
+            expiresTime:
+              type: string
+              description: Expiration Time
+              example: 2026-01-01 00:00:00
     ReviewTaskStatus:
       type: integer
       description: |

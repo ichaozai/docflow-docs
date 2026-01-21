@@ -2544,10 +2544,10 @@ components:
               type: string
               description: 有效的token
               example: abcd
-            expiresTime:
-              type: string
-              description: 过期时间
-              example: 2026-01-01 00:00:00
+            expiry:
+              type: integer
+              description: 过期时间(格式是epoch时间戳，单位：秒)
+              example: 1700000000
 
   securitySchemes:
     ApiId: # arbitrary name for the security scheme

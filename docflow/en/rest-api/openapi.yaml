@@ -2087,10 +2087,10 @@ components:
               type: string
               description: Valid token for iframe scenarios
               example: abcd
-            expiresTime:
-              type: string
-              description: Expiration Time
-              example: 2026-01-01 00:00:00
+            expiry:
+              type: integer
+              description: Expiration time (in epoch timestamp format, unit is seconds)
+              example: 1700000000
     ReviewTaskStatus:
       type: integer
       description: |

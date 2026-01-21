@@ -93,6 +93,7 @@ paths:
         - $ref: '#/components/parameters/ParserApplyMerge'
         - $ref: '#/components/parameters/ParserFormulaLevel'
         - $ref: '#/components/parameters/ParserTableTextSplitMode'
+        - $ref: '#/components/parameters/WithTaskDetailUrl'
       requestBody:
         $ref: '#/components/requestBodies/FileUploadRequestBody'
       responses:
@@ -179,6 +180,13 @@ paths:
         - name: with_document
           in: query
           description: 是否返回文档的全部文字识别结果
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: with_task_detail_url
+          in: query
+          description: 是否返回任务详情页URL
           required: false
           schema:
             type: boolean
@@ -520,6 +528,20 @@ paths:
                 allOf:
                   - $ref: '#/components/schemas/CodeMessage'
                   - $ref: '#/components/schemas/TaskProcessResult'
+  /api/app-api/sip/platform/v2/token/pick:
+    get:
+      summary: 获取有效token(用于iframe场景)
+      description: 获取有效token(用于iframe场景)
+      operationId: pickToken
+      responses:
+        '200':
+          description: 成功获取文件列表
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - $ref: '#/components/schemas/TokenResult'
   /api/app-api/sip/platform/v2/category/list:
     get:
       summary: 获取空间文件类别列表
@@ -750,6 +772,10 @@ paths:
                   type: string
                   description: 审核任务ID
                   example: "31415926"
+                with_task_detail_url:
+                  type: boolean
+                  description: 是否返回审核详情页URL
+                  example: false
               required:
                 - workspace_id
                 - task_id
@@ -774,6 +800,9 @@ paths:
                             type: string
                             description: 任务名称
                             example: "审核任务1"
+                          task_detail_url:
+                            type: string
+                            description: 审核任务详情URL
                           status:
                             $ref: '#/components/schemas/ReviewTaskStatus'
                           rule_repo:
@@ -1567,6 +1596,14 @@ components:
       schema:
         type: integer
         default: 0
+    WithTaskDetailUrl:
+      name: with_task_detail_url
+      in: query
+      description: 是否返回任务详情页URL
+      required: false
+      schema:
+        type: boolean
+        default: false
 
   requestBodies:
     FileUploadRequestBody:
@@ -1963,6 +2000,9 @@ components:
                     type: string
                     description: 任务ID
                     example: 202412190001
+                  task_detail_url:
+                    type: string
+                    description: 文件任务详情页URL
                   task_type:
                     $ref: '#/components/schemas/TaskType'
                   batch_number:
@@ -2132,6 +2172,10 @@ components:
                       任务处理时间，单位：毫秒
                       计算的是从任务开始至完成(成功或失败)的时间，不包括排队等待时间。
                     example: 10000
+                  total_page_num:
+                    type: integer
+                    description: 当前文件总页数
+                    example: 10
                 required:
                   - id
                   - name
@@ -2224,6 +2268,9 @@ components:
           type: string
           description: 任务ID
           example: 202412190001
+        task_detail_url:
+          type: string
+          description: 文件子任务详情页URL
         task_type:
           $ref: '#/components/schemas/TaskType'
         parent_task_id:
@@ -2487,6 +2534,15 @@ components:
           type: integer
           description: 是否去水印(0 不去水印、1 去水印)
           example: 0
+    TokenResult:
+      type: object
+      properties:
+        result:
+          type: object
+          properties:
+            token:
+              type: string
+              description: 用于iframe场景的有效token
 
   securitySchemes:
     ApiId: # arbitrary name for the security scheme

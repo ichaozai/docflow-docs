@@ -103,6 +103,7 @@ paths:
         - $ref: '#/components/parameters/ParserApplyMerge'
         - $ref: '#/components/parameters/ParserFormulaLevel'
         - $ref: '#/components/parameters/ParserTableTextSplitMode'
+        - $ref: '#/components/parameters/WithTaskDetailUrl'
       requestBody:
         $ref: '#/components/requestBodies/FileUploadRequestBody'
       responses:
@@ -189,6 +190,13 @@ paths:
         - name: with_document
           in: query
           description: Whether to return the complete text recognition result of the document
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: with_task_detail_url
+          in: query
+          description: Whether to return the task details page URL
           required: false
           schema:
             type: boolean
@@ -428,6 +436,20 @@ paths:
                 allOf:
                   - $ref: '#/components/schemas/CodeMessage'
                   - $ref: '#/components/schemas/TaskProcessResult'
+  /api/app-api/sip/platform/v2/token/pick:
+    get:
+      summary: Obtain a valid token (for iframe scenarios)
+      description: Obtain a valid token (for iframe scenarios)
+      operationId: pickToken
+      responses:
+        '200':
+          description: Token information successfully retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - $ref: '#/components/schemas/TokenResult'
   /api/app-api/sip/platform/v2/file/retry:
     post:
       summary: Retry File Processing
@@ -1306,6 +1328,14 @@ components:
       schema:
         type: integer
         default: 0
+    WithTaskDetailUrl:
+      name: with_task_detail_url
+      in: query
+      description: Whether to return the task details page URL
+      required: false
+      schema:
+        type: boolean
+        default: false
   requestBodies:
     FileUploadRequestBody:
       description: File upload request body
@@ -1425,6 +1455,9 @@ components:
                     type: string
                     description: Task ID
                     example: 202412190001
+                  task_detail_url:
+                    type: string
+                    description: Task Details Page URL
                   task_type:
                     $ref: '#/components/schemas/TaskType'
                   batch_number:
@@ -1597,6 +1630,10 @@ components:
                       Task processing time, unit: milliseconds
                       Calculated from the start of the task to completion (success or failure), excluding queue waiting time.
                     example: 10000
+                  total_page_num:
+                    type: integer
+                    description: Total number of pages in the current file
+                    example: 10
                 required:
                   - id
                   - name
@@ -1755,6 +1792,9 @@ components:
           type: string
           description: Task ID
           example: 202412190001
+        task_detail_url:
+          type: string
+          description: File subtask details page URL
         task_type:
           $ref: '#/components/schemas/TaskType'
         parent_task_id:
@@ -2037,6 +2077,15 @@ components:
           type: integer
           description: Remove watermark (0 no, 1 yes)
           example: 0
+    TokenResult:
+      type: object
+      properties:
+        result:
+          type: object
+          properties:
+            token:
+              type: string
+              description: Valid token for iframe scenarios
     ReviewTaskStatus:
       type: integer
       description: |

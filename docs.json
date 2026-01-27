@@ -103,7 +103,8 @@
                   "docflow/cn/100-faq/get_enterprise_id",
                   "docflow/cn/100-faq/setup_category",
                   "docflow/cn/100-faq/chinese_category_param",
-                  "docflow/cn/100-faq/product_charge"
+                  "docflow/cn/100-faq/product_charge",
+                  "docflow/cn/100-faq/openapi_download"
                 ]
               }
             ]
@@ -208,7 +209,8 @@
                   "docflow/en/100-faq/get_enterprise_id",
                   "docflow/en/100-faq/setup_category",
                   "docflow/en/100-faq/chinese_category_param",
-                  "docflow/en/100-faq/product_charge"
+                  "docflow/en/100-faq/product_charge",
+                  "docflow/en/100-faq/openapi_download"
                 ]
               }
             ]

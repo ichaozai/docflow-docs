@@ -44,10 +44,26 @@ paths:
     $ref: './paths/workspaces.yaml#/~1api~1app-api~1sip~1platform~1v2~1workspace~1delete'
 
   # Categories
+  /api/app-api/sip/platform/v2/category/create:
+    $ref: './paths/categories.yaml#/~1api~1app-api~1sip~1platform~1v2~1category~1create'
   /api/app-api/sip/platform/v2/category/list:
     $ref: './paths/categories.yaml#/~1api~1app-api~1sip~1platform~1v2~1category~1list'
+  /api/app-api/sip/platform/v2/category/update:
+    $ref: './paths/categories.yaml#/~1api~1app-api~1sip~1platform~1v2~1category~1update'
+  /api/app-api/sip/platform/v2/category/delete:
+    $ref: './paths/categories.yaml#/~1api~1app-api~1sip~1platform~1v2~1category~1delete'
   /api/app-api/sip/platform/v2/category/fields/list:
     $ref: './paths/categories.yaml#/~1api~1app-api~1sip~1platform~1v2~1category~1fields~1list'
+  
+  # Category Samples
+  /api/app-api/sip/platform/v2/category/sample/upload:
+    $ref: './paths/categories.yaml#/~1api~1app-api~1sip~1platform~1v2~1category~1sample~1upload'
+  /api/app-api/sip/platform/v2/category/sample/list:
+    $ref: './paths/categories.yaml#/~1api~1app-api~1sip~1platform~1v2~1category~1sample~1list'
+  /api/app-api/sip/platform/v2/category/sample/download:
+    $ref: './paths/categories.yaml#/~1api~1app-api~1sip~1platform~1v2~1category~1sample~1download'
+  /api/app-api/sip/platform/v2/category/sample/delete:
+    $ref: './paths/categories.yaml#/~1api~1app-api~1sip~1platform~1v2~1category~1sample~1delete'
 
   # Review Rules
   /api/app-api/sip/platform/v2/review/rule_repo/create:
@@ -166,8 +182,12 @@ components:
       $ref: './components/schemas/workspaces.yaml#/Workspace'
 
     # Category schemas
+    Category:
+      $ref: './components/schemas/categories.yaml#/Category'
     CategoryField:
       $ref: './components/schemas/categories.yaml#/CategoryField'
+    CategorySample:
+      $ref: './components/schemas/categories.yaml#/CategorySample'
     EnabledStatus:
       $ref: './components/schemas/categories.yaml#/EnabledStatus'
 

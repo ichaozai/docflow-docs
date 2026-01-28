@@ -1,3 +1,25 @@
+Category:
+  type: object
+  description: 文件类别
+  properties:
+    id:
+      type: string
+      description: 文件类别ID
+      example: "1234567890"
+    name:
+      type: string
+      description: 文件类别名称
+      example: "发票"
+    category_prompt:
+      type: string
+      description: 用于分类的提示词
+      example: "增值税发票，包含发票代码、发票号码等字段"
+    enabled:
+      $ref: '#/EnabledStatus'
+  required:
+    - id
+    - name
+
 CategoryField:
   type: object
   properties:
@@ -15,6 +37,22 @@ CategoryField:
       example: 发票代码描述
     enabled:
       $ref: '#/EnabledStatus'
+
+CategorySample:
+  type: object
+  description: 文件类别样本
+  properties:
+    sample_id:
+      type: string
+      description: 样本ID
+      example: "1234567890"
+    file_name:
+      type: string
+      description: 文件名
+      example: "invoice_sample.pdf"
+  required:
+    - sample_id
+    - file_name
 
 EnabledStatus:
   type: integer

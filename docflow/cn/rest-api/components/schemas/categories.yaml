@@ -20,13 +20,9 @@ Category:
     - id
     - name
 
-CategoryField:
+CategoryFieldConfig:
   type: object
   properties:
-    id:
-      type: string
-      description: 字段ID
-      example: "1234567890"
     name:
       type: string
       description: 字段名称
@@ -35,6 +31,95 @@ CategoryField:
       type: string
       description: 字段描述
       example: 发票代码描述
+    prompt:
+      type: string
+      description: 语义抽取提示词
+    use_prompt:
+      type: boolean
+      description: 是否使用语义提示词
+    alias:
+      type: array
+      description: 字段别名
+      items:
+        type: string
+    identity:
+      type: string
+      description: 导出字段名
+    multi_value:
+      type: boolean
+      description: 是否多值抽取
+    transform_settings:
+      type: object
+      description: 转换配置
+      properties:
+        type:
+          type: string
+          description: 转换类型
+          enum:
+            - text
+            - number
+            - datetime
+            - enumerate
+            - regex
+        text_settings:
+          type: object
+          description: 文本类型转换配置
+          properties:
+            strip:
+              type: string
+              description: 去除的字符
+        number_settings:
+          type: object
+          description: 数字类型转换配置
+        datetime_settings:
+          type: object
+          description: 时间类型转换配置
+          properties:
+            format:
+              type: string
+              description: 日期时间格式，参考 DocFlow 日期格式说明 (https://docflow.textin.com/markdown?key=dateFormatGuide)
+        enumerate_settings:
+          type: object
+          description: 枚举类型转换配置
+          properties:
+            items:
+              type: array
+              description: 可选枚举值列表
+              items:
+                type: string
+        regex_settings:
+          type: object
+          description: 正则类型转换配置
+          properties:
+            match:
+              type: string
+              description: 匹配用的正则表达式
+            replace:
+              type: string
+              description: 替换用的正则表达式
+        mismatch_action:
+          type: object
+          description: 字段值不匹配时的处理动作，例如替换为默认值或仅输出告警
+          properties:
+            mode:
+              type: string
+              description: 不匹配时的处理模式
+              enum:
+                - default
+                - warning
+            default_value:
+              type: string
+              description: 当模式为 default 时使用的默认值
+
+CategoryField:
+  allOf:
+    - $ref: '#/CategoryFieldConfig'
+    - type: object
+      properties:
+        id:
+          type: string
+          description: 字段ID
+          example: "1234567890"
 
 CategorySample:
   type: object

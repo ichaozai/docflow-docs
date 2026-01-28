@@ -276,6 +276,8 @@
       content:
         application/json:
           schema:
+            allOf:
+              - $ref: '../components/schemas/categories.yaml#/CategoryFieldConfig'
             type: object
             properties:
               workspace_id:
@@ -293,16 +295,6 @@
                   - 不传或为空：创建普通字段，结果会出现在 result.fields 中  
                   - 传入表格ID：创建对应表格下的表格字段，结果会出现在 result.tables[].fields 中
                 example: "1234567890"
-              name:
-                type: string
-                description: 字段名称
-                example: 发票代码
-                maxLength: 50
-              description:
-                type: string
-                description: 字段描述
-                example: 发票代码描述
-                maxLength: 200
             required:
               - workspace_id
               - category_id
@@ -337,6 +329,8 @@
       content:
         application/json:
           schema:
+            allOf:
+              - $ref: '../components/schemas/categories.yaml#/CategoryFieldConfig'
             type: object
             properties:
               workspace_id:
@@ -358,16 +352,6 @@
                   - 对普通字段可不传  
                   - 对表格字段需要传入其所属的表格ID
                 example: "1234567890"
-              name:
-                type: string
-                description: 字段名称
-                example: 发票代码
-                maxLength: 50
-              description:
-                type: string
-                description: 字段描述
-                example: 发票代码描述
-                maxLength: 200
             required:
               - workspace_id
               - category_id

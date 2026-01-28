@@ -111,7 +111,7 @@
           },
           {
             "tab": "API",
-            "openapi": "docflow/cn/rest-api/openapi.yaml"
+            "openapi": "docflow/cn/rest-api/openapi.bundle.yaml"
           }
 
         ]
@@ -217,7 +217,7 @@
           },
           {
             "tab": "API",
-            "openapi": "docflow/en/rest-api/openapi.yaml"
+            "openapi": "docflow/en/rest-api/openapi.bundle.yaml"
           }
 
         ]

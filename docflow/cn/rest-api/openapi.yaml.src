@@ -52,8 +52,26 @@ paths:
     $ref: './paths/categories.yaml#/~1api~1app-api~1sip~1platform~1v2~1category~1update'
   /api/app-api/sip/platform/v2/category/delete:
     $ref: './paths/categories.yaml#/~1api~1app-api~1sip~1platform~1v2~1category~1delete'
+
+  # Category Tables
+  /api/app-api/sip/platform/v2/category/tables/list:
+    $ref: './paths/categories.yaml#/~1api~1app-api~1sip~1platform~1v2~1category~1tables~1list'
+  /api/app-api/sip/platform/v2/category/table/add:
+    $ref: './paths/categories.yaml#/~1api~1app-api~1sip~1platform~1v2~1category~1table~1add'
+  /api/app-api/sip/platform/v2/category/table/update:
+    $ref: './paths/categories.yaml#/~1api~1app-api~1sip~1platform~1v2~1category~1table~1update'
+  /api/app-api/sip/platform/v2/category/table/delete:
+    $ref: './paths/categories.yaml#/~1api~1app-api~1sip~1platform~1v2~1category~1table~1delete'
+  
+  # Category Fields
   /api/app-api/sip/platform/v2/category/fields/list:
     $ref: './paths/categories.yaml#/~1api~1app-api~1sip~1platform~1v2~1category~1fields~1list'
+  /api/app-api/sip/platform/v2/category/fields/add:
+    $ref: './paths/categories.yaml#/~1api~1app-api~1sip~1platform~1v2~1category~1fields~1add'
+  /api/app-api/sip/platform/v2/category/fields/update:
+    $ref: './paths/categories.yaml#/~1api~1app-api~1sip~1platform~1v2~1category~1fields~1update'
+  /api/app-api/sip/platform/v2/category/fields/delete:
+    $ref: './paths/categories.yaml#/~1api~1app-api~1sip~1platform~1v2~1category~1fields~1delete'
   
   # Category Samples
   /api/app-api/sip/platform/v2/category/sample/upload:
@@ -133,81 +151,6 @@ components:
   requestBodies:
     FileUploadRequestBody:
       $ref: './components/request-bodies.yaml#/FileUploadRequestBody'
-
-  schemas:
-    # Common schemas
-    RecognitionStatus:
-      $ref: './components/schemas/common.yaml#/RecognitionStatus'
-    VerificationStatus:
-      $ref: './components/schemas/common.yaml#/VerificationStatus'
-    CodeMessage:
-      $ref: './components/schemas/common.yaml#/CodeMessage'
-
-    # File schemas
-    ExtractFieldReqVO:
-      $ref: './components/schemas/files.yaml#/ExtractFieldReqVO'
-    TaskProcessResult:
-      $ref: './components/schemas/files.yaml#/TaskProcessResult'
-    KeyValue:
-      $ref: './components/schemas/files.yaml#/KeyValue'
-    FieldRespKeyValue:
-      $ref: './components/schemas/files.yaml#/FieldRespKeyValue'
-    StampValue:
-      $ref: './components/schemas/files.yaml#/StampValue'
-    HandWritingValue:
-      $ref: './components/schemas/files.yaml#/HandWritingValue'
-    Document:
-      $ref: './components/schemas/files.yaml#/Document'
-    CommonFieldDetailRespVO:
-      $ref: './components/schemas/files.yaml#/CommonFieldDetailRespVO'
-    TaskCropResult:
-      $ref: './components/schemas/files.yaml#/TaskCropResult'
-    SubFileDetailInfo:
-      $ref: './components/schemas/files.yaml#/SubFileDetailInfo'
-    TextInLines:
-      $ref: './components/schemas/files.yaml#/TextInLines'
-    KeyValuePosition:
-      $ref: './components/schemas/files.yaml#/KeyValuePosition'
-    TaskType:
-      $ref: './components/schemas/files.yaml#/TaskType'
-    PagesInfo:
-      $ref: './components/schemas/files.yaml#/PagesInfo'
-    DocumentParserParam:
-      $ref: './components/schemas/files.yaml#/DocumentParserParam'
-    TokenResult:
-      $ref: './components/schemas/files.yaml#/TokenResult'
-
-    # Workspace schemas
-    Workspace:
-      $ref: './components/schemas/workspaces.yaml#/Workspace'
-
-    # Category schemas
-    Category:
-      $ref: './components/schemas/categories.yaml#/Category'
-    CategoryField:
-      $ref: './components/schemas/categories.yaml#/CategoryField'
-    CategorySample:
-      $ref: './components/schemas/categories.yaml#/CategorySample'
-    EnabledStatus:
-      $ref: './components/schemas/categories.yaml#/EnabledStatus'
-
-    # Review schemas
-    ReviewTaskStatus:
-      $ref: './components/schemas/reviews.yaml#/ReviewTaskStatus'
-    ReviewRuleProperties:
-      $ref: './components/schemas/reviews.yaml#/ReviewRuleProperties'
-    ReviewRuleReferencedField:
-      $ref: './components/schemas/reviews.yaml#/ReviewRuleReferencedField'
-    RiskLevel:
-      $ref: './components/schemas/reviews.yaml#/RiskLevel'
-    ReviewRuleField:
-      $ref: './components/schemas/reviews.yaml#/ReviewRuleField'
-    ReviewRuleRepo:
-      $ref: './components/schemas/reviews.yaml#/ReviewRuleRepo'
-    ReviewRuleGroup:
-      $ref: './components/schemas/reviews.yaml#/ReviewRuleGroup'
-    ReviewRule:
-      $ref: './components/schemas/reviews.yaml#/ReviewRule'
 
   securitySchemes:
     ApiId:

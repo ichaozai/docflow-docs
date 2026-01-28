@@ -35,8 +35,6 @@ CategoryField:
       type: string
       description: 字段描述
       example: 发票代码描述
-    enabled:
-      $ref: '#/EnabledStatus'
 
 CategorySample:
   type: object

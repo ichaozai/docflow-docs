@@ -1,0 +1,19 @@
+Workspace:
+  type: object
+  description: 工作空间
+  properties:
+    workspace_id:
+      type: string
+      description: 空间ID（系统生成）
+      example: "1234567890"
+    name:
+      type: string
+      description: 空间名称
+      example: "我的工作空间"
+    description:
+      type: string
+      description: 空间描述
+      example: "这是一个用于处理发票的工作空间"
+  required:
+    - workspace_id
+    - name

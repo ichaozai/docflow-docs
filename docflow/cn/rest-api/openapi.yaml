@@ -31,6 +31,18 @@ paths:
   /api/app-api/sip/platform/v2/auth/token:
     $ref: './paths/auth.yaml#/~1api~1app-api~1sip~1platform~1v2~1auth~1token'
 
+  # Workspaces
+  /api/app-api/sip/platform/v2/workspace/create:
+    $ref: './paths/workspaces.yaml#/~1api~1app-api~1sip~1platform~1v2~1workspace~1create'
+  /api/app-api/sip/platform/v2/workspace/list:
+    $ref: './paths/workspaces.yaml#/~1api~1app-api~1sip~1platform~1v2~1workspace~1list'
+  /api/app-api/sip/platform/v2/workspace/get:
+    $ref: './paths/workspaces.yaml#/~1api~1app-api~1sip~1platform~1v2~1workspace~1get'
+  /api/app-api/sip/platform/v2/workspace/update:
+    $ref: './paths/workspaces.yaml#/~1api~1app-api~1sip~1platform~1v2~1workspace~1update'
+  /api/app-api/sip/platform/v2/workspace/delete:
+    $ref: './paths/workspaces.yaml#/~1api~1app-api~1sip~1platform~1v2~1workspace~1delete'
+
   # Categories
   /api/app-api/sip/platform/v2/category/list:
     $ref: './paths/categories.yaml#/~1api~1app-api~1sip~1platform~1v2~1category~1list'
@@ -148,6 +160,10 @@ components:
       $ref: './components/schemas/files.yaml#/DocumentParserParam'
     TokenResult:
       $ref: './components/schemas/files.yaml#/TokenResult'
+
+    # Workspace schemas
+    Workspace:
+      $ref: './components/schemas/workspaces.yaml#/Workspace'
 
     # Category schemas
     CategoryField:

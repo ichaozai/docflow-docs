@@ -1,0 +1,173 @@
+ReviewTaskStatus:
+  type: integer
+  description: |
+    任务状态
+    - 0: 未审核
+    - 1: 审核通过
+    - 2: 审核失败
+    - 3: 审核中
+    - 4: 审核不通过
+    - 5: 识别中
+    - 6: 排队中
+    - 7: 识别失败
+  enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+
+ReviewRuleProperties:
+  type: object
+  properties:
+    group_id:
+      type: string
+      description: 审核规则组ID
+      example: "31415926"
+    name:
+      type: string
+      description: 规则名称
+      example: "审核规则1"
+    prompt:
+      type: string
+      description: 规则提示词
+      example: "审核规则提示词"
+    category_ids:
+      type: array
+      items:
+        type: string
+        description: 分类ID
+        example: "1234567890"
+    risk_level:
+      $ref: '#/RiskLevel'
+    referenced_fields:
+      type: array
+      items:
+        $ref: '#/ReviewRuleReferencedField'
+
+ReviewRuleReferencedField:
+  type: object
+  properties:
+    category_id:
+      type: string
+      description: 分类ID
+      example: "1234567890"
+    category_name:
+      type: string
+      description: 分类名称
+      example: "发票"
+    fields:
+      type: array
+      items:
+        $ref: '#/ReviewRuleField'
+    tables:
+      type: array
+      items:
+        type: object
+        properties:
+          table_id:
+            type: string
+            description: 表格ID
+            example: "1234567890"
+          table_name:
+            type: string
+            description: 表格名称
+            example: "发票表格"
+          fields:
+            type: array
+            items:
+              $ref: '#/ReviewRuleField'
+
+RiskLevel:
+  type: integer
+  description: |
+    风险等级
+    - 10: 高风险
+    - 20: 中风险
+    - 30: 低风险
+  enum:
+    - 10
+    - 20
+    - 30
+
+ReviewRuleField:
+  type: object
+  properties:
+    field_id:
+      type: string
+      description: 字段ID
+      example: "1234567890"
+    field_name:
+      type: string
+      description: 字段名称
+      example: "发票代码"
+
+ReviewRuleRepo:
+  type: object
+  properties:
+    repo_id:
+      type: string
+      description: 审核规则库ID
+      example: "31415926"
+    name:
+      type: string
+      description: 审核规则库名称
+      example: "审核规则库1"
+    groups:
+      description: 规则库下的规则组列表
+      type: array
+      items:
+        $ref: '#/ReviewRuleGroup'
+    category_ids:
+      type: array
+      items:
+        type: string
+        description: 分类ID
+        example: "1234567890"
+
+ReviewRuleGroup:
+  type: object
+  properties:
+    group_id:
+      type: string
+      description: 规则组ID
+      example: "31415926"
+    name:
+      type: string
+      description: 规则组名称
+      example: "审核规则组1"
+    rules:
+      type: array
+      items:
+        $ref: '#/ReviewRule'
+
+ReviewRule:
+  type: object
+  properties:
+    rule_id:
+      type: string
+      description: 规则ID
+      example: "31415926"
+    name:
+      type: string
+      description: 规则名称
+      example: "审核规则1"
+    prompt:
+      type: string
+      description: 规则提示词
+      example: "审核规则提示词"
+    category_ids:
+      type: array
+      items:
+        type: string
+        description: 分类ID
+        example: "1234567890"
+    risk_level:
+      $ref: '#/RiskLevel'
+    referenced_fields:
+      type: array
+      items:
+        $ref: '#/ReviewRuleReferencedField'

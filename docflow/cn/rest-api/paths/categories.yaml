@@ -1,0 +1,151 @@
+/api/app-api/sip/platform/v2/category/list:
+  get:
+    summary: 获取空间文件类别列表
+    tags:
+      - 文件类别
+    description: 获取空间文件类别列表
+    operationId: listCategories
+    parameters:
+      - name: workspace_id
+        in: query
+        description: 空间ID
+        required: true
+        schema:
+          type: string
+          example: "1234567890"
+      - name: page
+        in: query
+        description: 页码
+        required: false
+        schema:
+          type: integer
+          default: 1
+      - name: page_size
+        in: query
+        description: 每页数量
+        required: false
+        schema:
+          type: integer
+          default: 1000
+      - name: enabled
+        in: query
+        description: |
+          启用状态  
+          - all: 所有
+          - 1: 启用
+          - 0: 禁用
+          - 2: 草稿
+        required: false
+        schema:
+          type: string
+          default: "1"
+          enum:
+            - "all"
+            - "1"
+            - "0"
+            - "2"
+    responses:
+      '200':
+        description: 成功获取空间文件类别列表
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas/common.yaml#/CodeMessage'
+                - type: object
+                  properties:
+                    result:
+                      type: object
+                      properties:
+                        total:
+                          type: integer
+                          description: 文件类别总数
+                          example: 100
+                        page:
+                          type: integer
+                          description: 当前页码
+                          example: 1
+                        page_size:
+                          type: integer
+                          description: 每页数量
+                          example: 20
+                        categories:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                description: 文件类别ID
+                                example: "1234567890"
+                              name:
+                                type: string
+                                description: 文件类别名称
+                                example: 发票
+                              description:
+                                type: string
+                                description: 文件类别描述
+                                example: 发票分类描述
+                              enabled:
+                                $ref: '../components/schemas/categories.yaml#/EnabledStatus'
+
+/api/app-api/sip/platform/v2/category/fields/list:
+  get:
+    summary: 获取文件类别字段列表
+    description: 获取文件类别字段列表
+    operationId: listCategoryFields
+    tags:
+      - 文件类别
+    parameters:
+      - name: workspace_id
+        in: query
+        description: 空间ID
+        required: true
+        schema:
+          type: string
+          example: "1234567890"
+      - name: category_id
+        in: query
+        description: 文件类别ID
+        required: true
+        schema:
+          type: string
+          example: "1234567890"
+    responses:
+      '200':
+        description: 成功获取文件类别字段列表
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas/common.yaml#/CodeMessage'
+                - type: object
+                  properties:
+                    result:
+                      type: object
+                      properties:
+                        fields:
+                          type: array
+                          items:
+                            $ref: '../components/schemas/categories.yaml#/CategoryField'
+                        tables:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                description: 表格ID
+                                example: "1234567890"
+                              name:
+                                type: string
+                                description: 表格名称
+                                example: 表格1
+                              description:
+                                type: string
+                                description: 表格描述
+                                example: 表格描述
+                              fields:
+                                type: array
+                                items:
+                                  $ref: '../components/schemas/categories.yaml#/CategoryField'

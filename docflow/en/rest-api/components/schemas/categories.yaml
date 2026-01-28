@@ -1,0 +1,29 @@
+CategoryField:
+  type: object
+  properties:
+    id:
+      type: string
+      description: Field ID
+      example: "1234567890"
+    name:
+      type: string
+      description: Field name
+      example: Invoice Code
+    description:
+      type: string
+      description: Field description
+      example: Invoice code description
+    enabled:
+      $ref: '#/EnabledStatus'
+
+EnabledStatus:
+  type: integer
+  description: |
+    Enabled status
+    - 0: Disabled
+    - 1: Enabled
+    - 2: Draft
+  enum:
+    - 0
+    - 1
+    - 2

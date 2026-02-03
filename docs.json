@@ -97,6 +97,12 @@
                 ]
               },
               {
+                "group": "Web 页面集成",
+                "pages": [
+                  "docflow/cn/10-web/iframe"
+                ]
+              },
+              {
                 "group": "常见问题",
                 "pages": [
                   "docflow/cn/100-faq/get_workspace_id",

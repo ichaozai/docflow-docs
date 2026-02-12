@@ -22,8 +22,75 @@
                 description: 空间描述
                 example: "这是一个用于处理发票的工作空间"
                 maxLength: 200
+              enterprise_id:
+                type: integer
+                format: int64
+                description: 企业组织ID
+                example: 12345
+              manage_account_id:
+                type: integer
+                format: int64
+                description: 空间管理员id
+                example: 67890
+              account_id:
+                type: integer
+                format: int64
+                description: 当前账号ID
+                example: 98765
+              auth_scope:
+                type: integer
+                description: "协作范围 0:仅自己可见 1:企业成员可见"
+                example: 1
+                enum:
+                  - 0
+                  - 1
+              enable_mail_collection_status:
+                type: boolean
+                description: "启用邮箱收票状态 false:禁用 true:启用"
+                example: true
+              mail_inbox_address:
+                type: string
+                description: 收件箱地址
+                example: "workspace@example.com"
+              init_status:
+                type: boolean
+                description: 是否为初始化空间
+                default: false
+                example: false
+              workspace_type:
+                type: integer
+                description: "工作空间类型 0：个人 1：团队"
+                example: 1
+                enum:
+                  - 0
+                  - 1
+              demo_status:
+                type: integer
+                description: "是否为demo工作空间 0：否 1：是"
+                default: 0
+                example: 0
+                enum:
+                  - 0
+                  - 1
+              task_clone_flag:
+                type: boolean
+                description: 是否复制任务数据
+                default: false
+                example: false
+              review_clone_flag:
+                type: boolean
+                description: 是否复制审核配置
+                default: false
+                example: false
             required:
               - name
+              - enterprise_id
+              - manage_account_id
+              - account_id
+              - auth_scope
+              - enable_mail_collection_status
+              - workspace_type
+              - demo_status
     responses:
       '200':
         description: 成功创建空间
@@ -152,8 +219,44 @@
                 description: 空间描述
                 example: "这是一个用于处理发票的工作空间"
                 maxLength: 200
+              auth_scope:
+                type: integer
+                description: "协作范围 0:仅自己可见 1:企业成员可见"
+                example: 1
+                enum:
+                  - 0
+                  - 1
+              enable_mail_collection_status:
+                type: boolean
+                description: "启用邮箱收票状态 false:禁用 true:启用"
+                example: true
+              mail_inbox_address:
+                type: string
+                description: 收件箱地址
+                example: "workspace@example.com"
+              workspace_type:
+                type: integer
+                description: "工作空间类型 0：个人 1：团队"
+                example: 1
+                enum:
+                  - 0
+                  - 1
+              callback_url:
+                type: string
+                description: 回调URL
+                example: "https://example.com/callback"
+              callback_retry_time:
+                type: integer
+                description: 回调重试次数
+                example: 3
+                minimum: 0
+                maximum: 3
             required:
               - workspace_id
+              - name
+              - auth_scope
+              - enable_mail_collection_status
+              - workspace_type
     responses:
       '200':
         description: 成功更新空间

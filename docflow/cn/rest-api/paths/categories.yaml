@@ -26,9 +26,16 @@
                 description: 用于分类的提示词
                 example: "增值税发票，包含发票代码、发票号码等字段"
                 maxLength: 500
+              extract_model:
+                description: 抽取模型
+                example: "llm"
+                enum:
+                  - llm
+                  - vlm
             required:
               - workspace_id
               - name
+              - extract_model
     responses:
       '200':
         description: 成功创建文件类别
@@ -465,8 +472,12 @@
                                 type: string
                                 description: 表格语义抽取提示词
                                 example: "请抽取每行的品名、数量和金额"
+                              collect_from_multi_talbe:
+                                  type: boolean
+                                  description: 多表合并
+                                  example: true
 
-/api/app-api/sip/platform/v2/category/table/add:
+/api/app-api/sip/platform/v2/category/tables/add:
   post:
     summary: 新增文件类别表格
     description: 在指定文件类别下新增一个表格
@@ -498,6 +509,10 @@
                 description: 表格语义抽取提示词
                 example: "请抽取每行的品名、数量和金额"
                 maxLength: 200
+              collect_from_multi_talbe:
+                  type: boolean
+                  description: 多表合并
+                  example: true
             required:
               - workspace_id
               - category_id
@@ -520,7 +535,7 @@
                           description: 新增表格ID
                           example: "1234567890"
 
-/api/app-api/sip/platform/v2/category/table/update:
+/api/app-api/sip/platform/v2/category/tables/update:
   post:
     summary: 更新文件类别表格
     description: 更新指定文件类别表格的信息
@@ -556,10 +571,15 @@
                 description: 表格语义抽取提示词
                 example: "请抽取每行的品名、数量和金额"
                 maxLength: 200
+              collect_from_multi_talbe:
+                  type: boolean
+                  description: 多表合并
+                  example: true
             required:
               - workspace_id
               - category_id
               - table_id
+              - collect_from_multi_talbe
     responses:
       '200':
         description: 成功更新文件类别表格
@@ -568,7 +588,7 @@
             schema:
               $ref: '../components/schemas/common.yaml#/CodeMessage'
 
-/api/app-api/sip/platform/v2/category/table/delete:
+/api/app-api/sip/platform/v2/category/tables/delete:
   post:
     summary: 删除文件类别表格
     description: 删除指定的文件类别表格，支持批量删除

@@ -623,8 +623,75 @@ paths:
                   description: 空间描述
                   example: 这是一个用于处理发票的工作空间
                   maxLength: 200
+                enterprise_id:
+                  type: integer
+                  format: int64
+                  description: 企业组织ID
+                  example: 12345
+                manage_account_id:
+                  type: integer
+                  format: int64
+                  description: 空间管理员id
+                  example: 67890
+                account_id:
+                  type: integer
+                  format: int64
+                  description: 当前账号ID
+                  example: 98765
+                auth_scope:
+                  type: integer
+                  description: 协作范围 0:仅自己可见 1:企业成员可见
+                  example: 1
+                  enum:
+                    - 0
+                    - 1
+                enable_mail_collection_status:
+                  type: boolean
+                  description: 启用邮箱收票状态 false:禁用 true:启用
+                  example: true
+                mail_inbox_address:
+                  type: string
+                  description: 收件箱地址
+                  example: workspace@example.com
+                init_status:
+                  type: boolean
+                  description: 是否为初始化空间
+                  default: false
+                  example: false
+                workspace_type:
+                  type: integer
+                  description: 工作空间类型 0：个人 1：团队
+                  example: 1
+                  enum:
+                    - 0
+                    - 1
+                demo_status:
+                  type: integer
+                  description: 是否为demo工作空间 0：否 1：是
+                  default: 0
+                  example: 0
+                  enum:
+                    - 0
+                    - 1
+                task_clone_flag:
+                  type: boolean
+                  description: 是否复制任务数据
+                  default: false
+                  example: false
+                review_clone_flag:
+                  type: boolean
+                  description: 是否复制审核配置
+                  default: false
+                  example: false
               required:
                 - name
+                - enterprise_id
+                - manage_account_id
+                - account_id
+                - auth_scope
+                - enable_mail_collection_status
+                - workspace_type
+                - demo_status
       responses:
         '200':
           description: 成功创建空间
@@ -750,8 +817,44 @@ paths:
                   description: 空间描述
                   example: 这是一个用于处理发票的工作空间
                   maxLength: 200
+                auth_scope:
+                  type: integer
+                  description: 协作范围 0:仅自己可见 1:企业成员可见
+                  example: 1
+                  enum:
+                    - 0
+                    - 1
+                enable_mail_collection_status:
+                  type: boolean
+                  description: 启用邮箱收票状态 false:禁用 true:启用
+                  example: true
+                mail_inbox_address:
+                  type: string
+                  description: 收件箱地址
+                  example: workspace@example.com
+                workspace_type:
+                  type: integer
+                  description: 工作空间类型 0：个人 1：团队
+                  example: 1
+                  enum:
+                    - 0
+                    - 1
+                callback_url:
+                  type: string
+                  description: 回调URL
+                  example: https://example.com/callback
+                callback_retry_time:
+                  type: integer
+                  description: 回调重试次数
+                  example: 3
+                  minimum: 0
+                  maximum: 3
               required:
                 - workspace_id
+                - name
+                - auth_scope
+                - enable_mail_collection_status
+                - workspace_type
       responses:
         '200':
           description: 成功更新空间
@@ -817,9 +920,16 @@ paths:
                   description: 用于分类的提示词
                   example: 增值税发票，包含发票代码、发票号码等字段
                   maxLength: 500
+                extract_model:
+                  description: 抽取模型
+                  example: llm
+                  enum:
+                    - llm
+                    - vlm
               required:
                 - workspace_id
                 - name
+                - extract_model
       responses:
         '200':
           description: 成功创建文件类别
@@ -1045,7 +1155,11 @@ paths:
                                   type: string
                                   description: 表格语义抽取提示词
                                   example: 请抽取每行的品名、数量和金额
-  /api/app-api/sip/platform/v2/category/table/add:
+                                collect_from_multi_talbe:
+                                  type: boolean
+                                  description: 多表合并
+                                  example: true
+  /api/app-api/sip/platform/v2/category/tables/add:
     post:
       summary: 新增文件类别表格
       description: 在指定文件类别下新增一个表格
@@ -1077,6 +1191,10 @@ paths:
                   description: 表格语义抽取提示词
                   example: 请抽取每行的品名、数量和金额
                   maxLength: 200
+                collect_from_multi_talbe:
+                  type: boolean
+                  description: 多表合并
+                  example: true
               required:
                 - workspace_id
                 - category_id
@@ -1098,7 +1216,7 @@ paths:
                             type: string
                             description: 新增表格ID
                             example: '1234567890'
-  /api/app-api/sip/platform/v2/category/table/update:
+  /api/app-api/sip/platform/v2/category/tables/update:
     post:
       summary: 更新文件类别表格
       description: 更新指定文件类别表格的信息
@@ -1134,10 +1252,15 @@ paths:
                   description: 表格语义抽取提示词
                   example: 请抽取每行的品名、数量和金额
                   maxLength: 200
+                collect_from_multi_talbe:
+                  type: boolean
+                  description: 多表合并
+                  example: true
               required:
                 - workspace_id
                 - category_id
                 - table_id
+                - collect_from_multi_talbe
       responses:
         '200':
           description: 成功更新文件类别表格
@@ -1145,7 +1268,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CodeMessage'
-  /api/app-api/sip/platform/v2/category/table/delete:
+  /api/app-api/sip/platform/v2/category/tables/delete:
     post:
       summary: 删除文件类别表格
       description: 删除指定的文件类别表格，支持批量删除
@@ -1174,7 +1297,7 @@ paths:
                     type: string
                   example:
                     - '1234567890'
-                    - 0987654321
+                    - '0987654321'
               required:
                 - workspace_id
                 - category_id
@@ -3444,6 +3567,75 @@ components:
           type: string
           description: 空间描述
           example: 这是一个用于处理发票的工作空间
+        enable_mail_collection_status:
+          type: integer
+          description: 启用邮箱收票状态 0:禁用 1:启用
+          example: 2
+          enum:
+            - 0
+            - 1
+        mail_inbox_address:
+          type: string
+          description: 收件箱地址
+          example: workspace@example.com
+        init_classification_status:
+          type: integer
+          description: 初始化类型操作状态 0：未初始化 1：初始化中 2：初始化成功 3：初始化失败
+          example: 2
+          enum:
+            - 0
+            - 1
+            - 2
+            - 3
+        workspace_type:
+          type: integer
+          description: 工作空间类型 0：个人 1：团队
+          example: 1
+          enum:
+            - 0
+            - 1
+        demo_status:
+          type: integer
+          description: 是否为demo工作空间 0：否 1：是
+          example: 1
+          enum:
+            - 0
+            - 1
+        auth_scope:
+          type: integer
+          description: 协作范围 0:仅自己可见 1:企业成员可见
+          example: 1
+          enum:
+            - 0
+            - 1
+        manage_account_id:
+          type: string
+          description: 空间管理员id
+          example: admin_123456
+        manage_account_name:
+          type: string
+          description: 空间管理员名称
+          example: 张三
+        doc_count:
+          type: integer
+          description: 文档数量
+          example: 150
+        classification_count:
+          type: integer
+          description: 类别数量
+          example: 8
+        review_rule_repo_count:
+          type: integer
+          description: 规则库数量
+          example: 5
+        callback_url:
+          type: string
+          description: 回调URL
+          example: https://example.com/callback
+        callback_retry_time:
+          type: integer
+          description: 回调重试次数
+          example: 3
       required:
         - workspace_id
         - name
@@ -3474,11 +3666,52 @@ components:
           type: string
           description: 用于分类的提示词
           example: 增值税发票，包含发票代码、发票号码等字段
+        extract_model:
+          description: 抽取模型
+          example: llm
+          enum:
+            - llm
+            - vlm
         enabled:
           $ref: '#/components/schemas/EnabledStatus'
       required:
         - id
         - name
+    GroupExtractConfig:
+      type: object
+      description: 组提取配置项
+      properties:
+        value_config:
+          type: object
+          description: 值配置
+          properties:
+            value:
+              type: string
+              description: 匹配值
+              example: 增值税
+        condition_config:
+          type: object
+          description: 条件配置
+          properties:
+            key:
+              type: string
+              description: 条件键
+              enum:
+                - text_include
+                - text_not_include
+                - text_equal
+                - text_not_equal
+                - text_is_empty
+              example: text_include
+    RuleConfig:
+      type: object
+      description: and型匹配规则配置
+      properties:
+        group_extract_config_list:
+          type: array
+          description: 配置列表
+          items:
+            $ref: '#/components/schemas/GroupExtractConfig'
     CategoryFieldConfig:
       type: object
       properties:
@@ -3571,6 +3804,15 @@ components:
                 default_value:
                   type: string
                   description: 当模式为 default 时使用的默认值
+        verify_settings:
+          type: object
+          description: 字段异常提示配置
+          properties:
+            rules:
+              type: array
+              description: 匹配规则配置列表，支持多个 and 型匹配规则，每个 and 型匹配规则间以or连接
+              items:
+                $ref: '#/components/schemas/RuleConfig'
     CategoryField:
       allOf:
         - $ref: '#/components/schemas/CategoryFieldConfig'

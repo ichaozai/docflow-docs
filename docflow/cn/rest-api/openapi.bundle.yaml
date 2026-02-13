@@ -3677,41 +3677,6 @@ components:
       required:
         - id
         - name
-    GroupExtractConfig:
-      type: object
-      description: 组提取配置项
-      properties:
-        value_config:
-          type: object
-          description: 值配置
-          properties:
-            value:
-              type: string
-              description: 匹配值
-              example: 增值税
-        condition_config:
-          type: object
-          description: 条件配置
-          properties:
-            key:
-              type: string
-              description: 条件键
-              enum:
-                - text_include
-                - text_not_include
-                - text_equal
-                - text_not_equal
-                - text_is_empty
-              example: text_include
-    RuleConfig:
-      type: object
-      description: and型匹配规则配置
-      properties:
-        group_extract_config_list:
-          type: array
-          description: 配置列表
-          items:
-            $ref: '#/components/schemas/GroupExtractConfig'
     CategoryFieldConfig:
       type: object
       properties:
@@ -3804,15 +3769,6 @@ components:
                 default_value:
                   type: string
                   description: 当模式为 default 时使用的默认值
-        verify_settings:
-          type: object
-          description: 字段异常提示配置
-          properties:
-            rules:
-              type: array
-              description: 匹配规则配置列表，支持多个 and 型匹配规则，每个 and 型匹配规则间以or连接
-              items:
-                $ref: '#/components/schemas/RuleConfig'
     CategoryField:
       allOf:
         - $ref: '#/components/schemas/CategoryFieldConfig'

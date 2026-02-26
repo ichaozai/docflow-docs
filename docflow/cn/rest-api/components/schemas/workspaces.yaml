@@ -14,40 +14,6 @@ Workspace:
       type: string
       description: 空间描述
       example: "这是一个用于处理发票的工作空间"
-    enable_mail_collection_status:
-      type: integer
-      description: "启用邮箱收票状态 0:禁用 1:启用"
-      example: 2
-      enum:
-        - 0
-        - 1
-    mail_inbox_address:
-      type: string
-      description: 收件箱地址
-      example: "workspace@example.com"
-    init_classification_status:
-      type: integer
-      description: "初始化类型操作状态 0：未初始化 1：初始化中 2：初始化成功 3：初始化失败"
-      example: 2
-      enum:
-        - 0
-        - 1
-        - 2
-        - 3
-    workspace_type:
-      type: integer
-      description: "工作空间类型 0：个人 1：团队"
-      example: 1
-      enum:
-        - 0
-        - 1
-    demo_status:
-      type: integer
-      description: "是否为demo工作空间 0：否 1：是"
-      example: 1
-      enum:
-        - 0
-        - 1
     auth_scope:
       type: integer
       description: "协作范围 0:仅自己可见 1:企业成员可见"
@@ -63,18 +29,6 @@ Workspace:
       type: string
       description: 空间管理员名称
       example: "张三"
-    doc_count:
-      type: integer
-      description: 文档数量
-      example: 150
-    classification_count:
-      type: integer
-      description: 类别数量
-      example: 8
-    review_rule_repo_count:
-      type: integer
-      description: 规则库数量
-      example: 5
     callback_url:
       type: string
       description: 回调URL

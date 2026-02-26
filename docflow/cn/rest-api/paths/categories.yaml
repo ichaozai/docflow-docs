@@ -472,7 +472,7 @@
                                 type: string
                                 description: 表格语义抽取提示词
                                 example: "请抽取每行的品名、数量和金额"
-                              collect_from_multi_talbe:
+                              collect_from_multi_table:
                                   type: boolean
                                   description: 多表合并
                                   example: true
@@ -509,7 +509,7 @@
                 description: 表格语义抽取提示词
                 example: "请抽取每行的品名、数量和金额"
                 maxLength: 200
-              collect_from_multi_talbe:
+              collect_from_multi_table:
                   type: boolean
                   description: 多表合并
                   example: true
@@ -571,7 +571,7 @@
                 description: 表格语义抽取提示词
                 example: "请抽取每行的品名、数量和金额"
                 maxLength: 200
-              collect_from_multi_talbe:
+              collect_from_multi_table:
                   type: boolean
                   description: 多表合并
                   example: true
@@ -579,7 +579,7 @@
               - workspace_id
               - category_id
               - table_id
-              - collect_from_multi_talbe
+              - collect_from_multi_table
     responses:
       '200':
         description: 成功更新文件类别表格

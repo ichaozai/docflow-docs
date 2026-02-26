@@ -628,70 +628,17 @@ paths:
                   format: int64
                   description: 企业组织ID
                   example: 12345
-                manage_account_id:
-                  type: integer
-                  format: int64
-                  description: 空间管理员id
-                  example: 67890
-                account_id:
-                  type: integer
-                  format: int64
-                  description: 当前账号ID
-                  example: 98765
                 auth_scope:
                   type: integer
-                  description: 协作范围 0:仅自己可见 1:企业成员可见
+                  description: '协作范围 0:仅自己可见 1:企业成员可见'
                   example: 1
                   enum:
                     - 0
                     - 1
-                enable_mail_collection_status:
-                  type: boolean
-                  description: 启用邮箱收票状态 false:禁用 true:启用
-                  example: true
-                mail_inbox_address:
-                  type: string
-                  description: 收件箱地址
-                  example: workspace@example.com
-                init_status:
-                  type: boolean
-                  description: 是否为初始化空间
-                  default: false
-                  example: false
-                workspace_type:
-                  type: integer
-                  description: 工作空间类型 0：个人 1：团队
-                  example: 1
-                  enum:
-                    - 0
-                    - 1
-                demo_status:
-                  type: integer
-                  description: 是否为demo工作空间 0：否 1：是
-                  default: 0
-                  example: 0
-                  enum:
-                    - 0
-                    - 1
-                task_clone_flag:
-                  type: boolean
-                  description: 是否复制任务数据
-                  default: false
-                  example: false
-                review_clone_flag:
-                  type: boolean
-                  description: 是否复制审核配置
-                  default: false
-                  example: false
               required:
                 - name
                 - enterprise_id
-                - manage_account_id
-                - account_id
                 - auth_scope
-                - enable_mail_collection_status
-                - workspace_type
-                - demo_status
       responses:
         '200':
           description: 成功创建空间
@@ -819,14 +766,14 @@ paths:
                   maxLength: 200
                 auth_scope:
                   type: integer
-                  description: 协作范围 0:仅自己可见 1:企业成员可见
+                  description: '协作范围 0:仅自己可见 1:企业成员可见'
                   example: 1
                   enum:
                     - 0
                     - 1
                 enable_mail_collection_status:
                   type: boolean
-                  description: 启用邮箱收票状态 false:禁用 true:启用
+                  description: '启用邮箱收票状态 false:禁用 true:启用'
                   example: true
                 mail_inbox_address:
                   type: string
@@ -842,7 +789,7 @@ paths:
                 callback_url:
                   type: string
                   description: 回调URL
-                  example: https://example.com/callback
+                  example: 'https://example.com/callback'
                 callback_retry_time:
                   type: integer
                   description: 回调重试次数
@@ -1155,7 +1102,7 @@ paths:
                                   type: string
                                   description: 表格语义抽取提示词
                                   example: 请抽取每行的品名、数量和金额
-                                collect_from_multi_talbe:
+                                collect_from_multi_table:
                                   type: boolean
                                   description: 多表合并
                                   example: true
@@ -1191,7 +1138,7 @@ paths:
                   description: 表格语义抽取提示词
                   example: 请抽取每行的品名、数量和金额
                   maxLength: 200
-                collect_from_multi_talbe:
+                collect_from_multi_table:
                   type: boolean
                   description: 多表合并
                   example: true
@@ -1252,7 +1199,7 @@ paths:
                   description: 表格语义抽取提示词
                   example: 请抽取每行的品名、数量和金额
                   maxLength: 200
-                collect_from_multi_talbe:
+                collect_from_multi_table:
                   type: boolean
                   description: 多表合并
                   example: true
@@ -1260,7 +1207,7 @@ paths:
                 - workspace_id
                 - category_id
                 - table_id
-                - collect_from_multi_talbe
+                - collect_from_multi_table
       responses:
         '200':
           description: 成功更新文件类别表格
@@ -1297,7 +1244,7 @@ paths:
                     type: string
                   example:
                     - '1234567890'
-                    - '0987654321'
+                    - 0987654321
               required:
                 - workspace_id
                 - category_id
@@ -3567,43 +3514,9 @@ components:
           type: string
           description: 空间描述
           example: 这是一个用于处理发票的工作空间
-        enable_mail_collection_status:
-          type: integer
-          description: 启用邮箱收票状态 0:禁用 1:启用
-          example: 2
-          enum:
-            - 0
-            - 1
-        mail_inbox_address:
-          type: string
-          description: 收件箱地址
-          example: workspace@example.com
-        init_classification_status:
-          type: integer
-          description: 初始化类型操作状态 0：未初始化 1：初始化中 2：初始化成功 3：初始化失败
-          example: 2
-          enum:
-            - 0
-            - 1
-            - 2
-            - 3
-        workspace_type:
-          type: integer
-          description: 工作空间类型 0：个人 1：团队
-          example: 1
-          enum:
-            - 0
-            - 1
-        demo_status:
-          type: integer
-          description: 是否为demo工作空间 0：否 1：是
-          example: 1
-          enum:
-            - 0
-            - 1
         auth_scope:
           type: integer
-          description: 协作范围 0:仅自己可见 1:企业成员可见
+          description: '协作范围 0:仅自己可见 1:企业成员可见'
           example: 1
           enum:
             - 0
@@ -3616,22 +3529,10 @@ components:
           type: string
           description: 空间管理员名称
           example: 张三
-        doc_count:
-          type: integer
-          description: 文档数量
-          example: 150
-        classification_count:
-          type: integer
-          description: 类别数量
-          example: 8
-        review_rule_repo_count:
-          type: integer
-          description: 规则库数量
-          example: 5
         callback_url:
           type: string
           description: 回调URL
-          example: https://example.com/callback
+          example: 'https://example.com/callback'
         callback_retry_time:
           type: integer
           description: 回调重试次数
@@ -3716,176 +3617,19 @@ components:
               type: string
               description: 转换类型
               enum:
-                - text
-                - number
                 - datetime
                 - enumerate
                 - regex
-            text_settings:
-              type: object
-              description: 文本类型转换配置
-              properties:
-                strip:
-                  type: array
-                  description: |
-                    去除的字符列表，值为枚举key。可选的枚举值：
-                    - remove_text_default_white_space: "空格" (en: "white space")
-                    - remove_text_default_comma: "，" (en: "，")
-                    - remove_text_default_full_stop: "。" (en: "。")
-                    - remove_text_default_full_stop_half_width: "." (en: ".")
-                    - remove_text_default_semicolon: "；" (en: "；")
-                    - remove_text_default_dun_hao: "、" (en: "、")
-                    - remove_text_default_colon: "：" (en: "：")
-                    - remove_text_default_slash: "/" (en: "/")
-                    - remove_text_default_ampersand: "&" (en: "&")
-                    - remove_text_default_vertical_bar: "|" (en: "|")
-                  items:
-                    type: string
-                    enum:
-                      - remove_text_default_white_space
-                      - remove_text_default_comma
-                      - remove_text_default_full_stop
-                      - remove_text_default_full_stop_half_width
-                      - remove_text_default_semicolon
-                      - remove_text_default_dun_hao
-                      - remove_text_default_colon
-                      - remove_text_default_slash
-                      - remove_text_default_ampersand
-                      - remove_text_default_vertical_bar
-                  example:
-                    - remove_text_default_white_space
-                    - remove_text_default_comma
-            number_settings:
-              type: object
-              description: 数字类型转换配置
-              properties:
-                format:
-                  type: string
-                  description: 输出格式
-                  enum:
-                    - normal
-                    - percentage
-                    - chinese_amount
-                unit_remove:
-                  type: array
-                  description: |
-                    单位去除列表，值为枚举key。可选的枚举值：
-                    - unit_remove_default_yuan_one: "元" (en: "元")
-                    - unit_remove_default_yuan_two: "¥" (en: "¥")
-                    - unit_remove_default_yuan_three: "RMB" (en: "RMB")
-                    - unit_remove_default_yuan_four: "CNY" (en: "CNY")
-                    - unit_remove_default_dollar_one: "美元" (en: "美元")
-                    - unit_remove_default_dollar_two: "$" (en: "$")
-                    - unit_remove_default_dollar_three: "USD" (en: "USD")
-                    - unit_remove_default_euro_one: "€" (en: "€")
-                    - unit_remove_default_euro_two: "EUR" (en: "EUR")
-                    - unit_remove_default_gbp_one: "£" (en: "£")
-                    - unit_remove_default_gbp_two: "GBP" (en: "GBP")
-                    - unit_remove_default_jpy_one: "JPY" (en: "JPY")
-                  items:
-                    type: string
-                    enum:
-                      - unit_remove_default_yuan_one
-                      - unit_remove_default_yuan_two
-                      - unit_remove_default_yuan_three
-                      - unit_remove_default_yuan_four
-                      - unit_remove_default_dollar_one
-                      - unit_remove_default_dollar_two
-                      - unit_remove_default_dollar_three
-                      - unit_remove_default_euro_one
-                      - unit_remove_default_euro_two
-                      - unit_remove_default_gbp_one
-                      - unit_remove_default_gbp_two
-                      - unit_remove_default_jpy_one
-                  example:
-                    - unit_remove_default_yuan_one
-                    - unit_remove_default_dollar_two
-                simplified_chinese:
-                  type: string
-                  description: |
-                    中文简写，值为枚举key。可选的枚举值：
-                    - number_simplified_chinese_hundred: "百" (en: "hundred")
-                    - number_simplified_chinese_thousand: "千" (en: "thousand")
-                    - number_simplified_chinese_ten_thousand: "万" (en: "ten thousand")
-                    - number_simplified_chinese_million: "百万" (en: "million")
-                    - number_simplified_chinese_ten_million: "千万" (en: "ten million")
-                    - number_simplified_chinese_billion: "亿" (en: "billion")
-                  enum:
-                    - number_simplified_chinese_hundred
-                    - number_simplified_chinese_thousand
-                    - number_simplified_chinese_ten_thousand
-                    - number_simplified_chinese_million
-                    - number_simplified_chinese_ten_million
-                    - number_simplified_chinese_billion
-                  example: number_simplified_chinese_hundred
-                simplified_english:
-                  type: string
-                  description: |
-                    英文简写，值为枚举key。可选的枚举值：
-                    - number_simplified_english_k: "k" (en: "k")
-                    - number_simplified_english_m: "m" (en: "m")
-                    - number_simplified_english_b: "b" (en: "b")
-                  enum:
-                    - number_simplified_english_k
-                    - number_simplified_english_m
-                    - number_simplified_english_b
-                  example: number_simplified_english_k
-                decimal_places:
-                  type: integer
-                  description: 保留小数位数
-                  example: 2
-                omit_trailing_zeros:
-                  type: boolean
-                  description: 省去末尾的0
-                thousand_separator:
-                  type: boolean
-                  description: 显示千位分隔符
-                chinese_case:
-                  type: string
-                  description: 中文金额大小写
-                  enum:
-                    - upper
-                    - lower
             datetime_settings:
               type: object
               description: 时间类型转换配置
               properties:
-                format_type:
+                format:
                   type: string
-                  description: |
-                    日期时间格式类型，值为枚举key。可选的枚举值：
-                    - time_format_one: "D/M/YYYY" (en: "D/M/YYYY")
-                    - time_format_two: "YYYY/M/D" (en: "YYYY/M/D")
-                    - time_format_three: "MM/DD/YYYY" (en: "MM/DD/YYYY")
-                    - time_format_four: "YYYY/MM/DD" (en: "YYYY/MM/DD")
-                    - time_format_five: "YYYY-MM-DD" (en: "YYYY-MM-DD")
-                    - time_format_six: "DD.MM.YY" (en: "DD.MM.YY")
-                    - time_format_seven: "YYYY年MM月DD日" (en: "YYYY年MM月DD日")
-                    - time_format_eight: "二零二三年十月二十七日" (en: "二零二三年十月二十七日")
-                    - time_format_nine: "YYYY年MM月DD日 HH时mm分ss秒" (en: "YYYY年MM月DD日 HH时mm分ss秒")
-                    - time_format_ten: "MM月DD日 HH时mm分ss秒" (en: "MM月DD日 HH时mm分ss秒")
-                    - time_format_eleven: "Month DDst/nd/rd/th, YYYY" (en: "Month DDst/nd/rd/th, YYYY")
-                    - time_format_twelve: "DDst/nd/rd/th Month, YYYY" (en: "DDst/nd/rd/th Month, YYYY")
-                    - time_format_custom: "自定义" (en: "custom")
-                  enum:
-                    - time_format_one
-                    - time_format_two
-                    - time_format_three
-                    - time_format_four
-                    - time_format_five
-                    - time_format_six
-                    - time_format_seven
-                    - time_format_eight
-                    - time_format_nine
-                    - time_format_ten
-                    - time_format_eleven
-                    - time_format_twelve
-                    - time_format_custom
-                  example: time_format_five
-                custom_format:
-                  type: string
-                  description: 自定义格式字符串，仅当 format_type 为 time_format_custom 时使用
-                  example: YYYY-MM-DD HH:mm:ss
+                  description: >-
+                    日期时间格式，参考 DocFlow 日期格式说明
+                    (https://docflow.textin.com/markdown?key=dateFormatGuide)
+                  example: 'yyyy-MM-dd HH:mm:ss'
             enumerate_settings:
               type: object
               description: 枚举类型转换配置
@@ -3895,23 +3639,6 @@ components:
                   description: 可选枚举值列表
                   items:
                     type: string
-                  example:
-                    - 选项1
-                    - 选项2
-                    - 选项3
-                mismatch_action:
-                  type: object
-                  description: 字段值不匹配时的处理动作
-                  properties:
-                    mode:
-                      type: string
-                      description: 不匹配时的处理模式
-                      enum:
-                        - default
-                        - warning
-                    default_value:
-                      type: string
-                      description: 当模式为 default 时使用的默认值
             regex_settings:
               type: object
               description: 正则类型转换配置
@@ -3919,15 +3646,14 @@ components:
                 match:
                   type: string
                   description: 匹配用的正则表达式
-                  example: ^\d{4}-\d{2}-\d{2}$
+                  example: '^\d{4}-\d{2}-\d{2}$'
                 replace:
                   type: string
                   description: 替换用的正则表达式
                   example: $1-$2-$3
             mismatch_action:
               type: object
-              description: 字段值不匹配时的处理动作（已废弃，请使用 enumerate_settings.mismatch_action）
-              deprecated: true
+              description: 字段值不匹配时的处理动作
               properties:
                 mode:
                   type: string

@@ -664,6 +664,13 @@ paths:
       tags:
         - 空间管理
       parameters:
+        - name: enterprise_id
+          in: query
+          description: 企业id
+          required: true
+          schema:
+            type: integer
+            format: int64
         - name: page
           in: query
           description: 页码
@@ -842,14 +849,14 @@ paths:
   /api/app-api/sip/platform/v2/category/create:
     post:
       summary: 创建文件类别
-      description: 在指定空间中创建一个新的文件类别
+      description: 在指定空间中创建一个新的文件类别，需要上传至少一个样本文件并配置至少一个字段
       operationId: createCategory
       tags:
         - 文件类别
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               type: object
               properties:
@@ -873,10 +880,26 @@ paths:
                   enum:
                     - llm
                     - vlm
+                sample_files:
+                  type: array
+                  description: 样本文件列表，至少上传一个样本文件
+                  items:
+                    type: string
+                    format: binary
+                  minItems: 1
+                fields:
+                  type: array
+                  description: 字段配置列表，至少配置一个字段
+                  items:
+                    allOf:
+                      - $ref: '#/components/schemas/CategoryFieldConfig'
+                  minItems: 1
               required:
                 - workspace_id
                 - name
                 - extract_model
+                - sample_files
+                - fields
       responses:
         '200':
           description: 成功创建文件类别
@@ -3540,44 +3563,6 @@ components:
       required:
         - workspace_id
         - name
-    EnabledStatus:
-      type: integer
-      description: |
-        启用状态
-        - 0: 禁用
-        - 1: 启用
-        - 2: 草稿
-      enum:
-        - 0
-        - 1
-        - 2
-    Category:
-      type: object
-      description: 文件类别
-      properties:
-        id:
-          type: string
-          description: 文件类别ID
-          example: '1234567890'
-        name:
-          type: string
-          description: 文件类别名称
-          example: 发票
-        category_prompt:
-          type: string
-          description: 用于分类的提示词
-          example: 增值税发票，包含发票代码、发票号码等字段
-        extract_model:
-          description: 抽取模型
-          example: llm
-          enum:
-            - llm
-            - vlm
-        enabled:
-          $ref: '#/components/schemas/EnabledStatus'
-      required:
-        - id
-        - name
     CategoryFieldConfig:
       type: object
       properties:
@@ -3664,6 +3649,44 @@ components:
                 default_value:
                   type: string
                   description: 当模式为 default 时使用的默认值
+    EnabledStatus:
+      type: integer
+      description: |
+        启用状态
+        - 0: 禁用
+        - 1: 启用
+        - 2: 草稿
+      enum:
+        - 0
+        - 1
+        - 2
+    Category:
+      type: object
+      description: 文件类别
+      properties:
+        id:
+          type: string
+          description: 文件类别ID
+          example: '1234567890'
+        name:
+          type: string
+          description: 文件类别名称
+          example: 发票
+        category_prompt:
+          type: string
+          description: 用于分类的提示词
+          example: 增值税发票，包含发票代码、发票号码等字段
+        extract_model:
+          description: 抽取模型
+          example: llm
+          enum:
+            - llm
+            - vlm
+        enabled:
+          $ref: '#/components/schemas/EnabledStatus'
+      required:
+        - id
+        - name
     CategoryField:
       allOf:
         - $ref: '#/components/schemas/CategoryFieldConfig'

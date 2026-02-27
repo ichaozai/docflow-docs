@@ -64,6 +64,13 @@
     tags:
       - 空间管理
     parameters:
+      - name: enterprise_id
+        in: query
+        description: 企业id
+        required: true
+        schema:
+          type: integer
+          format: int64
       - name: page
         in: query
         description: 页码

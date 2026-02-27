@@ -1,14 +1,14 @@
 /api/app-api/sip/platform/v2/category/create:
   post:
     summary: 创建文件类别
-    description: 在指定空间中创建一个新的文件类别
+    description: 在指定空间中创建一个新的文件类别，需要上传至少一个样本文件并配置至少一个字段
     operationId: createCategory
     tags:
       - 文件类别
     requestBody:
       required: true
       content:
-        application/json:
+        multipart/form-data:
           schema:
             type: object
             properties:
@@ -32,10 +32,26 @@
                 enum:
                   - llm
                   - vlm
+              sample_files:
+                type: array
+                description: 样本文件列表，至少上传一个样本文件
+                items:
+                  type: string
+                  format: binary
+                minItems: 1
+              fields:
+                type: array
+                description: 字段配置列表，至少配置一个字段
+                items:
+                  allOf:
+                    - $ref: '../components/schemas/categories.yaml#/CategoryFieldConfig'
+                minItems: 1
             required:
               - workspace_id
               - name
               - extract_model
+              - sample_files
+              - fields
     responses:
       '200':
         description: 成功创建文件类别

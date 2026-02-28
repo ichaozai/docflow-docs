@@ -56,12 +56,12 @@ paths:
   # Category Tables
   /api/app-api/sip/platform/v2/category/tables/list:
     $ref: './paths/categories.yaml#/~1api~1app-api~1sip~1platform~1v2~1category~1tables~1list'
-  /api/app-api/sip/platform/v2/category/table/add:
-    $ref: './paths/categories.yaml#/~1api~1app-api~1sip~1platform~1v2~1category~1table~1add'
-  /api/app-api/sip/platform/v2/category/table/update:
-    $ref: './paths/categories.yaml#/~1api~1app-api~1sip~1platform~1v2~1category~1table~1update'
-  /api/app-api/sip/platform/v2/category/table/delete:
-    $ref: './paths/categories.yaml#/~1api~1app-api~1sip~1platform~1v2~1category~1table~1delete'
+  /api/app-api/sip/platform/v2/category/tables/add:
+    $ref: './paths/categories.yaml#/~1api~1app-api~1sip~1platform~1v2~1category~1tables~1add'
+  /api/app-api/sip/platform/v2/category/tables/update:
+    $ref: './paths/categories.yaml#/~1api~1app-api~1sip~1platform~1v2~1category~1tables~1update'
+  /api/app-api/sip/platform/v2/category/tables/delete:
+    $ref: './paths/categories.yaml#/~1api~1app-api~1sip~1platform~1v2~1category~1tables~1delete'
   
   # Category Fields
   /api/app-api/sip/platform/v2/category/fields/list:

@@ -22,8 +22,22 @@
                 description: 空间描述
                 example: "这是一个用于处理发票的工作空间"
                 maxLength: 200
+              enterprise_id:
+                type: integer
+                format: int64
+                description: 企业组织ID
+                example: 12345
+              auth_scope:
+                type: integer
+                description: "协作范围 0:仅自己可见 1:企业成员可见"
+                example: 1
+                enum:
+                  - 0
+                  - 1
             required:
               - name
+              - enterprise_id
+              - auth_scope
     responses:
       '200':
         description: 成功创建空间
@@ -50,6 +64,13 @@
     tags:
       - 空间管理
     parameters:
+      - name: enterprise_id
+        in: query
+        description: 企业id
+        required: true
+        schema:
+          type: integer
+          format: int64
       - name: page
         in: query
         description: 页码
@@ -152,8 +173,44 @@
                 description: 空间描述
                 example: "这是一个用于处理发票的工作空间"
                 maxLength: 200
+              auth_scope:
+                type: integer
+                description: "协作范围 0:仅自己可见 1:企业成员可见"
+                example: 1
+                enum:
+                  - 0
+                  - 1
+              enable_mail_collection_status:
+                type: boolean
+                description: "启用邮箱收票状态 false:禁用 true:启用"
+                example: true
+              mail_inbox_address:
+                type: string
+                description: 收件箱地址
+                example: "workspace@example.com"
+              workspace_type:
+                type: integer
+                description: "工作空间类型 0：个人 1：团队"
+                example: 1
+                enum:
+                  - 0
+                  - 1
+              callback_url:
+                type: string
+                description: 回调URL
+                example: "https://example.com/callback"
+              callback_retry_time:
+                type: integer
+                description: 回调重试次数
+                example: 3
+                minimum: 0
+                maximum: 3
             required:
               - workspace_id
+              - name
+              - auth_scope
+              - enable_mail_collection_status
+              - workspace_type
     responses:
       '200':
         description: 成功更新空间

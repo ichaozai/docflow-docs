@@ -623,8 +623,22 @@ paths:
                   description: 空间描述
                   example: 这是一个用于处理发票的工作空间
                   maxLength: 200
+                enterprise_id:
+                  type: integer
+                  format: int64
+                  description: 企业组织ID
+                  example: 12345
+                auth_scope:
+                  type: integer
+                  description: '协作范围 0:仅自己可见 1:企业成员可见'
+                  example: 1
+                  enum:
+                    - 0
+                    - 1
               required:
                 - name
+                - enterprise_id
+                - auth_scope
       responses:
         '200':
           description: 成功创建空间
@@ -650,6 +664,13 @@ paths:
       tags:
         - 空间管理
       parameters:
+        - name: enterprise_id
+          in: query
+          description: 企业id
+          required: true
+          schema:
+            type: integer
+            format: int64
         - name: page
           in: query
           description: 页码
@@ -750,8 +771,44 @@ paths:
                   description: 空间描述
                   example: 这是一个用于处理发票的工作空间
                   maxLength: 200
+                auth_scope:
+                  type: integer
+                  description: '协作范围 0:仅自己可见 1:企业成员可见'
+                  example: 1
+                  enum:
+                    - 0
+                    - 1
+                enable_mail_collection_status:
+                  type: boolean
+                  description: '启用邮箱收票状态 false:禁用 true:启用'
+                  example: true
+                mail_inbox_address:
+                  type: string
+                  description: 收件箱地址
+                  example: workspace@example.com
+                workspace_type:
+                  type: integer
+                  description: 工作空间类型 0：个人 1：团队
+                  example: 1
+                  enum:
+                    - 0
+                    - 1
+                callback_url:
+                  type: string
+                  description: 回调URL
+                  example: 'https://example.com/callback'
+                callback_retry_time:
+                  type: integer
+                  description: 回调重试次数
+                  example: 3
+                  minimum: 0
+                  maximum: 3
               required:
                 - workspace_id
+                - name
+                - auth_scope
+                - enable_mail_collection_status
+                - workspace_type
       responses:
         '200':
           description: 成功更新空间
@@ -792,14 +849,14 @@ paths:
   /api/app-api/sip/platform/v2/category/create:
     post:
       summary: 创建文件类别
-      description: 在指定空间中创建一个新的文件类别
+      description: 在指定空间中创建一个新的文件类别，需要上传至少一个样本文件并配置至少一个字段
       operationId: createCategory
       tags:
         - 文件类别
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               type: object
               properties:
@@ -817,9 +874,32 @@ paths:
                   description: 用于分类的提示词
                   example: 增值税发票，包含发票代码、发票号码等字段
                   maxLength: 500
+                extract_model:
+                  description: 抽取模型
+                  example: llm
+                  enum:
+                    - llm
+                    - vlm
+                sample_files:
+                  type: array
+                  description: 样本文件列表，至少上传一个样本文件
+                  items:
+                    type: string
+                    format: binary
+                  minItems: 1
+                fields:
+                  type: array
+                  description: 字段配置列表，至少配置一个字段
+                  items:
+                    allOf:
+                      - $ref: '#/components/schemas/CategoryFieldConfig'
+                  minItems: 1
               required:
                 - workspace_id
                 - name
+                - extract_model
+                - sample_files
+                - fields
       responses:
         '200':
           description: 成功创建文件类别
@@ -1045,7 +1125,11 @@ paths:
                                   type: string
                                   description: 表格语义抽取提示词
                                   example: 请抽取每行的品名、数量和金额
-  /api/app-api/sip/platform/v2/category/table/add:
+                                collect_from_multi_table:
+                                  type: boolean
+                                  description: 多表合并
+                                  example: true
+  /api/app-api/sip/platform/v2/category/tables/add:
     post:
       summary: 新增文件类别表格
       description: 在指定文件类别下新增一个表格
@@ -1077,6 +1161,10 @@ paths:
                   description: 表格语义抽取提示词
                   example: 请抽取每行的品名、数量和金额
                   maxLength: 200
+                collect_from_multi_table:
+                  type: boolean
+                  description: 多表合并
+                  example: true
               required:
                 - workspace_id
                 - category_id
@@ -1098,7 +1186,7 @@ paths:
                             type: string
                             description: 新增表格ID
                             example: '1234567890'
-  /api/app-api/sip/platform/v2/category/table/update:
+  /api/app-api/sip/platform/v2/category/tables/update:
     post:
       summary: 更新文件类别表格
       description: 更新指定文件类别表格的信息
@@ -1134,10 +1222,15 @@ paths:
                   description: 表格语义抽取提示词
                   example: 请抽取每行的品名、数量和金额
                   maxLength: 200
+                collect_from_multi_table:
+                  type: boolean
+                  description: 多表合并
+                  example: true
               required:
                 - workspace_id
                 - category_id
                 - table_id
+                - collect_from_multi_table
       responses:
         '200':
           description: 成功更新文件类别表格
@@ -1145,7 +1238,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CodeMessage'
-  /api/app-api/sip/platform/v2/category/table/delete:
+  /api/app-api/sip/platform/v2/category/tables/delete:
     post:
       summary: 删除文件类别表格
       description: 删除指定的文件类别表格，支持批量删除
@@ -3444,40 +3537,31 @@ components:
           type: string
           description: 空间描述
           example: 这是一个用于处理发票的工作空间
+        auth_scope:
+          type: integer
+          description: '协作范围 0:仅自己可见 1:企业成员可见'
+          example: 1
+          enum:
+            - 0
+            - 1
+        manage_account_id:
+          type: string
+          description: 空间管理员id
+          example: admin_123456
+        manage_account_name:
+          type: string
+          description: 空间管理员名称
+          example: 张三
+        callback_url:
+          type: string
+          description: 回调URL
+          example: 'https://example.com/callback'
+        callback_retry_time:
+          type: integer
+          description: 回调重试次数
+          example: 3
       required:
         - workspace_id
-        - name
-    EnabledStatus:
-      type: integer
-      description: |
-        启用状态
-        - 0: 禁用
-        - 1: 启用
-        - 2: 草稿
-      enum:
-        - 0
-        - 1
-        - 2
-    Category:
-      type: object
-      description: 文件类别
-      properties:
-        id:
-          type: string
-          description: 文件类别ID
-          example: '1234567890'
-        name:
-          type: string
-          description: 文件类别名称
-          example: 发票
-        category_prompt:
-          type: string
-          description: 用于分类的提示词
-          example: 增值税发票，包含发票代码、发票号码等字段
-        enabled:
-          $ref: '#/components/schemas/EnabledStatus'
-      required:
-        - id
         - name
     CategoryFieldConfig:
       type: object
@@ -3507,6 +3591,9 @@ components:
         multi_value:
           type: boolean
           description: 是否多值抽取
+        duplicate_value_distinct:
+          type: boolean
+          description: 是否重复值去重，仅当 multi_value 为 true 时有效
         transform_settings:
           type: object
           description: 转换配置
@@ -3515,21 +3602,9 @@ components:
               type: string
               description: 转换类型
               enum:
-                - text
-                - number
                 - datetime
                 - enumerate
                 - regex
-            text_settings:
-              type: object
-              description: 文本类型转换配置
-              properties:
-                strip:
-                  type: string
-                  description: 去除的字符
-            number_settings:
-              type: object
-              description: 数字类型转换配置
             datetime_settings:
               type: object
               description: 时间类型转换配置
@@ -3539,6 +3614,7 @@ components:
                   description: >-
                     日期时间格式，参考 DocFlow 日期格式说明
                     (https://docflow.textin.com/markdown?key=dateFormatGuide)
+                  example: 'yyyy-MM-dd HH:mm:ss'
             enumerate_settings:
               type: object
               description: 枚举类型转换配置
@@ -3555,12 +3631,14 @@ components:
                 match:
                   type: string
                   description: 匹配用的正则表达式
+                  example: '^\d{4}-\d{2}-\d{2}$'
                 replace:
                   type: string
                   description: 替换用的正则表达式
+                  example: $1-$2-$3
             mismatch_action:
               type: object
-              description: 字段值不匹配时的处理动作，例如替换为默认值或仅输出告警
+              description: 字段值不匹配时的处理动作
               properties:
                 mode:
                   type: string
@@ -3571,6 +3649,44 @@ components:
                 default_value:
                   type: string
                   description: 当模式为 default 时使用的默认值
+    EnabledStatus:
+      type: integer
+      description: |
+        启用状态
+        - 0: 禁用
+        - 1: 启用
+        - 2: 草稿
+      enum:
+        - 0
+        - 1
+        - 2
+    Category:
+      type: object
+      description: 文件类别
+      properties:
+        id:
+          type: string
+          description: 文件类别ID
+          example: '1234567890'
+        name:
+          type: string
+          description: 文件类别名称
+          example: 发票
+        category_prompt:
+          type: string
+          description: 用于分类的提示词
+          example: 增值税发票，包含发票代码、发票号码等字段
+        extract_model:
+          description: 抽取模型
+          example: llm
+          enum:
+            - llm
+            - vlm
+        enabled:
+          $ref: '#/components/schemas/EnabledStatus'
+      required:
+        - id
+        - name
     CategoryField:
       allOf:
         - $ref: '#/components/schemas/CategoryFieldConfig'

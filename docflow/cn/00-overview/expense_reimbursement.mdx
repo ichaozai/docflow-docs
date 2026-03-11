@@ -1,0 +1,351 @@
+---
+title: "费用报销场景"
+description: "在财务部门费用报销业务场景，调用 DocFlow API 完成文档全流程自动化处理"
+---
+
+<Tip>
+  本文以**费用报销**为业务场景，演示如何通过 API 完成从创建空间、配置类别、上传文件到获取结果的完整流程。
+  如果您刚刚接触 DocFlow，建议先在 [Web 页面](https://docflow.textin.com/) 体验一下产品的基本功能，再阅读本文。
+</Tip>
+
+## 01 场景说明
+
+在费用报销业务中，财务人员每天需要处理大量不同类型的报销单据，例如：
+
+- **报销申请单**（XLS 格式）：记录申请人、出差目的、费用明细等信息
+- **酒店水单**（图片）：记录入住日期、离店日期及消费明细
+- **支付记录**（图片）：记录交易流水号、交易金额、收付款方信息
+
+通过 DocFlow，您只需配置一次分类和字段，后续上传的单据即可自动完成**分类识别**和**结构化信息抽取**，无需人工逐份录入。
+
+## 02 业务流程
+
+```
+创建工作空间  →  配置文件类别（含样本和字段）  →  上传待处理文件  →  获取分类与抽取结果
+```
+
+<Steps>
+  <Step title="创建工作空间">
+    为费用报销业务创建专属工作空间，后续所有单据和类别都将在此空间下管理。
+  </Step>
+  <Step title="配置文件类别">
+    创建三个文件类别，分别对应三种单据类型。每个类别需要：
+    - 上传至少一份**样本文件**（用于 AI 学习文档结构）
+    - 配置需要抽取的**字段列表**
+  </Step>
+  <Step title="上传待处理文件">
+    将需要处理的报销单据上传至工作空间，系统将自动进行分类与字段抽取。
+  </Step>
+  <Step title="获取结果">
+    轮询接口直至处理完成，获取每份文件的分类结果和字段抽取结果。
+  </Step>
+</Steps>
+
+## 03 类别与字段配置
+
+本示例配置三个文件类别，字段设计如下：
+
+<AccordionGroup>
+  <Accordion title="报销申请单（样本：报销申请单.XLS）">
+    报销申请单是差旅费用报销的主单据，以 Excel 表格形式记录申请人信息、出差行程及各项费用明细。通过字段抽取，系统可自动录入申请人、金额、税率等关键数据，避免手工填表出错：
+
+    | 字段名 | 类型 |
+    |---|---|
+    | 申请人 | 基本信息字段 |
+    | 出差目的 | 基本信息字段 |
+    | 报销期间 | 基本信息字段 |
+    | 目的地 | 基本信息字段 |
+    | 费用发生日期 | 基本信息字段 |
+    | 费用项目 | 基本信息字段 |
+    | 差旅费金额 | 基本信息字段 |
+    | 税率 | 基本信息字段 |
+    | 冲借款金额 | 基本信息字段 |
+    | 申请付款金额 | 基本信息字段 |
+    | 备注 | 基本信息字段 |
+    | 税额 | 基本信息字段 |
+  </Accordion>
+  <Accordion title="酒店水单（样本：酒店水单.png）">
+    酒店水单是住宿消费的凭证，通常包含入住/离店日期等全局信息，以及按天计费的消费明细表格。字段配置同时使用**基本信息字段**（全局信息）和**表格字段**（逐行消费记录），以完整提取单据中的结构化数据：
+
+    ![酒店水单样本](../images/sample_hotel_receipt.png)
+
+    | 字段名 | 类型 |
+    |---|---|
+    | 入住日期 | 基本信息字段 |
+    | 离店日期 | 基本信息字段 |
+    | 总金额 | 基本信息字段 |
+    | 日期 | 表格字段 |
+    | 费用类型 | 表格字段 |
+    | 金额 | 表格字段 |
+    | 备注 | 表格字段 |
+  </Accordion>
+  <Accordion title="支付记录（样本：支付记录.png）">
+    支付记录是银行或支付机构出具的电子回单，包含交易流水号、交易双方及金额等详情。通过字段抽取，可快速核验报销金额和收付款方是否与申请单一致：
+
+    ![支付记录样本](../images/sample_payment_record.png)
+
+    | 字段名 | 类型 |
+    |---|---|
+    | 交易流水号 | 基本信息字段 |
+    | 交易授权码 | 基本信息字段 |
+    | 付款卡种 | 基本信息字段 |
+    | 收款方户名 | 基本信息字段 |
+    | 付款方户名 | 基本信息字段 |
+    | 交易时间 | 基本信息字段 |
+    | 备注 | 基本信息字段 |
+    | 收款方账户 | 基本信息字段 |
+    | 收款方银行 | 基本信息字段 |
+    | 交易金额 | 基本信息字段 |
+    | 交易描述 | 基本信息字段 |
+    | 付款银行 | 基本信息字段 |
+    | 币种 | 基本信息字段 |
+    | 交易账号/支付方式 | 基本信息字段 |
+  </Accordion>
+</AccordionGroup>
+
+## 04 先决条件
+
+1. 登录 [TextIn 控制台](https://www.textin.com/console/dashboard/setting)，获取 `x-ti-app-id` 和 `x-ti-secret-code`
+2. 在控制台「企业管理」中查看企业组织 ID（`enterprise_id`），参考 [如何获取企业 ID](../100-faq/get_enterprise_id)
+3. 下载[示例样本文件](https://github.com/ichaozai/docflow-docs/tree/master/examples/sample_files)，或使用自己的报销单据
+
+## 05 完整示例代码下载
+
+完整可运行代码（含 Python、Java 两个版本）已内置在文档仓库的 `examples/` 目录下：
+
+```
+examples/
+├── python/
+│   ├── expense_reimbursement.py   # Python 完整示例
+│   ├── requirements.txt
+│   └── README.md
+├── java/
+│   ├── src/main/java/com/docflow/ExpenseReimbursement.java
+│   ├── pom.xml
+│   └── README.md
+└── sample_files/
+    └── 费用报销/
+        ├── 报销申请单.XLS
+        ├── 酒店水单.png
+        └── 支付记录.png
+```
+
+<CardGroup cols={2}>
+  <Card title="Python 示例" icon="python" href="https://github.com/ichaozai/docflow-docs/tree/master/examples/python">
+    查看 Python 完整示例代码
+  </Card>
+  <Card title="Java 示例" icon="java" href="https://github.com/ichaozai/docflow-docs/tree/master/examples/java">
+    查看 Java 完整示例代码
+  </Card>
+</CardGroup>
+
+## 06 运行示例
+
+<Tabs>
+  <Tab title="Python">
+    **环境要求**：Python 3.8+
+
+    **1. 安装依赖**
+
+    ```bash
+    cd examples/python
+    pip install -r requirements.txt
+    ```
+
+    **2. 填写配置**
+
+    打开 `expense_reimbursement.py`，填写文件顶部的配置项：
+
+    ```python
+    APP_ID        = "your-app-id"      # x-ti-app-id
+    SECRET_CODE   = "your-secret-code" # x-ti-secret-code
+    ENTERPRISE_ID = 0                  # 企业组织 ID
+    ```
+
+    **3. 运行**
+
+    ```bash
+    python expense_reimbursement.py
+    ```
+  </Tab>
+  <Tab title="Java">
+    **环境要求**：JDK 11+，Maven 3.6+
+
+    **1. 填写配置**
+
+    打开 `src/main/java/com/docflow/ExpenseReimbursement.java`，填写文件顶部的配置项：
+
+    ```java
+    private static final String APP_ID        = "your-app-id";
+    private static final String SECRET_CODE   = "your-secret-code";
+    private static final long   ENTERPRISE_ID = 0L;   // 替换为企业组织 ID
+    ```
+
+    **2. 编译并运行**
+
+    ```bash
+    cd examples/java
+    mvn clean package -q
+    java -jar target/expense-reimbursement-1.0.0.jar
+    ```
+  </Tab>
+</Tabs>
+
+<Tip>
+  运行成功后，可登录 [DocFlow Web 页面](https://docflow.textin.com/)，在对应工作空间下直观查看每份文件的分类和字段抽取结果，便于与代码输出对照验证。
+</Tip>
+
+## 07 结果说明
+
+处理完成后，每份文件将返回分类结果和字段抽取结果。字段抽取结果位于 `data.fields[]`，每个字段包含 `key`、`value` 及坐标 `position`（可用于原文高亮回显）。
+
+以下为三份样本文件的实际接口返回（来自 `file/fetch`，省略了部分 `position` 坐标）：
+
+<AccordionGroup>
+  <Accordion title="报销申请单.XLS">
+    ```json
+    {
+      "id": "2029124607672344576",
+      "name": "报销申请单.XLS",
+      "format": "xls",
+      "category": "报销申请单",
+      "recognition_status": 1,
+      "duration_ms": 5316,
+      "data": {
+        "fields": [
+          {
+            "key": "目的地",
+            "value": "无锡",
+            "position": [{ "page": 0, "vertices": [902, 158, 925, 158, 925, 170, 902, 170] }]
+          },
+          { "key": "费用发生日期", "value": "2025/4/22" },
+          { "key": "费用项目",    "value": "管理费用_出差住宿费(含洗衣费)" },
+          { "key": "申请付款金额", "value": "531.00" },
+          { "key": "申请人",      "value": "合合信息" },
+          { "key": "出差目的",    "value": "商务沟通" },
+          { "key": "差旅费金额",  "value": "500.94" },
+          { "key": "税率",        "value": "6%" },
+          { "key": "冲借款金额",  "value": "" },
+          { "key": "备注",        "value": "配合chris 4月22日上午政府会见，事先行程预演，并入住政府推荐就近酒店" },
+          { "key": "税额",        "value": "30.06" },
+          { "key": "报销期间",    "value": "2025年04月" }
+        ],
+        "stamps": [],
+        "handwritings": []
+      }
+    }
+    ```
+  </Accordion>
+  <Accordion title="酒店水单.png">
+    ```json
+    {
+      "id": "2029521862627704832",
+      "name": "酒店水单.png",
+      "format": "png",
+      "category": "酒店水单",
+      "recognition_status": 1,
+      "duration_ms": 6185,
+      "data": {
+        "fields": [
+          {
+            "key": "总金额",
+            "value": "1,288.00",
+            "position": [{ "page": 0, "vertices": [1258, 838, 1337, 838, 1337, 860, 1258, 860] }]
+          },
+          { "key": "入住日期", "value": "2024-12-18" },
+          { "key": "离店日期", "value": "2024-12-20" }
+        ],
+        "items": [
+          [
+            { "key": "日期",     "value": "2024-12-18", "position": [{ "page": 0, "vertices": [259, 714, 370, 714, 370, 732, 259, 732] }] },
+            { "key": "费用类型", "value": "房费*Room Charge" },
+            { "key": "金额",     "value": "644.00" },
+            { "key": "备注",     "value": "*Room Charge" }
+          ],
+          [
+            { "key": "日期",     "value": "2024-12-19" },
+            { "key": "费用类型", "value": "房费*Room Charge" },
+            { "key": "金额",     "value": "644.00" },
+            { "key": "备注",     "value": "*Room Charge" }
+          ]
+        ],
+        "tables": [
+          {
+            "tableName": "表格",
+            "tableType": "0",
+            "tableIdNo": -1,
+            "items": [
+              [
+                { "key": "日期",     "value": "2024-12-18" },
+                { "key": "费用类型", "value": "房费*Room Charge" },
+                { "key": "金额",     "value": "644.00" },
+                { "key": "备注",     "value": "*Room Charge" }
+              ],
+              [
+                { "key": "日期",     "value": "2024-12-19" },
+                { "key": "费用类型", "value": "房费*Room Charge" },
+                { "key": "金额",     "value": "644.00" },
+                { "key": "备注",     "value": "*Room Charge" }
+              ]
+            ]
+          }
+        ],
+        "stamps": [
+          {
+            "page": 0,
+            "text": "北京中■马哥华罗大酒店有限 911101007916219X 发票专用章",
+            "type": "其他",
+            "color": "红色",
+            "shape": "椭圆章"
+          }
+        ],
+        "handwritings": []
+      }
+    }
+    ```
+  </Accordion>
+  <Accordion title="支付记录.png">
+    ```json
+    {
+      "id": "2029124614827827202",
+      "name": "支付记录.png",
+      "format": "png",
+      "category": "支付记录",
+      "recognition_status": 1,
+      "duration_ms": 7203,
+      "data": {
+        "fields": [
+          {
+            "key": "交易描述",
+            "value": "财付通-叶婆婆钵钵鸡",
+            "position": [{ "page": 0, "vertices": [741, 1288, 1157, 1288, 1157, 1330, 741, 1330] }]
+          },
+          { "key": "交易流水号",       "value": "910220250309124124624054" },
+          { "key": "收款方户名",       "value": "" },
+          { "key": "交易时间",         "value": "2025-03-09 12:41:24" },
+          { "key": "收款方账户",       "value": "" },
+          { "key": "交易金额",         "value": "240.00" },
+          { "key": "付款银行",         "value": "宁波银行" },
+          { "key": "币种",             "value": "" },
+          { "key": "交易账号/支付方式", "value": "信用卡" },
+          { "key": "交易授权码",       "value": "929632" },
+          { "key": "付款卡种",         "value": "信用卡" },
+          { "key": "付款方户名",       "value": "吕昊宇" },
+          { "key": "备注",             "value": "" },
+          { "key": "收款方银行",       "value": "" }
+        ],
+        "stamps": [
+          {
+            "page": 0,
+            "text": "宁波银行股份有限公司 电子回单专用章",
+            "type": "其他",
+            "color": "红色",
+            "shape": "椭圆章"
+          }
+        ],
+        "handwritings": []
+      }
+    }
+    ```
+  </Accordion>
+</AccordionGroup>

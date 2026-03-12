@@ -1,0 +1,49 @@
+RecognitionStatus:
+  type: integer
+  description: |
+    文件识别状态: 
+    - 0: 待识别
+    - 1: 识别成功
+    - 2: 识别失败
+    - 3: 分类中
+    - 4: 抽取中
+    - 5: 准备中
+    - 6: 文件拆分中
+    - 7: 切图中
+    - 10: 分类完成(当upload接口的target_process为classify时才有此状态)
+    - 20: 解析中
+  enum:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 10
+  - 20
+
+VerificationStatus:
+  type: integer
+  description: "文件核对状态 0: 待核对 2: 已确认 3: 已拒绝 4: 已删除 5: 推迟处理"
+  enum:
+    - 0
+    - 2
+    - 3
+    - 4
+    - 5
+
+CodeMessage:
+  type: object
+  properties:
+    code:
+      type: integer
+      description: 状态码
+      example: 200
+    msg:
+      type: string
+      description: 状态描述
+  required:
+  - code
+  - msg

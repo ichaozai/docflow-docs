@@ -1,0 +1,448 @@
+/api/app-api/sip/platform/v2/review/rule_repo/create:
+  post:
+    summary: 创建审核规则库
+    description: 创建审核规则库
+    operationId: createReviewRuleRepo
+    tags:
+      - 智能审核
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              workspace_id:
+                type: string
+                description: 空间ID
+                example: "1234567890"
+              name:
+                type: string
+                description: 库名称
+                example: "审核规则库1"
+                maxLength: 30
+            required:
+              - workspace_id
+              - name
+    responses:
+      '200':
+        description: 成功创建审核规则库
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas/common.yaml#/CodeMessage'
+                - type: object
+                  properties:
+                    result:
+                      type: object
+                      properties:
+                        repo_id:
+                          type: integer
+                          description: 审核规则库ID
+                          example: "31415926"
+
+/api/app-api/sip/platform/v2/review/rule_repo/delete:
+  post:
+    summary: 删除审核规则库
+    description: 删除审核规则库
+    operationId: deleteReviewRuleRepo
+    tags:
+      - 智能审核
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              workspace_id:
+                type: string
+                description: 空间ID
+                example: "1234567890"
+              repo_ids:
+                type: array
+                items:
+                  type: integer
+                  description: 审核规则库ID
+                  example: "31415926"
+            required:
+              - workspace_id
+              - repo_ids
+    responses:
+      '200':
+        description: 成功删除审核规则库
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas/common.yaml#/CodeMessage'
+
+/api/app-api/sip/platform/v2/review/rule_repo/update:
+  post:
+    summary: 更新审核规则库
+    description: 更新审核规则库
+    operationId: updateReviewRuleRepo
+    tags:
+      - 智能审核
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              workspace_id:
+                type: string
+                description: 空间ID
+                example: "1234567890"
+              repo_id:
+                type: integer
+                description: 审核规则库ID
+                example: "31415926"
+              name:
+                type: string
+                description: 库名称
+                example: "审核规则库1"
+                maxLength: 30
+            required:
+              - workspace_id
+              - repo_id
+    responses:
+      '200':
+        description: 成功更新审核规则库
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas/common.yaml#/CodeMessage'
+
+/api/app-api/sip/platform/v2/review/rule_group/create:
+  post:
+    summary: 创建审核规则组
+    description: 创建审核规则组
+    operationId: createReviewRuleGroup
+    tags:
+      - 智能审核
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              workspace_id:
+                type: string
+                description: 空间ID
+                example: "1234567890"
+              repo_id:
+                type: integer
+                description: 审核规则库ID
+                example: "31415926"
+              name:
+                type: string
+                description: 组名称
+                example: "审核规则组1"
+                maxLength: 30
+            required:
+              - workspace_id
+              - repo_id
+              - name
+    responses:
+      '200':
+        description: 成功创建审核规则组
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas/common.yaml#/CodeMessage'
+                - type: object
+                  properties:
+                    result:
+                      type: object
+                      properties:
+                        group_id:
+                          type: string
+                          description: 审核规则组ID
+                          example: "31415926"
+
+/api/app-api/sip/platform/v2/review/rule_group/delete:
+  post:
+    summary: 删除审核规则组
+    description: 删除审核规则组
+    operationId: deleteReviewRuleGroup
+    tags:
+      - 智能审核
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              workspace_id:
+                type: string
+                description: 空间ID
+                example: "1234567890"
+              group_id:
+                type: string
+                description: 审核规则组ID
+                example: "31415926"
+            required:
+              - workspace_id
+              - group_id
+    responses:
+      '200':
+        description: 成功删除审核规则组
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas/common.yaml#/CodeMessage'
+
+/api/app-api/sip/platform/v2/review/rule_group/update:
+  post:
+    summary: 更新审核规则组
+    description: 更新审核规则组
+    operationId: updateReviewRuleGroup
+    tags:
+      - 智能审核
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              workspace_id:
+                type: string
+                description: 空间ID
+                example: "1234567890"
+              group_id:
+                type: string
+                description: 审核规则组ID
+                example: "31415926"
+              name:
+                type: string
+                description: 组名称
+                example: "审核规则组1"
+                maxLength: 30
+            required:
+              - workspace_id
+              - group_id
+    responses:
+      '200':
+        description: 成功更新审核规则组
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas/common.yaml#/CodeMessage'
+
+/api/app-api/sip/platform/v2/review/rule/create:
+  post:
+    summary: 创建审核规则
+    description: 创建审核规则
+    operationId: createReviewRule
+    tags:
+      - 智能审核
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '../components/schemas/reviews.yaml#/ReviewRuleProperties'
+              - type: object
+                properties:
+                  workspace_id:
+                    type: string
+                    description: 空间ID
+                    example: "1234567890"
+                  repo_id:
+                    type: integer
+                    description: 审核规则库ID
+                    example: "31415926"
+                required:
+                  - workspace_id
+                  - repo_id
+    responses:
+      '200':
+        description: 成功创建审核规则
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    result:
+                      type: object
+                      properties:
+                        rule_id:
+                          type: string
+                          description: 审核规则ID
+                          example: "31415926"
+                - $ref: '../components/schemas/common.yaml#/CodeMessage'
+
+/api/app-api/sip/platform/v2/review/rule/update:
+  post:
+    summary: 更新审核规则
+    description: 更新审核规则
+    operationId: updateReviewRule
+    tags:
+      - 智能审核
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - type: object
+                properties:
+                  workspace_id:
+                    type: string
+                    description: 空间ID
+                    example: "1234567890"
+                  rule_id:
+                    type: string
+                    description: 审核规则ID
+                    example: "31415926"
+              - $ref: '../components/schemas/reviews.yaml#/ReviewRuleProperties'
+    responses:
+      '200':
+        description: 成功更新审核规则
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas/common.yaml#/CodeMessage'
+
+/api/app-api/sip/platform/v2/review/rule/delete:
+  post:
+    summary: 删除审核规则
+    description: 删除审核规则
+    operationId: deleteReviewRule
+    tags:
+      - 智能审核
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              workspace_id:
+                type: string
+                description: 空间ID
+                example: "1234567890"
+              rule_id:
+                type: string
+                description: 审核规则ID
+                example: "31415926"
+            required:
+              - workspace_id
+              - rule_id
+    responses:
+      '200':
+        description: 成功删除审核规则
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas/common.yaml#/CodeMessage'
+
+/api/app-api/sip/platform/v2/review/rule_repo/list:
+  get:
+    summary: 获取审核规则库列表
+    description: 获取审核规则库列表, 包含规则库下的规则组和规则信息
+    operationId: listReviewRuleRepo
+    tags:
+      - 智能审核
+    parameters:
+      - name: workspace_id
+        in: query
+        description: 空间ID
+        required: true
+        schema:
+          type: string
+          example: "1234567890"
+      - name: page
+        in: query
+        description: 页码
+        required: false
+        schema:
+          type: integer
+          example: 1
+          default: 1
+      - name: page_size
+        in: query
+        description: 每页条数
+        required: false
+        schema:
+          type: integer
+          example: 10
+          default: 10
+    responses:
+      '200':
+        description: 成功获取审核规则库列表
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas/common.yaml#/CodeMessage'
+                - type: object
+                  properties:
+                    result:
+                      type: object
+                      properties:
+                        repos:
+                          type: array
+                          items:
+                            $ref: '../components/schemas/reviews.yaml#/ReviewRuleRepo'
+                        total:
+                          type: integer
+                          description: 总条数
+                          example: 100
+                        page:
+                          type: integer
+                          description: 页码
+                          example: 1
+                        page_size:
+                          type: integer
+                          description: 每页条数
+                          example: 10
+
+/api/app-api/sip/platform/v2/review/rule_repo/get:
+  get:
+    summary: 获取审核规则库
+    description: 获取审核规则库
+    operationId: getReviewRuleRepo
+    tags:
+      - 智能审核
+    parameters:
+      - name: workspace_id
+        in: query
+        description: 空间ID
+        required: true
+        schema:
+          type: string
+          example: "1234567890"
+      - name: repo_id
+        in: query
+        description: 审核规则库ID
+        required: true
+        schema:
+          type: string
+          example: "31415926"
+    responses:
+      '200':
+        description: 成功获取审核规则库
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas/common.yaml#/CodeMessage'
+                - type: object
+                  properties:
+                    result:
+                      $ref: '../components/schemas/reviews.yaml#/ReviewRuleRepo'

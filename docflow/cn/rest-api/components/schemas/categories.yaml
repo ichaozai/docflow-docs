@@ -1,0 +1,150 @@
+Category:
+  type: object
+  description: 文件类别
+  properties:
+    id:
+      type: string
+      description: 文件类别ID
+      example: "1234567890"
+    name:
+      type: string
+      description: 文件类别名称
+      example: "发票"
+    category_prompt:
+      type: string
+      description: 用于分类的提示词
+      example: "增值税发票，包含发票代码、发票号码等字段"
+    extract_model:
+      description: 抽取模型
+      example: "llm"
+      enum:
+        - llm
+        - vlm
+    enabled:
+      $ref: '#/EnabledStatus'
+  required:
+    - id
+    - name
+
+CategoryFieldConfig:
+  type: object
+  properties:
+    name:
+      type: string
+      description: 字段名称
+      example: 发票代码
+    description:
+      type: string
+      description: 字段描述
+      example: 发票代码描述
+    prompt:
+      type: string
+      description: 语义抽取提示词
+    use_prompt:
+      type: boolean
+      description: 是否使用语义提示词
+    alias:
+      type: array
+      description: 字段别名
+      items:
+        type: string
+    identity:
+      type: string
+      description: 导出字段名
+    multi_value:
+      type: boolean
+      description: 是否多值抽取
+    duplicate_value_distinct:
+      type: boolean
+      description: 是否重复值去重，仅当 multi_value 为 true 时有效
+    transform_settings:
+      type: object
+      description: 转换配置
+      properties:
+        type:
+          type: string
+          description: 转换类型
+          enum:
+            - datetime
+            - enumerate
+            - regex
+        datetime_settings:
+          type: object
+          description: 时间类型转换配置
+          properties:
+            format:
+              type: string
+              description: 日期时间格式，参考 DocFlow 日期格式说明 (https://docflow.textin.com/markdown?key=dateFormatGuide)
+              example: yyyy-MM-dd HH:mm:ss
+        enumerate_settings:
+          type: object
+          description: 枚举类型转换配置
+          properties:
+            items:
+              type: array
+              description: 可选枚举值列表
+              items:
+                type: string
+        regex_settings:
+          type: object
+          description: 正则类型转换配置
+          properties:
+            match:
+              type: string
+              description: 匹配用的正则表达式
+              example: ^\d{4}-\d{2}-\d{2}$
+            replace:
+              type: string
+              description: 替换用的正则表达式
+              example: $1-$2-$3
+        mismatch_action:
+          type: object
+          description: 字段值不匹配时的处理动作
+          properties:
+            mode:
+              type: string
+              description: 不匹配时的处理模式
+              enum:
+                - default
+                - warning
+            default_value:
+              type: string
+              description: 当模式为 default 时使用的默认值
+
+CategoryField:
+  allOf:
+    - $ref: '#/CategoryFieldConfig'
+    - type: object
+      properties:
+        id:
+          type: string
+          description: 字段ID
+          example: "1234567890"
+
+CategorySample:
+  type: object
+  description: 文件类别样本
+  properties:
+    sample_id:
+      type: string
+      description: 样本ID
+      example: "1234567890"
+    file_name:
+      type: string
+      description: 文件名
+      example: "invoice_sample.pdf"
+  required:
+    - sample_id
+    - file_name
+
+EnabledStatus:
+  type: integer
+  description: |
+    启用状态
+    - 0: 禁用
+    - 1: 启用
+    - 2: 草稿
+  enum:
+    - 0
+    - 1
+    - 2

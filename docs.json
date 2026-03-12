@@ -26,6 +26,21 @@
                 ]
               },
               {
+                "group": "工作空间管理",
+                "pages": [
+                  "docflow/cn/02-workspace/quickstart"
+                ]
+              },
+              {
+                "group": "文件类别管理",
+                "pages": [
+                  "docflow/cn/10-category-management/quickstart",
+                  "docflow/cn/10-category-management/fields_management",
+                  "docflow/cn/10-category-management/tables_management",
+                  "docflow/cn/10-category-management/samples_management"
+                ]
+              },
+              {
                 "group": "文档上传",
                 "pages": [
                   "docflow/cn/01-upload/quickstart",
@@ -117,7 +132,7 @@
           },
           {
             "tab": "API",
-            "openapi": "docflow/cn/rest-api/openapi.yaml"
+            "openapi": "docflow/cn/rest-api/openapi.bundle.yaml"
           }
 
         ]
@@ -135,6 +150,21 @@
                   "docflow/en/00-overview/quickstart",
                   "docflow/en/00-overview/auth",
                   "docflow/en/00-overview/enterprise_multi_tenant"
+                ]
+              },
+              {
+                "group": "Workspace Management",
+                "pages": [
+                  "docflow/en/02-workspace/quickstart"
+                ]
+              },
+              {
+                "group": "Category Management",
+                "pages": [
+                  "docflow/en/10-category-management/quickstart",
+                  "docflow/en/10-category-management/fields_management",
+                  "docflow/en/10-category-management/tables_management",
+                  "docflow/en/10-category-management/samples_management"
                 ]
               },
               {
@@ -223,7 +253,7 @@
           },
           {
             "tab": "API",
-            "openapi": "docflow/en/rest-api/openapi.yaml"
+            "openapi": "docflow/en/rest-api/openapi.bundle.yaml"
           }
 
         ]

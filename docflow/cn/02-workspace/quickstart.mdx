@@ -3,9 +3,15 @@ title: "快速启动"
 description: "参考示例，快速用API集成工作空间管理功能"
 ---
 
+<Tip>
+  工作空间（Workspace）是 DocFlow 中用于组织和隔离文档处理任务的基本单位。每个工作空间可以包含文件类别、审核规则库等资源，便于进行多租户或多项目管理。
+</Tip>
+
 本文介绍如何使用工作空间相关接口：创建、查看、更新与删除。
 
 ## 创建工作空间
+
+创建一个新的工作空间：
 
 <CodeGroup>
 
@@ -14,33 +20,71 @@ curl -X POST \
   -H "x-ti-app-id: <your-app-id>" \
   -H "x-ti-secret-code: <your-secret-code>" \
   -H "Content-Type: application/json" \
-  -d '{"name": "我的工作空间", "description": "用于演示的空间"}' \
+  -d '{
+    "name": "我的工作空间",
+    "description": "这是一个用于处理发票的工作空间",
+    "enterprise_id": 12345,
+    "auth_scope": 1
+  }' \
   "https://docflow.textin.com/api/app-api/sip/platform/v2/workspace/create"
 ```
 
 ```python Python icon=python expandable lines
 import requests
 
+ti_app_id = "<your-app-id>"
+ti_secret_code = "<your-secret-code>"
 host = "https://docflow.textin.com"
 url = "/api/app-api/sip/platform/v2/workspace/create"
 
-headers = {
-    "x-ti-app-id": "<your-app-id>",
-    "x-ti-secret-code": "<your-secret-code>",
-    "Content-Type": "application/json",
+payload = {
+    "name": "我的工作空间",
+    "description": "这是一个用于处理发票的工作空间",
+    "enterprise_id": 12345,
+    "auth_scope": 1  # 0: 仅自己可见, 1: 企业成员可见
 }
 
-resp = requests.post(f"{host}{url}", json={
-    "name": "我的工作空间",
-    "description": "用于演示的空间"
-}, headers=headers, timeout=30)
+resp = requests.post(
+    url=f"{host}{url}",
+    json=payload,
+    headers={
+        "x-ti-app-id": ti_app_id,
+        "x-ti-secret-code": ti_secret_code,
+    },
+    timeout=30,
+)
 
-print(resp.status_code, resp.text)
+result = resp.json()
+if result.get("code") == 200:
+    workspace_id = result.get("result", {}).get("workspace_id")
+    print(f"工作空间创建成功，ID: {workspace_id}")
+else:
+    print(f"创建失败: {result.get('msg')}")
 ```
 
 </CodeGroup>
 
-## 列出工作空间
+**请求参数：**
+- `name` (必填): 工作空间名称，最大长度 50
+- `description` (选填): 工作空间描述，最大长度 200
+- `enterprise_id` (必填): 企业组织 ID
+- `auth_scope` (必填): 协作范围，0: 仅自己可见, 1: 企业成员可见
+
+**响应示例：**
+
+```json
+{
+  "code": 200,
+  "msg": "success",
+  "result": {
+    "workspace_id": "1234567890"
+  }
+}
+```
+
+## 获取工作空间列表
+
+获取当前用户的所有工作空间列表：
 
 <CodeGroup>
 
@@ -48,49 +92,251 @@ print(resp.status_code, resp.text)
 curl \
   -H "x-ti-app-id: <your-app-id>" \
   -H "x-ti-secret-code: <your-secret-code>" \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/workspace/list?page=1&page_size=20"
+  "https://docflow.textin.com/api/app-api/sip/platform/v2/workspace/list?enterprise_id=12345&page=1&page_size=20"
 ```
 
 ```python Python icon=python expandable lines
 import requests
 
+ti_app_id = "<your-app-id>"
+ti_secret_code = "<your-secret-code>"
+enterprise_id = 12345
+
+host = "https://docflow.textin.com"
+url = "/api/app-api/sip/platform/v2/workspace/list"
+
 resp = requests.get(
-    "https://docflow.textin.com/api/app-api/sip/platform/v2/workspace/list",
-    params={"page": 1, "page_size": 20},
-    headers={"x-ti-app-id": "<your-app-id>", "x-ti-secret-code": "<your-secret-code>"},
+    url=f"{host}{url}",
+    params={
+        "enterprise_id": enterprise_id,
+        "page": 1,
+        "page_size": 20
+    },
+    headers={
+        "x-ti-app-id": ti_app_id,
+        "x-ti-secret-code": ti_secret_code,
+    },
     timeout=30,
 )
-print(resp.json())
+
+result = resp.json()
+if result.get("code") == 200:
+    workspaces = result.get("result", {}).get("workspaces", [])
+    total = result.get("result", {}).get("total", 0)
+    print(f"共找到 {total} 个工作空间")
+    for workspace in workspaces:
+        print(f"空间ID: {workspace.get('workspace_id')}, 名称: {workspace.get('name')}")
+else:
+    print(f"获取失败: {result.get('msg')}")
 ```
 
 </CodeGroup>
 
+**请求参数：**
+- `enterprise_id` (必填): 企业 ID
+- `page` (选填): 页码，默认为 1
+- `page_size` (选填): 每页数量，默认为 20
+
+**响应示例：**
+
+```json
+{
+  "code": 200,
+  "msg": "success",
+  "result": {
+    "total": 10,
+    "page": 1,
+    "page_size": 20,
+    "workspaces": [
+      {
+        "workspace_id": "1234567890",
+        "name": "我的工作空间",
+        "description": "这是一个用于处理发票的工作空间",
+        "auth_scope": 1,
+        "manage_account_id": "admin_123456",
+        "manage_account_name": "张三",
+        "callback_url": "https://example.com/callback",
+        "callback_retry_time": 3
+      }
+    ]
+  }
+}
+```
+
 ## 获取工作空间详情
+
+根据空间 ID 获取工作空间详细信息：
+
+<CodeGroup>
 
 ```bash curl icon=terminal wrap
 curl \
   -H "x-ti-app-id: <your-app-id>" \
   -H "x-ti-secret-code: <your-secret-code>" \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/workspace/get?id=<your-workspace-id>"
+  "https://docflow.textin.com/api/app-api/sip/platform/v2/workspace/get?workspace_id=1234567890"
 ```
 
+```python Python icon=python expandable lines
+import requests
+
+ti_app_id = "<your-app-id>"
+ti_secret_code = "<your-secret-code>"
+workspace_id = "1234567890"
+
+host = "https://docflow.textin.com"
+url = "/api/app-api/sip/platform/v2/workspace/get"
+
+resp = requests.get(
+    url=f"{host}{url}",
+    params={"workspace_id": workspace_id},
+    headers={
+        "x-ti-app-id": ti_app_id,
+        "x-ti-secret-code": ti_secret_code,
+    },
+    timeout=30,
+)
+
+result = resp.json()
+if result.get("code") == 200:
+    workspace = result.get("result", {})
+    print(f"空间名称: {workspace.get('name')}")
+    print(f"空间描述: {workspace.get('description')}")
+    print(f"管理员: {workspace.get('manage_account_name')}")
+else:
+    print(f"获取失败: {result.get('msg')}")
+```
+
+</CodeGroup>
+
+**请求参数：**
+- `workspace_id` (必填): 工作空间 ID
+
 ## 更新工作空间
+
+更新指定工作空间的信息：
+
+<CodeGroup>
 
 ```bash curl icon=terminal wrap
 curl -X POST \
   -H "x-ti-app-id: <your-app-id>" \
   -H "x-ti-secret-code: <your-secret-code>" \
   -H "Content-Type: application/json" \
-  -d '{"id": "<your-workspace-id>", "name": "新的空间名", "description": "新的描述"}' \
+  -d '{
+    "workspace_id": "1234567890",
+    "name": "更新后的工作空间名称",
+    "description": "更新后的描述",
+    "auth_scope": 1,
+    "callback_url": "https://example.com/callback",
+    "callback_retry_time": 3
+  }' \
   "https://docflow.textin.com/api/app-api/sip/platform/v2/workspace/update"
 ```
 
+```python Python icon=python expandable lines
+import requests
+
+ti_app_id = "<your-app-id>"
+ti_secret_code = "<your-secret-code>"
+workspace_id = "1234567890"
+
+host = "https://docflow.textin.com"
+url = "/api/app-api/sip/platform/v2/workspace/update"
+
+payload = {
+    "workspace_id": workspace_id,
+    "name": "更新后的工作空间名称",
+    "description": "更新后的描述",
+    "auth_scope": 1,
+    "callback_url": "https://example.com/callback",
+    "callback_retry_time": 3
+}
+
+resp = requests.post(
+    url=f"{host}{url}",
+    json=payload,
+    headers={
+        "x-ti-app-id": ti_app_id,
+        "x-ti-secret-code": ti_secret_code,
+    },
+    timeout=30,
+)
+
+result = resp.json()
+if result.get("code") == 200:
+    print("工作空间更新成功")
+else:
+    print(f"更新失败: {result.get('msg')}")
+```
+
+</CodeGroup>
+
+**请求参数：**
+- `workspace_id` (必填): 工作空间 ID
+- `name` (必填): 工作空间名称，最大长度 50
+- `description` (选填): 工作空间描述，最大长度 200
+- `auth_scope` (必填): 协作范围，0: 仅自己可见, 1: 企业成员可见
+- `callback_url` (选填): 回调 URL
+- `callback_retry_time` (选填): 回调重试次数，范围 0-3
+
 ## 删除工作空间
 
+删除指定的工作空间（可以批量删除）：
+
+<CodeGroup>
+
 ```bash curl icon=terminal wrap
-curl -X DELETE \
+curl -X POST \
   -H "x-ti-app-id: <your-app-id>" \
   -H "x-ti-secret-code: <your-secret-code>" \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/workspace/delete?id=<your-workspace-id>"
+  -H "Content-Type: application/json" \
+  -d '{
+    "workspace_ids": ["1234567890", "0987654321"]
+  }' \
+  "https://docflow.textin.com/api/app-api/sip/platform/v2/workspace/delete"
 ```
+
+```python Python icon=python expandable lines
+import requests
+
+ti_app_id = "<your-app-id>"
+ti_secret_code = "<your-secret-code>"
+
+host = "https://docflow.textin.com"
+url = "/api/app-api/sip/platform/v2/workspace/delete"
+
+payload = {
+    "workspace_ids": ["1234567890", "0987654321"]
+}
+
+resp = requests.post(
+    url=f"{host}{url}",
+    json=payload,
+    headers={
+        "x-ti-app-id": ti_app_id,
+        "x-ti-secret-code": ti_secret_code,
+    },
+    timeout=30,
+)
+
+result = resp.json()
+if result.get("code") == 200:
+    print("工作空间删除成功")
+else:
+    print(f"删除失败: {result.get('msg')}")
+```
+
+</CodeGroup>
+
+**请求参数：**
+- `workspace_ids` (必填): 要删除的工作空间 ID 数组
+
+<Warning>
+  删除工作空间会同时删除其下的所有资源（包括文件类别、审核规则库等），请谨慎操作。
+</Warning>
+
+## 下一步
+
+- 学习[文件类别管理](../10-category-management/quickstart) - 在工作空间中创建和管理文件类别
+- 学习[智能审核规则管理](../07-review/rule_management) - 在工作空间中创建审核规则库
 

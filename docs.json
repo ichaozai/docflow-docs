@@ -26,6 +26,12 @@
                 ]
               },
               {
+                "group": "场景化示例",
+                "pages": [
+                  "docflow/cn/00-overview/expense_reimbursement"
+                ]
+              },
+              {
                 "group": "工作空间管理",
                 "pages": [
                   "docflow/cn/02-workspace/quickstart"

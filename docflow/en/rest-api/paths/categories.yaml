@@ -25,20 +25,27 @@
                 type: string
                 description: Prompt for classification
                 example: "VAT invoice, including fields such as invoice code, invoice number, etc."
-                maxLength: 500
+                maxLength: 150
               extract_model:
-                description: Extraction model
-                example: "llm"
+                type: string
+                description: |
+                  Optional, extraction model, defaults to Model 1 if not specified
+                  - Model 1: Fast speed with stable extraction results
+                  - Model 2: Suitable for complex document understanding
+                  - Model 3: VLM, suitable for simple extraction
+                example: "Model 1"
                 enum:
-                  - llm
-                  - vlm
+                  - Model 1
+                  - Model 2
+                  - Model 3
               sample_files:
                 type: array
-                description: Sample file list, at least one sample file must be uploaded
+                description: Sample file list, at least one sample file must be uploaded, a category can have at most 10 sample files
                 items:
                   type: string
                   format: binary
                 minItems: 1
+                maxItems: 10
               fields:
                 type: array
                 description: Field configuration list, at least one field must be configured
@@ -98,7 +105,9 @@
         required: false
         schema:
           type: integer
-          default: 1000
+          default: 20
+          minimum: 1
+          maximum: 100
       - name: enabled
         in: query
         description: |
@@ -144,22 +153,7 @@
                         categories:
                           type: array
                           items:
-                            type: object
-                            properties:
-                              id:
-                                type: string
-                                description: File category ID
-                                example: "1234567890"
-                              name:
-                                type: string
-                                description: File category name
-                                example: Invoice
-                              description:
-                                type: string
-                                description: File category description
-                                example: Invoice category description
-                              enabled:
-                                $ref: '../components/schemas/categories.yaml#/EnabledStatus'
+                            $ref: '../components/schemas/categories.yaml#/Category'
 
 /api/app-api/sip/platform/v2/category/update:
   post:
@@ -192,9 +186,21 @@
                 type: string
                 description: Prompt for classification
                 example: "VAT invoice, including fields such as invoice code, invoice number, etc."
-                maxLength: 500
+                maxLength: 150
               enabled:
                 $ref: '../components/schemas/categories.yaml#/EnabledStatus'
+              extract_model:
+                type: string
+                description: |
+                  Extraction model
+                  - Model 1: Fast speed with stable extraction results
+                  - Model 2: Suitable for complex document understanding
+                  - Model 3: VLM, suitable for simple extraction
+                example: "Model 1"
+                enum:
+                  - Model 1
+                  - Model 2
+                  - Model 3
             required:
               - workspace_id
               - category_id
@@ -333,6 +339,18 @@
                   - Not provided or empty: Create a regular field, result will appear in result.fields
                   - Provided table ID: Create a table field under the corresponding table, result will appear in result.tables[].fields
                 example: "1234567890"
+              extract_model:
+                type: string
+                description: |
+                  Optional, field-level extraction model, only supported for regular fields (not table fields), defaults to Model 1 if not specified
+                  - Model 1: Fast speed with stable extraction results
+                  - Model 2: Suitable for complex document understanding
+                  - Model 3: VLM, suitable for simple extraction
+                example: "Model 1"
+                enum:
+                  - Model 1
+                  - Model 2
+                  - Model 3
             required:
               - workspace_id
               - category_id
@@ -390,6 +408,18 @@
                   - Not required for regular fields
                   - Required for table fields, need to provide the table ID it belongs to
                 example: "1234567890"
+              extract_model:
+                type: string
+                description: |
+                  Field-level extraction model
+                  - Model 1: Fast speed with stable extraction results
+                  - Model 2: Suitable for complex document understanding
+                  - Model 3: VLM, suitable for simple extraction
+                example: "Model 1"
+                enum:
+                  - Model 1
+                  - Model 2
+                  - Model 3
             required:
               - workspace_id
               - category_id
@@ -507,6 +537,10 @@
                                   type: boolean
                                   description: Merge multiple tables
                                   example: true
+                              extract_model:
+                                type: string
+                                description: Table-level extraction model
+                                example: "Model 1"
 
 /api/app-api/sip/platform/v2/category/tables/add:
   post:
@@ -544,6 +578,18 @@
                   type: boolean
                   description: Merge multiple tables
                   example: true
+              extract_model:
+                type: string
+                description: |
+                  Table-level extraction model
+                  - Model 1: Fast speed with stable extraction results
+                  - Model 2: Suitable for complex document understanding
+                  - Model 3: VLM, suitable for simple extraction
+                example: "Model 1"
+                enum:
+                  - Model 1
+                  - Model 2
+                  - Model 3
             required:
               - workspace_id
               - category_id
@@ -606,6 +652,18 @@
                   type: boolean
                   description: Merge multiple tables
                   example: true
+              extract_model:
+                type: string
+                description: |
+                  Table-level extraction model
+                  - Model 1: Fast speed with stable extraction results
+                  - Model 2: Suitable for complex document understanding
+                  - Model 3: VLM, suitable for simple extraction
+                example: "Model 1"
+                enum:
+                  - Model 1
+                  - Model 2
+                  - Model 3
             required:
               - workspace_id
               - category_id

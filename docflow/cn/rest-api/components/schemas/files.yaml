@@ -9,6 +9,19 @@ ExtractFieldReqVO:
       type: string
       description: 字段提示
       example: 只保留年的部分
+    extract_model:
+      type: string
+      description: |
+        字段级抽取模型，不填默认使用 Model 1
+        - Model 1: 速度快，抽取结果稳定
+        - Model 2: 适用复杂文档理解
+        - Model 3: 多模态，适用简单抽取
+        注意：表格内字段的抽取模型由整表的 extract_model 决定，此处设置无效
+      example: "Model 1"
+      enum:
+        - Model 1
+        - Model 2
+        - Model 3
 
 TaskProcessResult:
   type: object
@@ -136,6 +149,12 @@ TaskProcessResult:
                           description: 表格类型， 0， 系统配置， 1 手动添加。
                           type: string
                           example: 0
+                        usePrompt:
+                          description: 是否使用语意抽取
+                          type: boolean
+                        extractModel:
+                          description: 整表抽取模型
+                          type: string
                         items:
                           type: array
                           items:
@@ -251,6 +270,14 @@ FieldRespKeyValue:
       description: 字段值
     position:
       $ref: "#/KeyValuePosition"
+    confidence:
+      type: number
+      format: float
+      description: 置信度分值，取值范围 0~1
+      example: 0.95
+    extract_model:
+      type: string
+      description: 实际使用的抽取模型
 
 StampValue:
   type: object
@@ -388,6 +415,11 @@ CommonFieldDetailRespVO:
     index:
       type: integer
       description: 索引
+    confidence:
+      type: number
+      format: float
+      description: 置信度分值，取值范围 0~1
+      example: 0.95
 
 SubFileDetailInfo:
   type: object
@@ -494,6 +526,9 @@ SubFileDetailInfo:
                 description: 表格类型， 0， 系统配置， 1 手动添加。
                 type: string
                 example: 0
+              extractModel:
+                description: 整表抽取模型
+                type: string
               items:
                 type: array
                 items:

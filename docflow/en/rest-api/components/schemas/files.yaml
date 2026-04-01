@@ -9,6 +9,19 @@ ExtractFieldReqVO:
       type: string
       description: Field prompt
       example: Only keep the year part
+    extract_model:
+      type: string
+      description: |
+        Field-level extraction model, defaults to Model 1 if not specified
+        - Model 1: Fast speed with stable extraction results
+        - Model 2: Suitable for complex document understanding
+        - Model 3: VLM, suitable for simple extraction
+        Note: For table fields, the extraction model is determined by the table-level extract_model, this field is ignored
+      example: "Model 1"
+      enum:
+        - Model 1
+        - Model 2
+        - Model 3
 
 TaskProcessResult:
   type: object
@@ -137,6 +150,9 @@ TaskProcessResult:
                             Table type, 0: system configured, 1: manually added.
                           type: string
                           example: 0
+                        extractModel:
+                          description: Table-level extraction model
+                          type: string
                         items:
                           type: array
                           items:
@@ -254,6 +270,14 @@ FieldRespKeyValue:
       description: Field value
     position:
       $ref: "#/KeyValuePosition"
+    confidence:
+      type: number
+      format: float
+      description: Confidence score, range 0~1
+      example: 0.95
+    extract_model:
+      type: string
+      description: Actual extraction model used
 
 StampValue:
   type: object
@@ -298,6 +322,23 @@ HandWritingValue:
     position:
       $ref: "#/KeyValuePosition"
 
+KeyValuePosition:
+  description: Position of the field value. Field values may span pages or rows, so they are displayed as arrays.
+  type: array
+  items:
+    type: object
+    properties:
+      page:
+        type: integer
+        description: Page where the field is located. It is the index of the pages array
+      vertices:
+        type: array
+        description: Bounding quadrilateral coordinates of the field value. The image uses the top-left as origin, array values are [top-left x, top-left y, top-right x, top-right y, bottom-right x, bottom-right y, bottom-left x, bottom-left y]
+        items:
+          type: integer
+        minItems: 8
+        maxItems: 8
+
 Document:
   type: object
   properties:
@@ -328,16 +369,26 @@ Document:
                   type: array
                   items:
                     type: integer
-                    minItems: 8
-                    maxItems: 8
+                  minItems: 8
+                  maxItems: 8
                 charPositions:
                   type: array
                   items:
                     type: array
                     items:
                       type: integer
-                      minItems: 8
-                      maxItems: 8
+                    minItems: 8
+                    maxItems: 8
+
+TaskCropResult:
+  type: object
+  properties:
+    page:
+      type: integer
+      description: Page index of the original file, 0 represents the first page of the source file
+    imageAngle:
+      type: string
+      description: Angle information of the cropped image
 
 CommonFieldDetailRespVO:
   type: object
@@ -364,16 +415,11 @@ CommonFieldDetailRespVO:
     index:
       type: integer
       description: Index
-
-TaskCropResult:
-  type: object
-  properties:
-    page:
-      type: integer
-      description: Page index of the original file, 0 represents the first page of the source file
-    imageAngle:
-      type: string
-      description: Angle information of the cropped image
+    confidence:
+      type: number
+      format: float
+      description: Confidence score, range 0~1
+      example: 0.95
 
 SubFileDetailInfo:
   type: object
@@ -481,6 +527,9 @@ SubFileDetailInfo:
                   Table type, 0: system configured, 1: manually added.
                 type: string
                 example: 0
+              extractModel:
+                description: Table-level extraction model
+                type: string
               items:
                 type: array
                 items:
@@ -557,7 +606,6 @@ SubFileDetailInfo:
         description: Position information
         example: 1
     crop_info:
-      description: Detailed information of multi-image cropping
       $ref: '#/TaskCropResult'
 
 TextInLines:
@@ -593,23 +641,6 @@ TextInLines:
           description: Character coordinates
           example: 1
   description: Field coordinates
-
-KeyValuePosition:
-  description: Position of the field value. Field values may span pages or rows, so they are displayed as arrays.
-  type: array
-  items:
-    type: object
-    properties:
-      page:
-        type: integer
-        description: Page where the field is located. It is the index of the pages array
-      vertices:
-        type: array
-        description: Bounding quadrilateral coordinates of the field value. The image uses the top-left as origin, array values are [top-left x, top-left y, top-right x, top-right y, bottom-right x, bottom-right y, bottom-left x, bottom-left y]
-        items:
-          type: integer
-        minItems: 8
-        maxItems: 8
 
 TaskType:
   type: integer

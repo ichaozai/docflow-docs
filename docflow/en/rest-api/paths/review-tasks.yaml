@@ -57,42 +57,6 @@
                           description: Review task ID
                           example: "31415926"
 
-/api/app-api/sip/platform/v2/review/task/delete:
-  post:
-    summary: Delete Review Task
-    description: Delete review task
-    operationId: deleteReviewTask
-    tags:
-      - Intelligent Review
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              workspace_id:
-                type: string
-                description: Workspace ID
-                example: "1234567890"
-              task_ids:
-                type: array
-                items:
-                  type: string
-                  description: Review task ID
-                  example: "31415926"
-            required:
-              - workspace_id
-              - task_ids
-    responses:
-      '200':
-        description: Successfully deleted review task
-        content:
-          application/json:
-            schema:
-              allOf:
-                - $ref: '../components/schemas/common.yaml#/CodeMessage'
-
 /api/app-api/sip/platform/v2/review/task/result:
   post:
     summary: Get Review Task Result
@@ -115,6 +79,10 @@
                 type: string
                 description: Review task ID
                 example: "31415926"
+              with_task_detail_url:
+                type: boolean
+                description: Whether to return the review task detail URL
+                example: false
             required:
               - workspace_id
               - task_id
@@ -139,6 +107,9 @@
                           type: string
                           description: Task name
                           example: "Review Task 1"
+                        task_detail_url:
+                          type: string
+                          description: Review task detail URL
                         status:
                           $ref: '../components/schemas/reviews.yaml#/ReviewTaskStatus'
                         rule_repo:
@@ -280,6 +251,42 @@
                                       type: string
                                       description: Manual review comments
                                       example: "Manual review comments"
+
+/api/app-api/sip/platform/v2/review/task/delete:
+  post:
+    summary: Delete Review Task
+    description: Delete review task
+    operationId: deleteReviewTask
+    tags:
+      - Intelligent Review
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              workspace_id:
+                type: string
+                description: Workspace ID
+                example: "1234567890"
+              task_ids:
+                type: array
+                items:
+                  type: string
+                  description: Review task ID
+                  example: "31415926"
+            required:
+              - workspace_id
+              - task_ids
+    responses:
+      '200':
+        description: Successfully deleted review task
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas/common.yaml#/CodeMessage'
 
 /api/app-api/sip/platform/v2/review/task/retry:
   post:

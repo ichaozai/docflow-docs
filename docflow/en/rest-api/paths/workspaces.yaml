@@ -172,7 +172,7 @@
                 type: string
                 description: Workspace description
                 example: "This is a workspace for invoice processing"
-                maxLength: 200
+                maxLength: 500
               auth_scope:
                 type: integer
                 description: "Collaboration scope 0: Visible only to self 1: Visible to enterprise members"
@@ -188,7 +188,7 @@
                 type: integer
                 description: Callback retry count
                 example: 3
-                minimum: 0
+                minimum: 1
                 maximum: 3
             required:
               - workspace_id

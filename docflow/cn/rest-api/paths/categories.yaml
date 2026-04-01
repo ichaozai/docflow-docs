@@ -25,13 +25,19 @@
                 type: string
                 description: 用于分类的提示词
                 example: "增值税发票，包含发票代码、发票号码等字段"
-                maxLength: 500
+                maxLength: 150
               extract_model:
-                description: 抽取模型
-                example: "llm"
+                type: string
+                description: |
+                  选填，抽取模型，不填默认 Model 1
+                  - Model 1: 速度快，抽取结果稳定
+                  - Model 2: 适用复杂文档理解
+                  - Model 3: 多模态，适用简单抽取
+                example: "Model 1"
                 enum:
-                  - llm
-                  - vlm
+                  - Model 1
+                  - Model 2
+                  - Model 3
               sample_files:
                 type: array
                 description: 样本文件列表，至少上传一个样本文件，一个类别最多有10个样本文件
@@ -180,9 +186,21 @@
                 type: string
                 description: 用于分类的提示词
                 example: "增值税发票，包含发票代码、发票号码等字段"
-                maxLength: 500
+                maxLength: 150
               enabled:
                 $ref: '../components/schemas/categories.yaml#/EnabledStatus'
+              extract_model:
+                type: string
+                description: |
+                  抽取模型
+                  - Model 1: 速度快，抽取结果稳定
+                  - Model 2: 适用复杂文档理解
+                  - Model 3: 多模态，适用简单抽取
+                example: "Model 1"
+                enum:
+                  - Model 1
+                  - Model 2
+                  - Model 3
             required:
               - workspace_id
               - category_id
@@ -317,10 +335,22 @@
               table_id:
                 type: string
                 description: |
-                  表格ID  
-                  - 不传或为空：创建普通字段，结果会出现在 result.fields 中  
+                  表格ID
+                  - 不传或为空：创建普通字段，结果会出现在 result.fields 中
                   - 传入表格ID：创建对应表格下的表格字段，结果会出现在 result.tables[].fields 中
                 example: "1234567890"
+              extract_model:
+                type: string
+                description: |
+                  选填，字段级抽取模型，仅普通字段（非表格字段）支持，不填默认 Model 1
+                  - Model 1: 速度快，抽取结果稳定
+                  - Model 2: 适用复杂文档理解
+                  - Model 3: 多模态，适用简单抽取
+                example: "Model 1"
+                enum:
+                  - Model 1
+                  - Model 2
+                  - Model 3
             required:
               - workspace_id
               - category_id
@@ -374,10 +404,22 @@
               table_id:
                 type: string
                 description: |
-                  表格ID  
-                  - 对普通字段可不传  
+                  表格ID
+                  - 对普通字段可不传
                   - 对表格字段需要传入其所属的表格ID
                 example: "1234567890"
+              extract_model:
+                type: string
+                description: |
+                  字段级抽取模型
+                  - Model 1: 速度快，抽取结果稳定
+                  - Model 2: 适用复杂文档理解
+                  - Model 3: 多模态，适用简单抽取
+                example: "Model 1"
+                enum:
+                  - Model 1
+                  - Model 2
+                  - Model 3
             required:
               - workspace_id
               - category_id
@@ -495,6 +537,10 @@
                                   type: boolean
                                   description: 多表合并
                                   example: true
+                              extract_model:
+                                type: string
+                                description: 表格级抽取模型
+                                example: "Model 1"
 
 /api/app-api/sip/platform/v2/category/tables/add:
   post:
@@ -532,6 +578,18 @@
                   type: boolean
                   description: 多表合并
                   example: true
+              extract_model:
+                type: string
+                description: |
+                  表格级抽取模型
+                  - Model 1: 速度快，抽取结果稳定
+                  - Model 2: 适用复杂文档理解
+                  - Model 3: 多模态，适用简单抽取
+                example: "Model 1"
+                enum:
+                  - Model 1
+                  - Model 2
+                  - Model 3
             required:
               - workspace_id
               - category_id
@@ -594,6 +652,18 @@
                   type: boolean
                   description: 多表合并
                   example: true
+              extract_model:
+                type: string
+                description: |
+                  表格级抽取模型
+                  - Model 1: 速度快，抽取结果稳定
+                  - Model 2: 适用复杂文档理解
+                  - Model 3: 多模态，适用简单抽取
+                example: "Model 1"
+                enum:
+                  - Model 1
+                  - Model 2
+                  - Model 3
             required:
               - workspace_id
               - category_id

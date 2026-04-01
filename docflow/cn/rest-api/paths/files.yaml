@@ -506,6 +506,18 @@
                       type: string
                       description: 表格名称
                       example: Table1
+                    extract_model:
+                      type: string
+                      description: |
+                        整表抽取模型，不填默认使用 Model 1。表格内所有字段统一使用此模型
+                        - Model 1: 速度快，抽取结果稳定
+                        - Model 2: 适用复杂文档理解
+                        - Model 3: 多模态，适用简单抽取
+                      example: "Model 1"
+                      enum:
+                        - Model 1
+                        - Model 2
+                        - Model 3
                     fields:
                       type: array
                       items:

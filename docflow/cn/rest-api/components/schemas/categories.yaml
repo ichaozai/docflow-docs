@@ -10,16 +10,28 @@ Category:
       type: string
       description: 文件类别名称
       example: "发票"
+    description:
+      type: string
+      description: 文件类别描述
+      example: "增值税发票类型"
     category_prompt:
       type: string
       description: 用于分类的提示词
       example: "增值税发票，包含发票代码、发票号码等字段"
     extract_model:
-      description: 抽取模型
-      example: "llm"
+      type: string
+      description: |
+        抽取模型
+        - Model 1: 速度快，抽取结果稳定
+        - Model 2: 适用复杂文档理解
+        - Model 3: 多模态，适用简单抽取
+        - mixed: 仅在响应中出现，表示该分类下各字段/表格使用了不同模型
+      example: "Model 1"
       enum:
-        - llm
-        - vlm
+        - Model 1
+        - Model 2
+        - Model 3
+        - mixed
     enabled:
       $ref: '#/EnabledStatus'
   required:

@@ -2,3 +2,9 @@
 export_pdf
 merge_docflow_cn.sh
 docflow_cn_combined_ordered.md
+/node_modules/
+/docflow-docs.iml
+/CLAUDE.md
+/package.json
+/package-lock.json
+/examples/java/src/main/java/rebel.xml

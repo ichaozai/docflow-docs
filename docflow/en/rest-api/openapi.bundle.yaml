@@ -74,21 +74,6 @@ paths:
                         required:
                           - batch_number
                           - files
-      x-codeSamples:
-        - lang: bash
-          label: cURL
-          source: >
-            curl -X POST \
-
-            -H 'x-ti-app-id: 1234567890' \
-
-            -H 'x-ti-secret-code: 1234567890' \
-
-            -F 'file=@invoice.pdf'
-
-            -F 'file=@another.pdf'
-
-            'https://docflow.textin.com/api/app-api/sip/platform/v2/file/upload?workspace_id=1234567890&category=invoice&batch_number=202412190001'
   /api/app-api/sip/platform/v2/file/upload/sync:
     post:
       summary: Upload File Synchronously
@@ -250,19 +235,19 @@ paths:
                     example: 202412190001
                   data:
                     description: >
-                      Full field update.  
+                      Full field update.
 
                       Note: Even if only updating partial fields, all fields
-                      must be included.  
+                      must be included.
 
                       If the incoming fields are more than the original fields,
-                      the additional fields will be added.  
+                      the additional fields will be added.
 
                       If the incoming fields are fewer than the original fields,
-                      the missing fields will be deleted.  
+                      the missing fields will be deleted.
 
                       If the incoming field values differ from the original
-                      field values, the field values will be updated.  
+                      field values, the field values will be updated.
 
                       If the incoming fields are identical to the original
                       fields, the fields will be preserved.
@@ -389,21 +374,6 @@ paths:
                                   type: string
                                   description: File ID
                                   example: 202412190001
-      x-codeSamples:
-        - lang: bash
-          label: cURL
-          source: >
-            curl -X POST \
-
-            -H 'x-ti-app-id: 1234567890' \
-
-            -H 'x-ti-secret-code: 1234567890' \
-
-            -d '[{"workspace_id": "1234567890", "file_id": "202412190001",
-            "data": {"fields": [{"key": "Invoice Code", "value":
-            "3100231130"}]}}]' \
-
-            'https://docflow.textin.com/api/app-api/sip/platform/v2/file/update'
   /api/app-api/sip/platform/v2/file/delete:
     post:
       summary: Delete Tasks
@@ -478,7 +448,7 @@ paths:
       summary: Extract Specific Fields
       description: >
         For tasks that have completed extraction, extract additional fields for
-        the task, or re-extract individual existing fields.  
+        the task, or re-extract individual existing fields.
 
         Returns the complete extraction result of all fields. The return
         structure is the same as `/api/app-api/sip/platform/v2/file/fetch`.
@@ -511,6 +481,23 @@ paths:
                         type: string
                         description: Table name
                         example: Table1
+                      extract_model:
+                        type: string
+                        description: >
+                          Table-level extraction model, defaults to Model 1 if
+                          not specified. All fields within the table use this
+                          model
+
+                          - Model 1: Fast speed with stable extraction results
+
+                          - Model 2: Suitable for complex document understanding
+
+                          - Model 3: VLM, suitable for simple extraction
+                        example: Model 1
+                        enum:
+                          - Model 1
+                          - Model 2
+                          - Model 3
                       fields:
                         type: array
                         items:
@@ -560,6 +547,81 @@ paths:
               schema:
                 allOf:
                   - $ref: '#/components/schemas/CodeMessage'
+  /api/app-api/sip/platform/v2/file/amend_category:
+    post:
+      summary: Amend File Category
+      description: >
+        - For regular tasks, modify the file category of the regular task
+
+        - For document splitting tasks, modify the file type and page numbers of
+        the split files
+
+        - For multi-image cropping tasks, modify the file type of the cropped
+        files
+      operationId: amendCategory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: Workspace ID
+                  example: 1234567890
+                task_id:
+                  type: string
+                  description: Task ID
+                  example: 1234567890
+                category:
+                  type: string
+                  description: |
+                    New file category.
+                    Only supported when the task type is a regular task.
+                  example: Electronic Invoice (Ordinary Invoice)
+                split_tasks:
+                  description: Document splitting task list
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      category:
+                        type: string
+                        description: Subtask file category
+                        example: Electronic Invoice (Ordinary Invoice)
+                      pages:
+                        type: array
+                        items:
+                          type: integer
+                          description: 'Subfile page numbers, starting from 0'
+                        example:
+                          - 0
+                          - 1
+                crop_tasks:
+                  description: Multi-image cropping task list
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      crop_child_task_id:
+                        type: string
+                        description: Multi-image cropping subtask ID
+                        example: 1234567890
+                      category:
+                        type: string
+                        description: Subtask file category
+                        example: Electronic Invoice (Ordinary Invoice)
+              required:
+                - workspace_id
+                - task_id
+      responses:
+        '200':
+          description: Successfully updated file category
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
   /api/app-api/sip/platform/v2/auth/token:
     get:
       summary: Generate a short-lived token
@@ -574,6 +636,330 @@ paths:
                 allOf:
                   - $ref: '#/components/schemas/CodeMessage'
                   - $ref: '#/components/schemas/TokenResult'
+  /api/app-api/sip/platform/v2/workspace/create:
+    post:
+      summary: Create Workspace
+      description: Create a new workspace
+      operationId: createWorkspace
+      tags:
+        - Workspace Management
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Workspace name
+                  example: My Workspace
+                  maxLength: 50
+                description:
+                  type: string
+                  description: Workspace description
+                  example: This is a workspace for invoice processing
+                  maxLength: 200
+                enterprise_id:
+                  type: integer
+                  format: int64
+                  description: Enterprise organization ID
+                  example: 12345
+                auth_scope:
+                  type: integer
+                  description: >-
+                    Collaboration scope 0: Visible only to self 1: Visible to
+                    enterprise members
+                  example: 1
+                  enum:
+                    - 0
+                    - 1
+              required:
+                - name
+                - enterprise_id
+                - auth_scope
+      responses:
+        '200':
+          description: Successfully created workspace
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          workspace_id:
+                            type: string
+                            description: Workspace ID
+                            example: '1234567890'
+  /api/app-api/sip/platform/v2/workspace/list:
+    get:
+      summary: Get Workspace List
+      description: Get list of all workspaces for the current user
+      operationId: listWorkspaces
+      tags:
+        - Workspace Management
+      parameters:
+        - name: enterprise_id
+          in: query
+          description: Enterprise ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: page
+          in: query
+          description: Page number
+          required: false
+          schema:
+            type: integer
+            default: 1
+            example: 1
+        - name: page_size
+          in: query
+          description: Page size
+          required: false
+          schema:
+            type: integer
+            default: 20
+            example: 20
+      responses:
+        '200':
+          description: Successfully retrieved workspace list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          total:
+                            type: integer
+                            description: Total number of workspaces
+                            example: 100
+                          page:
+                            type: integer
+                            description: Current page number
+                            example: 1
+                          page_size:
+                            type: integer
+                            description: Page size
+                            example: 20
+                          workspaces:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Workspace'
+  /api/app-api/sip/platform/v2/workspace/get:
+    get:
+      summary: Get Workspace Details
+      description: Get detailed information of a workspace by workspace ID
+      operationId: getWorkspace
+      tags:
+        - Workspace Management
+      parameters:
+        - name: workspace_id
+          in: query
+          description: Workspace ID
+          required: true
+          schema:
+            type: string
+            example: '1234567890'
+      responses:
+        '200':
+          description: Successfully retrieved workspace details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        $ref: '#/components/schemas/Workspace'
+  /api/app-api/sip/platform/v2/workspace/update:
+    post:
+      summary: Update Workspace
+      description: Update information of a specified workspace
+      operationId: updateWorkspace
+      tags:
+        - Workspace Management
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: Workspace ID
+                  example: '1234567890'
+                name:
+                  type: string
+                  description: Workspace name
+                  example: My Workspace
+                  maxLength: 50
+                description:
+                  type: string
+                  description: Workspace description
+                  example: This is a workspace for invoice processing
+                  maxLength: 500
+                auth_scope:
+                  type: integer
+                  description: >-
+                    Collaboration scope 0: Visible only to self 1: Visible to
+                    enterprise members
+                  example: 1
+                  enum:
+                    - 0
+                    - 1
+                callback_url:
+                  type: string
+                  description: Callback URL
+                  example: 'https://example.com/callback'
+                callback_retry_time:
+                  type: integer
+                  description: Callback retry count
+                  example: 3
+                  minimum: 1
+                  maximum: 3
+              required:
+                - workspace_id
+                - name
+                - auth_scope
+      responses:
+        '200':
+          description: Successfully updated workspace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeMessage'
+  /api/app-api/sip/platform/v2/workspace/delete:
+    post:
+      summary: Delete Workspace
+      description: Delete specified workspace(s)
+      operationId: deleteWorkspace
+      tags:
+        - Workspace Management
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_ids:
+                  type: array
+                  items:
+                    type: string
+                    description: Workspace ID
+                    example: '1234567890'
+                  description: List of workspace IDs to delete
+              required:
+                - workspace_ids
+      responses:
+        '200':
+          description: Successfully deleted workspace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeMessage'
+  /api/app-api/sip/platform/v2/category/create:
+    post:
+      summary: Create File Category
+      description: >-
+        Create a new file category in the specified workspace, requiring at
+        least one sample file and at least one field configuration
+      operationId: createCategory
+      tags:
+        - File Category
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: Workspace ID
+                  example: '1234567890'
+                name:
+                  type: string
+                  description: File category name
+                  example: Invoice
+                  maxLength: 50
+                category_prompt:
+                  type: string
+                  description: Prompt for classification
+                  example: >-
+                    VAT invoice, including fields such as invoice code, invoice
+                    number, etc.
+                  maxLength: 150
+                extract_model:
+                  type: string
+                  description: >
+                    Optional, extraction model, defaults to Model 1 if not
+                    specified
+
+                    - Model 1: Fast speed with stable extraction results
+
+                    - Model 2: Suitable for complex document understanding
+
+                    - Model 3: VLM, suitable for simple extraction
+                  example: Model 1
+                  enum:
+                    - Model 1
+                    - Model 2
+                    - Model 3
+                sample_files:
+                  type: array
+                  description: >-
+                    Sample file list, at least one sample file must be uploaded,
+                    a category can have at most 10 sample files
+                  items:
+                    type: string
+                    format: binary
+                  minItems: 1
+                  maxItems: 10
+                fields:
+                  type: array
+                  description: >-
+                    Field configuration list, at least one field must be
+                    configured
+                  items:
+                    allOf:
+                      - $ref: '#/components/schemas/CategoryFieldConfig'
+                  minItems: 1
+              required:
+                - workspace_id
+                - name
+                - extract_model
+                - sample_files
+                - fields
+      responses:
+        '200':
+          description: Successfully created file category
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          category_id:
+                            type: string
+                            description: File category ID
+                            example: '1234567890'
   /api/app-api/sip/platform/v2/category/list:
     get:
       summary: Get Workspace File Category List
@@ -602,7 +988,9 @@ paths:
           required: false
           schema:
             type: integer
-            default: 1000
+            default: 20
+            minimum: 1
+            maximum: 100
         - name: enabled
           in: query
           description: |
@@ -648,22 +1036,338 @@ paths:
                           categories:
                             type: array
                             items:
+                              $ref: '#/components/schemas/Category'
+  /api/app-api/sip/platform/v2/category/update:
+    post:
+      summary: Update File Category
+      description: Update information of the specified file category
+      operationId: updateCategory
+      tags:
+        - File Category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: Workspace ID
+                  example: '1234567890'
+                category_id:
+                  type: string
+                  description: File category ID
+                  example: '1234567890'
+                name:
+                  type: string
+                  description: File category name
+                  example: Invoice
+                  maxLength: 50
+                category_prompt:
+                  type: string
+                  description: Prompt for classification
+                  example: >-
+                    VAT invoice, including fields such as invoice code, invoice
+                    number, etc.
+                  maxLength: 150
+                enabled:
+                  $ref: '#/components/schemas/EnabledStatus'
+                extract_model:
+                  type: string
+                  description: |
+                    Extraction model
+                    - Model 1: Fast speed with stable extraction results
+                    - Model 2: Suitable for complex document understanding
+                    - Model 3: VLM, suitable for simple extraction
+                  example: Model 1
+                  enum:
+                    - Model 1
+                    - Model 2
+                    - Model 3
+              required:
+                - workspace_id
+                - category_id
+      responses:
+        '200':
+          description: Successfully updated file category
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeMessage'
+  /api/app-api/sip/platform/v2/category/delete:
+    post:
+      summary: Delete File Category
+      description: Delete the specified file category
+      operationId: deleteCategory
+      tags:
+        - File Category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: Workspace ID
+                  example: '1234567890'
+                category_ids:
+                  type: array
+                  items:
+                    type: string
+                  description: List of file category IDs to delete
+                  example:
+                    - '1234567890'
+                    - 0987654321
+              required:
+                - workspace_id
+                - category_ids
+      responses:
+        '200':
+          description: Successfully deleted file category
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeMessage'
+  /api/app-api/sip/platform/v2/category/tables/list:
+    get:
+      summary: Get File Category Tables List
+      description: Get all tables configured under the specified file category
+      operationId: listCategoryTables
+      tags:
+        - File Category
+      parameters:
+        - name: workspace_id
+          in: query
+          description: Workspace ID
+          required: true
+          schema:
+            type: string
+            example: '1234567890'
+        - name: category_id
+          in: query
+          description: File category ID
+          required: true
+          schema:
+            type: string
+            example: '1234567890'
+      responses:
+        '200':
+          description: Successfully retrieved file category tables list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          tables:
+                            type: array
+                            description: Tables list
+                            items:
                               type: object
                               properties:
                                 id:
                                   type: string
-                                  description: File category ID
+                                  description: Table ID
                                   example: '1234567890'
                                 name:
                                   type: string
-                                  description: File category name
-                                  example: Invoice
-                                description:
+                                  description: Table name
+                                  example: Table 1
+                                prompt:
                                   type: string
-                                  description: File category description
-                                  example: Invoice category description
-                                enabled:
-                                  $ref: '#/components/schemas/EnabledStatus'
+                                  description: Table semantic extraction prompt
+                                  example: >-
+                                    Extract name, quantity and amount for each
+                                    row
+                                collect_from_multi_table:
+                                  type: boolean
+                                  description: Merge multiple tables
+                                  example: true
+                                extract_model:
+                                  type: string
+                                  description: Table-level extraction model
+                                  example: Model 1
+  /api/app-api/sip/platform/v2/category/tables/add:
+    post:
+      summary: Add File Category Table
+      description: Add a table to the specified file category
+      operationId: addCategoryTable
+      tags:
+        - File Category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: Workspace ID
+                  example: '1234567890'
+                category_id:
+                  type: string
+                  description: File category ID
+                  example: '1234567890'
+                name:
+                  type: string
+                  description: Table name
+                  example: Table 1
+                  maxLength: 50
+                prompt:
+                  type: string
+                  description: Table semantic extraction prompt
+                  example: 'Extract name, quantity and amount for each row'
+                  maxLength: 200
+                collect_from_multi_table:
+                  type: boolean
+                  description: Merge multiple tables
+                  example: true
+                extract_model:
+                  type: string
+                  description: |
+                    Table-level extraction model
+                    - Model 1: Fast speed with stable extraction results
+                    - Model 2: Suitable for complex document understanding
+                    - Model 3: VLM, suitable for simple extraction
+                  example: Model 1
+                  enum:
+                    - Model 1
+                    - Model 2
+                    - Model 3
+              required:
+                - workspace_id
+                - category_id
+                - name
+      responses:
+        '200':
+          description: Successfully added file category table
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          table_id:
+                            type: string
+                            description: Newly added table ID
+                            example: '1234567890'
+  /api/app-api/sip/platform/v2/category/tables/update:
+    post:
+      summary: Update File Category Table
+      description: Update information of the specified file category table
+      operationId: updateCategoryTable
+      tags:
+        - File Category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: Workspace ID
+                  example: '1234567890'
+                category_id:
+                  type: string
+                  description: File category ID
+                  example: '1234567890'
+                table_id:
+                  type: string
+                  description: Table ID
+                  example: '1234567890'
+                name:
+                  type: string
+                  description: Table name
+                  example: Table 1
+                  maxLength: 50
+                prompt:
+                  type: string
+                  description: Table semantic extraction prompt
+                  example: 'Extract name, quantity and amount for each row'
+                  maxLength: 200
+                collect_from_multi_table:
+                  type: boolean
+                  description: Merge multiple tables
+                  example: true
+                extract_model:
+                  type: string
+                  description: |
+                    Table-level extraction model
+                    - Model 1: Fast speed with stable extraction results
+                    - Model 2: Suitable for complex document understanding
+                    - Model 3: VLM, suitable for simple extraction
+                  example: Model 1
+                  enum:
+                    - Model 1
+                    - Model 2
+                    - Model 3
+              required:
+                - workspace_id
+                - category_id
+                - table_id
+                - collect_from_multi_table
+      responses:
+        '200':
+          description: Successfully updated file category table
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeMessage'
+  /api/app-api/sip/platform/v2/category/tables/delete:
+    post:
+      summary: Delete File Category Tables
+      description: 'Delete the specified file category tables, supporting batch deletion'
+      operationId: deleteCategoryTables
+      tags:
+        - File Category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: Workspace ID
+                  example: '1234567890'
+                category_id:
+                  type: string
+                  description: File category ID
+                  example: '1234567890'
+                table_ids:
+                  type: array
+                  description: List of table IDs to delete
+                  items:
+                    type: string
+                  example:
+                    - '1234567890'
+                    - 0987654321
+              required:
+                - workspace_id
+                - category_id
+                - table_ids
+      responses:
+        '200':
+          description: Successfully deleted file category tables
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeMessage'
   /api/app-api/sip/platform/v2/category/fields/list:
     get:
       summary: Get File Category Fields List
@@ -724,6 +1428,389 @@ paths:
                                   type: array
                                   items:
                                     $ref: '#/components/schemas/CategoryField'
+  /api/app-api/sip/platform/v2/category/fields/add:
+    post:
+      summary: Add File Category Field
+      description: >-
+        Add a field to the specified file category, supporting both regular
+        fields and table fields
+      operationId: addCategoryField
+      tags:
+        - File Category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/CategoryFieldConfig'
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: Workspace ID
+                  example: '1234567890'
+                category_id:
+                  type: string
+                  description: File category ID
+                  example: '1234567890'
+                table_id:
+                  type: string
+                  description: >
+                    Table ID
+
+                    - Not provided or empty: Create a regular field, result will
+                    appear in result.fields
+
+                    - Provided table ID: Create a table field under the
+                    corresponding table, result will appear in
+                    result.tables[].fields
+                  example: '1234567890'
+                extract_model:
+                  type: string
+                  description: >
+                    Optional, field-level extraction model, only supported for
+                    regular fields (not table fields), defaults to Model 1 if
+                    not specified
+
+                    - Model 1: Fast speed with stable extraction results
+
+                    - Model 2: Suitable for complex document understanding
+
+                    - Model 3: VLM, suitable for simple extraction
+                  example: Model 1
+                  enum:
+                    - Model 1
+                    - Model 2
+                    - Model 3
+              required:
+                - workspace_id
+                - category_id
+                - name
+      responses:
+        '200':
+          description: Successfully added file category field
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          field_id:
+                            type: string
+                            description: Newly created field ID
+                            example: '1234567890'
+  /api/app-api/sip/platform/v2/category/fields/update:
+    post:
+      summary: Update File Category Field
+      description: >-
+        Update information of the specified file category field, supporting both
+        regular fields and table fields
+      operationId: updateCategoryField
+      tags:
+        - File Category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/CategoryFieldConfig'
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: Workspace ID
+                  example: '1234567890'
+                category_id:
+                  type: string
+                  description: File category ID
+                  example: '1234567890'
+                field_id:
+                  type: string
+                  description: Field ID
+                  example: '1234567890'
+                table_id:
+                  type: string
+                  description: >
+                    Table ID
+
+                    - Not required for regular fields
+
+                    - Required for table fields, need to provide the table ID it
+                    belongs to
+                  example: '1234567890'
+                extract_model:
+                  type: string
+                  description: |
+                    Field-level extraction model
+                    - Model 1: Fast speed with stable extraction results
+                    - Model 2: Suitable for complex document understanding
+                    - Model 3: VLM, suitable for simple extraction
+                  example: Model 1
+                  enum:
+                    - Model 1
+                    - Model 2
+                    - Model 3
+              required:
+                - workspace_id
+                - category_id
+                - field_id
+      responses:
+        '200':
+          description: Successfully updated file category field
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeMessage'
+  /api/app-api/sip/platform/v2/category/fields/delete:
+    post:
+      summary: Delete File Category Fields
+      description: >-
+        Delete the specified file category fields, supporting batch deletion of
+        both regular fields and table fields
+      operationId: deleteCategoryFields
+      tags:
+        - File Category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: Workspace ID
+                  example: '1234567890'
+                category_id:
+                  type: string
+                  description: File category ID
+                  example: '1234567890'
+                field_ids:
+                  type: array
+                  description: List of field IDs to delete
+                  items:
+                    type: string
+                  example:
+                    - '1234567890'
+                    - 0987654321
+                table_id:
+                  type: string
+                  description: >
+                    Table ID
+
+                    - Not provided: Delete regular fields (fields in
+                    result.fields)
+
+                    - Provided table ID: Delete table fields under the
+                    corresponding table (fields in result.tables[].fields)
+                  example: '1234567890'
+              required:
+                - workspace_id
+                - category_id
+                - field_ids
+      responses:
+        '200':
+          description: Successfully deleted file category fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeMessage'
+  /api/app-api/sip/platform/v2/category/sample/upload:
+    post:
+      summary: Upload Category Sample
+      description: Upload a sample file for the specified file category
+      operationId: uploadCategorySample
+      tags:
+        - File Category Samples
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: Workspace ID
+                  example: '1234567890'
+                category_id:
+                  type: string
+                  description: File category ID
+                  example: '1234567890'
+                file:
+                  type: string
+                  format: binary
+                  description: Sample file
+              required:
+                - workspace_id
+                - category_id
+                - file
+      responses:
+        '200':
+          description: Successfully uploaded category sample
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          sample_id:
+                            type: string
+                            description: Sample ID
+                            example: '1234567890'
+  /api/app-api/sip/platform/v2/category/sample/list:
+    get:
+      summary: Get Category Samples List
+      description: Get the list of samples for the specified file category
+      operationId: listCategorySamples
+      tags:
+        - File Category Samples
+      parameters:
+        - name: workspace_id
+          in: query
+          description: Workspace ID
+          required: true
+          schema:
+            type: string
+            example: '1234567890'
+        - name: category_id
+          in: query
+          description: File category ID
+          required: true
+          schema:
+            type: string
+            example: '1234567890'
+        - name: page
+          in: query
+          description: Page number
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: page_size
+          in: query
+          description: Page size
+          required: false
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Successfully retrieved category samples list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          total:
+                            type: integer
+                            description: Total number of samples
+                            example: 10
+                          page:
+                            type: integer
+                            description: Current page number
+                            example: 1
+                          page_size:
+                            type: integer
+                            description: Page size
+                            example: 20
+                          samples:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/CategorySample'
+  /api/app-api/sip/platform/v2/category/sample/download:
+    get:
+      summary: Download Category Sample
+      description: Download the specified category sample file
+      operationId: downloadCategorySample
+      tags:
+        - File Category Samples
+      parameters:
+        - name: workspace_id
+          in: query
+          description: Workspace ID
+          required: true
+          schema:
+            type: string
+            example: '1234567890'
+        - name: category_id
+          in: query
+          description: File category ID
+          required: true
+          schema:
+            type: string
+            example: '1234567890'
+        - name: sample_id
+          in: query
+          description: Sample ID
+          required: true
+          schema:
+            type: string
+            example: '1234567890'
+      responses:
+        '200':
+          description: Successfully downloaded sample file
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+  /api/app-api/sip/platform/v2/category/sample/delete:
+    post:
+      summary: Delete Category Samples
+      description: Delete the specified category samples
+      operationId: deleteCategorySample
+      tags:
+        - File Category Samples
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: Workspace ID
+                  example: '1234567890'
+                category_id:
+                  type: string
+                  description: File category ID
+                  example: '1234567890'
+                sample_ids:
+                  type: array
+                  items:
+                    type: string
+                  description: List of sample IDs to delete
+                  example:
+                    - '1234567890'
+                    - 0987654321
+              required:
+                - workspace_id
+                - category_id
+                - sample_ids
+      responses:
+        '200':
+          description: Successfully deleted category samples
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeMessage'
   /api/app-api/sip/platform/v2/review/rule_repo/create:
     post:
       summary: Create Review Rule Repository
@@ -840,6 +1927,102 @@ paths:
               schema:
                 allOf:
                   - $ref: '#/components/schemas/CodeMessage'
+  /api/app-api/sip/platform/v2/review/rule_repo/list:
+    get:
+      summary: Get Review Rule Repository List
+      description: >-
+        Get review rule repository list, including rule groups and rules
+        information under the repository
+      operationId: listReviewRuleRepo
+      tags:
+        - Intelligent Review
+      parameters:
+        - name: workspace_id
+          in: query
+          description: Workspace ID
+          required: true
+          schema:
+            type: string
+            example: '1234567890'
+        - name: page
+          in: query
+          description: Page number
+          required: false
+          schema:
+            type: integer
+            example: 1
+            default: 1
+        - name: page_size
+          in: query
+          description: Page size
+          required: false
+          schema:
+            type: integer
+            example: 10
+            default: 10
+      responses:
+        '200':
+          description: Successfully retrieved review rule repository list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          repos:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/ReviewRuleRepo'
+                          total:
+                            type: integer
+                            description: Total count
+                            example: 100
+                          page:
+                            type: integer
+                            description: Page number
+                            example: 1
+                          page_size:
+                            type: integer
+                            description: Page size
+                            example: 10
+  /api/app-api/sip/platform/v2/review/rule_repo/get:
+    get:
+      summary: Get Review Rule Repository
+      description: Get review rule repository
+      operationId: getReviewRuleRepo
+      tags:
+        - Intelligent Review
+      parameters:
+        - name: workspace_id
+          in: query
+          description: Workspace ID
+          required: true
+          schema:
+            type: string
+            example: '1234567890'
+        - name: repo_id
+          in: query
+          description: Review rule repository ID
+          required: true
+          schema:
+            type: string
+            example: '31415926'
+      responses:
+        '200':
+          description: Successfully retrieved review rule repository
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        $ref: '#/components/schemas/ReviewRuleRepo'
   /api/app-api/sip/platform/v2/review/rule_group/create:
     post:
       summary: Create Review Rule Group
@@ -1183,6 +2366,10 @@ paths:
                   type: string
                   description: Review task ID
                   example: '31415926'
+                with_task_detail_url:
+                  type: boolean
+                  description: Whether to return the review task detail URL
+                  example: false
               required:
                 - workspace_id
                 - task_id
@@ -1207,6 +2394,9 @@ paths:
                             type: string
                             description: Task name
                             example: Review Task 1
+                          task_detail_url:
+                            type: string
+                            description: Review task detail URL
                           status:
                             $ref: '#/components/schemas/ReviewTaskStatus'
                           rule_repo:
@@ -1331,6 +2521,109 @@ paths:
                                               type: integer
                                               description: Page number in the file
                                               example: 1
+                                            source:
+                                              type: string
+                                              description: |
+                                                Position anchor source
+                                                - "ocr": Recognition
+                                                - "extract_field": Associated field
+                                              example: ocr
+                                              enum:
+                                                - ocr
+                                                - extract_field
+                                            file_category:
+                                              type: string
+                                              description: File category
+                                              example: Invoice
+                                            field_name:
+                                              type: string
+                                              description: Associated field name
+                                              example: Invoice Code
+                                      audit_result:
+                                        type: integer
+                                        description: |
+                                          Manual review result
+                                          - 0: Manual review failed
+                                          - 1: Manual review passed
+                                        example: 1
+                                        enum:
+                                          - 0
+                                          - 1
+                                      audit_message:
+                                        type: string
+                                        description: Manual review comments
+                                        example: Manual review comments
+  /api/app-api/sip/platform/v2/review/task/retry:
+    post:
+      summary: Retry Review Task
+      description: Retry review task
+      operationId: retryReviewTask
+      tags:
+        - Intelligent Review
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: Workspace ID
+                  example: '1234567890'
+                task_id:
+                  type: string
+                  description: Review task ID
+                  example: '31415926'
+              required:
+                - workspace_id
+                - task_id
+      responses:
+        '200':
+          description: Successfully retried review task
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+  /api/app-api/sip/platform/v2/review/task/rule/retry:
+    post:
+      summary: Retry Specific Rule in Review Task
+      description: Retry a specific rule in the review task.
+      operationId: retryReviewTaskRule
+      tags:
+        - Intelligent Review
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: Workspace ID
+                  example: '1234567890'
+                task_id:
+                  type: string
+                  description: Review task ID
+                  example: '31415926'
+                rule_id:
+                  type: string
+                  description: Review rule ID
+                  example: '31415926'
+              required:
+                - workspace_id
+                - task_id
+                - rule_id
+      responses:
+        '200':
+          description: Successfully retried specific rule in review task
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
 components:
   parameters:
     WorkspaceId:
@@ -1477,7 +2770,51 @@ components:
                 maxItems: 10
             required:
               - urls
+  securitySchemes:
+    ApiId:
+      type: apiKey
+      in: header
+      name: x-ti-app-id
+    SecretCode:
+      type: apiKey
+      in: header
+      name: x-ti-secret-code
   schemas:
+    CodeMessage:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Status code
+          example: 200
+        msg:
+          type: string
+          description: Status description
+      required:
+        - code
+        - msg
+    TaskType:
+      type: integer
+      description: >
+        Task type
+
+        - 0: **File split subtask**: When a file task with "File split" switch
+        enabled executes successfully, the subtasks generated by file split
+        operations in that file batch task are split subtasks, divided according
+        to the actual number of file sets under the file category
+
+        - 1: **Regular task**: File tasks without "File split" and "Multi-image
+        crop" switches enabled
+
+        - 2: **Parent task**: After file tasks with "File split" or "Multi-image
+        crop" switches enabled execute, each file in that file batch task
+        becomes a parent task
+
+        - 3: **Crop subtask**: When a file task with "Multi-image crop" switch
+        enabled executes successfully, the subtasks generated by multi-image
+        crop operations in that file batch task are crop subtasks, divided
+        according to the actual number of crop results under the file category
+      example: 1
     RecognitionStatus:
       type: integer
       description: >
@@ -1525,30 +2862,523 @@ components:
         - 3
         - 4
         - 5
-    CodeMessage:
-      type: object
-      properties:
-        code:
-          type: integer
-          description: Status code
-          example: 200
-        msg:
-          type: string
-          description: Status description
-      required:
-        - code
-        - msg
-    ExtractFieldReqVO:
+    PagesInfo:
+      type: array
+      description: >
+        Data for rendering each page of the file.            Combined with the
+        page and position fields in data.fields, you can accurately draw the
+        position of fields on the page.
+      items:
+        type: object
+        properties:
+          page:
+            type: integer
+            description: 'Page number, starting from 0'
+            example: 1
+          angle:
+            type: integer
+            description: Rotation angle
+            enum:
+              - 0
+              - 90
+              - 180
+              - 270
+          width:
+            type: integer
+            description: Page width after correction
+            example: 1024
+          height:
+            type: integer
+            description: Page height after correction
+            example: 1024
+          dpi:
+            type: integer
+            description: >-
+              Resolution when converting PDF to image. For non-PDF files, this
+              value is 0.
+            example: 144
+    KeyValuePosition:
+      description: >-
+        Position of the field value. Field values may span pages or rows, so
+        they are displayed as arrays.
+      type: array
+      items:
+        type: object
+        properties:
+          page:
+            type: integer
+            description: >-
+              Page where the field is located. It is the index of the pages
+              array
+          vertices:
+            type: array
+            description: >-
+              Bounding quadrilateral coordinates of the field value. The image
+              uses the top-left as origin, array values are [top-left x,
+              top-left y, top-right x, top-right y, bottom-right x, bottom-right
+              y, bottom-left x, bottom-left y]
+            items:
+              type: integer
+            minItems: 8
+            maxItems: 8
+    FieldRespKeyValue:
       type: object
       properties:
         key:
           type: string
           description: Field name
-          example: Invoice Code
-        prompt:
+        identifier:
           type: string
-          description: Field prompt
-          example: Only keep the year part
+          description: Identifier(from export field name)
+        value:
+          type: string
+          description: Field value
+        position:
+          $ref: '#/components/schemas/KeyValuePosition'
+        confidence:
+          type: number
+          format: float
+          description: 'Confidence score, range 0~1'
+          example: 0.95
+        extract_model:
+          type: string
+          description: Actual extraction model used
+    KeyValue:
+      type: object
+      properties:
+        key:
+          type: string
+          description: Field name
+        value:
+          type: string
+          description: Field value
+        position:
+          $ref: '#/components/schemas/KeyValuePosition'
+    TextInLines:
+      type: object
+      properties:
+        angle:
+          type: string
+          description: Angle
+          example: 0
+        pos:
+          type: array
+          description: Coordinates
+          items:
+            type: integer
+            description: Coordinates
+            example: 1
+        page:
+          type: integer
+          description: Page number
+          example: 1
+        text:
+          type: string
+          description: Text
+          example: Text content
+        char_pos:
+          type: array
+          description: Character coordinates
+          items:
+            type: array
+            description: Character coordinates
+            items:
+              type: integer
+              description: Character coordinates
+              example: 1
+      description: Field coordinates
+    CommonFieldDetailRespVO:
+      type: object
+      properties:
+        key:
+          type: string
+          description: Field key
+        identifier:
+          type: string
+          description: Identifier(from export field name)
+        value:
+          type: string
+          description: Field value
+        textInLines:
+          deprecated: true
+          type: array
+          description: |
+            **Deprecated**, please use position field instead
+            Field coordinates
+          items:
+            $ref: '#/components/schemas/TextInLines'
+        position:
+          $ref: '#/components/schemas/KeyValuePosition'
+        index:
+          type: integer
+          description: Index
+        confidence:
+          type: number
+          format: float
+          description: 'Confidence score, range 0~1'
+          example: 0.95
+    StampValue:
+      type: object
+      properties:
+        angel:
+          type: integer
+          description: Angle
+        page:
+          type: integer
+          description: Page number
+        text:
+          type: string
+          description: Stamp text content
+        type:
+          type: string
+          description: Stamp type
+        color:
+          type: string
+          description: Stamp color
+        shape:
+          type: string
+          description: Stamp shape
+        position:
+          type: array
+          description: Position information
+          items:
+            type: integer
+            example: 1
+    HandWritingValue:
+      type: object
+      properties:
+        angel:
+          type: integer
+          description: Angle
+        page:
+          type: integer
+          description: Page number
+        text:
+          type: string
+          description: Handwriting text content
+        position:
+          $ref: '#/components/schemas/KeyValuePosition'
+    Document:
+      type: object
+      properties:
+        pages:
+          type: array
+          items:
+            type: object
+            properties:
+              angle:
+                type: integer
+                description: Page rotation angle
+              width:
+                type: integer
+                description: Page width
+              height:
+                type: integer
+                description: Page height
+              lines:
+                description: Page text line array
+                type: array
+                items:
+                  type: object
+                  properties:
+                    text:
+                      type: string
+                      description: Line text
+                    position:
+                      type: array
+                      items:
+                        type: integer
+                      minItems: 8
+                      maxItems: 8
+                    charPositions:
+                      type: array
+                      items:
+                        type: array
+                        items:
+                          type: integer
+                        minItems: 8
+                        maxItems: 8
+    TaskCropResult:
+      type: object
+      properties:
+        page:
+          type: integer
+          description: >-
+            Page index of the original file, 0 represents the first page of the
+            source file
+        imageAngle:
+          type: string
+          description: Angle information of the cropped image
+    SubFileDetailInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: File ID
+          example: 202412190001
+        task_id:
+          type: string
+          description: Task ID
+          example: 202412190001
+        task_detail_url:
+          type: string
+          description: File subtask details page URL
+        task_type:
+          $ref: '#/components/schemas/TaskType'
+        parent_task_id:
+          type: string
+          description: Parent task ID (meaningful when not 0)
+          example: 202412190001
+        batch_number:
+          type: string
+          description: Batch Number
+          example: 202412190001
+        name:
+          type: string
+          description: File Name
+          example: invoice.pdf
+        format:
+          type: string
+          description: File Format
+        recognition_status:
+          $ref: '#/components/schemas/RecognitionStatus'
+        verification_status:
+          $ref: '#/components/schemas/VerificationStatus'
+        category:
+          type: string
+          description: File Category
+          example: invoice
+        pages:
+          $ref: '#/components/schemas/PagesInfo'
+        data:
+          type: object
+          description: Processing result
+          properties:
+            fields:
+              description: Field list
+              type: array
+              items:
+                $ref: '#/components/schemas/FieldRespKeyValue'
+              example:
+                - key: Invoice Code
+                  identifier: Invoice Code Identifier
+                  value: '3100231130'
+                  position:
+                    - page: 0
+                      vertices:
+                        - 0
+                        - 0
+                        - 100
+                        - 0
+                        - 100
+                        - 100
+                        - 0
+                        - 100
+                - key: Invoice Number
+                  identifier: Invoice Number Identifier
+                  value: '28737000'
+                  position:
+                    - page: 0
+                      vertices:
+                        - 0
+                        - 0
+                        - 100
+                        - 0
+                        - 100
+                        - 100
+                        - 0
+                        - 100
+            items:
+              description: Table data list
+              type: array
+              items:
+                type: array
+                items:
+                  $ref: '#/components/schemas/KeyValue'
+              example:
+                - - key: Goods and Services Name
+                    value: ＊Electronic Computer＊Microcomputer Host
+                    position:
+                      - page: 0
+                        vertices:
+                          - 0
+                          - 0
+                          - 100
+                          - 0
+                          - 100
+                          - 100
+                          - 0
+                          - 100
+                  - key: Specification Model
+                    value: DMS-SC68
+                    position:
+                      - page: 0
+                        vertices:
+                          - 0
+                          - 0
+                          - 100
+                          - 0
+                          - 100
+                          - 100
+                          - 0
+                          - 100
+                - - key: Goods and Services Name
+                    value: ＊Mechanical Computer＊Supercomputer Host
+                    position:
+                      - page: 0
+                        vertices:
+                          - 0
+                          - 0
+                          - 100
+                          - 0
+                          - 100
+                          - 100
+                          - 0
+                          - 100
+                  - key: Specification Model
+                    value: AN/FSQ-7
+                    position:
+                      - page: 0
+                        vertices:
+                          - 0
+                          - 0
+                          - 100
+                          - 0
+                          - 100
+                          - 100
+                          - 0
+                          - 100
+            tables:
+              description: >-
+                Complete table data list (including system tables and manually
+                configured tables)
+              type: array
+              items:
+                type: object
+                properties:
+                  tableName:
+                    description: Table name
+                    type: string
+                    example: table1
+                  tableType:
+                    description: |
+                      Table type, 0: system configured, 1: manually added.
+                    type: string
+                    example: 0
+                  extractModel:
+                    description: Table-level extraction model
+                    type: string
+                  items:
+                    type: array
+                    items:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/CommonFieldDetailRespVO'
+            stamps:
+              description: Stamp information
+              type: array
+              items:
+                $ref: '#/components/schemas/StampValue'
+              example:
+                - angel: 0
+                  page: 0
+                  text: National Unified Invoice Supervision Seal
+                  type: Other
+                  color: Red
+                  shape: Oval Seal
+                  position:
+                    - 0
+                    - 0
+                    - 100
+                    - 0
+                    - 100
+                    - 100
+                    - 0
+                    - 100
+                - angel: 0
+                  page: 0
+                  text: Tax Bureau Seal
+                  type: Other
+                  color: Red
+                  shape: Oval Seal
+                  position:
+                    - 0
+                    - 0
+                    - 100
+                    - 0
+                    - 100
+                    - 100
+                    - 0
+                    - 100
+            handwritings:
+              description: Handwriting information
+              type: array
+              items:
+                $ref: '#/components/schemas/HandWritingValue'
+              example:
+                - angel: 0
+                  page: 0
+                  text: March 1st
+                  position:
+                    - page: 0
+                      vertices:
+                        - 0
+                        - 0
+                        - 100
+                        - 0
+                        - 100
+                        - 100
+                        - 0
+                        - 100
+                - angel: 0
+                  page: 0
+                  text: Zhang San
+                  position:
+                    - page: 0
+                      vertices:
+                        - 0
+                        - 0
+                        - 100
+                        - 0
+                        - 100
+                        - 100
+                        - 0
+                        - 100
+            invoiceVerifyResult:
+              description: Invoice verification result
+              type: object
+              properties:
+                invoiceVerifyStatus:
+                  type: integer
+                  description: >
+                    Whether invoice verification is successful (0: No, 1: Yes,
+                    null: Not verified)
+                  example: 0
+                invoiceVerifyErrorCode:
+                  type: integer
+                  description: Invoice verification error code
+                  example: 0
+                invoiceVerifyCanRetry:
+                  type: integer
+                  description: >
+                    Whether invoice verification can be retried/initiated (0:
+                    No, 1: Yes)
+                  example: 0
+                invoiceVerifyFailMsg:
+                  type: string
+                  description: Invoice verification failure reason
+                  example: Exceeded daily limit
+        document:
+          $ref: '#/components/schemas/Document'
+        from_parent_position_list:
+          type: array
+          description: Coordinate position of cropping result in the original file
+          items:
+            type: integer
+            description: Position information
+            example: 1
+        crop_info:
+          $ref: '#/components/schemas/TaskCropResult'
     TaskProcessResult:
       type: object
       properties:
@@ -1727,6 +3557,9 @@ components:
                                 added.
                               type: string
                               example: 0
+                            extractModel:
+                              description: Table-level extraction model
+                              type: string
                             items:
                               type: array
                               items:
@@ -1853,530 +3686,35 @@ components:
                   - recognition_status
                   - verification_status
                   - category
-    KeyValue:
+    ExtractFieldReqVO:
       type: object
       properties:
         key:
           type: string
           description: Field name
-        value:
+          example: Invoice Code
+        prompt:
           type: string
-          description: Field value
-        position:
-          $ref: '#/components/schemas/KeyValuePosition'
-    FieldRespKeyValue:
-      type: object
-      properties:
-        key:
+          description: Field prompt
+          example: Only keep the year part
+        extract_model:
           type: string
-          description: Field name
-        identifier:
-          type: string
-          description: Identifier(from export field name)
-        value:
-          type: string
-          description: Field value
-        position:
-          $ref: '#/components/schemas/KeyValuePosition'
-    StampValue:
-      type: object
-      properties:
-        angel:
-          type: integer
-          description: Angle
-        page:
-          type: integer
-          description: Page number
-        text:
-          type: string
-          description: Stamp text content
-        type:
-          type: string
-          description: Stamp type
-        color:
-          type: string
-          description: Stamp color
-        shape:
-          type: string
-          description: Stamp shape
-        position:
-          type: array
-          description: Position information
-          items:
-            type: integer
-            example: 1
-    HandWritingValue:
-      type: object
-      properties:
-        angel:
-          type: integer
-          description: Angle
-        page:
-          type: integer
-          description: Page number
-        text:
-          type: string
-          description: Handwriting text content
-        position:
-          $ref: '#/components/schemas/KeyValuePosition'
-    Document:
-      type: object
-      properties:
-        pages:
-          type: array
-          items:
-            type: object
-            properties:
-              angle:
-                type: integer
-                description: Page rotation angle
-              width:
-                type: integer
-                description: Page width
-              height:
-                type: integer
-                description: Page height
-              lines:
-                description: Page text line array
-                type: array
-                items:
-                  type: object
-                  properties:
-                    text:
-                      type: string
-                      description: Line text
-                    position:
-                      type: array
-                      items:
-                        type: integer
-                        minItems: 8
-                        maxItems: 8
-                    charPositions:
-                      type: array
-                      items:
-                        type: array
-                        items:
-                          type: integer
-                          minItems: 8
-                          maxItems: 8
-    CommonFieldDetailRespVO:
-      type: object
-      properties:
-        key:
-          type: string
-          description: Field key
-        identifier:
-          type: string
-          description: Identifier(from export field name)
-        value:
-          type: string
-          description: Field value
-        textInLines:
-          deprecated: true
-          type: array
-          description: |
-            **Deprecated**, please use position field instead
-            Field coordinates
-          items:
-            $ref: '#/components/schemas/TextInLines'
-        position:
-          $ref: '#/components/schemas/KeyValuePosition'
-        index:
-          type: integer
-          description: Index
-    TaskCropResult:
-      type: object
-      properties:
-        page:
-          type: integer
-          description: >-
-            Page index of the original file, 0 represents the first page of the
-            source file
-        imageAngle:
-          type: string
-          description: Angle information of the cropped image
-    SubFileDetailInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: File ID
-          example: 202412190001
-        task_id:
-          type: string
-          description: Task ID
-          example: 202412190001
-        task_detail_url:
-          type: string
-          description: File subtask details page URL
-        task_type:
-          $ref: '#/components/schemas/TaskType'
-        parent_task_id:
-          type: string
-          description: Parent task ID (meaningful when not 0)
-          example: 202412190001
-        batch_number:
-          type: string
-          description: Batch Number
-          example: 202412190001
-        name:
-          type: string
-          description: File Name
-          example: invoice.pdf
-        format:
-          type: string
-          description: File Format
-        recognition_status:
-          $ref: '#/components/schemas/RecognitionStatus'
-        verification_status:
-          $ref: '#/components/schemas/VerificationStatus'
-        category:
-          type: string
-          description: File Category
-          example: invoice
-        pages:
-          $ref: '#/components/schemas/PagesInfo'
-        data:
-          type: object
-          description: Processing result
-          properties:
-            fields:
-              description: Field list
-              type: array
-              items:
-                $ref: '#/components/schemas/FieldRespKeyValue'
-              example:
-                - key: Invoice Code
-                  identifier: Invoice Code Identifier
-                  value: '3100231130'
-                  position:
-                    - page: 0
-                      vertices:
-                        - 0
-                        - 0
-                        - 100
-                        - 0
-                        - 100
-                        - 100
-                        - 0
-                        - 100
-                - key: Invoice Number
-                  identifier: Invoice Number Identifier
-                  value: '28737000'
-                  position:
-                    - page: 0
-                      vertices:
-                        - 0
-                        - 0
-                        - 100
-                        - 0
-                        - 100
-                        - 100
-                        - 0
-                        - 100
-            items:
-              description: Table data list
-              type: array
-              items:
-                type: array
-                items:
-                  $ref: '#/components/schemas/KeyValue'
-              example:
-                - - key: Goods and Services Name
-                    value: ＊Electronic Computer＊Microcomputer Host
-                    position:
-                      - page: 0
-                        vertices:
-                          - 0
-                          - 0
-                          - 100
-                          - 0
-                          - 100
-                          - 100
-                          - 0
-                          - 100
-                  - key: Specification Model
-                    value: DMS-SC68
-                    position:
-                      - page: 0
-                        vertices:
-                          - 0
-                          - 0
-                          - 100
-                          - 0
-                          - 100
-                          - 100
-                          - 0
-                          - 100
-                - - key: Goods and Services Name
-                    value: ＊Mechanical Computer＊Supercomputer Host
-                    position:
-                      - page: 0
-                        vertices:
-                          - 0
-                          - 0
-                          - 100
-                          - 0
-                          - 100
-                          - 100
-                          - 0
-                          - 100
-                  - key: Specification Model
-                    value: AN/FSQ-7
-                    position:
-                      - page: 0
-                        vertices:
-                          - 0
-                          - 0
-                          - 100
-                          - 0
-                          - 100
-                          - 100
-                          - 0
-                          - 100
-            tables:
-              description: >-
-                Complete table data list (including system tables and manually
-                configured tables)
-              type: array
-              items:
-                type: object
-                properties:
-                  tableName:
-                    description: Table name
-                    type: string
-                    example: table1
-                  tableType:
-                    description: |
-                      Table type, 0: system configured, 1: manually added.
-                    type: string
-                    example: 0
-                  items:
-                    type: array
-                    items:
-                      type: array
-                      items:
-                        $ref: '#/components/schemas/CommonFieldDetailRespVO'
-            stamps:
-              description: Stamp information
-              type: array
-              items:
-                $ref: '#/components/schemas/StampValue'
-              example:
-                - angel: 0
-                  page: 0
-                  text: National Unified Invoice Supervision Seal
-                  type: Other
-                  color: Red
-                  shape: Oval Seal
-                  position:
-                    - 0
-                    - 0
-                    - 100
-                    - 0
-                    - 100
-                    - 100
-                    - 0
-                    - 100
-                - angel: 0
-                  page: 0
-                  text: Tax Bureau Seal
-                  type: Other
-                  color: Red
-                  shape: Oval Seal
-                  position:
-                    - 0
-                    - 0
-                    - 100
-                    - 0
-                    - 100
-                    - 100
-                    - 0
-                    - 100
-            handwritings:
-              description: Handwriting information
-              type: array
-              items:
-                $ref: '#/components/schemas/HandWritingValue'
-              example:
-                - angel: 0
-                  page: 0
-                  text: March 1st
-                  position:
-                    - page: 0
-                      vertices:
-                        - 0
-                        - 0
-                        - 100
-                        - 0
-                        - 100
-                        - 100
-                        - 0
-                        - 100
-                - angel: 0
-                  page: 0
-                  text: Zhang San
-                  position:
-                    - page: 0
-                      vertices:
-                        - 0
-                        - 0
-                        - 100
-                        - 0
-                        - 100
-                        - 100
-                        - 0
-                        - 100
-            invoiceVerifyResult:
-              description: Invoice verification result
-              type: object
-              properties:
-                invoiceVerifyStatus:
-                  type: integer
-                  description: >
-                    Whether invoice verification is successful (0: No, 1: Yes,
-                    null: Not verified)
-                  example: 0
-                invoiceVerifyErrorCode:
-                  type: integer
-                  description: Invoice verification error code
-                  example: 0
-                invoiceVerifyCanRetry:
-                  type: integer
-                  description: >
-                    Whether invoice verification can be retried/initiated (0:
-                    No, 1: Yes)
-                  example: 0
-                invoiceVerifyFailMsg:
-                  type: string
-                  description: Invoice verification failure reason
-                  example: Exceeded daily limit
-        document:
-          $ref: '#/components/schemas/Document'
-        from_parent_position_list:
-          type: array
-          description: Coordinate position of cropping result in the original file
-          items:
-            type: integer
-            description: Position information
-            example: 1
-        crop_info:
-          description: Detailed information of multi-image cropping
-          $ref: '#/components/schemas/TaskCropResult'
-    TextInLines:
-      type: object
-      properties:
-        angle:
-          type: string
-          description: Angle
-          example: 0
-        pos:
-          type: array
-          description: Coordinates
-          items:
-            type: integer
-            description: Coordinates
-            example: 1
-        page:
-          type: integer
-          description: Page number
-          example: 1
-        text:
-          type: string
-          description: Text
-          example: Text content
-        char_pos:
-          type: array
-          description: Character coordinates
-          items:
-            type: array
-            description: Character coordinates
-            items:
-              type: integer
-              description: Character coordinates
-              example: 1
-      description: Field coordinates
-    KeyValuePosition:
-      description: >-
-        Position of the field value. Field values may span pages or rows, so
-        they are displayed as arrays.
-      type: array
-      items:
-        type: object
-        properties:
-          page:
-            type: integer
-            description: >-
-              Page where the field is located. It is the index of the pages
-              array
-          vertices:
-            type: array
-            description: >-
-              Bounding quadrilateral coordinates of the field value. The image
-              uses the top-left as origin, array values are [top-left x,
-              top-left y, top-right x, top-right y, bottom-right x, bottom-right
-              y, bottom-left x, bottom-left y]
-            items:
-              type: integer
-            minItems: 8
-            maxItems: 8
-    TaskType:
-      type: integer
-      description: >
-        Task type
+          description: >
+            Field-level extraction model, defaults to Model 1 if not specified
 
-        - 0: **File split subtask**: When a file task with "File split" switch
-        enabled executes successfully, the subtasks generated by file split
-        operations in that file batch task are split subtasks, divided according
-        to the actual number of file sets under the file category
+            - Model 1: Fast speed with stable extraction results
 
-        - 1: **Regular task**: File tasks without "File split" and "Multi-image
-        crop" switches enabled
+            - Model 2: Suitable for complex document understanding
 
-        - 2: **Parent task**: After file tasks with "File split" or "Multi-image
-        crop" switches enabled execute, each file in that file batch task
-        becomes a parent task
+            - Model 3: VLM, suitable for simple extraction
 
-        - 3: **Crop subtask**: When a file task with "Multi-image crop" switch
-        enabled executes successfully, the subtasks generated by multi-image
-        crop operations in that file batch task are crop subtasks, divided
-        according to the actual number of crop results under the file category
-      example: 1
-    PagesInfo:
-      type: array
-      description: >
-        Data for rendering each page of the file.            Combined with the
-        page and position fields in data.fields, you can accurately draw the
-        position of fields on the page.
-      items:
-        type: object
-        properties:
-          page:
-            type: integer
-            description: 'Page number, starting from 0'
-            example: 1
-          angle:
-            type: integer
-            description: Rotation angle
-            enum:
-              - 0
-              - 90
-              - 180
-              - 270
-          width:
-            type: integer
-            description: Page width after correction
-            example: 1024
-          height:
-            type: integer
-            description: Page height after correction
-            example: 1024
-          dpi:
-            type: integer
-            description: >-
-              Resolution when converting PDF to image. For non-PDF files, this
-              value is 0.
-            example: 144
+            Note: For table fields, the extraction model is determined by the
+            table-level extract_model, this field is ignored
+          example: Model 1
+          enum:
+            - Model 1
+            - Model 2
+            - Model 3
     DocumentParserParam:
       type: object
       properties:
@@ -2417,13 +3755,53 @@ components:
               type: integer
               description: 'Expiration time (in epoch timestamp format, unit is seconds)'
               example: 1700000000
-    CategoryField:
+    Workspace:
+      type: object
+      description: Workspace
+      properties:
+        workspace_id:
+          type: string
+          description: Workspace ID (system generated)
+          example: '1234567890'
+        name:
+          type: string
+          description: Workspace name
+          example: My Workspace
+        description:
+          type: string
+          description: Workspace description
+          example: This is a workspace for invoice processing
+        auth_scope:
+          type: integer
+          description: >-
+            Collaboration scope 0: Visible only to self 1: Visible to enterprise
+            members
+          example: 1
+          enum:
+            - 0
+            - 1
+        manage_account_id:
+          type: string
+          description: Workspace administrator ID
+          example: admin_123456
+        manage_account_name:
+          type: string
+          description: Workspace administrator name
+          example: John Doe
+        callback_url:
+          type: string
+          description: Callback URL
+          example: 'https://example.com/callback'
+        callback_retry_time:
+          type: integer
+          description: Callback retry count
+          example: 3
+      required:
+        - workspace_id
+        - name
+    CategoryFieldConfig:
       type: object
       properties:
-        id:
-          type: string
-          description: Field ID
-          example: '1234567890'
         name:
           type: string
           description: Field name
@@ -2432,8 +3810,83 @@ components:
           type: string
           description: Field description
           example: Invoice code description
-        enabled:
-          $ref: '#/components/schemas/EnabledStatus'
+        prompt:
+          type: string
+          description: Semantic extraction prompt
+        use_prompt:
+          type: boolean
+          description: Whether to use semantic prompt
+        alias:
+          type: array
+          description: Field aliases
+          items:
+            type: string
+        identity:
+          type: string
+          description: Export field name
+        multi_value:
+          type: boolean
+          description: Whether to enable multi-value extraction
+        duplicate_value_distinct:
+          type: boolean
+          description: >-
+            Whether to deduplicate values, only effective when multi_value is
+            true
+        transform_settings:
+          type: object
+          description: Transform configuration
+          properties:
+            type:
+              type: string
+              description: Transform type
+              enum:
+                - datetime
+                - enumerate
+                - regex
+            datetime_settings:
+              type: object
+              description: Datetime type transform configuration
+              properties:
+                format:
+                  type: string
+                  description: >-
+                    Date time format, refer to DocFlow date format guide
+                    (https://docflow.textin.com/markdown?key=dateFormatGuide)
+                  example: 'yyyy-MM-dd HH:mm:ss'
+            enumerate_settings:
+              type: object
+              description: Enumeration type transform configuration
+              properties:
+                items:
+                  type: array
+                  description: List of available enumeration values
+                  items:
+                    type: string
+            regex_settings:
+              type: object
+              description: Regex type transform configuration
+              properties:
+                match:
+                  type: string
+                  description: Regex pattern for matching
+                  example: '^\d{4}-\d{2}-\d{2}$'
+                replace:
+                  type: string
+                  description: Regex pattern for replacement
+                  example: $1-$2-$3
+            mismatch_action:
+              type: object
+              description: Action when field value does not match
+              properties:
+                mode:
+                  type: string
+                  description: Mismatch handling mode
+                  enum:
+                    - default
+                    - warning
+                default_value:
+                  type: string
+                  description: Default value when mode is default
     EnabledStatus:
       type: integer
       description: |
@@ -2445,54 +3898,98 @@ components:
         - 0
         - 1
         - 2
-    ReviewTaskStatus:
-      type: integer
-      description: |
-        Task status
-        - 0: Pending
-        - 1: Approved
-        - 2: Review failed
-        - 3: Reviewing
-        - 4: Rejected
-        - 5: Recognizing
-        - 6: In Queue
-        - 7: Recognition Failed
-      enum:
-        - 0
-        - 1
-        - 2
-        - 3
-        - 4
-        - 5
-        - 6
-        - 7
-    ReviewRuleProperties:
+    Category:
       type: object
+      description: File Category
       properties:
-        group_id:
+        id:
           type: string
-          description: Review rule group ID
-          example: '31415926'
+          description: File category ID
+          example: '1234567890'
         name:
           type: string
-          description: Rule name
-          example: Review Rule 1
-        prompt:
+          description: File category name
+          example: Invoice
+        description:
           type: string
-          description: Rule prompt
-          example: Review rule prompt
-        category_ids:
-          type: array
-          items:
-            type: string
-            description: Category ID
-            example: '1234567890'
-        risk_level:
-          $ref: '#/components/schemas/RiskLevel'
-        referenced_fields:
-          type: array
-          items:
-            $ref: '#/components/schemas/ReviewRuleReferencedField'
+          description: File category description
+          example: VAT invoice type
+        category_prompt:
+          type: string
+          description: Prompt for classification
+          example: >-
+            VAT invoice, including fields such as invoice code, invoice number,
+            etc.
+        extract_model:
+          type: string
+          description: >
+            Extraction model
+
+            - Model 1: Fast speed with stable extraction results
+
+            - Model 2: Suitable for complex document understanding
+
+            - Model 3: VLM, suitable for simple extraction
+
+            - mixed: Only in responses, indicates different models are used
+            across fields/tables in this category
+          example: Model 1
+          enum:
+            - Model 1
+            - Model 2
+            - Model 3
+            - mixed
+        enabled:
+          $ref: '#/components/schemas/EnabledStatus'
+      required:
+        - id
+        - name
+    CategoryField:
+      allOf:
+        - $ref: '#/components/schemas/CategoryFieldConfig'
+        - type: object
+          properties:
+            id:
+              type: string
+              description: Field ID
+              example: '1234567890'
+    CategorySample:
+      type: object
+      description: File category sample
+      properties:
+        sample_id:
+          type: string
+          description: Sample ID
+          example: '1234567890'
+        file_name:
+          type: string
+          description: File name
+          example: invoice_sample.pdf
+      required:
+        - sample_id
+        - file_name
+    RiskLevel:
+      type: integer
+      description: |
+        Risk level
+        - 10: High risk
+        - 20: Medium risk
+        - 30: Low risk
+      enum:
+        - 10
+        - 20
+        - 30
+    ReviewRuleField:
+      type: object
+      properties:
+        field_id:
+          type: string
+          description: Field ID
+          example: '1234567890'
+        field_name:
+          type: string
+          description: Field name
+          example: Invoice Code
     ReviewRuleReferencedField:
       type: object
       properties:
@@ -2525,37 +4022,118 @@ components:
                 type: array
                 items:
                   $ref: '#/components/schemas/ReviewRuleField'
-    RiskLevel:
-      type: integer
-      description: |
-        Risk level
-        - 10: High risk
-        - 20: Medium risk
-        - 30: Low risk
-      enum:
-        - 10
-        - 20
-        - 30
-    ReviewRuleField:
+    ReviewRule:
       type: object
       properties:
-        field_id:
+        rule_id:
           type: string
-          description: Field ID
-          example: '1234567890'
-        field_name:
+          description: Rule ID
+          example: '31415926'
+        name:
           type: string
-          description: Field name
-          example: Invoice Code
-  securitySchemes:
-    ApiId:
-      type: apiKey
-      in: header
-      name: x-ti-app-id
-    SecretCode:
-      type: apiKey
-      in: header
-      name: x-ti-secret-code
+          description: Rule name
+          example: Review Rule 1
+        prompt:
+          type: string
+          description: Rule prompt
+          example: Review rule prompt
+        category_ids:
+          type: array
+          items:
+            type: string
+            description: Category ID
+            example: '1234567890'
+        risk_level:
+          $ref: '#/components/schemas/RiskLevel'
+        referenced_fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReviewRuleReferencedField'
+    ReviewRuleGroup:
+      type: object
+      properties:
+        group_id:
+          type: string
+          description: Rule group ID
+          example: '31415926'
+        name:
+          type: string
+          description: Rule group name
+          example: Review Rule Group 1
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReviewRule'
+    ReviewRuleRepo:
+      type: object
+      properties:
+        repo_id:
+          type: string
+          description: Review rule repo ID
+          example: '31415926'
+        name:
+          type: string
+          description: Review rule repo name
+          example: Review Rule Repo 1
+        groups:
+          description: List of rule groups under the rule repo
+          type: array
+          items:
+            $ref: '#/components/schemas/ReviewRuleGroup'
+        category_ids:
+          type: array
+          items:
+            type: string
+            description: Category ID
+            example: '1234567890'
+    ReviewRuleProperties:
+      type: object
+      properties:
+        group_id:
+          type: string
+          description: Review rule group ID
+          example: '31415926'
+        name:
+          type: string
+          description: Rule name
+          example: Review Rule 1
+        prompt:
+          type: string
+          description: Rule prompt
+          example: Review rule prompt
+        category_ids:
+          type: array
+          items:
+            type: string
+            description: Category ID
+            example: '1234567890'
+        risk_level:
+          $ref: '#/components/schemas/RiskLevel'
+        referenced_fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReviewRuleReferencedField'
+    ReviewTaskStatus:
+      type: integer
+      description: |
+        Task status
+        - 0: Pending
+        - 1: Approved
+        - 2: Review failed
+        - 3: Reviewing
+        - 4: Rejected
+        - 5: Recognizing
+        - 6: In Queue
+        - 7: Recognition Failed
+      enum:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+        - 6
+        - 7
 security:
   - ApiId: []
     SecretCode: []

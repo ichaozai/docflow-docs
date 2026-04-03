@@ -32,6 +32,15 @@
 
     <build>
         <plugins>
+            <!-- 运行指定 main class -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <mainClass>com.docflow.ExpenseReimbursement</mainClass>
+                </configuration>
+            </plugin>
             <!-- 打包为可执行 fat-jar -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

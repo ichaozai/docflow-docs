@@ -1,0 +1,500 @@
+---
+title: "智能文档抽取"
+description: "调用 TextIn 智能文档抽取 API，从任意格式文档中一键提取结构化信息"
+---
+
+<Tip>
+  TextIn 智能文档抽取 API 整合了专业文档解析底座与大模型语义理解能力，支持 **Prompt 自由抽取** 和 **自定义字段精确抽取** 两种模式，覆盖 20 余种文件格式，0 样本开箱即用。
+</Tip>
+
+## 01 接口说明
+
+| 项目 | 说明 |
+|---|---|
+| 请求地址 | `https://api.textin.com/ai/service/v2/entity_extraction` |
+| 请求方式 | HTTP POST |
+| Content-Type | `application/json` |
+| 支持格式 | png, jpg, jpeg, pdf, bmp, tiff, webp, doc, docx, html, mhtml, xls, xlsx, csv, ppt, pptx, txt, ofd |
+
+**两种抽取模式对比：**
+
+| 模式 | 触发方式 | 最大处理页数 | 适用场景 |
+|---|---|---|---|
+| Prompt 模式 | 请求体中传入 `prompt` 字段 | 20 页 | 字段不固定、需要灵活抽取 |
+| 字段模式 | 请求体中传入 `fields` / `table_fields` | 100 页 | 字段固定、需要精确可控抽取 |
+
+<Note>
+  当同时传入 `prompt` 和 `fields` 时，以 **Prompt 模式** 优先。
+</Note>
+
+## 02 先决条件
+
+登录 [TextIn 控制台](https://www.textin.com/console/dashboard/setting)，在「账号与开发者信息」中获取：
+
+- `x-ti-app-id`
+- `x-ti-secret-code`
+
+## 03 完整示例代码下载
+
+完整可运行代码（含 Python、Java 两个版本）已内置在文档仓库的 `examples/` 目录下：
+
+```
+examples/
+├── python/
+│   ├── entity_extraction.py   # Python 完整示例
+│   └── requirements.txt
+└── java/
+    └── src/main/java/com/docflow/
+        └── EntityExtraction.java   # Java 完整示例
+```
+
+<CardGroup cols={2}>
+  <Card title="Python 示例" icon="python" href="https://github.com/ichaozai/docflow-docs/tree/master/examples/python">
+    查看 Python 完整示例代码
+  </Card>
+  <Card title="Java 示例" icon="java" href="https://github.com/ichaozai/docflow-docs/tree/master/examples/java">
+    查看 Java 完整示例代码
+  </Card>
+</CardGroup>
+
+## 04 运行示例
+
+<Tabs>
+  <Tab title="Python">
+    **环境要求**：Python 3.8+
+
+    **1. 安装依赖**
+
+    ```bash
+    cd examples/python
+    pip install requests
+    ```
+
+    **2. 填写配置**
+
+    打开 `entity_extraction.py`，填写文件顶部的配置项：
+
+    ```python
+    APP_ID      = "your-app-id"       # x-ti-app-id
+    SECRET_CODE = "your-secret-code"  # x-ti-secret-code
+    ```
+
+    **3. 运行**
+
+    ```bash
+    python entity_extraction.py invoice.pdf
+    ```
+  </Tab>
+  <Tab title="Java">
+    **环境要求**：JDK 11+，Maven 3.6+
+
+    **1. 填写配置**
+
+    打开 `src/main/java/com/docflow/EntityExtraction.java`，填写文件顶部的配置项：
+
+    ```java
+    private static final String APP_ID      = "your-app-id";
+    private static final String SECRET_CODE = "your-secret-code";
+    ```
+
+    **2. 编译并运行**
+
+    ```bash
+    cd examples/java
+    mvn clean package -q
+    java -cp target/docflow-examples-1.0.0.jar com.docflow.EntityExtraction invoice.pdf
+    ```
+  </Tab>
+</Tabs>
+
+## 05 代码说明
+
+<AccordionGroup>
+  <Accordion defaultOpen title="初始化：配置鉴权与工具函数">
+    所有请求都需要在 HTTP 头中携带 `x-ti-app-id` 和 `x-ti-secret-code`；待抽取文件以 **base64** 字符串形式放入请求体。
+
+    <Tabs>
+      <Tab title="Python">
+        ```python
+        import base64
+        import requests
+
+        APP_ID      = "your-app-id"
+        SECRET_CODE = "your-secret-code"
+        API_URL     = "https://api.textin.com/ai/service/v2/entity_extraction"
+
+        def _headers() -> dict:
+            return {
+                "x-ti-app-id":      APP_ID,
+                "x-ti-secret-code": SECRET_CODE,
+                "Content-Type":     "application/json",
+            }
+
+        def _encode_file(file_path: str) -> str:
+            with open(file_path, "rb") as f:
+                return base64.b64encode(f.read()).decode("utf-8")
+
+        def extract(file_path, request_body, url_params=None):
+            body = {**request_body, "file": _encode_file(file_path)}
+            resp = requests.post(API_URL, params=url_params or {}, headers=_headers(),
+                                 json=body, timeout=120)
+            resp.raise_for_status()
+            result = resp.json()
+            if result.get("code") != 200:
+                raise RuntimeError(f"API 错误 {result['code']}：{result['message']}")
+            return result
+        ```
+      </Tab>
+      <Tab title="Java">
+        ```java
+        private static final String APP_ID      = "your-app-id";
+        private static final String SECRET_CODE = "your-secret-code";
+        private static final String API_URL     = "https://api.textin.com/ai/service/v2/entity_extraction";
+
+        private static Headers authHeaders() {
+            return new Headers.Builder()
+                    .add("x-ti-app-id", APP_ID)
+                    .add("x-ti-secret-code", SECRET_CODE)
+                    .build();
+        }
+
+        private static String encodeFile(String filePath) throws IOException {
+            byte[] bytes = Files.readAllBytes(new File(filePath).toPath());
+            return Base64.getEncoder().encodeToString(bytes);
+        }
+
+        private static JsonObject callApi(String filePath, JsonObject body,
+                Map<String, String> urlParams) throws IOException {
+            body.addProperty("file", encodeFile(filePath));
+            HttpUrl.Builder urlBuilder = Objects.requireNonNull(HttpUrl.parse(API_URL)).newBuilder();
+            if (urlParams != null) urlParams.forEach(urlBuilder::addQueryParameter);
+            Request req = new Request.Builder().url(urlBuilder.build()).headers(authHeaders())
+                    .post(RequestBody.create(GSON.toJson(body), JSON_TYPE)).build();
+            try (Response resp = HTTP.newCall(req).execute()) {
+                JsonObject result = JsonParser.parseString(resp.body().string()).getAsJsonObject();
+                if (result.get("code").getAsInt() != 200)
+                    throw new RuntimeException("API 错误：" + result.get("message").getAsString());
+                return result;
+            }
+        }
+        ```
+      </Tab>
+    </Tabs>
+  </Accordion>
+
+  <Accordion defaultOpen title="Prompt 模式抽取">
+    传入一段自然语言 prompt，系统将根据 prompt 的描述从文档中提取信息，返回键值对（`llm_json`）和带坐标的结果（`raw_json`）。
+
+    <Tabs>
+      <Tab title="Python">
+        ```python
+        result = extract(
+            "invoice.pdf",
+            request_body={
+                "prompt": "请抽取发票号码、开票日期、购买方名称、销售方名称、合计金额",
+            },
+            url_params={"parse_mode": "scan"},
+        )
+
+        # llm_json：大模型直接返回的键值对，方便直接使用
+        llm_json = result["result"]["llm_json"]
+        print(llm_json)
+        # 示例输出：{"发票号码": "044031900211", "开票日期": "2024-03-15", "合计金额": "1500.00"}
+
+        # raw_json：带坐标的抽取结果，用于前端高亮回显
+        raw_json = result["result"]["raw_json"]
+
+        # usage：token 消耗统计
+        usage = result["result"]["usage"]
+        print(f"Token 消耗：{usage['total_tokens']}")
+        ```
+      </Tab>
+      <Tab title="Java">
+        ```java
+        JsonObject body = new JsonObject();
+        body.addProperty("prompt", "请抽取发票号码、开票日期、购买方名称、销售方名称、合计金额");
+
+        Map<String, String> params = Map.of("parse_mode", "scan");
+
+        JsonObject result = callApi("invoice.pdf", body, params);
+        JsonObject res = result.getAsJsonObject("result");
+
+        // llm_json：大模型直接返回的键值对，方便直接使用
+        JsonElement llmJson = res.get("llm_json");
+        System.out.println(GSON.toJson(llmJson));
+        // 示例输出：{"发票号码": "044031900211", "开票日期": "2024-03-15", "合计金额": "1500.00"}
+
+        // usage：token 消耗统计
+        JsonObject usage = res.getAsJsonObject("usage");
+        System.out.println("Token 消耗：" + usage.get("total_tokens").getAsInt());
+        ```
+      </Tab>
+    </Tabs>
+  </Accordion>
+
+  <Accordion defaultOpen title="字段模式抽取（含表格）">
+    提供 `fields`（单值字段）和 `table_fields`（表格字段）列表，系统按字段名精确抽取，结果在 `details` 中按字段名组织。
+
+    <Tabs>
+      <Tab title="Python">
+        ```python
+        result = extract(
+            "invoice.pdf",
+            request_body={
+                # 单值字段
+                "fields": [
+                    {"name": "发票号码"},
+                    {"name": "开票日期"},
+                    {"name": "购买方名称"},
+                    {"name": "销售方名称"},
+                    {"name": "合计金额"},
+                ],
+                # 表格字段
+                "table_fields": [
+                    {
+                        "title": "货物明细",
+                        "description": "发票中的货物或服务明细表格",
+                        "fields": [
+                            {"name": "项目名称"},
+                            {"name": "数量"},
+                            {"name": "单价"},
+                            {"name": "金额"},
+                        ],
+                    }
+                ],
+            },
+            url_params={"parse_mode": "scan"},
+        )
+
+        details = result["result"]["details"]
+
+        # 读取单值字段
+        print(details["发票号码"]["value"])   # → "044031900211"
+        print(details["合计金额"]["value"])   # → "1500.00"
+
+        # 读取表格行
+        for row in details["row"]:
+            print(row)
+        ```
+      </Tab>
+      <Tab title="Java">
+        ```java
+        JsonObject body = new JsonObject();
+
+        // 单值字段
+        JsonArray fields = new JsonArray();
+        for (String name : new String[]{"发票号码", "开票日期", "购买方名称", "销售方名称", "合计金额"}) {
+            JsonObject f = new JsonObject();
+            f.addProperty("name", name);
+            fields.add(f);
+        }
+        body.add("fields", fields);
+
+        // 表格字段
+        JsonArray tableFields = new JsonArray();
+        JsonObject table = new JsonObject();
+        table.addProperty("title", "货物明细");
+        table.addProperty("description", "发票中的货物或服务明细表格");
+        JsonArray cols = new JsonArray();
+        for (String col : new String[]{"项目名称", "数量", "单价", "金额"}) {
+            JsonObject c = new JsonObject(); c.addProperty("name", col); cols.add(c);
+        }
+        table.add("fields", cols);
+        tableFields.add(table);
+        body.add("table_fields", tableFields);
+
+        JsonObject result = callApi("invoice.pdf", body, Map.of("parse_mode", "scan"));
+        JsonObject details = result.getAsJsonObject("result").getAsJsonObject("details");
+
+        // 读取单值字段
+        System.out.println(details.getAsJsonObject("发票号码").get("value").getAsString());
+
+        // 读取表格行
+        JsonArray rows = details.getAsJsonArray("row");
+        for (JsonElement row : rows) System.out.println(row);
+        ```
+      </Tab>
+    </Tabs>
+  </Accordion>
+</AccordionGroup>
+
+## 06 入参说明
+
+### 请求头
+
+| 参数名 | 说明 |
+|---|---|
+| x-ti-app-id | 登录后在「工作台-账号设置-开发者信息」查看 |
+| x-ti-secret-code | 登录后在「工作台-账号设置-开发者信息」查看 |
+
+### URL 参数
+
+URL 参数以 `?参数名=参数值` 形式拼接在请求 URL 后，例如 `?parse_mode=scan&page_count=10`。
+
+| 参数名 | 类型 | 必填 | 默认值 | 说明 |
+|---|---|---|---|---|
+| page_start | integer | 否 | 1 | PDF 从第几页开始抽取（从 1 计数） |
+| page_count | integer | 否 | 见说明 | 抽取的 PDF 页数。Prompt 模式最多 20 页，字段模式最多 100 页 |
+| parse_mode | string | 否 | `scan` | PDF 解析模式：`auto`（综合文字识别与解析）、`scan`（仅按文字识别）；图片文件无需设置 |
+| get_image | string | 否 | `objects` | 仅 Prompt 模式生效，返回图像：`none`（不返回）、`page`（整页图像）、`objects`（页内子图像）、`both`（整页+子图像） |
+| crop_image | integer | 否 | `0` | 是否进行切边矫正：`0` 不处理、`1` 处理 |
+| remove_watermark | integer | 否 | `0` | 是否去水印：`0` 不处理、`1` 处理 |
+| formula_level | integer | 否 | `0` | 公式识别等级：`0` 全识别、`1` 仅识别行间公式、`2` 不识别 |
+| file_name | string | 否 | — | 待抽取文件的文件名（含后缀），用于辅助格式判断 |
+
+### 请求体字段
+
+| 字段名 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| file | string | 是 | 待处理文档的 base64 字符串 |
+| prompt | string | 否 | Prompt 模式：自然语言抽取指令；传入此字段时 `fields` 和 `table_fields` 将被忽略 |
+| fields | array | 否 | 字段模式：要抽取的单值字段列表，总字段数（含 table_fields 的列）不得超过 100 |
+| fields[].name | string | 是 | 字段名 |
+| fields[].description | string | 否 | 字段描述，辅助模型理解 |
+| table_fields | array | 否 | 字段模式：要抽取的表格列表 |
+| table_fields[].title | string | 是 | 表格名称，例如"货物明细" |
+| table_fields[].description | string | 否 | 表格描述，辅助模型理解 |
+| table_fields[].fields | array | 否 | 表格列定义 |
+| table_fields[].fields[].name | string | 是 | 列名 |
+| table_fields[].fields[].description | string | 否 | 列描述，辅助模型理解 |
+
+## 07 出参说明
+
+### 通用字段
+
+| 字段名 | 类型 | 说明 |
+|---|---|---|
+| code | integer | 错误码，200 表示成功 |
+| message | string | 错误信息，成功时为 "success" |
+| version | string | API 版本号 |
+| duration | integer | 推理时间（毫秒） |
+| x_request_id | string | 请求唯一标识 |
+
+### Prompt 模式返回字段（result 对象）
+
+| 字段名 | 类型 | 说明 |
+|---|---|---|
+| llm_json | object / array | 大模型抽取的键值对结果，字段名由 prompt 决定；当文档包含多条记录时返回数组 |
+| raw_json | object / array | 与 llm_json 结构一致，但每个字段值扩展为含坐标的对象（见下表） |
+| raw_json[key].value | string | 字段的抽取值 |
+| raw_json[key].pages | array | 字段所在页码列表，例如 `[1]` |
+| raw_json[key].bounding_regions | array | 字段的边界框信息列表 |
+| raw_json[key].bounding_regions[].page_id | integer | 所在页码 |
+| raw_json[key].bounding_regions[].value | string | 边界框内的文本内容 |
+| raw_json[key].bounding_regions[].position | array | 坐标，8 元素数组 `[x1,y1,x2,y2,x3,y3,x4,y4]`（左上→右上→右下→左下） |
+| raw_json[key].bounding_regions[].char_pos | array | 每个字符的坐标数组 |
+| pages | array | 每页的处理信息（状态、尺寸、图片 ID 等） |
+| usage.prompt_tokens | integer | 输入消耗 token 数 |
+| usage.completion_tokens | integer | 输出消耗 token 数 |
+| usage.total_tokens | integer | 总消耗 token 数 |
+| finish_reason | string | 推理结束原因：`stop`（正常结束）、`length`（超出 token 限制） |
+
+### 字段模式返回字段（result 对象）
+
+| 字段名 | 类型 | 说明 |
+|---|---|---|
+| details | object | 字段抽取结果，以字段名为 key |
+| details[key].value | string | 字段识别结果 |
+| details[key].position | array | 坐标，8 元素数组（左上→右上→右下→左下） |
+| details[key].description | string | 字段中文描述 |
+| details[key].lines | array | 抽取结果的文本行信息 |
+| details.row | array | 表格抽取结果，每个元素为一行数据 |
+| category | object | details 各字段的数据类型：`one_to_one`（单值）或 `item_list`（表格） |
+| detail_structure | array | 文档结构化识别信息，包含文档类型、表格、印章等 |
+| page_count | integer | 实际处理的文档页数 |
+| rotated_image_width | integer | 正方向时文档宽度（仅图片有效） |
+| rotated_image_height | integer | 正方向时文档高度（仅图片有效） |
+| image_angle | integer | 文档需逆时针旋转的角度（0/90/180/270，仅图片有效） |
+| finish_reason | string | 推理结束原因：`stop` 或 `length` |
+
+<Tip>
+  `detail_structure` 中还包含印章识别结果（`stamps`），可获取印章颜色、形状、类型和文字内容。
+</Tip>
+
+### 返回示例
+
+<CodeGroup>
+
+```json Prompt 模式
+{
+  "code": 200,
+  "message": "success",
+  "duration": 2120,
+  "result": {
+    "llm_json": {
+      "发票号码": "044031900211",
+      "开票日期": "2024-03-15",
+      "购买方名称": "北京某科技有限公司",
+      "销售方名称": "上海某贸易有限公司",
+      "合计金额": "1500.00"
+    },
+    "raw_json": {
+      "发票号码": {
+        "value": "044031900211",
+        "pages": [1],
+        "bounding_regions": [
+          {
+            "page_id": 1,
+            "value": "044031900211",
+            "position": [201, 199, 308, 199, 308, 230, 201, 230],
+            "char_pos": []
+          }
+        ]
+      }
+    },
+    "pages": [
+      {"page_id": 1, "status": "Success", "width": 1192, "height": 1024, "angle": 0}
+    ],
+    "usage": {"prompt_tokens": 800, "completion_tokens": 60, "total_tokens": 860},
+    "finish_reason": "stop"
+  }
+}
+```
+
+```json 字段模式
+{
+  "code": 200,
+  "message": "success",
+  "duration": 1850,
+  "result": {
+    "details": {
+      "发票号码": {"value": "044031900211", "position": [], "description": ""},
+      "合计金额": {"value": "1500.00", "position": [], "description": ""},
+      "row": [
+        {"项目名称": {"value": "办公耗材"}, "数量": {"value": "10"}, "单价": {"value": "50.00"}, "金额": {"value": "500.00"}},
+        {"项目名称": {"value": "打印纸"}, "数量": {"value": "20"}, "单价": {"value": "50.00"}, "金额": {"value": "1000.00"}}
+      ]
+    },
+    "category": {
+      "发票号码": "one_to_one",
+      "合计金额": "one_to_one",
+      "row": "item_list"
+    },
+    "page_count": 1,
+    "finish_reason": "stop"
+  }
+}
+```
+
+</CodeGroup>
+
+## 08 错误码说明
+
+| 错误码 | 描述 |
+|:---|:---|
+| 40101 | x-ti-app-id 或 x-ti-secret-code 为空 |
+| 40102 | x-ti-app-id 或 x-ti-secret-code 无效，验证失败 |
+| 40103 | 客户端 IP 不在白名单 |
+| 40003 | 余额不足，请充值后再使用 |
+| 40004 | 参数错误，请查看文档检查传参 |
+| 40007 | 机器人不存在或未发布 |
+| 40008 | 机器人未开通，请至市场开通后重试 |
+| 40301 | 图片类型不支持 |
+| 40302 | 文件超过 50M 大小限制 |
+| 40303 | 文件类型不支持（响应中会返回实际检测到的文件类型） |
+| 40304 | 图片尺寸不符，宽高须在 20～10000 像素之间 |
+| 40305 | 识别文件未上传 |
+| 40306 | QPS 超过限制 |
+| 40400 | 无效的请求链接，请检查 URL 是否正确 |
+| 30203 | 基础服务故障，请稍后重试 |
+| 500 | 服务器内部错误 |

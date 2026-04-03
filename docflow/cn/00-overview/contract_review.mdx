@@ -1,0 +1,250 @@
+---
+title: "合同审核场景(从零开始)"
+description: "在法务/采购合规业务场景，调用 DocFlow API 对采购合同进行全面的财务条款、法务合规和文本质量自动化审核"
+---
+
+<Tip>
+  本文以**采购合同审核**为业务场景，演示如何通过 API 完成从创建空间、配置类别、上传合同文件、获取抽取结果到智能审核的完整流程。
+  如果您刚刚接触 DocFlow，建议先在 [Web 页面](https://docflow.textin.com/) 体验一下产品的基本功能，再阅读本文。
+</Tip>
+
+## 01 场景说明
+
+在企业采购合规业务中，法务或采购部门需要对每份合同进行系统性审核，主要关注三个维度：
+
+- **财务条款审核**：金额计算、税率合规、付款方式和比例、违约金上限等
+- **法务合规审核**：必备条款完整性、签约主体一致性、不可抗力条款、知识产权归属等
+- **文本质量审核**：数字计算校验、跨条款逻辑一致性、错别字和语义歧义检测
+
+通过 DocFlow，您只需将合同文件（PDF 或 Word）上传到工作空间，系统即可自动完成**结构化字段抽取**，并依据预设规则库进行**全面智能审核**，显著降低人工逐条审阅的时间成本。
+
+<Note>
+  合同审核场景只需配置**一个文件类别**（采购合同），但规则较多（3 个规则组、22 条规则），覆盖合同审核的常见风险点。
+</Note>
+
+## 02 业务流程
+
+![合同审核业务流程](../images/expense_reimbursement_flow.png)
+
+<Note>
+  **工作空间、文件类别和审核规则库只需配置一次**，后续可持续复用——直接上传新的合同文件并创建新的审核任务即可。本示例为演示完整流程，将配置步骤和处理步骤放在同一段代码中运行。
+</Note>
+
+## 03 先决条件
+
+1. 登录 [TextIn 控制台](https://www.textin.com/console/dashboard/setting)，获取 `x-ti-app-id` 和 `x-ti-secret-code`
+2. 在控制台「企业管理」中查看企业组织 ID（`enterprise_id`），参考 [如何获取企业 ID](../100-faq/get_enterprise_id)
+3. 下载[示例样本文件](https://github.com/intsig-textin/docflow-docs/tree/master/examples/sample_files/合同审核)，或使用自己的采购合同文件
+
+## 04 类别与字段配置
+
+本示例只配置一个文件类别：**采购合同**。合同是复杂的长文档，字段较多，建议使用 **Model 2（复杂文档理解）** 以获得更准确的抽取效果。
+
+<AccordionGroup>
+  <Accordion defaultOpen title="采购合同（样本：示例_采购合同.docx）">
+    采购合同包含主体信息、标的条款、财务条款、法务条款等多个维度的字段，全部为**基本信息字段**：
+
+    | 字段名 | 类型 |
+    |---|---|
+    | <span style={{color: "#3b82f6"}}>合同编号</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>合同名称</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>签订日期</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>生效条件</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>甲方全称</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>甲方统一社会信用代码</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>甲方联系方式</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>甲方地址</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>乙方全称</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>乙方统一社会信用代码</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>乙方联系方式</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>乙方地址</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>乙方法定代表人/授权委托人</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>标的名称</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>标的规格型号/标准</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>标的技术/质量标准</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>标的数量/服务范围</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>含税总金额（大写）</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>不含税金额</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>税额</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>税率</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>发票条款</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>付款方式</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>付款条件</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>付款比例</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>账期</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>收款账户信息</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>履约期限</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>履约地点</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>交付/验收标准与流程</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>违约责任</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>免责条款</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>争议解决方式</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>合同解除与终止条件</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>保密条款</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>知识产权声明</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>合同份数</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>附件清单</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>签约人签字/盖章</span> | 基本信息字段 |
+  </Accordion>
+</AccordionGroup>
+
+## 05 审核规则配置
+
+本示例的审核规则库包含 **3 个规则组、22 条审核规则**，全面覆盖合同审核的常见风险：
+
+<AccordionGroup>
+  <Accordion defaultOpen title="规则组 1：财务条款审核（12 条规则）">
+    | 规则名称 | 风险等级 | 审核逻辑 |
+    |---|---|---|
+    | <span style={{color: "#3b82f6"}}>连带责任条款</span> | 🟡 中风险 | 若存在三方关系（开票方/付款方/签约主体不一致），合同须明确各方债权债务关系 |
+    | <span style={{color: "#3b82f6"}}>履约保证金条款</span> | 🟡 中风险 | 若约定保证金/质保金，须明确退还条件、时间节点及不予退还的情形 |
+    | <span style={{color: "#3b82f6"}}>滞纳金/违约金合理性</span> | 🟡 中风险 | 逾期付款或逾期交付的违约金日费率 ≤ 0.05% |
+    | <span style={{color: "#3b82f6"}}>验收/交付标准明确性</span> | 🟡 中风险 | 合同须明确交付完成的判定标准 |
+    | <span style={{color: "#3b82f6"}}>币别一致性</span> | 🟡 中风险 | 合同全文涉及金额的币别须前后一致 |
+    | <span style={{color: "#3b82f6"}}>付款方式明确性</span> | 🟡 中风险 | 付款方式须为银行转账、承兑汇票或第三方支付之一 |
+    | <span style={{color: "#3b82f6"}}>付款条件明确性</span> | 🟡 中风险 | 付款节点和期限须明确 |
+    | <span style={{color: "#3b82f6"}}>税率合理性</span> | 🔴 高风险 | 税率须为有效值（6%/9%/13%/1%/3%/免税/0%）且与合同标的类型匹配 |
+    | <span style={{color: "#3b82f6"}}>付款比例合计</span> | 🔴 高风险 | 分阶段付款比例合计须等于 100% |
+    | <span style={{color: "#3b82f6"}}>产品明细合计与总金额一致性</span> | 🔴 高风险 | 各明细行单价×数量=金额，所有明细行金额合计=合同总金额（允许±0.01元） |
+    | <span style={{color: "#3b82f6"}}>金额合规检测</span> | 🔴 高风险 | 不含税金额×税率=税额；不含税金额+税额=含税总金额（允许±0.01元尾差） |
+    | <span style={{color: "#3b82f6"}}>合同金额大小写一致性</span> | 🔴 高风险 | 大小写金额须一致；仅有大写时校验中文金额书写规范 |
+  </Accordion>
+  <Accordion defaultOpen title="规则组 2：法务合规审核（9 条规则）">
+    | 规则名称 | 风险等级 | 审核逻辑 |
+    |---|---|---|
+    | <span style={{color: "#3b82f6"}}>不可抗力条款</span> | 🟢 低风险 | 须包含不可抗力条款且定义清晰（范围、通知时限、责任豁免方式） |
+    | <span style={{color: "#3b82f6"}}>保密条款完整性</span> | 🟢 低风险 | 保密信息定义、保密期限、违约责任三要素齐全 |
+    | <span style={{color: "#3b82f6"}}>知识产权归属</span> | 🟢 低风险 | 涉及技术开发/软件开发时，须有明确的知识产权归属条款 |
+    | <span style={{color: "#3b82f6"}}>违约金上限合理性</span> | 🟢 低风险 | 违约金须设置上限（如不超过合同总金额的 20%） |
+    | <span style={{color: "#3b82f6"}}>违约对等性检查</span> | 🟢 低风险 | 甲乙双方逾期违约金比例差异不超过设定阈值（如 ≥50% 时标记） |
+    | <span style={{color: "#3b82f6"}}>合同日期合理性</span> | 🟡 中风险 | 签订日期 ≤ 生效日期 ≤ 到期日期；生效日期不得早于当前日期 |
+    | <span style={{color: "#3b82f6"}}>签约主体名称一致性</span> | 🔴 高风险 | 合同首部、尾部签章处、正文中的签约主体名称须完全一致 |
+    | <span style={{color: "#3b82f6"}}>签约主体信息完整性</span> | 🔴 高风险 | 甲乙双方的名称、地址、联系方式均不为空 |
+    | <span style={{color: "#3b82f6"}}>必备条款完整性</span> | 🔴 高风险 | 须包含主体信息、标的、数量、价款、履行期限、违约责任、争议解决等必备条款 |
+  </Accordion>
+  <Accordion defaultOpen title="规则组 3：文本质量与一致性审核（3 条规则）">
+    | 规则名称 | 风险等级 | 审核逻辑 |
+    |---|---|---|
+    | <span style={{color: "#3b82f6"}}>数字计算校验</span> | 🟢 低风险 | 单价×数量=金额（每行）；各分项金额合计=合同总金额 |
+    | <span style={{color: "#3b82f6"}}>内部一致性检测</span> | 🟡 中风险 | 跨条款逻辑无矛盾：付款条件与交付条款不冲突、金额前后一致、期限起止合理 |
+    | <span style={{color: "#3b82f6"}}>错别字/语义错误检测</span> | 🟢 低风险 | 检测错别字、用词不当、语义歧义 |
+  </Accordion>
+</AccordionGroup>
+
+## 06 代码结构说明
+
+示例代码将完整的七步流程放在一起运行。在实际生产中，**步骤 1、2、5 只需执行一次**；后续审核新合同时，只需重复**步骤 3、4、6、7**，直接复用已有配置即可。参见 [合同审核场景（已完成配置）](./contract_review_already_configured)。
+
+示例代码中的函数分为两类，理解这一点有助于对照 API 文档进行调试和扩展。
+
+### 两类函数
+
+**REST API 调用函数** — 每个函数直接封装一个 API 端点，函数参数与接口文档一一对应：
+
+| 函数（Python） | 方法（Java） | 对应 API 端点 | 说明 |
+|---|---|---|---|
+| `create_workspace` | `createWorkspace` | `POST /workspace/create` | 创建工作空间，返回 workspace_id |
+| `create_category` | `createCategory` | `POST /category/create` | 创建文件类别并上传样本，返回 category_id |
+| `upload_file` | `uploadFile` | `POST /file/upload` | 上传待处理文件，返回 batch_number |
+| `create_rule_repo` | `createRuleRepo` | `POST /review/rule_repo/create` | 创建审核规则库，返回 repo_id |
+| `create_rule_group` | `createRuleGroup` | `POST /review/rule_group/create` | 在规则库内创建规则组，返回 group_id |
+| `create_rule` | `createRule` | `POST /review/rule/create` | 在规则组内创建审核规则，绑定适用分类 |
+| `submit_review_task` | `submitReviewTask` | `POST /review/task/submit` | 提交审核任务，返回审核 task_id |
+
+**工具辅助函数** — 不直接对应 API 端点，提供公共基础能力或封装轮询/展示逻辑：
+
+| 函数（Python） | 方法（Java） | 作用 |
+|---|---|---|
+| `_headers` | `authHeaders` | 构造鉴权请求头 |
+| `_check` | `checkResponse` | 校验响应 code，统一异常处理 |
+| `_mime` | `mimeType` | 根据扩展名推断 MIME 类型 |
+| `wait_for_result` | `waitForResult` | 循环轮询 `file/fetch`，等待抽取完成 |
+| `display_result` | `displayResult` | 格式化打印抽取结果 |
+| `wait_for_review` | `waitForReview` | 循环轮询 `review/task/result`，等待审核完成 |
+| `display_review_result` | `displayReviewResult` | 格式化打印审核结果 |
+
+### 逐步代码说明
+
+<AccordionGroup>
+  <Accordion defaultOpen title="步骤 2：创建采购合同类别">
+    合同字段较多，直接在 `create_category` 的 `fields` 参数中一次性传入所有字段，无需额外调用 `add_category_field`。
+
+    <Tabs>
+      <Tab title="Python">
+        ```python
+        contract_id = create_category(
+            workspace_id=workspace_id,
+            name="采购合同",
+            sample_file_path=os.path.join(SAMPLE_DIR, "示例_采购合同.docx"),
+            fields=[
+                {"name": "合同编号"}, {"name": "合同名称"}, {"name": "签订日期"},
+                {"name": "甲方全称"}, {"name": "乙方全称"},
+                # ... 其余字段
+            ],
+        )
+        ```
+      </Tab>
+      <Tab title="Java">
+        ```java
+        String contractId = createCategory(
+                workspaceId, "采购合同",
+                SAMPLE_DIR + "/示例_采购合同.docx",
+                Arrays.asList(
+                        field("合同编号"), field("合同名称"), field("签订日期"),
+                        field("甲方全称"), field("乙方全称"),
+                        // ... 其余字段
+                ), "");
+        ```
+      </Tab>
+    </Tabs>
+  </Accordion>
+  <Accordion defaultOpen title="步骤 4：获取合同抽取结果">
+    合同文档较长，处理时间可能比普通票据更长（建议超时时间设为 180s）。结果中的 `fields` 数组包含所有抽取到的字段和值。
+
+    <Tabs>
+      <Tab title="Python">
+        ```python
+        # 超时时间设为 180s（合同文档较长）
+        file_result = wait_for_result(workspace_id, batch_number, timeout=180)
+        display_result(file_result)
+        ```
+      </Tab>
+      <Tab title="Java">
+        ```java
+        JsonObject fileResult = waitForResult(workspaceId, batchNumber, 180, 3);
+        displayResult(fileResult);
+        ```
+      </Tab>
+    </Tabs>
+  </Accordion>
+</AccordionGroup>
+
+## 07 运行示例
+
+<Steps>
+  <Step title="下载示例文件">
+    下载[示例样本文件](https://github.com/intsig-textin/docflow-docs/tree/master/examples/sample_files/合同审核)，放入本地 `examples/sample_files/合同审核/` 目录。
+  </Step>
+  <Step title="填写配置项">
+    打开示例代码，将 `APP_ID`、`SECRET_CODE`、`ENTERPRISE_ID` 替换为您在 [TextIn 控制台](https://www.textin.com/console/dashboard/setting) 获取的实际值。
+  </Step>
+  <Step title="安装依赖并运行">
+    <Tabs>
+      <Tab title="Python">
+        ```bash
+        pip install requests
+        python examples/python/contract_review.py
+        ```
+      </Tab>
+      <Tab title="Java">
+        ```bash
+        cd examples/java
+        mvn compile exec:java -Dexec.mainClass="com.docflow.ContractReview"
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+  <Step title="查看结果">
+    控制台会依次打印合同的字段抽取结果，以及每条审核规则的通过/不通过结论和 AI 依据。
+  </Step>
+</Steps>

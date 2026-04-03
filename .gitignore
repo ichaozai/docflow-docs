@@ -8,3 +8,14 @@ docflow_cn_combined_ordered.md
 /package.json
 /package-lock.json
 /examples/java/src/main/java/rebel.xml
+/examples/java/target/
+/examples/java/.idea/
+/examples/python/.venv/
+/examples/python/results.json
+/examples/python/__pycache__/
+
+# IDE
+.cursor/
+
+# vibe coding
+vibe

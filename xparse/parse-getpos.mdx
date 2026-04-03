@@ -1,0 +1,299 @@
+---
+title: "前端可视化：获取精确坐标"
+---
+
+一个功能丰富的RAG应用，通常会支持用户查看大模型找到的片段在原文档中的具体位置，从而让用户检查大模型是否在胡编乱造。而这就需要能把文本段落等各元素在原文档中高亮标记出来的能力。
+
+TextIn xParse文档解析API支持返回块级坐标`position`以及字符级坐标`char_pos`（请求时设置URL参数`char_details=true`），代表解析结果片段在原文档中的精确位置。
+
+将解析结果和坐标可视化，有助于：
+
+- 与原文档对照，细粒度验证解析的效果
+- 审核校正解析结果
+
+例如，下面是一个原文档（带坐标回显，左）和解析结果（Markdown，右）的对比图：
+
+![](/images/parse-get-pos-compare.png)
+
+接下来详细介绍如何利用python实现坐标可视化。
+
+<Tip>
+  本教程基于Textin官方pdf示例文件，您可点击下载或使用该链接：[文档解析pdf示例.pdf](https://web-api.textin.com/open/image/download?filename=a2bd40607faa4be7ba975d41c96b9a47)
+</Tip>
+
+## 上传pdf文件，获取解析结果
+
+参考[快速启动](/xparse/parse-quickstart)，上传pdf文件，获取解析结果。为获得详细的页面信息和坐标数据，解析时需要设置URL参数page_details=1和markdown_details=1。
+
+本次示例文件解析结果如下（为方便展示，此处只解析一页，仅列出坐标相关数据）：
+
+```python
+{
+  "code": 200,
+  "message": "success",
+  "duration": 1751,
+  "result": {
+     "pages": [
+                {
+                  "status": "Success",
+                  "angle": 0,
+                  "page_id": 1,
+                  "width": 1191,
+                  "height": 1684,
+                  "structured": [
+                    {
+                        "blocks": [
+                            {
+                                "id": 0,
+                                "pos": [71,146,549,144,548,185,70,187],
+                                "text": "某服装企业（600398.SH）",
+                                "type": "textblock"
+                                # ...
+                            }
+                        ],
+                        "type": "header"
+                    },
+                    {
+                        "type": "header",
+                        "blocks": [
+                            {   "id": 2,
+                                "pos": [69,203,781,203,781,238,69,238],
+                                "text": "第三季度收入下滑11%，费用率提升盈利承压",
+                                "type": "textblock",
+                            }
+                        ],
+                    }
+                  ]
+
+                  # ...
+                }
+              ],
+      "detail": [
+          {
+            "page_id": 1,
+            "text": "**某服装企业（600398.SH）**"
+            "position": [71,146,549,144,548,185,70,187]
+             # ...
+          },
+          {
+            "page_id": 1,
+            "text": "**第三季度收入下滑11%，费用率提升盈利承压**"
+            "position": [69,203,781,203,781,238,69,238]
+             # ...
+          }
+          # ...
+      ]
+  }
+}
+```
+
+`pages`字段包含每一页的信息，其中`page_id`表示页码（从1开始），`width, height`表示识别时文档转成图像的宽高，`angle`表示将图像转正的角度（如需要），`structured`表示解析后对应页的结构化数据，包含元素块内容以及对应的坐标`pos`。
+
+`detail`中包含所有markdown块级元素（文字、段落、表格等）的详细信息，每一块通过`page_id`与页码关联，`position`字段表示该块的坐标信息。与`pages`不同的是，detail中是将markdown内容规整后元素块，比如跨页段落、跨页表格在detail中已经合并，采用了更好的语义上的分割，可以直接用于下游需要分块的应用，而`pages`中最大限度地保留了每一页的原始信息。
+
+**坐标系统说明**
+
+接口返回的坐标格式为：`[x1, y1, x2, y2, x3, y3, x4, y4]`
+
+这表示一个四边形的四个顶点坐标，按顺时针排列：
+
+```
+坐标数组: [x1, y1, x2, y2, x3, y3, x4, y4]
+          ↑左上    ↑右上    ↑右下    ↑左下
+```
+
+该坐标表示在识别时以页面左上角为原点，宽高为`page.width`、`page.height`画布下的绝对坐标，单位为像素（px）。
+
+比如上述接口返回：
+
+```json
+"pages": [{ "width": 1191, "height": 1684}]
+"position": [69,203,781,203,781,238,69,238]
+```
+
+在图像上示意如下：
+
+```
+图像坐标系 (原点在左上角)
+┌───────────────1191────────────────── x
+│(0,0)
+│
+│
+│      (69,203) ───────────── (781,203)
+│          │                        │     
+1684                 文本区域           
+│          │                        │
+│      (69,238) ───────────── (781,238)
+│
+│
+│
+│
+y
+```
+
+下面演示如何从pages中和detail中获取页面和元素块坐标信息，并在原文档上绘制标注。
+
+原文档页面图片可以通过设置参数`get_image="page"或"both"`返回，
+您将获得每一页的image_id或者base64（详见[JSON结构说明](/xparse/parse-getjson)）用于预览，也可以手动将您的原文档转成图片，
+只要保证每一页的图片跟上述`page.width`、`page.height`同比例渲染，`position`中的坐标值也需要跟随页面同比例缩放，，即可准确绘制。
+
+
+## 从API返回结果中获取坐标数据
+
+从json结果提取出每一页的元素坐标信息，输出到二维数组：
+
+```python
+def extract_coordinates_from_parse_result(parse_result):
+    """
+    从API返回的解析结果中提取每页的宽高、角度和所有detail块的坐标信息
+    返回: [{width, height, angle, details: [detail, ...]}, ...]
+    """
+    result = parse_result.get("result", {})
+    pages = result.get("pages", [])
+    details = result.get("detail", [])
+
+    # 按页组织details
+    page_map = {}
+    for page in pages:
+        page_id = page.get("page_id", 1)
+        page_map[page_id] = {
+            "width": page.get("width", 0),
+            "height": page.get("height", 0),
+            "angle": page.get("angle", 0),
+            "details": []
+        }
+    for d in details:
+        page_id = d.get("page_id", 1)
+        if page_id in page_map:
+            page_map[page_id]["details"].append(d)
+    # 保证顺序
+    return [page_map[pid] for pid in sorted(page_map.keys())]
+```
+
+## 绘制坐标框到原图
+
+```python
+import fitz  # PyMuPDF
+from PIL import Image, ImageDraw
+import os
+
+# pdf转图片，获取页面图片
+def pdf_to_images(pdf_path, output_dir="./temp_images"):
+    os.makedirs(output_dir, exist_ok=True)
+    doc = fitz.open(pdf_path)
+    zoom = 144 / 72 # dpi=144，图片更清晰
+    mat = fitz.Matrix(zoom, zoom)
+    image_paths = []
+    for i, page in enumerate(doc):
+        pix = page.get_pixmap(matrix=mat)
+        img_path = os.path.join(output_dir, f"page_{i+1}.png")
+        pix.save(img_path)
+        image_paths.append(img_path)
+    doc.close()
+    return image_paths
+
+# 绘制一页坐标
+def draw_boxes_on_image(image_path, details, page_width, page_height, color=(26,102,255), line_width=2):
+    image = Image.open(image_path).convert("RGB")
+    draw = ImageDraw.Draw(image)
+    img_w, img_h = image.size
+    # 根据解析时的页面宽高缩放适配，确保绘制坐标准确
+    scale_x = img_w / page_width if page_width else 1
+    scale_y = img_h / page_height if page_height else 1
+    for d in details:
+        pos = d.get("position")
+        if pos and len(pos) == 8:
+            points = [
+                (pos[0]*scale_x, pos[1]*scale_y),
+                (pos[2]*scale_x, pos[3]*scale_y),
+                (pos[4]*scale_x, pos[5]*scale_y),
+                (pos[6]*scale_x, pos[7]*scale_y),
+                (pos[0]*scale_x, pos[1]*scale_y)
+            ]
+            draw.line(points, fill=color, width=line_width)
+    out_path = image_path.replace('.png', '_boxed.png')
+    image.save(out_path)
+    return out_path
+
+# 绘制所有页面全部坐标
+def annotate_pdf_with_boxes(pdf_path, page_details, output_dir="./annotated_images"):
+    os.makedirs(output_dir, exist_ok=True)
+    image_paths = pdf_to_images(pdf_path, output_dir=output_dir)
+    result_paths = []
+    for i, page in enumerate(page_details):
+        img_path = image_paths[i]
+        out_path = draw_boxes_on_image(
+            img_path, 
+            page["details"], 
+            page["width"], 
+            page["height"]
+        )
+        result_paths.append(out_path)
+    return result_paths
+
+# 使用示例
+if __name__ == "__main__":
+    import json
+    PDF_PATH = "your_document.pdf"
+    JSON_PATH = "parse_result.json"
+    with open(JSON_PATH, "r", encoding="utf-8") as f:
+        parse_result = json.load(f)
+    page_details = extract_coordinates_from_parse_result(parse_result)
+    result_imgs = annotate_pdf_with_boxes(PDF_PATH, page_details)
+    print("标注图片：", result_imgs)
+```
+
+### 代码使用说明
+
+**1. 准备环境**
+
+```bash
+pip install PyMuPDF pillow
+```
+
+**2. 绘制图片和坐标**
+
+将上述代码保存为`pdf_coordinate_drawer.py`文件，替换main函数中的`your_document.pdf`和`parse_result.json`为真实文件路径，运行：
+
+```bash
+python3 pdf_coordinate_drawer.py
+```
+
+**3. 输出结果**
+
+- 每页生成一个标注后的PNG图片
+- 坐标框用指定颜色绘制，您也可以自定义颜色，不同类型元素用不同颜色绘制
+- 生成坐标类型图例
+
+该示例生成的标注最终效果如下：
+
+![](/images/parse-getpos-annotate.png)
+
+可以看到，Textin xParse针对复杂布局的文档，能够精准识别并细粒度还原坐标，方便您将解析结果与原文件进行对比，查看解析效果以及审核校正。
+
+## 前端开源项目
+
+此外，我们开源了web前端项目[xparse-frontend](https://github.com/intsig-textin/xparse-frontend/)，该项目包含跟我们[在线web平台](https://www.textin.com/console/recognition/robot_markdown?service=pdf_to_markdown)效果一致的全套前端代码，具备文件预览、坐标回显、动态交互对照、编辑校正、导出多种格式结果文件等丰富功能。上手方便，开箱即用，欢迎体验！
+
+## 常见问题
+
+### **坐标偏移不准确，有错位**
+
+**可能原因：**
+
+- 文档转图片使用了跟解析时不同的DPI，且坐标没有根据解析返回的页面宽高缩放适配
+- 页面旋转角度未正确处理
+
+**解决方案**
+
+- 文档转图片的时候使用跟解析相同的DPI，或者渲染时将页面和坐标值根据解析返回的页面宽高缩放适配（推荐，参考上述代码示例）
+- 确认页面是否经过旋转(angle)，绘制时设置angle修正角度
+
+### **如何处理跨页段落和表格**
+
+跨页信息可以在两个位置获取：
+
+- 在pages的structure中：跨页信息通过continue和next_page_id、next_para_id表示
+- 在detail中：跨页信息通过通过split_section_page_ids和split_section_positions表示
+
+更多信息请参考[JSON结构说明](/xparse/parse-getjson)。

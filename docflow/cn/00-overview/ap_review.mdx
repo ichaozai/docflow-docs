@@ -1,0 +1,311 @@
+---
+title: "AP 审单场景(从零开始)"
+description: "在财务部门 AP（应付账款）审单业务场景，调用 DocFlow API 完成发票、采购合同、入库单、验收单的自动化交叉审核"
+---
+
+<Tip>
+  本文以 **AP 审单**（应付账款审核）为业务场景，演示如何通过 API 完成从创建空间、配置类别、上传文件、获取抽取结果到智能审核的完整流程。
+  如果您刚刚接触 DocFlow，建议先在 [Web 页面](https://docflow.textin.com/) 体验一下产品的基本功能，再阅读本文。
+</Tip>
+
+## 01 场景说明
+
+在 AP（应付账款）审单业务中，财务人员每次付款前需要对一组采购单据进行交叉核验，典型的单据组合包括：
+
+- **国内票-数电票**（增值税专用发票/普通发票）：记录销售方/购买方信息、开票金额和税率
+- **采购合同**（PDF/Word）：约定供应商信息、合同金额、税率和产品明细
+- **入库单**（PDF）：记录实际收货数量、物料信息和对应合同号
+- **验收单**（PDF）：记录验收结论、交付内容和对应合同号
+
+通过 DocFlow，您只需配置一次分类和字段，后续上传的单据即可自动完成**分类识别**和**结构化信息抽取**；配置好审核规则库后，还可对多份单据进行**跨文档智能审核**，自动发现供应商不一致、金额超标、数量异常等问题。
+
+## 02 业务流程
+
+![AP 审单业务流程](../images/expense_reimbursement_flow.png)
+
+<Note>
+  **工作空间、文件类别和审核规则库只需配置一次**，后续可持续复用——直接上传新的待处理文件并创建新的审核任务即可。本示例为演示完整流程，将配置步骤和处理步骤放在同一段代码中运行。
+</Note>
+
+## 03 先决条件
+
+1. 登录 [TextIn 控制台](https://www.textin.com/console/dashboard/setting)，获取 `x-ti-app-id` 和 `x-ti-secret-code`
+2. 在控制台「企业管理」中查看企业组织 ID（`enterprise_id`），参考 [如何获取企业 ID](../100-faq/get_enterprise_id)
+3. 下载[示例样本文件](https://github.com/intsig-textin/docflow-docs/tree/master/examples/sample_files/AP审单)，或使用自己的单据文件
+
+## 04 类别与字段配置
+
+本示例配置四个文件类别，均通过 `category/create` 接口创建并配置字段。
+
+<AccordionGroup>
+  <Accordion defaultOpen title="国内票-数电票（样本：示例_发票.pdf）">
+    增值税电子发票（数电票），包含发票号码、开票日期、购买方/销售方名称及税号、价税合计等基本信息字段，以及商品明细表格字段：
+
+    | 字段名 | 类型 |
+    |---|---|
+    | <span style={{color: "#3b82f6"}}>发票号码</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>开票日期</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>价税合计</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>税前金额</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>税额</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>销售方名称</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>销售方纳税人识别号</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>购买方名称</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>购买方纳税人识别号</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>发票备注</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>商品名称</span> | 表格字段 |
+    | <span style={{color: "#3b82f6"}}>规格型号</span> | 表格字段 |
+    | <span style={{color: "#3b82f6"}}>单位</span> | 表格字段 |
+    | <span style={{color: "#3b82f6"}}>数量</span> | 表格字段 |
+    | <span style={{color: "#3b82f6"}}>单价</span> | 表格字段 |
+    | <span style={{color: "#3b82f6"}}>金额</span> | 表格字段 |
+    | <span style={{color: "#3b82f6"}}>税率</span> | 表格字段 |
+    | <span style={{color: "#3b82f6"}}>税额</span> | 表格字段 |
+  </Accordion>
+  <Accordion defaultOpen title="采购合同（样本：示例_采购合同.pdf）">
+    采购合同是约定交易条款的核心文件，包含合同编号、甲乙方信息、金额、税率和产品明细。字段配置同时使用**基本信息字段**和**表格字段**：
+
+    | 字段名 | 类型 |
+    |---|---|
+    | <span style={{color: "#3b82f6"}}>编号</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>甲方</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>乙方</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>签订日期</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>合作期间</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>支付条款</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>乙方银行账户信息</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>开票信息</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>违约金条款</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>采购物料/服务数量</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>合同类型</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>采购金额</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>采购单价</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>税率</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>乙方税号</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>采购物料/服务</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>产品型号</span> | 表格字段 |
+    | <span style={{color: "#3b82f6"}}>产品说明</span> | 表格字段 |
+    | <span style={{color: "#3b82f6"}}>单价</span> | 表格字段 |
+    | <span style={{color: "#3b82f6"}}>数量</span> | 表格字段 |
+    | <span style={{color: "#3b82f6"}}>金额</span> | 表格字段 |
+  </Accordion>
+  <Accordion defaultOpen title="入库单（样本：示例_入库单.pdf）">
+    入库单是仓库收货的凭证，记录实收数量、物料信息和供应商信息。字段配置同时使用**基本信息字段**和**表格字段**：
+
+    | 字段名 | 类型 |
+    |---|---|
+    | <span style={{color: "#3b82f6"}}>收货单编号</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>收货日期</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>对应合同号</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>供应商名称</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>仓库／库位</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>物流单号</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>入库总金额</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>收货结论</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>备注</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>仓库收货人</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>仓库收货人日期</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>质检确认</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>质检确认日期</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>供应商送货人</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>供应商送货人日期</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>供应商税号</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>收货入库明细-物料编码</span> | 表格字段 |
+    | <span style={{color: "#3b82f6"}}>收货入库明细-物料描述</span> | 表格字段 |
+    | <span style={{color: "#3b82f6"}}>收货入库明细-单位</span> | 表格字段 |
+    | <span style={{color: "#3b82f6"}}>收货入库明细-应收</span> | 表格字段 |
+    | <span style={{color: "#3b82f6"}}>收货入库明细-实收</span> | 表格字段 |
+    | <span style={{color: "#3b82f6"}}>收货入库明细-差异</span> | 表格字段 |
+    | <span style={{color: "#3b82f6"}}>收货入库明细-质检</span> | 表格字段 |
+    | <span style={{color: "#3b82f6"}}>收货入库明细-签收人</span> | 表格字段 |
+  </Accordion>
+  <Accordion defaultOpen title="验收单（样本：示例_验收单.pdf）">
+    验收单是确认货物/服务交付质量的凭证，仅包含基本信息字段：
+
+    | 字段名 | 类型 |
+    |---|---|
+    | <span style={{color: "#3b82f6"}}>项目名称</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>合同编号</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>甲方单位名称</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>乙方单位名称</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>甲方验收人</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>乙方施工人</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>交付内容</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>验收说明</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>验收结论</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>验收数量</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>验收日期</span> | 基本信息字段 |
+    | <span style={{color: "#3b82f6"}}>乙方税号</span> | 基本信息字段 |
+  </Accordion>
+</AccordionGroup>
+
+## 05 审核规则配置
+
+本示例的审核规则库包含 **2 个规则组、12 条审核规则**，覆盖跨单据业务一致性核验和文档完整性预检两个维度：
+
+<AccordionGroup>
+  <Accordion defaultOpen title="规则组 1：业务一致性审核（跨单据交叉核验）">
+    | 规则名称 | 风险等级 | 审核逻辑 |
+    |---|---|---|
+    | <span style={{color: "#3b82f6"}}>供应商一致性</span> | 🔴 高风险 | 若均存在税号，则发票销售方税号 = 合同乙方税号 = 入库单供应商税号；否则比对名称 |
+    | <span style={{color: "#3b82f6"}}>金额匹配</span> | 🔴 高风险 | 发票价税合计金额 ≤ 采购合同总金额；框架协议（金额为空或 0）时不校验 |
+    | <span style={{color: "#3b82f6"}}>数量一致性（入库单维度）</span> | 🟡 中风险 | 若发票含商品明细，则发票数量合计 ≤ 入库单实收数量合计 |
+    | <span style={{color: "#3b82f6"}}>标的一致性</span> | 🟢 低风险 | 合同约定的规格型号须与入库单、发票中的规格型号一致；未约定规格型号时校验标的物描述是否指向同一商品 |
+    | <span style={{color: "#3b82f6"}}>税率一致性</span> | 🟡 中风险 | 发票各行税率须与合同约定税率一致；合同未约定税率时跳过 |
+    | <span style={{color: "#3b82f6"}}>验收结论校验</span> | 🟡 中风险 | 验收单的验收结论须为合格/通过/验收通过/同意验收或类似认可状态 |
+    | <span style={{color: "#3b82f6"}}>数量一致性（验收单维度）</span> | 🟡 中风险 | 若发票含商品明细且验收单有合格数量，则发票数量合计 ≤ 验收单合格数量 |
+    | <span style={{color: "#3b82f6"}}>合同关联性</span> | 🟡 中风险 | 入库单合同编号 = 采购合同编号；验收单合同编号 = 采购合同编号 |
+
+    <Tip>
+      跨文档规则的 `category_ids` 包含多个分类 ID，只有当审核任务覆盖所有关联分类时，该规则才会被触发执行。
+    </Tip>
+  </Accordion>
+  <Accordion defaultOpen title="规则组 2：文档采集与预处理审核">
+    | 规则名称 | 风险等级 | 审核逻辑 |
+    |---|---|---|
+    | <span style={{color: "#3b82f6"}}>信息完整性校验</span> | 🟡 中风险 | 检查四类文档齐全性并核验各文档必填字段非空（详见审核点说明） |
+    | <span style={{color: "#3b82f6"}}>发票日期合规性</span> | 🟡 中风险 | 发票开票日期 ≥ 合同签订日期 |
+    | <span style={{color: "#3b82f6"}}>购买方信息匹配</span> | 🔴 高风险 | 发票购买方名称 = 上海合合信息科技股份有限公司；购买方税号 = 91310110791485269J |
+    | <span style={{color: "#3b82f6"}}>税率合规性校验</span> | 🟡 中风险 | 货物类税率应为 13%，服务类应为 6%，小规模纳税人应为 1% 或 3% |
+  </Accordion>
+</AccordionGroup>
+
+## 06 代码结构说明
+
+示例代码将完整的七步流程放在一起运行，便于理解端到端的调用链路。在实际生产中，**步骤 1、2、5（创建工作空间、配置文件类别、配置审核规则库）只需执行一次**；后续处理新单据时，只需重复**步骤 3、4、6、7（上传文件 → 获取抽取结果 → 提交审核任务 → 获取审核结果）**，直接复用已有的配置即可。参见 [AP 审单场景（已完成配置）](./ap_review_already_configured)。
+
+示例代码中的函数分为两类，理解这一点有助于对照 API 文档进行调试和扩展。
+
+### 两类函数
+
+**REST API 调用函数** — 每个函数直接封装一个 API 端点，函数参数与接口文档一一对应：
+
+| 函数（Python） | 方法（Java） | 对应 API 端点 | 说明 |
+|---|---|---|---|
+| `create_workspace` | `createWorkspace` | `POST /workspace/create` | 创建工作空间，返回 workspace_id |
+| `create_category` | `createCategory` | `POST /category/create` | 创建文件类别并上传样本，返回 category_id |
+| `add_category_field` | `addCategoryField` | `POST /category/fields/add` | 为已有类别追加字段（用于添加表格字段） |
+| `upload_file` | `uploadFile` | `POST /file/upload` | 上传待处理文件，返回 batch_number |
+| `create_rule_repo` | `createRuleRepo` | `POST /review/rule_repo/create` | 创建审核规则库，返回 repo_id |
+| `create_rule_group` | `createRuleGroup` | `POST /review/rule_group/create` | 在规则库内创建规则组，返回 group_id |
+| `create_rule` | `createRule` | `POST /review/rule/create` | 在规则组内创建审核规则，绑定适用分类 |
+| `submit_review_task` | `submitReviewTask` | `POST /review/task/submit` | 提交审核任务，返回审核 task_id |
+
+**工具辅助函数** — 不直接对应 API 端点，提供公共基础能力或封装轮询/展示逻辑：
+
+| 函数（Python） | 方法（Java） | 作用 |
+|---|---|---|
+| `_headers` | `authHeaders` | 构造鉴权请求头 |
+| `_check` | `checkResponse` | 校验响应 code，统一异常处理 |
+| `_mime` | `mimeType` | 根据扩展名推断 MIME 类型 |
+| `wait_for_result` | `waitForResult` | 循环轮询 `file/fetch`，等待抽取完成 |
+| `display_result` | `displayResult` | 格式化打印抽取结果 |
+| `wait_for_review` | `waitForReview` | 循环轮询 `review/task/result`，等待审核完成 |
+| `display_review_result` | `displayReviewResult` | 格式化打印审核结果 |
+
+### 逐步代码说明
+
+<AccordionGroup>
+  <Accordion defaultOpen title="步骤 2：创建含表格字段的文件类别">
+    国内票-数电票、采购合同和入库单均包含表格字段，需先创建类别（配置基本信息字段），再通过 `add_category_field` 追加表格字段。`table_id=-1` 表示挂载到默认表格。
+
+    <Tabs>
+      <Tab title="Python">
+        ```python
+        # 国内票-数电票（基本信息字段 + 明细表格字段）
+        invoice_id = create_category(
+            workspace_id=workspace_id,
+            name="国内票-数电票",
+            sample_file_path="示例_发票.pdf",
+            fields=[
+                {"name": "发票号码"}, {"name": "开票日期"}, {"name": "价税合计"},
+                # ... 其余基本信息字段
+            ],
+        )
+        for field_name in ["商品名称", "规格型号", "单位", "数量", "单价", "金额", "税率", "税额"]:
+            add_category_field(workspace_id, invoice_id, field_name, table_id=-1)
+
+        # 采购合同（基本信息字段 + 表格字段）
+        contract_id = create_category(
+            workspace_id=workspace_id,
+            name="采购合同",
+            sample_file_path="示例_采购合同.pdf",
+            fields=[{"name": "编号"}, {"name": "甲方"}, {"name": "乙方"}, ...],
+        )
+        for field_name in ["产品型号", "产品说明", "单价", "数量", "金额"]:
+            add_category_field(workspace_id, contract_id, field_name, table_id=-1)
+        ```
+      </Tab>
+      <Tab title="Java">
+        ```java
+        // 国内票-数电票
+        String invoiceId = createCategory(workspaceId, "国内票-数电票",
+                SAMPLE_DIR + "/示例_发票.pdf", invoiceFields, "增值税电子发票（数电票）...");
+        for (String fn : new String[]{"商品名称", "规格型号", "单位", "数量", "单价", "金额", "税率", "税额"}) {
+            addCategoryField(workspaceId, invoiceId, fn, "-1");
+        }
+        // 采购合同
+        String contractId = createCategory(workspaceId, "采购合同",
+                SAMPLE_DIR + "/示例_采购合同.pdf", contractFields, "");
+        for (String fn : new String[]{"产品型号", "产品说明", "单价", "数量", "金额"}) {
+            addCategoryField(workspaceId, contractId, fn, "-1");
+        }
+        ```
+      </Tab>
+    </Tabs>
+  </Accordion>
+  <Accordion defaultOpen title="步骤 5：配置跨文档审核规则">
+    跨文档规则在 `category_ids` 中传入多个分类 ID。DocFlow 会从各分类已抽取的结果中提取规则关联字段，交由 AI 统一判断。
+
+    <Tabs>
+      <Tab title="Python">
+        ```python
+        # 供应商一致性——关联发票、合同、入库单三个分类
+        create_rule(workspace_id, repo_id, group1_id,
+            "供应商一致性",
+            "若均存在税号字段，则发票【销售方纳税人识别号】= 合同【乙方纳税人识别号】"
+            "= 入库单【供应商税号】；否则比对名称",
+            [invoice_id, contract_id, inbound_id], 10)
+        ```
+      </Tab>
+      <Tab title="Java">
+        ```java
+        createRule(workspaceId, repoId, group1Id, "供应商一致性",
+                "若均存在税号字段，则发票【销售方纳税人识别号】= 合同【乙方纳税人识别号】"
+                + "= 入库单【供应商税号】；否则比对名称",
+                Arrays.asList(invoiceId, contractId, inboundId), 10);
+        ```
+      </Tab>
+    </Tabs>
+  </Accordion>
+</AccordionGroup>
+
+## 07 运行示例
+
+<Steps>
+  <Step title="下载示例文件">
+    下载[示例样本文件](https://github.com/intsig-textin/docflow-docs/tree/master/examples/sample_files/AP审单)，放入本地 `examples/sample_files/AP审单/` 目录。
+  </Step>
+  <Step title="填写配置项">
+    打开示例代码，将 `APP_ID`、`SECRET_CODE`、`ENTERPRISE_ID` 替换为您在 [TextIn 控制台](https://www.textin.com/console/dashboard/setting) 获取的实际值。
+  </Step>
+  <Step title="安装依赖并运行">
+    <Tabs>
+      <Tab title="Python">
+        ```bash
+        pip install requests
+        python examples/python/ap_review.py
+        ```
+      </Tab>
+      <Tab title="Java">
+        ```bash
+        cd examples/java
+        mvn compile exec:java -Dexec.mainClass="com.docflow.ApReview"
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+  <Step title="查看结果">
+    控制台会依次打印各文件的分类与字段抽取结果，以及每条审核规则的通过/不通过结论和 AI 依据。
+  </Step>
+</Steps>

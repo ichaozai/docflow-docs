@@ -10,14 +10,14 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
- * DocFlow 费用报销场景示例
+ * DocFlow 合同审核场景示例
  *
  * <p>完整演示从零开始的业务流程：
  * <ol>
  *   <li>创建工作空间</li>
- *   <li>创建文件类别（含样本文件和字段配置）</li>
- *   <li>上传待分类抽取的文件</li>
- *   <li>轮询获取抽取结果，展示分类与字段抽取结果</li>
+ *   <li>创建文件类别（采购合同，含字段配置）</li>
+ *   <li>上传待审核合同文件</li>
+ *   <li>轮询获取抽取结果，展示字段抽取结果</li>
  *   <li>配置审核规则库（规则库 → 规则组 → 规则）</li>
  *   <li>提交审核任务</li>
  *   <li>轮询获取审核结果，展示审核结论</li>
@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
  *
  * <p>依赖：OkHttp 4.x、Gson（见 pom.xml）
  */
-public class ExpenseReimbursement {
+public class ContractReview {
 
     // ============================================================
     // 配置项 — 请替换为您的实际值
@@ -36,16 +36,16 @@ public class ExpenseReimbursement {
 
     private static final String BASE_URL = "https://docflow.textin.com";
 
-    // 样本文件目录（相对 examples/ 根目录）
+    // 示例文件目录（相对 examples/ 根目录）
     private static final String SAMPLE_DIR =
-            resolveDir("../sample_files/费用报销");
+            new File("../sample_files/合同审核").getAbsolutePath();
 
     // ============================================================
     // 全局工具对象
     // ============================================================
     private static final OkHttpClient HTTP = new OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(60, TimeUnit.SECONDS)
+            .readTimeout(90, TimeUnit.SECONDS)
             .writeTimeout(60, TimeUnit.SECONDS)
             .build();
 
@@ -54,8 +54,6 @@ public class ExpenseReimbursement {
 
     // ============================================================
     // 工具辅助函数
-    // 以下方法不直接对应某个 API 端点，而是提供公共的 HTTP 头、
-    // 响应校验、MIME 类型推断等基础能力，供各 API 调用方法复用。
     // ============================================================
 
     private static Headers authHeaders() {
@@ -65,9 +63,6 @@ public class ExpenseReimbursement {
                 .build();
     }
 
-    /**
-     * 校验响应 code，不为 200 时抛出异常；否则返回整个 JSON 对象。
-     */
     private static JsonObject checkResponse(String body, String action) {
         JsonObject obj = JsonParser.parseString(body).getAsJsonObject();
         if (obj.get("code").getAsInt() != 200) {
@@ -76,27 +71,20 @@ public class ExpenseReimbursement {
         return obj;
     }
 
-    /** 根据文件扩展名返回 MIME 类型。 */
     private static String mimeType(String filename) {
         String lower = filename.toLowerCase();
         if (lower.endsWith(".png"))  return "image/png";
         if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
-        if (lower.endsWith(".xls"))  return "application/vnd.ms-excel";
-        if (lower.endsWith(".xlsx")) return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
         if (lower.endsWith(".pdf"))  return "application/pdf";
+        if (lower.endsWith(".docx")) return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        if (lower.endsWith(".xlsx")) return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
         return "application/octet-stream";
     }
 
-    /** 构造一个仅含 name 的字段 Map（用于 fields 列表）。 */
     private static Map<String, String> field(String name) {
         Map<String, String> m = new LinkedHashMap<>();
         m.put("name", name);
         return m;
-    }
-
-    /** 将相对路径解析为绝对路径（基于本 class 文件所在 jar 的上级目录）。 */
-    private static String resolveDir(String relative) {
-        return new File(relative).getAbsolutePath();
     }
 
     // ============================================================
@@ -104,23 +92,16 @@ public class ExpenseReimbursement {
     // REST API: POST /api/app-api/sip/platform/v2/workspace/create
     // ============================================================
 
-    /**
-     * 创建工作空间。
-     *
-     * @return workspace_id
-     */
     public static String createWorkspace(String name, String description) throws IOException {
         String url = BASE_URL + "/api/app-api/sip/platform/v2/workspace/create";
-
         JsonObject payload = new JsonObject();
         payload.addProperty("name", name);
         payload.addProperty("description", description);
         if (ENTERPRISE_ID != null) payload.addProperty("enterprise_id", ENTERPRISE_ID);
-        payload.addProperty("auth_scope", 0); // 0: 仅自己可见；1: 企业成员可见
+        payload.addProperty("auth_scope", 0);
 
         Request req = new Request.Builder()
-                .url(url)
-                .headers(authHeaders())
+                .url(url).headers(authHeaders())
                 .post(RequestBody.create(GSON.toJson(payload), JSON_TYPE))
                 .build();
 
@@ -140,9 +121,7 @@ public class ExpenseReimbursement {
     /**
      * 创建文件类别，同时上传样本文件并配置字段。
      *
-     * @param fields          字段列表，每个元素为 {"name": "字段名"}
-     * @param categoryPrompt  分类提示词（可选）
-     * @return category_id
+     * <p>合同审核场景使用 Model 2（复杂文档理解），适合合同这类长文档的深度理解和字段抽取。
      */
     public static String createCategory(
             String workspaceId,
@@ -158,7 +137,7 @@ public class ExpenseReimbursement {
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("workspace_id",    workspaceId)
                 .addFormDataPart("name",            name)
-                .addFormDataPart("extract_model",   "Model 1")
+                .addFormDataPart("extract_model",   "Model 2")
                 .addFormDataPart("category_prompt", categoryPrompt)
                 .addFormDataPart("fields",          GSON.toJson(fields))
                 .addFormDataPart("sample_files",    sampleFile.getName(),
@@ -166,8 +145,7 @@ public class ExpenseReimbursement {
                 .build();
 
         Request req = new Request.Builder()
-                .url(url)
-                .headers(authHeaders())
+                .url(url).headers(authHeaders())
                 .post(body)
                 .build();
 
@@ -180,58 +158,10 @@ public class ExpenseReimbursement {
     }
 
     // ============================================================
-    // 步骤 2b：追加字段（可选）
-    // REST API: POST /api/app-api/sip/platform/v2/category/fields/add
-    // ============================================================
-
-    /**
-     * 在已有类别中追加一个字段。
-     *
-     * <p>如需创建「表格字段」，先通过 category/fields/list 接口获取 table_id，
-     * 再传入 tableId 参数；传 null 则创建普通字段。
-     *
-     * @return field_id
-     */
-    public static String addCategoryField(
-            String workspaceId,
-            String categoryId,
-            String fieldName,
-            String tableId) throws IOException {
-
-        String url = BASE_URL + "/api/app-api/sip/platform/v2/category/fields/add";
-
-        JsonObject payload = new JsonObject();
-        payload.addProperty("workspace_id", workspaceId);
-        payload.addProperty("category_id",  categoryId);
-        payload.addProperty("name",         fieldName);
-        if (tableId != null && !tableId.isEmpty()) {
-            payload.addProperty("table_id", tableId);
-        }
-
-        Request req = new Request.Builder()
-                .url(url)
-                .headers(authHeaders())
-                .post(RequestBody.create(GSON.toJson(payload), JSON_TYPE))
-                .build();
-
-        try (Response resp = HTTP.newCall(req).execute()) {
-            JsonObject data = checkResponse(resp.body().string(), "追加字段[" + fieldName + "]");
-            String fieldId = data.getAsJsonObject("result").get("field_id").getAsString();
-            System.out.println("  追加字段成功  name=" + fieldName + "  field_id=" + fieldId);
-            return fieldId;
-        }
-    }
-
-    // ============================================================
     // 步骤 3：上传待处理文件
     // REST API: POST /api/app-api/sip/platform/v2/file/upload
     // ============================================================
 
-    /**
-     * 上传文件至指定工作空间。
-     *
-     * @return batch_number
-     */
     public static String uploadFile(String workspaceId, String filePath) throws IOException {
         File file = new File(filePath);
         HttpUrl url = HttpUrl.parse(BASE_URL + "/api/app-api/sip/platform/v2/file/upload")
@@ -246,8 +176,7 @@ public class ExpenseReimbursement {
                 .build();
 
         Request req = new Request.Builder()
-                .url(url)
-                .headers(authHeaders())
+                .url(url).headers(authHeaders())
                 .post(body)
                 .build();
 
@@ -262,22 +191,17 @@ public class ExpenseReimbursement {
 
     // ============================================================
     // 步骤 4：轮询等待抽取结果
-    // REST API: GET /api/app-api/sip/platform/v2/file/fetch（封装了轮询逻辑）
+    // REST API: GET /api/app-api/sip/platform/v2/file/fetch
     // ============================================================
 
     /**
      * 轮询直至文件识别完成，返回文件结果对象（含 task_id）。
      *
-     * <p>recognition_status: 0=待识别, 1=成功, 2=失败
-     *
-     * @param timeoutSec  最长等待秒数
-     * @param intervalSec 轮询间隔秒数
+     * <p>合同文档通常较长，超时时间设置为 180s。
      */
     public static JsonObject waitForResult(
-            String workspaceId,
-            String batchNumber,
-            int timeoutSec,
-            int intervalSec) throws IOException, InterruptedException {
+            String workspaceId, String batchNumber,
+            int timeoutSec, int intervalSec) throws IOException, InterruptedException {
 
         HttpUrl url = HttpUrl.parse(BASE_URL + "/api/app-api/sip/platform/v2/file/fetch")
                 .newBuilder()
@@ -290,10 +214,7 @@ public class ExpenseReimbursement {
 
         while (System.currentTimeMillis() < deadline) {
             Request req = new Request.Builder()
-                    .url(url)
-                    .headers(authHeaders())
-                    .get()
-                    .build();
+                    .url(url).headers(authHeaders()).get().build();
 
             try (Response resp = HTTP.newCall(req).execute()) {
                 JsonObject data = checkResponse(resp.body().string(), "获取处理结果");
@@ -301,10 +222,8 @@ public class ExpenseReimbursement {
                 if (files != null && files.size() > 0) {
                     JsonObject file = files.get(0).getAsJsonObject();
                     int status = file.get("recognition_status").getAsInt();
-                    if (status == 1) {
-                        System.out.println(" 完成");
-                        return file;
-                    } else if (status == 2) {
+                    if (status == 1) { System.out.println(" 完成"); return file; }
+                    if (status == 2) {
                         String cause = file.has("failure_causes")
                                 ? file.get("failure_causes").getAsString() : "未知原因";
                         throw new RuntimeException("文件处理失败: " + cause);
@@ -317,7 +236,6 @@ public class ExpenseReimbursement {
         throw new RuntimeException("等待处理结果超时（" + timeoutSec + "s）");
     }
 
-    /** 格式化输出文件的分类结果和字段抽取结果（工具辅助函数）。 */
     public static void displayResult(JsonObject fileResult) {
         System.out.println("\n" + "=".repeat(60));
         System.out.println("文件名   : " + str(fileResult, "name"));
@@ -326,68 +244,22 @@ public class ExpenseReimbursement {
         if (!fileResult.has("data") || fileResult.get("data").isJsonNull()) return;
         JsonObject data = fileResult.getAsJsonObject("data");
 
-        // 普通字段
         JsonArray fields = jsonArray(data, "fields");
         if (fields != null && fields.size() > 0) {
-            System.out.println("\n── 普通字段 ──────────────────────────");
+            System.out.println("\n── 基本信息字段 ────────────────────────");
             for (JsonElement e : fields) {
                 JsonObject f = e.getAsJsonObject();
-                System.out.printf("  %-20s: %s%n", str(f, "key"), str(f, "value"));
-            }
-        }
-
-        // 表格行（系统自动识别的 items，行×列二维数组）
-        JsonArray items = jsonArray(data, "items");
-        if (items != null && items.size() > 0) {
-            System.out.println("\n── 表格行数据 ────────────────────────");
-            for (int i = 0; i < items.size(); i++) {
-                JsonArray row = items.get(i).getAsJsonArray();
-                StringBuilder sb = new StringBuilder("  第").append(i + 1).append("行: ");
-                for (int j = 0; j < row.size(); j++) {
-                    JsonObject cell = row.get(j).getAsJsonObject();
-                    if (j > 0) sb.append("  |  ");
-                    sb.append(str(cell, "key")).append("=").append(str(cell, "value"));
-                }
-                System.out.println(sb);
-            }
-        }
-
-        // 配置表格（tables，含手动配置的表格字段）
-        JsonArray tables = jsonArray(data, "tables");
-        if (tables != null) {
-            for (JsonElement te : tables) {
-                JsonObject table = te.getAsJsonObject();
-                String tname = str(table, "tableName");
-                JsonArray tItems = jsonArray(table, "items");
-                if (tItems != null && tItems.size() > 0) {
-                    System.out.println("\n── 表格[" + tname + "] ──────────────────────");
-                    for (int i = 0; i < tItems.size(); i++) {
-                        JsonArray row = tItems.get(i).getAsJsonArray();
-                        StringBuilder sb = new StringBuilder("  第").append(i + 1).append("行: ");
-                        for (int j = 0; j < row.size(); j++) {
-                            JsonObject cell = row.get(j).getAsJsonObject();
-                            if (j > 0) sb.append("  |  ");
-                            sb.append(str(cell, "key")).append("=").append(str(cell, "value"));
-                        }
-                        System.out.println(sb);
-                    }
-                }
+                String val = str(f, "value");
+                String display = val.length() > 80 ? val.substring(0, 80) + "..." : val;
+                System.out.printf("  %-25s: %s%n", str(f, "key"), display);
             }
         }
     }
 
     // ============================================================
     // 步骤 5：配置审核规则库
-    // REST API: POST /api/app-api/sip/platform/v2/review/rule_repo/create
-    //           POST /api/app-api/sip/platform/v2/review/rule_group/create
-    //           POST /api/app-api/sip/platform/v2/review/rule/create
     // ============================================================
 
-    /**
-     * 创建审核规则库。
-     *
-     * @return repo_id
-     */
     public static String createRuleRepo(String workspaceId, String name) throws IOException {
         String url = BASE_URL + "/api/app-api/sip/platform/v2/review/rule_repo/create";
         JsonObject payload = new JsonObject();
@@ -395,8 +267,7 @@ public class ExpenseReimbursement {
         payload.addProperty("name", name);
 
         Request req = new Request.Builder()
-                .url(url)
-                .headers(authHeaders())
+                .url(url).headers(authHeaders())
                 .post(RequestBody.create(GSON.toJson(payload), JSON_TYPE))
                 .build();
 
@@ -408,11 +279,6 @@ public class ExpenseReimbursement {
         }
     }
 
-    /**
-     * 在规则库下创建规则组。
-     *
-     * @return group_id
-     */
     public static String createRuleGroup(
             String workspaceId, String repoId, String name) throws IOException {
         String url = BASE_URL + "/api/app-api/sip/platform/v2/review/rule_group/create";
@@ -422,8 +288,7 @@ public class ExpenseReimbursement {
         payload.addProperty("name", name);
 
         Request req = new Request.Builder()
-                .url(url)
-                .headers(authHeaders())
+                .url(url).headers(authHeaders())
                 .post(RequestBody.create(GSON.toJson(payload), JSON_TYPE))
                 .build();
 
@@ -435,21 +300,9 @@ public class ExpenseReimbursement {
         }
     }
 
-    /**
-     * 在规则组下创建审核规则。
-     *
-     * @param categoryIds 适用分类 ID 列表，规则仅对这些分类的抽取任务生效
-     * @param riskLevel   风险等级：10=高风险 / 20=中风险 / 30=低风险
-     * @return rule_id
-     */
     public static String createRule(
-            String workspaceId,
-            String repoId,
-            String groupId,
-            String name,
-            String prompt,
-            List<String> categoryIds,
-            int riskLevel) throws IOException {
+            String workspaceId, String repoId, String groupId,
+            String name, String prompt, List<String> categoryIds, int riskLevel) throws IOException {
 
         String url = BASE_URL + "/api/app-api/sip/platform/v2/review/rule/create";
         JsonObject payload = new JsonObject();
@@ -464,8 +317,7 @@ public class ExpenseReimbursement {
         payload.addProperty("risk_level", riskLevel);
 
         Request req = new Request.Builder()
-                .url(url)
-                .headers(authHeaders())
+                .url(url).headers(authHeaders())
                 .post(RequestBody.create(GSON.toJson(payload), JSON_TYPE))
                 .build();
 
@@ -482,16 +334,8 @@ public class ExpenseReimbursement {
     // REST API: POST /api/app-api/sip/platform/v2/review/task/submit
     // ============================================================
 
-    /**
-     * 提交审核任务。
-     *
-     * @param extractTaskIds 抽取任务 ID 列表（来自 file/fetch 返回的 task_id）
-     * @return 审核任务 task_id
-     */
     public static String submitReviewTask(
-            String workspaceId,
-            String name,
-            String repoId,
+            String workspaceId, String name, String repoId,
             List<String> extractTaskIds) throws IOException {
 
         String url = BASE_URL + "/api/app-api/sip/platform/v2/review/task/submit";
@@ -504,8 +348,7 @@ public class ExpenseReimbursement {
         payload.add("extract_task_ids", ids);
 
         Request req = new Request.Builder()
-                .url(url)
-                .headers(authHeaders())
+                .url(url).headers(authHeaders())
                 .post(RequestBody.create(GSON.toJson(payload), JSON_TYPE))
                 .build();
 
@@ -519,22 +362,12 @@ public class ExpenseReimbursement {
 
     // ============================================================
     // 步骤 7：轮询等待审核结果
-    // REST API: POST /api/app-api/sip/platform/v2/review/task/result（封装了轮询逻辑）
+    // REST API: POST /api/app-api/sip/platform/v2/review/task/result
     // ============================================================
 
-    /**
-     * 轮询直至审核任务完成，返回审核结果对象。
-     *
-     * <p>终态: 1=审核通过, 2=审核失败, 4=审核不通过, 7=识别失败
-     *
-     * @param timeoutSec  最长等待秒数
-     * @param intervalSec 轮询间隔秒数
-     */
     public static JsonObject waitForReview(
-            String workspaceId,
-            String taskId,
-            int timeoutSec,
-            int intervalSec) throws IOException, InterruptedException {
+            String workspaceId, String taskId,
+            int timeoutSec, int intervalSec) throws IOException, InterruptedException {
 
         String url = BASE_URL + "/api/app-api/sip/platform/v2/review/task/result";
         JsonObject payload = new JsonObject();
@@ -546,8 +379,7 @@ public class ExpenseReimbursement {
 
         while (System.currentTimeMillis() < deadline) {
             Request req = new Request.Builder()
-                    .url(url)
-                    .headers(authHeaders())
+                    .url(url).headers(authHeaders())
                     .post(RequestBody.create(GSON.toJson(payload), JSON_TYPE))
                     .build();
 
@@ -566,7 +398,6 @@ public class ExpenseReimbursement {
         throw new RuntimeException("等待审核结果超时（" + timeoutSec + "s）");
     }
 
-    /** 格式化输出审核任务的结论和各规则审核结果（工具辅助函数）。 */
     public static void displayReviewResult(JsonObject reviewResult) {
         Map<Integer, String> statusMap = new LinkedHashMap<>();
         statusMap.put(0, "未审核");   statusMap.put(1, "审核通过");   statusMap.put(2, "审核失败");
@@ -597,10 +428,8 @@ public class ExpenseReimbursement {
                         int riskLevel = rt.has("risk_level")    ? rt.get("risk_level").getAsInt()    : 0;
                         String icon   = rv == 1 ? "✓" : "✗";
                         System.out.printf("  %s [%s] %s: %s%n",
-                                icon,
-                                riskMap.getOrDefault(riskLevel, "未知"),
-                                str(rt, "rule_name"),
-                                statusMap.getOrDefault(rv, "未知"));
+                                icon, riskMap.getOrDefault(riskLevel, "未知"),
+                                str(rt, "rule_name"), statusMap.getOrDefault(rv, "未知"));
                         String reasoning = str(rt, "reasoning");
                         if (!reasoning.isEmpty()) {
                             System.out.println("    依据: " + (reasoning.length() > 100
@@ -617,157 +446,153 @@ public class ExpenseReimbursement {
     // ============================================================
     public static void main(String[] args) throws Exception {
         System.out.println("=".repeat(60));
-        System.out.println("  DocFlow 费用报销场景示例");
+        System.out.println("  DocFlow 合同审核场景示例");
         System.out.println("=".repeat(60));
 
-        // ----------------------------------------------------------
-        // 步骤 1：创建工作空间（名称含时间戳，避免重名）
-        // ----------------------------------------------------------
-        String workspaceName = "费用报销_"
-                + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String workspaceId = createWorkspace(workspaceName, "费用报销单据自动化处理空间");
+        // 步骤 1：创建工作空间
+        String workspaceName = "合同审核_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String workspaceId = createWorkspace(workspaceName, "采购合同智能审核空间");
 
-        // ----------------------------------------------------------
-        // 步骤 2：创建文件类别（含样本和字段）
-        // ----------------------------------------------------------
-
-        // 2.1 报销申请单
-        String baoxiaoId = createCategory(
-                workspaceId, "报销申请单",
-                SAMPLE_DIR + "/报销申请单.XLS",
+        // 步骤 2：创建文件类别（采购合同）
+        String contractId = createCategory(
+                workspaceId, "采购合同",
+                SAMPLE_DIR + "/示例_采购合同.docx",
                 Arrays.asList(
-                        field("申请人"), field("出差目的"), field("报销期间"),
-                        field("目的地"), field("费用发生日期"), field("费用项目"),
-                        field("差旅费金额"), field("税率"), field("冲借款金额"),
-                        field("申请付款金额"), field("备注"), field("税额")
-                ),
-                ""
-        );
+                        field("合同编号"),               field("合同名称"),
+                        field("签订日期"),               field("生效条件"),
+                        field("甲方全称"),               field("甲方统一社会信用代码"),
+                        field("甲方联系方式"),           field("甲方地址"),
+                        field("乙方全称"),               field("乙方统一社会信用代码"),
+                        field("乙方联系方式"),           field("乙方地址"),
+                        field("乙方法定代表人/授权委托人"),
+                        field("标的名称"),               field("标的规格型号/标准"),
+                        field("标的技术/质量标准"),      field("标的数量/服务范围"),
+                        field("含税总金额（大写）"),     field("不含税金额"),
+                        field("税额"),                   field("税率"),
+                        field("发票条款"),               field("付款方式"),
+                        field("付款条件"),               field("付款比例"),
+                        field("账期"),                   field("收款账户信息"),
+                        field("履约期限"),               field("履约地点"),
+                        field("交付/验收标准与流程"),   field("违约责任"),
+                        field("免责条款"),               field("争议解决方式"),
+                        field("合同解除与终止条件"),    field("保密条款"),
+                        field("知识产权声明"),           field("合同份数"),
+                        field("附件清单"),               field("签约人签字/盖章")
+                ), "");
 
-        // 2.2 酒店水单（普通字段 + 消费明细表格字段）
-        String hotelId = createCategory(
-                workspaceId, "酒店水单",
-                SAMPLE_DIR + "/sample_hotel_receipt.png",
-                Arrays.asList(
-                        field("入住日期"), field("离店日期"), field("总金额")
-                ),
-                ""
-        );
-        // 追加表格字段（传 "-1" 自动归入默认表格）
-        for (String fn : new String[]{"日期", "费用类型", "金额", "备注"}) {
-            addCategoryField(workspaceId, hotelId, fn, "-1");
-        }
+        System.out.println("\n类别配置完成  采购合同: category_id=" + contractId);
 
-        // 2.3 支付记录
-        String paymentId = createCategory(
-                workspaceId, "支付记录",
-                SAMPLE_DIR + "/sample_payment_record.pdf",
-                Arrays.asList(
-                        field("交易流水号"), field("交易授权码"), field("付款卡种"),
-                        field("收款方户名"), field("付款方户名"), field("交易时间"),
-                        field("备注"), field("收款方账户"), field("收款方银行"),
-                        field("交易金额"), field("交易描述"), field("付款银行"),
-                        field("币种"), field("交易账号/支付方式")
-                ),
-                ""
-        );
-
-        System.out.println("\n配置完成  workspace_id=" + workspaceId);
-        System.out.println("  报销申请单: category_id=" + baoxiaoId);
-        System.out.println("  酒店水单:   category_id=" + hotelId);
-        System.out.println("  支付记录:   category_id=" + paymentId);
-
-        // ----------------------------------------------------------
         // 步骤 3：上传待处理文件
-        // ----------------------------------------------------------
         System.out.println("\n开始上传待处理文件...");
-        String[] sampleFiles = {
-                SAMPLE_DIR + "/报销申请单.XLS",
-                SAMPLE_DIR + "/sample_hotel_receipt.png",
-                SAMPLE_DIR + "/sample_payment_record.pdf"
-        };
-        List<String> batchNumbers = new ArrayList<>();
-        for (String path : sampleFiles) {
-            batchNumbers.add(uploadFile(workspaceId, path));
-        }
+        String batchNumber = uploadFile(workspaceId, SAMPLE_DIR + "/示例_采购合同.docx");
 
-        // ----------------------------------------------------------
         // 步骤 4：获取并展示抽取结果
-        // ----------------------------------------------------------
         System.out.println("\n开始获取处理结果...");
-        List<JsonObject> rawResults = new ArrayList<>();
-        for (String batchNumber : batchNumbers) {
-            try {
-                JsonObject result = waitForResult(workspaceId, batchNumber, 120, 3);
-                displayResult(result);
-                rawResults.add(result);
-            } catch (Exception e) {
-                System.err.println("  异常: " + e.getMessage());
-            }
-        }
+        JsonObject fileResult = waitForResult(workspaceId, batchNumber, 180, 3);
+        displayResult(fileResult);
 
-        // ----------------------------------------------------------
         // 步骤 5：配置审核规则库
-        // ----------------------------------------------------------
         System.out.println("\n开始配置审核规则库...");
-        String repoId = createRuleRepo(workspaceId, "费用报销审核规则库");
+        String repoId = createRuleRepo(workspaceId, "合同审核场景规则库");
 
-        // 规则组1：报销申请单合规性检查
-        String group1Id = createRuleGroup(workspaceId, repoId, "报销申请单合规性检查");
-        createRule(workspaceId, repoId, group1Id,
-                "行报销金额校验",
-                "行申请付款金额 ≤ 行差旅费金额（含税）- 行冲借款金额，如冲借款金额为空则冲借款金额视为0",
-                Arrays.asList(baoxiaoId), 10);
-        createRule(workspaceId, repoId, group1Id,
-                "报销总金额校验",
-                "申请付款总金额 ≤ Σ行申请付款金额",
-                Arrays.asList(baoxiaoId), 10);
-        createRule(workspaceId, repoId, group1Id,
-                "报销期间与费用日期匹配",
-                "\"费用发生日期\"应在\"报销期间\"所覆盖的日期范围内",
-                Arrays.asList(baoxiaoId), 20);
-        createRule(workspaceId, repoId, group1Id,
-                "必填字段完整性校验",
-                "\"申请人\"、\"费用发生日期\"、\"费用项目\"、\"申请付款金额\"均不为空，任一字段为空则审核不通过",
-                Arrays.asList(baoxiaoId), 10);
+        // 规则组1：财务条款审核
+        String group1Id = createRuleGroup(workspaceId, repoId, "财务条款审核");
+        createRule(workspaceId, repoId, group1Id, "连带责任条款",
+                "若存在开票方、付款方与签约主体不一致的情形（三方关系），则合同必须明确各方债权债务关系。",
+                Arrays.asList(contractId), 20);
+        createRule(workspaceId, repoId, group1Id, "履约保证金条款",
+                "若约定履约保证金/质保金，必须明确退还条件、退还时间节点及不予退还的情形。",
+                Arrays.asList(contractId), 20);
+        createRule(workspaceId, repoId, group1Id, "滞纳金/违约金合理性",
+                "若存在甲方逾期付款或乙方逾期交付的滞纳金/违约金条款，则日费率 <= 0.05%。",
+                Arrays.asList(contractId), 20);
+        createRule(workspaceId, repoId, group1Id, "验收/交付标准明确性",
+                "合同必须明确交付完成的判定标准（如双方签署验收单、开通即交付、开通N天后无异议即交付等）。",
+                Arrays.asList(contractId), 20);
+        createRule(workspaceId, repoId, group1Id, "币别一致性",
+                "合同全文中涉及金额的币别必须前后一致，若无提及币别信息，则视为一致。",
+                Arrays.asList(contractId), 20);
+        createRule(workspaceId, repoId, group1Id, "付款方式明确性",
+                "付款方式必须明确，属于以下之一：银行转账、银行承兑汇票、商业承兑汇票、第三方支付。",
+                Arrays.asList(contractId), 20);
+        createRule(workspaceId, repoId, group1Id, "付款条件明确性",
+                "付款节点需清晰（如【货到验收合格后】【合同签订后】）；付款期限需明确（如【30日内支付】【收到发票后15个工作日】）。",
+                Arrays.asList(contractId), 20);
+        createRule(workspaceId, repoId, group1Id, "税率合理性",
+                "税率必须为有效值：6%、9%、13%、1%、3%、免税、0%；税率需与合同标的类型匹配。",
+                Arrays.asList(contractId), 10);
+        createRule(workspaceId, repoId, group1Id, "付款比例合计",
+                "若合同中存在分阶段付款比例（如预付款、进度款、尾款），则各阶段付款比例合计必须等于 100%。",
+                Arrays.asList(contractId), 10);
+        createRule(workspaceId, repoId, group1Id, "产品明细合计与总金额一致性",
+                "若合同包含明细行：\n1. 各明细行【单价 x 数量 = 金额】；\n2. 所有明细行金额合计 = 合同总金额（允许±0.01元）。",
+                Arrays.asList(contractId), 10);
+        createRule(workspaceId, repoId, group1Id, "金额合规检测",
+                "1. 不含税金额 x 税率 = 税额（允许±0.01元尾差）；\n2. 不含税金额 + 税额 = 含税总金额。",
+                Arrays.asList(contractId), 10);
+        createRule(workspaceId, repoId, group1Id, "合同金额大小写一致性",
+                "若大小写金额均存在：两者必须一致；若仅存在大写金额：校验大写格式是否符合中文金额书写规范（如【壹万贰仟叁佰元整】）",
+                Arrays.asList(contractId), 10);
 
-        // 规则组2：差旅费用政策匹配审核
-        String group2Id = createRuleGroup(workspaceId, repoId, "差旅费用政策匹配审核");
-        createRule(workspaceId, repoId, group2Id,
-                "城市差标匹配",
-                "酒店住宿单价≤目的地城市差旅标准：一线城市（北京/上海/广州/深圳）≤800元/晚，省会及计划单列市≤500元/晚，其他城市≤300元/晚",
-                Arrays.asList(hotelId), 20);
-        createRule(workspaceId, repoId, group2Id,
-                "酒店明细合计金额校验",
-                "酒店水单中所有明细行\"金额\"的合计应等于\"总金额\"",
-                Arrays.asList(hotelId), 20);
+        // 规则组2：法务合规审核
+        String group2Id = createRuleGroup(workspaceId, repoId, "法务合规审核");
+        createRule(workspaceId, repoId, group2Id, "不可抗力条款",
+                "包含不可抗力条款，且定义清晰（如列明不可抗力事件范围、通知时限、责任豁免方式）。",
+                Arrays.asList(contractId), 30);
+        createRule(workspaceId, repoId, group2Id, "保密条款完整性",
+                "保密信息定义、保密期限、违约责任三项要素齐全。",
+                Arrays.asList(contractId), 30);
+        createRule(workspaceId, repoId, group2Id, "知识产权归属",
+                "若合同涉及技术开发、委托设计、软件开发等内容，则必须存在知识产权归属条款且归属明确。",
+                Arrays.asList(contractId), 30);
+        createRule(workspaceId, repoId, group2Id, "违约金上限合理性",
+                "违约金是否设置上限（如不超过合同总金额的20%），过高违约金存在法律风险。",
+                Arrays.asList(contractId), 30);
+        createRule(workspaceId, repoId, group2Id, "违约对等性检查",
+                "比较甲乙双方的逾期违约金比例。若双方比例差异超过设定阈值（如相差>=50%），则标记提醒。",
+                Arrays.asList(contractId), 30);
+        createRule(workspaceId, repoId, group2Id, "合同日期合理性",
+                "签订日期 <= 生效日期；生效日期 <= 到期日期（若有）；生效日期不得早于当前日期。",
+                Arrays.asList(contractId), 20);
+        createRule(workspaceId, repoId, group2Id, "签约主体名称一致性",
+                "合同首部、尾部签章处、正文中出现的签约主体名称必须完全一致。",
+                Arrays.asList(contractId), 10);
+        createRule(workspaceId, repoId, group2Id, "签约主体信息完整性",
+                "甲乙双方以下字段非空：名称、地址、联系方式。",
+                Arrays.asList(contractId), 10);
+        createRule(workspaceId, repoId, group2Id, "必备条款完整性",
+                "合同必须包含以下条款：\n"
+                + "1. 主体信息（双方名称、统一社会信用代码）；\n"
+                + "2. 标的（货物/服务名称）；\n"
+                + "3. 数量/服务范围；\n"
+                + "4. 质量（若有）；\n"
+                + "5. 价款/报酬（含税总金额）；\n"
+                + "6. 履行期限、地点和方式；\n"
+                + "7. 违约责任（有明确的违约情形和违约金）；\n"
+                + "8. 争议解决方式（诉讼或仲裁）。",
+                Arrays.asList(contractId), 10);
 
-        // 规则组3：跨文档交叉审核
-        String group3Id = createRuleGroup(workspaceId, repoId, "跨文档交叉审核");
-        createRule(workspaceId, repoId, group3Id,
-                "跨文档金额匹配",
-                "报销申请单的差旅费金额（含税）= 酒店水单的\"总金额\" = 支付记录的\"交易金额\"，允许±0.1元误差",
-                Arrays.asList(baoxiaoId, hotelId, paymentId), 10);
-        createRule(workspaceId, repoId, group3Id,
-                "付款人身份与申请人一致性",
-                "支付记录的\"付款方户名\"与报销申请单的\"申请人\"应为同一人",
-                Arrays.asList(baoxiaoId, paymentId), 20);
+        // 规则组3：文本质量与一致性审核
+        String group3Id = createRuleGroup(workspaceId, repoId, "文本质量与一致性审核");
+        createRule(workspaceId, repoId, group3Id, "数字计算校验",
+                "1. 单价 x 数量 = 金额（每行）；\n2. 各分项金额合计 = 合同总金额（允许±0.01元尾差）。",
+                Arrays.asList(contractId), 30);
+        createRule(workspaceId, repoId, group3Id, "内部一致性检测",
+                "跨条款逻辑无矛盾：如付款条件与交付/验收条款不冲突；合同金额在正文、汇总表中前后一致；期限起止日期合理。",
+                Arrays.asList(contractId), 20);
+        createRule(workspaceId, repoId, group3Id, "错别字/语义错误检测",
+                "检测合同文本中的错别字、用词不当、语义歧义",
+                Arrays.asList(contractId), 30);
 
-        // ----------------------------------------------------------
         // 步骤 6：提交审核任务
-        // ----------------------------------------------------------
         List<String> extractTaskIds = new ArrayList<>();
-        for (JsonObject r : rawResults) {
-            if (r.has("task_id") && !r.get("task_id").isJsonNull()) {
-                extractTaskIds.add(r.get("task_id").getAsString());
-            }
+        if (fileResult.has("task_id") && !fileResult.get("task_id").isJsonNull()) {
+            extractTaskIds.add(fileResult.get("task_id").getAsString());
         }
-        String reviewTaskId = submitReviewTask(
-                workspaceId, "费用报销审核", repoId, extractTaskIds);
+        String ts = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String reviewTaskId = submitReviewTask(workspaceId, "合同审核_" + ts, repoId, extractTaskIds);
 
-        // ----------------------------------------------------------
         // 步骤 7：轮询获取审核结果
-        // ----------------------------------------------------------
         JsonObject reviewResult = waitForReview(workspaceId, reviewTaskId, 300, 5);
         displayReviewResult(reviewResult);
 
@@ -780,9 +605,7 @@ public class ExpenseReimbursement {
     // 私有工具方法
     // ============================================================
 
-    private static String str(JsonObject obj, String key) {
-        return str(obj, key, "");
-    }
+    private static String str(JsonObject obj, String key) { return str(obj, key, ""); }
 
     private static String str(JsonObject obj, String key, String defaultVal) {
         if (obj == null || !obj.has(key) || obj.get(key).isJsonNull()) return defaultVal;

@@ -28,7 +28,27 @@
               {
                 "group": "场景化示例",
                 "pages": [
-                  "docflow/cn/00-overview/expense_reimbursement"
+                  {
+                    "group": "费用报销场景",
+                    "pages": [
+                      "docflow/cn/00-overview/expense_reimbursement",
+                      "docflow/cn/00-overview/expense_reimbursement_already_configured"
+                    ]
+                  },
+                  {
+                    "group": "AP审单场景",
+                    "pages": [
+                      "docflow/cn/00-overview/ap_review",
+                      "docflow/cn/00-overview/ap_review_already_configured"
+                    ]
+                  },
+                  {
+                    "group": "合同审核场景",
+                    "pages": [
+                      "docflow/cn/00-overview/contract_review",
+                      "docflow/cn/00-overview/contract_review_already_configured"
+                    ]
+                  }
                 ]
               },
               {
@@ -140,7 +160,6 @@
             "tab": "API",
             "openapi": "docflow/cn/rest-api/openapi.bundle.yaml"
           }
-
         ]
       },
       {

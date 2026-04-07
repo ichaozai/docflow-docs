@@ -30,14 +30,13 @@ import requests
 # ============================================================
 APP_ID        = "your-app-id"      # TextIn 控制台中的 x-ti-app-id
 SECRET_CODE   = "your-secret-code" # TextIn 控制台中的 x-ti-secret-code
-ENTERPRISE_ID = 0                  # 企业组织 ID，可在 TextIn 控制台「账号与开发者信息」中查看
 
 BASE_URL = "https://docflow.textin.com"
 
 # 示例文件目录（相对本脚本的路径）
 SAMPLE_DIR = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
-    "..", "sample_files", "合同审核"
+    "..", "sample_files", "contract_review"
 )
 
 # ============================================================
@@ -85,8 +84,6 @@ def create_workspace(name: str, description: str = "") -> str:
         "description": description,
         "auth_scope":  0,
     }
-    if ENTERPRISE_ID:
-        payload["enterprise_id"] = ENTERPRISE_ID
     resp = requests.post(url, json=payload, headers=_headers(), timeout=30)
     data = _check(resp, "创建工作空间")
     workspace_id = data["result"]["workspace_id"]
@@ -381,7 +378,7 @@ def main():
     contract_id = create_category(
         workspace_id=workspace_id,
         name="采购合同",
-        sample_file_path=os.path.join(SAMPLE_DIR, "示例_采购合同.docx"),
+        sample_file_path=os.path.join(SAMPLE_DIR, "sample_contract.docx"),
         fields=[
             {"name": "合同编号"},               {"name": "合同名称"},
             {"name": "签订日期"},               {"name": "生效条件"},
@@ -414,7 +411,7 @@ def main():
     print("\n开始上传待处理文件...")
     batch_number = upload_file(
         workspace_id,
-        os.path.join(SAMPLE_DIR, "示例_采购合同.docx"),
+        os.path.join(SAMPLE_DIR, "sample_contract.docx"),
     )
 
     # ----------------------------------------------------------

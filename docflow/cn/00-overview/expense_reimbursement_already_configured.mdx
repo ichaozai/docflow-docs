@@ -1,6 +1,6 @@
 ---
-title: "费用报销场景(已完成空间配置)"
-description: "工作空间、文件类别和审核规则库已就绪，通过 DocFlow API 完成文件上传、抽取结果获取和智能审核的日常处理流程"
+title: "费用报销场景（已有工作空间）"
+description: "当已在docflow产品页完成工作空间创建、文件类别和审核规则库配置，通过 DocFlow API 完成文件上传，获取文件分类、抽取及智能审核结果的处理流程如下"
 ---
 
 <Tip>
@@ -10,7 +10,7 @@ description: "工作空间、文件类别和审核规则库已就绪，通过 Do
 
 ## 01 场景说明
 
-工作空间、文件类别、审核规则库属于**一次性基础配置**，完成后即可持续复用。在日常业务中，财务人员只需通过 API 重复以下三步：
+工作空间、文件类别、审核规则库属于**一次性基础配置**，完成后即可持续复用。在日常业务中，企业研发人员只需通过 API 重复以下三步：
 
 1. **上传文件**：将新的报销单据上传至工作空间
 2. **获取抽取结果**：等待系统完成分类识别与字段抽取，获取结构化数据
@@ -102,7 +102,7 @@ description: "工作空间、文件类别和审核规则库已就绪，通过 Do
 
         # 调用示例：批量上传本次报销包的所有单据
         file_paths = [
-            os.path.join(FILES_DIR, "报销申请单.XLS"),
+            os.path.join(FILES_DIR, "sample_expense_form.xls"),
             os.path.join(FILES_DIR, "sample_hotel_receipt.png"),
             os.path.join(FILES_DIR, "sample_payment_record.pdf"),
         ]
@@ -131,7 +131,7 @@ description: "工作空间、文件类别和审核规则库已就绪，通过 Do
 
         // 调用示例：批量上传本次报销包的所有单据
         String[] filePaths = {
-            FILES_DIR + "/报销申请单.XLS",
+            FILES_DIR + "/sample_expense_form.xls",
             FILES_DIR + "/sample_hotel_receipt.png",
             FILES_DIR + "/sample_payment_record.pdf"
         };
@@ -390,7 +390,7 @@ description: "工作空间、文件类别和审核规则库已就绪，通过 Do
     BASE_URL  = "https://docflow.textin.com"
     FILES_DIR = os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
-        "..", "sample_files", "费用报销"
+        "..", "sample_files", "expense_reimbursement"
     )
 
     # ============================================================
@@ -557,7 +557,7 @@ description: "工作空间、文件类别和审核规则库已就绪，通过 Do
         # 步骤 1：上传文件
         print("开始上传待处理文件...")
         file_paths = [
-            os.path.join(FILES_DIR, "报销申请单.XLS"),
+            os.path.join(FILES_DIR, "sample_expense_form.xls"),
             os.path.join(FILES_DIR, "sample_hotel_receipt.png"),
             os.path.join(FILES_DIR, "sample_payment_record.pdf"),
         ]
@@ -617,7 +617,7 @@ description: "工作空间、文件类别和审核规则库已就绪，通过 Do
         private static final String REPO_ID      = "your-repo-id";
 
         private static final String BASE_URL  = "https://docflow.textin.com";
-        private static final String FILES_DIR = "../sample_files/费用报销";
+        private static final String FILES_DIR = "../sample_files/expense_reimbursement";
 
         private static final OkHttpClient HTTP      = new OkHttpClient.Builder()
                 .callTimeout(java.time.Duration.ofSeconds(60)).build();
@@ -776,7 +776,7 @@ description: "工作空间、文件类别和审核规则库已就绪，通过 Do
             // 步骤 1：上传文件
             System.out.println("开始上传待处理文件...");
             String[] filePaths = {
-                FILES_DIR + "/报销申请单.XLS",
+                FILES_DIR + "/sample_expense_form.xls",
                 FILES_DIR + "/sample_hotel_receipt.png",
                 FILES_DIR + "/sample_payment_record.pdf"
             };
@@ -825,8 +825,8 @@ examples/
 │   ├── pom.xml
 │   └── README.md
 └── sample_files/
-    └── 费用报销/
-        ├── 报销申请单.XLS
+    └── expense_reimbursement/
+        ├── sample_expense_form.xls
         ├── sample_hotel_receipt.png
         └── sample_payment_record.pdf
 ```
@@ -909,7 +909,7 @@ examples/
 规则库:   <repo_id>
 
 开始上传待处理文件...
-[步骤1] 文件上传成功  name=报销申请单.XLS  batch_number=<batch_number>
+[步骤1] 文件上传成功  name=sample_expense_form.xls  batch_number=<batch_number>
 [步骤1] 文件上传成功  name=sample_hotel_receipt.png  batch_number=<batch_number>
 [步骤1] 文件上传成功  name=sample_payment_record.pdf  batch_number=<batch_number>
 
@@ -917,7 +917,7 @@ examples/
 [步骤2] 等待处理结果（batch_number=<batch_number>）..... 完成
 
 ============================================================
-文件名   : 报销申请单.XLS
+文件名   : sample_expense_form.xls
 分类结果 : 报销申请单
 
 ── 普通字段 ──────────────────────────
@@ -939,4 +939,169 @@ examples/
     ⚠️  行报销金额校验
        → 第 2 行申请付款金额超出差旅费金额
     ...
+```
+
+## 07 结果说明
+
+### 抽取结果
+
+处理完成后，每份文件将返回分类结果和字段抽取结果。字段抽取结果位于 `data.fields[]`，每个字段包含 `key`、`value` 及坐标 `position`（可用于原文高亮回显）。
+
+以下为三份样本文件的实际接口返回（来自 `file/fetch`，省略了部分 `position` 坐标）：
+
+<AccordionGroup>
+  <Accordion defaultOpen title="sample_expense_form.xls">
+    ```json
+    {
+      "name": "sample_expense_form.xls",
+      "format": "xls",
+      "category": "报销申请单",
+      "recognition_status": 1,
+      "duration_ms": 5316,
+      "data": {
+        "fields": [
+          { "key": "备注",        "value": "配合chris 12月19日上午政府会见，事先行程预演，并入住政府推荐就近酒店" },
+          { "key": "申请人",      "value": "吕昊宇" },
+          { "key": "出差目的",    "value": "商务沟通" },
+          { "key": "报销期间",    "value": "2024-12-18 至 2024-12-20" },
+          { "key": "税率",        "value": "0.06" },
+          { "key": "税额",        "value": "30.06" }
+        ],
+        "stamps": [],
+        "handwritings": []
+      }
+    }
+    ```
+  </Accordion>
+  <Accordion defaultOpen title="sample_hotel_receipt.png">
+    ```json
+    {
+      "name": "sample_hotel_receipt.png",
+      "format": "png",
+      "category": "酒店水单",
+      "recognition_status": 1,
+      "duration_ms": 6185,
+      "data": {
+        "fields": [
+          { "key": "总金额",    "value": "1,288.00" },
+          { "key": "入住日期",  "value": "2024-12-18" },
+          { "key": "离店日期",  "value": "2024-12-20" }
+        ],
+        "items": [
+          [
+            { "key": "日期",     "value": "2024-12-18" },
+            { "key": "费用类型", "value": "房费*Room Charge" },
+            { "key": "金额",     "value": "644.00" }
+          ],
+          [
+            { "key": "日期",     "value": "2024-12-19" },
+            { "key": "费用类型", "value": "房费*Room Charge" },
+            { "key": "金额",     "value": "644.00" }
+          ]
+        ],
+        "stamps": [
+          {
+            "text": "北京中■马哥华罗大酒店有限 发票专用章",
+            "type": "其他",
+            "color": "红色",
+            "shape": "椭圆章"
+          }
+        ],
+        "handwritings": []
+      }
+    }
+    ```
+  </Accordion>
+  <Accordion defaultOpen title="sample_payment_record.pdf">
+    ```json
+    {
+      "name": "sample_payment_record.pdf",
+      "format": "pdf",
+      "category": "支付记录",
+      "recognition_status": 1,
+      "duration_ms": 7203,
+      "data": {
+        "fields": [
+          { "key": "交易描述",          "value": "财付通-叶婆婆钵钵鸡" },
+          { "key": "交易流水号",        "value": "910220250309124124624054" },
+          { "key": "交易时间",          "value": "2025-03-09 12:41:24" },
+          { "key": "交易金额",          "value": "240.00" },
+          { "key": "付款银行",          "value": "宁波银行" },
+          { "key": "交易账号/支付方式",  "value": "信用卡" },
+          { "key": "付款方户名",        "value": "吕昊宇" }
+        ],
+        "stamps": [
+          {
+            "text": "宁波银行股份有限公司 电子回单专用章",
+            "type": "其他",
+            "color": "红色",
+            "shape": "椭圆章"
+          }
+        ],
+        "handwritings": []
+      }
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### 审核结果
+
+审核完成后，可从 `review/task/result` 接口获取以下信息：
+
+- **`status`**：任务整体状态（`1`=审核通过，`4`=审核不通过，`2`=审核失败）
+- **`statistics`**：规则通过数、不通过数汇总
+- **`groups[].review_tasks[]`**：每条规则的详细审核结果，包含：
+  - `review_result`：该规则的审核结论
+  - `reasoning`：AI 给出的审核依据说明
+  - `anchors`：依据在原文中的坐标位置（可用于高亮回显）
+
+```json
+{
+  "task_id": "31415926",
+  "task_name": "费用报销审核",
+  "status": 4,
+  "statistics": { "pass_count": 5, "failure_count": 3, "error_count": 0 },
+  "groups": [
+    {
+      "group_name": "报销申请单合规性检查",
+      "review_tasks": [
+        {
+          "rule_name": "必填字段完整性校验",
+          "risk_level": 10,
+          "review_result": 1,
+          "reasoning": "申请人、费用发生日期、费用项目、申请付款金额均已填写，审核通过。"
+        },
+        {
+          "rule_name": "行报销金额校验",
+          "risk_level": 10,
+          "review_result": 4,
+          "reasoning": "行申请付款金额 1288.00 大于行差旅费金额（含税）1215.09 + 税额 72.91 = 1288.00，等于上限，审核不通过。"
+        }
+      ]
+    },
+    {
+      "group_name": "差旅费用政策匹配审核",
+      "review_tasks": [
+        {
+          "rule_name": "城市差标匹配",
+          "risk_level": 20,
+          "review_result": 1,
+          "reasoning": "酒店位于北京（一线城市），住宿单价 644.00 元/晚未超过 800 元/晚的标准，审核通过。"
+        }
+      ]
+    },
+    {
+      "group_name": "跨文档交叉审核",
+      "review_tasks": [
+        {
+          "rule_name": "付款人身份与申请人一致性",
+          "risk_level": 20,
+          "review_result": 4,
+          "reasoning": "支付记录付款方户名"吕昊宇"与报销申请单申请人签名"徐汉波"不一致，审核不通过。"
+        }
+      ]
+    }
+  ]
+}
 ```

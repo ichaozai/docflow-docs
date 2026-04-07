@@ -32,13 +32,12 @@ public class ApReview {
     // ============================================================
     private static final String APP_ID        = "your-app-id";       // x-ti-app-id
     private static final String SECRET_CODE   = "your-secret-code";  // x-ti-secret-code
-    private static final Long   ENTERPRISE_ID = null;                 // 企业组织 ID，不需要时留 null
 
     private static final String BASE_URL = "https://docflow.textin.com";
 
     // 示例文件目录（相对 examples/ 根目录）
     private static final String SAMPLE_DIR =
-            new File("../sample_files/AP审单").getAbsolutePath();
+            new File("../sample_files/ap_review").getAbsolutePath();
 
     // ============================================================
     // 全局工具对象
@@ -97,7 +96,6 @@ public class ApReview {
         JsonObject payload = new JsonObject();
         payload.addProperty("name", name);
         payload.addProperty("description", description);
-        if (ENTERPRISE_ID != null) payload.addProperty("enterprise_id", ENTERPRISE_ID);
         payload.addProperty("auth_scope", 0);
 
         Request req = new Request.Builder()
@@ -498,7 +496,7 @@ public class ApReview {
         // 2.1 国内票-数电票（基本信息字段 + 明细表格字段）
         String invoiceId = createCategory(
                 workspaceId, "国内票-数电票",
-                SAMPLE_DIR + "/示例_发票.pdf",
+                SAMPLE_DIR + "/sample_invoice.pdf",
                 Arrays.asList(
                         field("发票号码"), field("开票日期"),
                         field("价税合计"), field("税前金额"),
@@ -514,7 +512,7 @@ public class ApReview {
         // 2.2 采购合同
         String contractId = createCategory(
                 workspaceId, "采购合同",
-                SAMPLE_DIR + "/示例_采购合同.pdf",
+                SAMPLE_DIR + "/sample_contract.pdf",
                 Arrays.asList(
                         field("编号"), field("甲方"), field("乙方"),
                         field("签订日期"), field("合作期间"), field("支付条款"),
@@ -530,7 +528,7 @@ public class ApReview {
         // 2.3 入库单
         String inboundId = createCategory(
                 workspaceId, "入库单",
-                SAMPLE_DIR + "/示例_入库单.pdf",
+                SAMPLE_DIR + "/sample_inbound.pdf",
                 Arrays.asList(
                         field("收货单编号"), field("收货日期"), field("对应合同号"),
                         field("供应商名称"), field("仓库／库位"), field("物流单号"),
@@ -549,7 +547,7 @@ public class ApReview {
         // 2.4 验收单
         String acceptanceId = createCategory(
                 workspaceId, "验收单",
-                SAMPLE_DIR + "/示例_验收单.pdf",
+                SAMPLE_DIR + "/sample_acceptance.pdf",
                 Arrays.asList(
                         field("项目名称"), field("合同编号"), field("甲方单位名称"),
                         field("乙方单位名称"), field("甲方验收人"), field("乙方施工人"),
@@ -566,10 +564,10 @@ public class ApReview {
         // 步骤 3：上传待处理文件
         System.out.println("\n开始上传待处理文件...");
         String[] sampleFiles = {
-                SAMPLE_DIR + "/示例_发票.pdf",
-                SAMPLE_DIR + "/示例_采购合同.pdf",
-                SAMPLE_DIR + "/示例_入库单.pdf",
-                SAMPLE_DIR + "/示例_验收单.pdf"
+                SAMPLE_DIR + "/sample_invoice.pdf",
+                SAMPLE_DIR + "/sample_contract.pdf",
+                SAMPLE_DIR + "/sample_inbound.pdf",
+                SAMPLE_DIR + "/sample_acceptance.pdf"
         };
         List<String> batchNumbers = new ArrayList<>();
         for (String path : sampleFiles) {

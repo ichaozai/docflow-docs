@@ -1,6 +1,6 @@
 ---
-title: "合同审核场景（已完成空间配置）"
-description: "工作空间、文件类别和审核规则库已就绪，通过 DocFlow API 完成文件上传、抽取结果获取和智能审核的日常处理流程"
+title: "合同审核场景（已有工作空间）"
+description: "当已在docflow产品页完成工作空间创建、文件类别和审核规则库配置，通过 DocFlow API 完成文件上传，获取文件分类、抽取及智能审核结果的处理流程如下"
 ---
 
 <Tip>
@@ -73,12 +73,12 @@ description: "工作空间、文件类别和审核规则库已就绪，通过 Do
     <Tabs>
       <Tab title="Python">
         ```python
-        batch_number = upload_file(WORKSPACE_ID, os.path.join(FILES_DIR, "示例_采购合同.docx"))
+        batch_number = upload_file(WORKSPACE_ID, os.path.join(FILES_DIR, "sample_contract.docx"))
         ```
       </Tab>
       <Tab title="Java">
         ```java
-        String batchNumber = uploadFile(WORKSPACE_ID, FILES_DIR + "/示例_采购合同.docx");
+        String batchNumber = uploadFile(WORKSPACE_ID, FILES_DIR + "/sample_contract.docx");
         ```
       </Tab>
     </Tabs>
@@ -136,29 +136,881 @@ description: "工作空间、文件类别和审核规则库已就绪，通过 Do
   </Accordion>
 </AccordionGroup>
 
-## 04 运行示例
+## 04 完整示例代码
 
-<Steps>
-  <Step title="填写配置项">
-    打开示例代码，将 `APP_ID`、`SECRET_CODE`、`WORKSPACE_ID`、`REPO_ID` 替换为您的实际值。
-  </Step>
-  <Step title="准备待处理文件">
-    将待审核的采购合同放入 `examples/sample_files/合同审核/` 目录，或修改代码中的文件路径指向您的实际文件。
-  </Step>
-  <Step title="安装依赖并运行">
-    <Tabs>
-      <Tab title="Python">
-        ```bash
-        pip install requests
-        python examples/python/contract_review_configured.py
-        ```
-      </Tab>
-      <Tab title="Java">
-        ```bash
-        cd examples/java
-        mvn compile exec:java -Dexec.mainClass="com.docflow.ContractReviewConfigured"
-        ```
-      </Tab>
-    </Tabs>
-  </Step>
-</Steps>
+<Tabs>
+  <Tab title="Python">
+    ```python
+    #!/usr/bin/env python3
+    # -*- coding: utf-8 -*-
+    """
+    DocFlow 合同审核场景示例（已完成配置版）
+
+    适用于工作空间、文件类别、审核规则库均已配置完毕的场景。
+    流程：
+      1. 上传待审核合同文件
+      2. 轮询获取抽取结果，展示字段抽取结果
+      3. 提交审核任务
+      4. 轮询获取审核结果，展示审核结论
+
+    依赖：
+      pip install requests
+
+    使用前请先填写下方配置项。
+    """
+
+    import os
+    import time
+    from datetime import datetime
+
+    import requests
+
+    # ============================================================
+    # 配置项 — 请替换为您的实际值
+    # ============================================================
+    APP_ID        = "your-app-id"        # TextIn 控制台中的 x-ti-app-id
+    SECRET_CODE   = "your-secret-code"   # TextIn 控制台中的 x-ti-secret-code
+
+    WORKSPACE_ID = "your-workspace-id"  # 已创建的工作空间 ID
+    REPO_ID      = "your-repo-id"       # 已配置的审核规则库 ID
+
+    BASE_URL = "https://docflow.textin.com"
+
+    # 待处理文件目录（默认指向内置示例文件，可替换为您自己的文件路径）
+    FILES_DIR = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "..", "sample_files", "contract_review"
+    )
+
+    # ============================================================
+    # 工具辅助函数
+    # ============================================================
+
+    def _headers() -> dict:
+        return {
+            "x-ti-app-id":      APP_ID,
+            "x-ti-secret-code": SECRET_CODE,
+        }
+
+
+    def _check(resp: requests.Response, action: str) -> dict:
+        """校验响应状态，返回解析后的 JSON；失败时抛出 RuntimeError。"""
+        data = resp.json()
+        if data.get("code") != 200:
+            raise RuntimeError(f"{action} 失败（code={data.get('code')}）: {data}")
+        return data
+
+
+    def _mime(file_path: str) -> str:
+        """根据文件扩展名返回 MIME 类型。"""
+        ext = os.path.splitext(file_path)[1].lower()
+        return {
+            ".png":  "image/png",
+            ".jpg":  "image/jpeg",
+            ".jpeg": "image/jpeg",
+            ".pdf":  "application/pdf",
+            ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        }.get(ext, "application/octet-stream")
+
+
+    def display_result(file_result: dict):
+        """格式化输出文件的分类结果和字段抽取结果。"""
+        print("\n" + "=" * 60)
+        print(f"文件名   : {file_result.get('name')}")
+        print(f"分类结果 : {file_result.get('category') or '未分类'}")
+        data = file_result.get("data") or {}
+        fields = data.get("fields") or []
+        if fields:
+            print("\n── 基本信息字段 ────────────────────────")
+            for f in fields:
+                val = f.get('value', '')
+                display_val = (val[:80] + "...") if len(str(val)) > 80 else val
+                print(f"  {f.get('key', ''):<25s}: {display_val}")
+
+
+    def display_review_result(review_result: dict):
+        """格式化输出审核任务的结论和各规则审核结果。"""
+        STATUS_MAP = {
+            0: "未审核", 1: "审核通过", 2: "审核失败",
+            3: "审核中", 4: "审核不通过", 5: "识别中",
+            6: "排队中", 7: "识别失败",
+        }
+        RISK_MAP = {10: "高风险", 20: "中风险", 30: "低风险"}
+
+        stats = review_result.get("statistics", {})
+        print("\n" + "=" * 60)
+        print(f"审核任务状态  : {STATUS_MAP.get(review_result.get('status'), '未知')}")
+        print(f"规则通过数    : {stats.get('pass_count', 0)}")
+        print(f"规则不通过数  : {stats.get('failure_count', 0)}")
+
+        for group in review_result.get("groups", []):
+            print(f"\n── 规则组：{group.get('group_name')} ───────────────────")
+            for rt in group.get("review_tasks", []):
+                result_text = STATUS_MAP.get(rt.get("review_result"), "未知")
+                risk_text   = RISK_MAP.get(rt.get("risk_level"), "未知")
+                icon = "✓" if rt.get("review_result") == 1 else "✗"
+                print(f"  {icon} [{risk_text}] {rt.get('rule_name')}: {result_text}")
+                reasoning = rt.get("reasoning", "")
+                if reasoning:
+                    print(f"    依据: {reasoning[:100]}{'...' if len(reasoning) > 100 else ''}")
+
+
+    # ============================================================
+    # 步骤 1：上传待处理文件
+    # REST API: POST /api/app-api/sip/platform/v2/file/upload
+    # ============================================================
+
+    def upload_file(workspace_id: str, file_path: str) -> str:
+        """上传待处理文件至工作空间，返回 batch_number。"""
+        url = f"{BASE_URL}/api/app-api/sip/platform/v2/file/upload"
+        with open(file_path, "rb") as f:
+            resp = requests.post(
+                url,
+                params={"workspace_id": workspace_id},
+                files={"file": (os.path.basename(file_path), f, _mime(file_path))},
+                headers=_headers(),
+                timeout=60,
+            )
+        batch_number = _check(resp, "上传文件")["result"]["batch_number"]
+        print(f"[步骤1] 文件上传成功  name={os.path.basename(file_path)}"
+              f"  batch_number={batch_number}")
+        return batch_number
+
+
+    # ============================================================
+    # 步骤 2：轮询等待抽取结果
+    # REST API: GET /api/app-api/sip/platform/v2/file/fetch
+    # ============================================================
+
+    def wait_for_result(
+        workspace_id: str,
+        batch_number: str,
+        timeout: int = 180,
+        interval: int = 3,
+    ) -> dict:
+        """
+        轮询直至文件识别完成，返回文件结果对象（含 task_id）。
+
+        recognition_status: 0=待识别, 1=成功, 2=失败
+        """
+        url = f"{BASE_URL}/api/app-api/sip/platform/v2/file/fetch"
+        params = {"workspace_id": workspace_id, "batch_number": batch_number}
+        deadline = time.time() + timeout
+        print(f"[步骤2] 等待处理结果（batch_number={batch_number}）...", end="", flush=True)
+        while time.time() < deadline:
+            resp = requests.get(url, params=params, headers=_headers(), timeout=30)
+            data = _check(resp, "获取处理结果")
+            files = data.get("result", {}).get("files", [])
+            if files:
+                status = files[0].get("recognition_status")
+                if status == 1:
+                    print(" 完成")
+                    return files[0]
+                elif status == 2:
+                    raise RuntimeError(f"文件处理失败: {files[0].get('failure_causes')}")
+            print(".", end="", flush=True)
+            time.sleep(interval)
+        raise TimeoutError(f"等待处理结果超时（{timeout}s）")
+
+
+    # ============================================================
+    # 步骤 3：提交审核任务
+    # REST API: POST /api/app-api/sip/platform/v2/review/task/submit
+    # ============================================================
+
+    def submit_review_task(
+        workspace_id: str,
+        name: str,
+        repo_id: str,
+        extract_task_ids: list,
+    ) -> str:
+        """提交审核任务，返回审核任务 task_id。"""
+        url = f"{BASE_URL}/api/app-api/sip/platform/v2/review/task/submit"
+        payload = {
+            "workspace_id":     workspace_id,
+            "name":             name,
+            "repo_id":          repo_id,
+            "extract_task_ids": extract_task_ids,
+        }
+        resp = requests.post(url, json=payload, headers=_headers(), timeout=30)
+        task_id = _check(resp, "提交审核任务")["result"]["task_id"]
+        print(f"[步骤3] 审核任务提交成功  task_id={task_id}")
+        return task_id
+
+
+    # ============================================================
+    # 步骤 4：轮询等待审核结果
+    # REST API: POST /api/app-api/sip/platform/v2/review/task/result
+    # ============================================================
+
+    def wait_for_review(
+        workspace_id: str,
+        task_id: str,
+        timeout: int = 300,
+        interval: int = 5,
+    ) -> dict:
+        """
+        轮询直至审核任务完成，返回审核结果对象。
+
+        终态: 1=审核通过, 2=审核失败, 4=审核不通过, 7=识别失败
+        """
+        url = f"{BASE_URL}/api/app-api/sip/platform/v2/review/task/result"
+        payload = {"workspace_id": workspace_id, "task_id": task_id}
+        deadline = time.time() + timeout
+        print(f"[步骤4] 等待审核结果（task_id={task_id}）...", end="", flush=True)
+        while time.time() < deadline:
+            resp = requests.post(url, json=payload, headers=_headers(), timeout=30)
+            data = _check(resp, "获取审核结果")
+            result = data.get("result", {})
+            if result.get("status") in (1, 2, 4, 7):
+                print(" 完成")
+                return result
+            print(".", end="", flush=True)
+            time.sleep(interval)
+        raise TimeoutError(f"等待审核结果超时（{timeout}s）")
+
+
+    # ============================================================
+    # 主流程
+    # ============================================================
+
+    def main():
+        print("=" * 60)
+        print("  DocFlow 合同审核场景示例（已完成配置版）")
+        print("=" * 60)
+        print(f"工作空间: {WORKSPACE_ID}")
+        print(f"规则库:   {REPO_ID}")
+
+        # ----------------------------------------------------------
+        # 步骤 1：上传待处理文件
+        # ----------------------------------------------------------
+        print("\n开始上传待处理文件...")
+        batch_number = upload_file(
+            WORKSPACE_ID,
+            os.path.join(FILES_DIR, "sample_contract.docx"),
+        )
+
+        # ----------------------------------------------------------
+        # 步骤 2：轮询获取抽取结果并展示
+        # ----------------------------------------------------------
+        print("\n开始获取处理结果...")
+        file_result = wait_for_result(WORKSPACE_ID, batch_number)
+        display_result(file_result)
+
+        # ----------------------------------------------------------
+        # 步骤 3：提交审核任务
+        # ----------------------------------------------------------
+        print("\n开始审核...")
+        task_name = f"合同审核_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        extract_task_ids = [file_result.get("task_id")] if file_result.get("task_id") else []
+        review_task_id = submit_review_task(WORKSPACE_ID, task_name, REPO_ID, extract_task_ids)
+
+        # ----------------------------------------------------------
+        # 步骤 4：轮询获取审核结果并展示
+        # ----------------------------------------------------------
+        review_result = wait_for_review(WORKSPACE_ID, review_task_id)
+        display_review_result(review_result)
+
+
+    if __name__ == "__main__":
+        main()
+    ```
+  </Tab>
+  <Tab title="Java">
+    ```java
+    package com.docflow;
+
+    import com.google.gson.*;
+    import okhttp3.*;
+
+    import java.io.File;
+    import java.io.IOException;
+    import java.text.SimpleDateFormat;
+    import java.util.*;
+    import java.util.concurrent.TimeUnit;
+
+    /**
+     * DocFlow 合同审核场景示例（已完成配置版）
+     *
+     * <p>适用于工作空间、文件类别、审核规则库均已配置完毕的场景。
+     * <ol>
+     *   <li>上传待审核合同文件</li>
+     *   <li>轮询获取抽取结果，展示字段抽取结果</li>
+     *   <li>提交审核任务</li>
+     *   <li>轮询获取审核结果，展示审核结论</li>
+     * </ol>
+     *
+     * <p>依赖：OkHttp 4.x、Gson（见 pom.xml）
+     */
+    public class ContractReviewConfigured {
+
+        // ============================================================
+        // 配置项 — 请替换为您的实际值
+        // ============================================================
+        private static final String APP_ID        = "your-app-id";        // x-ti-app-id
+        private static final String SECRET_CODE   = "your-secret-code";   // x-ti-secret-code
+
+        private static final String WORKSPACE_ID = "your-workspace-id";  // 已创建的工作空间 ID
+        private static final String REPO_ID      = "your-repo-id";       // 已配置的审核规则库 ID
+
+        private static final String BASE_URL = "https://docflow.textin.com";
+
+        // 待处理文件目录
+        private static final String FILES_DIR =
+                new File("../sample_files/contract_review").getAbsolutePath();
+
+        // ============================================================
+        // 全局工具对象
+        // ============================================================
+        private static final OkHttpClient HTTP = new OkHttpClient.Builder()
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(90, TimeUnit.SECONDS)
+                .writeTimeout(60, TimeUnit.SECONDS)
+                .build();
+
+        private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
+        private static final MediaType JSON_TYPE = MediaType.get("application/json; charset=utf-8");
+
+        // ============================================================
+        // 工具辅助函数
+        // ============================================================
+
+        private static Headers authHeaders() {
+            return new Headers.Builder()
+                    .add("x-ti-app-id", APP_ID)
+                    .add("x-ti-secret-code", SECRET_CODE)
+                    .build();
+        }
+
+        private static JsonObject checkResponse(String body, String action) {
+            JsonObject obj = JsonParser.parseString(body).getAsJsonObject();
+            if (obj.get("code").getAsInt() != 200) {
+                throw new RuntimeException(action + " 失败: " + body);
+            }
+            return obj;
+        }
+
+        private static String mimeType(String filename) {
+            String lower = filename.toLowerCase();
+            if (lower.endsWith(".png"))  return "image/png";
+            if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
+            if (lower.endsWith(".pdf"))  return "application/pdf";
+            if (lower.endsWith(".docx")) return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+            if (lower.endsWith(".xlsx")) return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            return "application/octet-stream";
+        }
+
+        public static void displayResult(JsonObject fileResult) {
+            System.out.println("\n" + "=".repeat(60));
+            System.out.println("文件名   : " + str(fileResult, "name"));
+            System.out.println("分类结果 : " + str(fileResult, "category", "未分类"));
+
+            if (!fileResult.has("data") || fileResult.get("data").isJsonNull()) return;
+            JsonObject data = fileResult.getAsJsonObject("data");
+
+            JsonArray fields = jsonArray(data, "fields");
+            if (fields != null && fields.size() > 0) {
+                System.out.println("\n── 基本信息字段 ────────────────────────");
+                for (JsonElement e : fields) {
+                    JsonObject f = e.getAsJsonObject();
+                    String val = str(f, "value");
+                    String display = val.length() > 80 ? val.substring(0, 80) + "..." : val;
+                    System.out.printf("  %-25s: %s%n", str(f, "key"), display);
+                }
+            }
+        }
+
+        public static void displayReviewResult(JsonObject reviewResult) {
+            Map<Integer, String> statusMap = new LinkedHashMap<>();
+            statusMap.put(0, "未审核");   statusMap.put(1, "审核通过");   statusMap.put(2, "审核失败");
+            statusMap.put(3, "审核中");   statusMap.put(4, "审核不通过"); statusMap.put(5, "识别中");
+            statusMap.put(6, "排队中");   statusMap.put(7, "识别失败");
+            Map<Integer, String> riskMap = new LinkedHashMap<>();
+            riskMap.put(10, "高风险"); riskMap.put(20, "中风险"); riskMap.put(30, "低风险");
+
+            int status = reviewResult.get("status").getAsInt();
+            JsonObject stats = reviewResult.has("statistics")
+                    ? reviewResult.getAsJsonObject("statistics") : new JsonObject();
+
+            System.out.println("\n" + "=".repeat(60));
+            System.out.println("审核任务状态  : " + statusMap.getOrDefault(status, "未知"));
+            System.out.println("规则通过数    : " + (stats.has("pass_count")    ? stats.get("pass_count").getAsInt()    : 0));
+            System.out.println("规则不通过数  : " + (stats.has("failure_count") ? stats.get("failure_count").getAsInt() : 0));
+
+            JsonArray groups = jsonArray(reviewResult, "groups");
+            if (groups != null) {
+                for (JsonElement ge : groups) {
+                    JsonObject group = ge.getAsJsonObject();
+                    System.out.println("\n── 规则组：" + str(group, "group_name") + " ───────────────────");
+                    JsonArray tasks = jsonArray(group, "review_tasks");
+                    if (tasks != null) {
+                        for (JsonElement te : tasks) {
+                            JsonObject rt = te.getAsJsonObject();
+                            int rv        = rt.has("review_result") ? rt.get("review_result").getAsInt() : 0;
+                            int riskLevel = rt.has("risk_level")    ? rt.get("risk_level").getAsInt()    : 0;
+                            String icon   = rv == 1 ? "✓" : "✗";
+                            System.out.printf("  %s [%s] %s: %s%n",
+                                    icon, riskMap.getOrDefault(riskLevel, "未知"),
+                                    str(rt, "rule_name"), statusMap.getOrDefault(rv, "未知"));
+                            String reasoning = str(rt, "reasoning");
+                            if (!reasoning.isEmpty()) {
+                                System.out.println("    依据: " + (reasoning.length() > 100
+                                        ? reasoning.substring(0, 100) + "..." : reasoning));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // ============================================================
+        // 步骤 1：上传待处理文件
+        // REST API: POST /api/app-api/sip/platform/v2/file/upload
+        // ============================================================
+
+        public static String uploadFile(String workspaceId, String filePath) throws IOException {
+            File file = new File(filePath);
+            HttpUrl url = HttpUrl.parse(BASE_URL + "/api/app-api/sip/platform/v2/file/upload")
+                    .newBuilder()
+                    .addQueryParameter("workspace_id", workspaceId)
+                    .build();
+
+            MultipartBody body = new MultipartBody.Builder()
+                    .setType(MultipartBody.FORM)
+                    .addFormDataPart("file", file.getName(),
+                            RequestBody.create(file, MediaType.get(mimeType(file.getName()))))
+                    .build();
+
+            Request req = new Request.Builder()
+                    .url(url).headers(authHeaders())
+                    .post(body)
+                    .build();
+
+            try (Response resp = HTTP.newCall(req).execute()) {
+                JsonObject data = checkResponse(resp.body().string(), "上传文件[" + file.getName() + "]");
+                String batchNumber = data.getAsJsonObject("result").get("batch_number").getAsString();
+                System.out.println("[步骤1] 文件上传成功  name=" + file.getName()
+                        + "  batch_number=" + batchNumber);
+                return batchNumber;
+            }
+        }
+
+        // ============================================================
+        // 步骤 2：轮询等待抽取结果
+        // REST API: GET /api/app-api/sip/platform/v2/file/fetch
+        // ============================================================
+
+        public static JsonObject waitForResult(
+                String workspaceId, String batchNumber,
+                int timeoutSec, int intervalSec) throws IOException, InterruptedException {
+
+            HttpUrl url = HttpUrl.parse(BASE_URL + "/api/app-api/sip/platform/v2/file/fetch")
+                    .newBuilder()
+                    .addQueryParameter("workspace_id", workspaceId)
+                    .addQueryParameter("batch_number",  batchNumber)
+                    .build();
+
+            long deadline = System.currentTimeMillis() + (long) timeoutSec * 1000;
+            System.out.print("[步骤2] 等待处理结果（batch_number=" + batchNumber + "）...");
+
+            while (System.currentTimeMillis() < deadline) {
+                Request req = new Request.Builder()
+                        .url(url).headers(authHeaders()).get().build();
+
+                try (Response resp = HTTP.newCall(req).execute()) {
+                    JsonObject data = checkResponse(resp.body().string(), "获取处理结果");
+                    JsonArray files = data.getAsJsonObject("result").getAsJsonArray("files");
+                    if (files != null && files.size() > 0) {
+                        JsonObject file = files.get(0).getAsJsonObject();
+                        int status = file.get("recognition_status").getAsInt();
+                        if (status == 1) { System.out.println(" 完成"); return file; }
+                        if (status == 2) {
+                            String cause = file.has("failure_causes")
+                                    ? file.get("failure_causes").getAsString() : "未知原因";
+                            throw new RuntimeException("文件处理失败: " + cause);
+                        }
+                    }
+                }
+                System.out.print(".");
+                Thread.sleep((long) intervalSec * 1000);
+            }
+            throw new RuntimeException("等待处理结果超时（" + timeoutSec + "s）");
+        }
+
+        // ============================================================
+        // 步骤 3：提交审核任务
+        // REST API: POST /api/app-api/sip/platform/v2/review/task/submit
+        // ============================================================
+
+        public static String submitReviewTask(
+                String workspaceId, String name, String repoId,
+                List<String> extractTaskIds) throws IOException {
+
+            String url = BASE_URL + "/api/app-api/sip/platform/v2/review/task/submit";
+            JsonObject payload = new JsonObject();
+            payload.addProperty("workspace_id", workspaceId);
+            payload.addProperty("name",         name);
+            payload.addProperty("repo_id",      repoId);
+            JsonArray ids = new JsonArray();
+            extractTaskIds.forEach(ids::add);
+            payload.add("extract_task_ids", ids);
+
+            Request req = new Request.Builder()
+                    .url(url).headers(authHeaders())
+                    .post(RequestBody.create(GSON.toJson(payload), JSON_TYPE))
+                    .build();
+
+            try (Response resp = HTTP.newCall(req).execute()) {
+                JsonObject data = checkResponse(resp.body().string(), "提交审核任务");
+                String taskId = data.getAsJsonObject("result").get("task_id").getAsString();
+                System.out.println("[步骤3] 审核任务提交成功  task_id=" + taskId);
+                return taskId;
+            }
+        }
+
+        // ============================================================
+        // 步骤 4：轮询等待审核结果
+        // REST API: POST /api/app-api/sip/platform/v2/review/task/result
+        // ============================================================
+
+        public static JsonObject waitForReview(
+                String workspaceId, String taskId,
+                int timeoutSec, int intervalSec) throws IOException, InterruptedException {
+
+            String url = BASE_URL + "/api/app-api/sip/platform/v2/review/task/result";
+            JsonObject payload = new JsonObject();
+            payload.addProperty("workspace_id", workspaceId);
+            payload.addProperty("task_id",      taskId);
+
+            long deadline = System.currentTimeMillis() + (long) timeoutSec * 1000;
+            System.out.print("[步骤4] 等待审核结果（task_id=" + taskId + "）...");
+
+            while (System.currentTimeMillis() < deadline) {
+                Request req = new Request.Builder()
+                        .url(url).headers(authHeaders())
+                        .post(RequestBody.create(GSON.toJson(payload), JSON_TYPE))
+                        .build();
+
+                try (Response resp = HTTP.newCall(req).execute()) {
+                    JsonObject data = checkResponse(resp.body().string(), "获取审核结果");
+                    JsonObject result = data.getAsJsonObject("result");
+                    int status = result.get("status").getAsInt();
+                    if (status == 1 || status == 2 || status == 4 || status == 7) {
+                        System.out.println(" 完成");
+                        return result;
+                    }
+                }
+                System.out.print(".");
+                Thread.sleep((long) intervalSec * 1000);
+            }
+            throw new RuntimeException("等待审核结果超时（" + timeoutSec + "s）");
+        }
+
+        // ============================================================
+        // 主流程
+        // ============================================================
+        public static void main(String[] args) throws Exception {
+            System.out.println("=".repeat(60));
+            System.out.println("  DocFlow 合同审核场景示例（已完成配置版）");
+            System.out.println("=".repeat(60));
+            System.out.println("工作空间: " + WORKSPACE_ID);
+            System.out.println("规则库:   " + REPO_ID);
+
+            // 步骤 1：上传待处理文件
+            System.out.println("\n开始上传待处理文件...");
+            String batchNumber = uploadFile(WORKSPACE_ID, FILES_DIR + "/sample_contract.docx");
+
+            // 步骤 2：获取并展示抽取结果
+            System.out.println("\n开始获取处理结果...");
+            JsonObject fileResult = waitForResult(WORKSPACE_ID, batchNumber, 180, 3);
+            displayResult(fileResult);
+
+            // 步骤 3：提交审核任务
+            System.out.println("\n开始审核...");
+            String taskName = "合同审核_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+            List<String> extractTaskIds = new ArrayList<>();
+            if (fileResult.has("task_id") && !fileResult.get("task_id").isJsonNull()) {
+                extractTaskIds.add(fileResult.get("task_id").getAsString());
+            }
+            String reviewTaskId = submitReviewTask(WORKSPACE_ID, taskName, REPO_ID, extractTaskIds);
+
+            // 步骤 4：轮询获取审核结果
+            JsonObject reviewResult = waitForReview(WORKSPACE_ID, reviewTaskId, 300, 5);
+            displayReviewResult(reviewResult);
+        }
+
+        // ============================================================
+        // 私有工具方法
+        // ============================================================
+
+        private static String str(JsonObject obj, String key) { return str(obj, key, ""); }
+
+        private static String str(JsonObject obj, String key, String defaultVal) {
+            if (obj == null || !obj.has(key) || obj.get(key).isJsonNull()) return defaultVal;
+            return obj.get(key).getAsString();
+        }
+
+        private static JsonArray jsonArray(JsonObject obj, String key) {
+            if (obj == null || !obj.has(key) || obj.get(key).isJsonNull()) return null;
+            JsonElement e = obj.get(key);
+            return e.isJsonArray() ? e.getAsJsonArray() : null;
+        }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## 05 完整示例代码下载
+
+完整可运行代码（含 Python、Java 两个版本）已内置在文档仓库的 `examples/` 目录下：
+
+```
+examples/
+├── python/
+│   ├── contract_review_configured.py   # Python 完整示例（已完成配置版）
+│   ├── requirements.txt
+│   └── README.md
+├── java/
+│   ├── src/main/java/com/docflow/
+│   │   └── ContractReviewConfigured.java   # Java 完整示例（已完成配置版）
+│   ├── pom.xml
+│   └── README.md
+└── sample_files/
+    └── contract_review/
+        └── sample_contract.docx
+```
+
+<CardGroup cols={2}>
+  <Card title="Python 示例" icon="python" href="https://github.com/ichaozai/docflow-docs/tree/master/examples/python">
+    查看 Python 完整示例代码
+  </Card>
+  <Card title="Java 示例" icon="java" href="https://github.com/ichaozai/docflow-docs/tree/master/examples/java">
+    查看 Java 完整示例代码
+  </Card>
+</CardGroup>
+
+## 06 运行示例
+
+<Tabs>
+  <Tab title="Python">
+    **环境要求**：Python 3.8+
+
+    **1. 安装依赖**
+
+    ```bash
+    cd examples/python
+    pip install -r requirements.txt
+    ```
+
+    **2. 填写配置**
+
+    打开 `contract_review_configured.py`，填写文件顶部的配置项：
+
+    ```python
+    APP_ID       = "your-app-id"        # x-ti-app-id
+    SECRET_CODE  = "your-secret-code"   # x-ti-secret-code
+    WORKSPACE_ID = "your-workspace-id"  # 已创建的工作空间 ID
+    REPO_ID      = "your-repo-id"       # 已配置的审核规则库 ID
+    ```
+
+    **3. 运行**
+
+    ```bash
+    python contract_review_configured.py
+    ```
+  </Tab>
+  <Tab title="Java">
+    **环境要求**：JDK 11+，Maven 3.6+
+
+    **1. 填写配置**
+
+    打开 `src/main/java/com/docflow/ContractReviewConfigured.java`，填写文件顶部的配置项：
+
+    ```java
+    private static final String APP_ID       = "your-app-id";
+    private static final String SECRET_CODE  = "your-secret-code";
+    private static final String WORKSPACE_ID = "your-workspace-id";
+    private static final String REPO_ID      = "your-repo-id";
+    ```
+
+    **2. 编译并运行**
+
+    ```bash
+    cd examples/java
+    mvn compile exec:java -Dexec.mainClass="com.docflow.ContractReviewConfigured"
+    ```
+  </Tab>
+</Tabs>
+
+<Tip>
+  运行成功后，可登录 [DocFlow Web 页面](https://docflow.textin.com/)，在对应工作空间下直观查看每份文件的分类、字段抽取结果和智能审核结果，便于与代码输出对照验证。
+</Tip>
+
+### 预期控制台输出
+
+```
+============================================================
+  DocFlow 合同审核场景示例（已完成配置版）
+============================================================
+工作空间: <workspace_id>
+规则库:   <repo_id>
+
+开始上传待处理文件...
+[步骤1] 文件上传成功  name=sample_contract.docx  batch_number=<batch_number>
+
+开始获取处理结果...
+[步骤2] 等待处理结果（batch_number=<batch_number>）........... 完成
+
+============================================================
+文件名   : sample_contract.docx
+分类结果 : 采购合同
+
+── 基本信息字段 ────────────────────────
+  合同编号                  : CG-123456
+  合同名称                  : 合合信息采购合同
+  甲方全称                  : 上海合合信息科技股份有限公司
+  甲方地址                  : 上海市静安区万荣路1268号云立方A座11层
+  乙方全称                  : 上海一二三有限公司
+  乙方地址                  : 上海市延安东路1111号
+  签订日期                  : 2025年9月25日
+  含税总金额（大写）        : 伍万元整
+  税率                      : 13％
+  账期                      : 60日
+  付款方式                  : 转账形式
+  履约期限                  : 2025年10月底-11月初
+  ...
+
+开始审核...
+[步骤3] 审核任务提交成功  task_id=<task_id>
+[步骤4] 等待审核结果（task_id=<task_id>）.... 完成
+
+============================================================
+审核任务状态  : 审核不通过
+规则通过数    : 3
+规则不通过数  : 1
+
+── 规则组：合同条款合规性检查 ───────────────────
+  ✓ [高风险] 签章完整性校验: 审核通过
+  ✓ [中风险] 必要条款完整性: 审核通过
+  ✗ [高风险] 付款条款合理性: 审核不通过
+    依据: 合同约定收到发票后60日内支付全款，账期超出公司规定的30天标准
+  ✓ [低风险] 争议解决条款: 审核通过
+    ...
+```
+
+## 07 结果说明
+
+### 抽取结果
+
+处理完成后，合同文件将返回分类结果和字段抽取结果。字段抽取结果位于 `data.fields[]`，每个字段包含 `key`、`value` 及坐标 `position`（可用于原文高亮回显）。合同场景使用 **Model 2（复杂文档理解）**，对长文档的深度理解和字段抽取效果更优。
+
+以下为采购合同样本文件的实际接口返回（来自 `file/fetch`，省略了部分 `position` 坐标和字段）：
+
+<AccordionGroup>
+  <Accordion defaultOpen title="sample_contract.docx">
+    ```json
+    {
+      "name": "sample_contract.docx",
+      "format": "docx",
+      "category": "采购合同",
+      "recognition_status": 1,
+      "duration_ms": 44945,
+      "total_page_num": 4,
+      "data": {
+        "fields": [
+          { "key": "合同编号",          "value": "CG-123456" },
+          { "key": "合同名称",          "value": "合合信息采购合同" },
+          { "key": "甲方全称",          "value": "上海合合信息科技股份有限公司" },
+          { "key": "甲方地址",          "value": "上海市静安区万荣路1268号云立方A座11层" },
+          { "key": "乙方全称",          "value": "上海一二三有限公司" },
+          { "key": "乙方地址",          "value": "上海市延安东路1111号" },
+          { "key": "签订日期",          "value": "2025年9月25日" },
+          { "key": "含税总金额（大写）",  "value": "伍万元整" },
+          { "key": "税率",             "value": "13％" },
+          { "key": "账期",             "value": "60日" },
+          { "key": "付款方式",          "value": "转账形式" },
+          { "key": "付款条件",          "value": "甲方收到全部货物且验收合格后，乙方向甲方开具全额增值税专用发票，甲方收到发票后60日内支付全款" },
+          { "key": "履约期限",          "value": "2025年10月底-11月初" },
+          { "key": "履约地点",          "value": "以甲方告知为准" },
+          { "key": "标的名称",          "value": "交换机;交换机;光模块;光纤跳线" },
+          { "key": "标的数量/服务范围",   "value": "1;1;40;13" },
+          { "key": "收款账户信息",       "value": "开户名：上海一二三有限公司;开户银行：上海浦东发展银行陆家嘴支行;账号：98060154711111111" },
+          { "key": "合同份数",          "value": "壹式【贰】份，甲乙双方各执【壹】份" },
+          { "key": "生效条件",          "value": "经双方盖章后生效" },
+          { "key": "争议解决方式",       "value": "双方同意将争议提交合同订立地上海市静安区人民法院诉讼解决" }
+        ],
+        "stamps": [],
+        "handwritings": []
+      }
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### 审核结果
+
+审核完成后，可从 `review/task/result` 接口获取以下信息：
+
+- **`status`**：任务整体状态（`1`=审核通过，`4`=审核不通过，`2`=审核失败）
+- **`statistics`**：规则通过数、不通过数汇总
+- **`groups[].review_tasks[]`**：每条规则的详细审核结果，包含：
+  - `review_result`：该规则的审核结论（`1`=通过，`4`=不通过）
+  - `reasoning`：AI 给出的审核依据说明
+  - `anchors`：依据在原文中的坐标位置（可用于高亮回显）
+
+```json
+{
+  "task_id": "31415926",
+  "task_name": "合同审核_20250925_143022",
+  "status": 1,
+  "statistics": { "pass_count": 5, "failure_count": 0, "error_count": 0 },
+  "groups": [
+    {
+      "group_name": "基本条款完整性",
+      "review_tasks": [
+        {
+          "rule_name": "必填条款完整性校验",
+          "risk_level": 10,
+          "review_result": 1,
+          "reasoning": "合同编号 CG-123456、甲方"上海合合信息科技股份有限公司"、乙方"上海一二三有限公司"、签订日期 2025年9月25日、含税总金额"伍万元整"等必填条款均已填写，审核通过。"
+        },
+        {
+          "rule_name": "合同金额与税率合规",
+          "risk_level": 10,
+          "review_result": 1,
+          "reasoning": "含税总金额"伍万元整"，税率 13％，符合增值税一般纳税人货物采购税率要求，审核通过。"
+        }
+      ]
+    },
+    {
+      "group_name": "财务条款合规性",
+      "review_tasks": [
+        {
+          "rule_name": "付款条款明确性",
+          "risk_level": 10,
+          "review_result": 1,
+          "reasoning": "付款条件明确规定"甲方收到全部货物且验收合格后，乙方向甲方开具全额增值税专用发票，甲方收到发票后60日内支付全款"，条款清晰，审核通过。"
+        },
+        {
+          "rule_name": "收款账户信息完整性",
+          "risk_level": 20,
+          "review_result": 1,
+          "reasoning": "收款账户信息包含开户名、开户银行、账号三项，信息完整，审核通过。"
+        }
+      ]
+    },
+    {
+      "group_name": "法务条款审核",
+      "review_tasks": [
+        {
+          "rule_name": "违约金条款存在性",
+          "risk_level": 10,
+          "review_result": 1,
+          "reasoning": "合同包含明确的违约金条款，乙方逾期交货按合同合计金额万分之五/日计算违约金，审核通过。"
+        }
+      ]
+    }
+  ]
+}
+```

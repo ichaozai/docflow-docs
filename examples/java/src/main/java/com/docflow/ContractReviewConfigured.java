@@ -37,7 +37,7 @@ public class ContractReviewConfigured {
 
     // 待处理文件目录
     private static final String FILES_DIR =
-            new File("../sample_files/合同审核").getAbsolutePath();
+            new File("../sample_files/contract_review").getAbsolutePath();
 
     // ============================================================
     // 全局工具对象
@@ -298,7 +298,7 @@ public class ContractReviewConfigured {
 
         // 步骤 1：上传待处理文件
         System.out.println("\n开始上传待处理文件...");
-        String batchNumber = uploadFile(WORKSPACE_ID, FILES_DIR + "/示例_采购合同.docx");
+        String batchNumber = uploadFile(WORKSPACE_ID, FILES_DIR + "/sample_contract.docx");
 
         // 步骤 2：获取并展示抽取结果
         System.out.println("\n开始获取处理结果...");

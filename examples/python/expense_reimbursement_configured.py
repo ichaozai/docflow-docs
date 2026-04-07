@@ -36,7 +36,7 @@ BASE_URL = "https://docflow.textin.com"
 # 待处理文件目录（默认指向内置示例文件，可替换为您自己的文件路径）
 FILES_DIR = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
-    "..", "sample_files", "费用报销"
+    "..", "sample_files", "expense_reimbursement"
 )
 
 # ============================================================
@@ -262,7 +262,7 @@ def main():
     # ----------------------------------------------------------
     print("\n开始上传待处理文件...")
     upload_targets = [
-        os.path.join(FILES_DIR, "报销申请单.XLS"),
+        os.path.join(FILES_DIR, "sample_expense_form.xls"),
         os.path.join(FILES_DIR, "sample_hotel_receipt.png"),
         os.path.join(FILES_DIR, "sample_payment_record.pdf"),
     ]

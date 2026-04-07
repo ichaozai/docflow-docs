@@ -30,14 +30,13 @@ import requests
 # ============================================================
 APP_ID        = "your-app-id"      # TextIn 控制台中的 x-ti-app-id
 SECRET_CODE   = "your-secret-code" # TextIn 控制台中的 x-ti-secret-code
-ENTERPRISE_ID = 0                  # 企业组织 ID，可在 TextIn 控制台「账号与开发者信息」中查看
 
 BASE_URL = "https://docflow.textin.com"
 
 # 示例文件目录（相对本脚本的路径）
 SAMPLE_DIR = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
-    "..", "sample_files", "AP审单"
+    "..", "sample_files", "ap_review"
 )
 
 # ============================================================
@@ -85,8 +84,6 @@ def create_workspace(name: str, description: str = "") -> str:
         "description": description,
         "auth_scope":  0,
     }
-    if ENTERPRISE_ID:
-        payload["enterprise_id"] = ENTERPRISE_ID
     resp = requests.post(url, json=payload, headers=_headers(), timeout=30)
     data = _check(resp, "创建工作空间")
     workspace_id = data["result"]["workspace_id"]
@@ -423,7 +420,7 @@ def main():
     invoice_id = create_category(
         workspace_id=workspace_id,
         name="国内票-数电票",
-        sample_file_path=os.path.join(SAMPLE_DIR, "示例_发票.pdf"),
+        sample_file_path=os.path.join(SAMPLE_DIR, "sample_invoice.pdf"),
         fields=[
             {"name": "发票号码"},           {"name": "开票日期"},
             {"name": "价税合计"},           {"name": "税前金额"},
@@ -441,7 +438,7 @@ def main():
     contract_id = create_category(
         workspace_id=workspace_id,
         name="采购合同",
-        sample_file_path=os.path.join(SAMPLE_DIR, "示例_采购合同.pdf"),
+        sample_file_path=os.path.join(SAMPLE_DIR, "sample_contract.pdf"),
         fields=[
             {"name": "编号"},           {"name": "甲方"},           {"name": "乙方"},
             {"name": "签订日期"},       {"name": "合作期间"},       {"name": "支付条款"},
@@ -459,7 +456,7 @@ def main():
     inbound_id = create_category(
         workspace_id=workspace_id,
         name="入库单",
-        sample_file_path=os.path.join(SAMPLE_DIR, "示例_入库单.pdf"),
+        sample_file_path=os.path.join(SAMPLE_DIR, "sample_inbound.pdf"),
         fields=[
             {"name": "收货单编号"},     {"name": "收货日期"},       {"name": "对应合同号"},
             {"name": "供应商名称"},     {"name": "仓库／库位"},     {"name": "物流单号"},
@@ -480,7 +477,7 @@ def main():
     acceptance_id = create_category(
         workspace_id=workspace_id,
         name="验收单",
-        sample_file_path=os.path.join(SAMPLE_DIR, "示例_验收单.pdf"),
+        sample_file_path=os.path.join(SAMPLE_DIR, "sample_acceptance.pdf"),
         fields=[
             {"name": "项目名称"},   {"name": "合同编号"},   {"name": "甲方单位名称"},
             {"name": "乙方单位名称"}, {"name": "甲方验收人"}, {"name": "乙方施工人"},
@@ -500,10 +497,10 @@ def main():
     # ----------------------------------------------------------
     print("\n开始上传待处理文件...")
     upload_targets = [
-        os.path.join(SAMPLE_DIR, "示例_发票.pdf"),
-        os.path.join(SAMPLE_DIR, "示例_采购合同.pdf"),
-        os.path.join(SAMPLE_DIR, "示例_入库单.pdf"),
-        os.path.join(SAMPLE_DIR, "示例_验收单.pdf"),
+        os.path.join(SAMPLE_DIR, "sample_invoice.pdf"),
+        os.path.join(SAMPLE_DIR, "sample_contract.pdf"),
+        os.path.join(SAMPLE_DIR, "sample_inbound.pdf"),
+        os.path.join(SAMPLE_DIR, "sample_acceptance.pdf"),
     ]
     batch_numbers = [upload_file(workspace_id, p) for p in upload_targets]
 

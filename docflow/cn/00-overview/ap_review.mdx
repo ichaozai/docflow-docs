@@ -1,6 +1,6 @@
 ---
-title: "AP 审单场景(从零开始)"
-description: "在财务部门 AP（应付账款）审单业务场景，调用 DocFlow API 完成发票、采购合同、入库单、验收单的自动化交叉审核"
+title: "AP 审单场景（无工作空间）"
+description: "在财务部门 AP（应付账款）审单业务场景中，调用 DocFlow API 完成发票、采购订单、收货单等单据的自动化交叉审核。"
 ---
 
 <Tip>
@@ -10,12 +10,11 @@ description: "在财务部门 AP（应付账款）审单业务场景，调用 Do
 
 ## 01 场景说明
 
-在 AP（应付账款）审单业务中，财务人员每次付款前需要对一组采购单据进行交叉核验，典型的单据组合包括：
+在 AP（应付账款）审单业务中，财务人员每次付款前需要对一组采购单据进行交叉核验。典型的单据组合包括：
 
-- **国内票-数电票**（增值税专用发票/普通发票）：记录销售方/购买方信息、开票金额和税率
-- **采购合同**（PDF/Word）：约定供应商信息、合同金额、税率和产品明细
-- **入库单**（PDF）：记录实际收货数量、物料信息和对应合同号
-- **验收单**（PDF）：记录验收结论、交付内容和对应合同号
+- 发票（含数电票、纸质增值税专用发票/普通发票等）：记录销售方/购买方信息、开票金额和税率 
+- 采购订单（PDF/Word）：约定供应商信息、合同金额、税率和产品明细
+- 收货单（PDF）：记录实际收货数量、物料信息及关联的采购订单号
 
 通过 DocFlow，您只需配置一次分类和字段，后续上传的单据即可自动完成**分类识别**和**结构化信息抽取**；配置好审核规则库后，还可对多份单据进行**跨文档智能审核**，自动发现供应商不一致、金额超标、数量异常等问题。
 
@@ -30,16 +29,21 @@ description: "在财务部门 AP（应付账款）审单业务场景，调用 Do
 ## 03 先决条件
 
 1. 登录 [TextIn 控制台](https://www.textin.com/console/dashboard/setting)，获取 `x-ti-app-id` 和 `x-ti-secret-code`
-2. 在控制台「企业管理」中查看企业组织 ID（`enterprise_id`），参考 [如何获取企业 ID](../100-faq/get_enterprise_id)
-3. 下载[示例样本文件](https://github.com/intsig-textin/docflow-docs/tree/master/examples/sample_files/AP审单)，或使用自己的单据文件
+2. 下载[示例样本文件](https://github.com/intsig-textin/docflow-docs/tree/master/examples/sample_files/ap_review)，或使用自己的单据文件
 
 ## 04 类别与字段配置
 
 本示例配置四个文件类别，均通过 `category/create` 接口创建并配置字段。
 
 <AccordionGroup>
-  <Accordion defaultOpen title="国内票-数电票（样本：示例_发票.pdf）">
+  <Accordion defaultOpen title="国内票-数电票（样本：sample_invoice.pdf）">
     增值税电子发票（数电票），包含发票号码、开票日期、购买方/销售方名称及税号、价税合计等基本信息字段，以及商品明细表格字段：
+
+    <Tip>
+      示例样本文件，可点击查看或下载：[sample\_invoice.pdf](https://dllf.intsig.net/download/2026/CustomService/sample_invoice.pdf)
+
+      <iframe src="https://dllf.intsig.net/download/2026/CustomService/sample_invoice.pdf" width="100%" height="500px" />
+    </Tip>
 
     | 字段名 | 类型 |
     |---|---|
@@ -62,8 +66,14 @@ description: "在财务部门 AP（应付账款）审单业务场景，调用 Do
     | <span style={{color: "#3b82f6"}}>税率</span> | 表格字段 |
     | <span style={{color: "#3b82f6"}}>税额</span> | 表格字段 |
   </Accordion>
-  <Accordion defaultOpen title="采购合同（样本：示例_采购合同.pdf）">
+  <Accordion defaultOpen title="采购合同（样本：sample_contract.pdf）">
     采购合同是约定交易条款的核心文件，包含合同编号、甲乙方信息、金额、税率和产品明细。字段配置同时使用**基本信息字段**和**表格字段**：
+
+    <Tip>
+      示例样本文件，可点击查看或下载：[sample\_contract.pdf](https://dllf.intsig.net/download/2026/CustomService/sample_contract.pdf)
+
+      <iframe src="https://dllf.intsig.net/download/2026/CustomService/sample_contract.pdf" width="100%" height="500px" />
+    </Tip>
 
     | 字段名 | 类型 |
     |---|---|
@@ -89,8 +99,14 @@ description: "在财务部门 AP（应付账款）审单业务场景，调用 Do
     | <span style={{color: "#3b82f6"}}>数量</span> | 表格字段 |
     | <span style={{color: "#3b82f6"}}>金额</span> | 表格字段 |
   </Accordion>
-  <Accordion defaultOpen title="入库单（样本：示例_入库单.pdf）">
+  <Accordion defaultOpen title="入库单（样本：sample_inbound.pdf）">
     入库单是仓库收货的凭证，记录实收数量、物料信息和供应商信息。字段配置同时使用**基本信息字段**和**表格字段**：
+
+    <Tip>
+      示例样本文件，可点击查看或下载：[sample\_inbound.pdf](https://dllf.intsig.net/download/2026/CustomService/sample_inbound.pdf)
+
+      <iframe src="https://dllf.intsig.net/download/2026/CustomService/sample_inbound.pdf" width="100%" height="500px" />
+    </Tip>
 
     | 字段名 | 类型 |
     |---|---|
@@ -119,8 +135,14 @@ description: "在财务部门 AP（应付账款）审单业务场景，调用 Do
     | <span style={{color: "#3b82f6"}}>收货入库明细-质检</span> | 表格字段 |
     | <span style={{color: "#3b82f6"}}>收货入库明细-签收人</span> | 表格字段 |
   </Accordion>
-  <Accordion defaultOpen title="验收单（样本：示例_验收单.pdf）">
+  <Accordion defaultOpen title="验收单（样本：sample_acceptance.pdf）">
     验收单是确认货物/服务交付质量的凭证，仅包含基本信息字段：
+
+    <Tip>
+      示例样本文件，可点击查看或下载：[sample\_acceptance.pdf](https://dllf.intsig.net/download/2026/CustomService/sample_acceptance.pdf)
+
+      <iframe src="https://dllf.intsig.net/download/2026/CustomService/sample_acceptance.pdf" width="100%" height="500px" />
+    </Tip>
 
     | 字段名 | 类型 |
     |---|---|
@@ -216,7 +238,7 @@ description: "在财务部门 AP（应付账款）审单业务场景，调用 Do
         invoice_id = create_category(
             workspace_id=workspace_id,
             name="国内票-数电票",
-            sample_file_path="示例_发票.pdf",
+            sample_file_path="sample_invoice.pdf",
             fields=[
                 {"name": "发票号码"}, {"name": "开票日期"}, {"name": "价税合计"},
                 # ... 其余基本信息字段
@@ -229,7 +251,7 @@ description: "在财务部门 AP（应付账款）审单业务场景，调用 Do
         contract_id = create_category(
             workspace_id=workspace_id,
             name="采购合同",
-            sample_file_path="示例_采购合同.pdf",
+            sample_file_path="sample_contract.pdf",
             fields=[{"name": "编号"}, {"name": "甲方"}, {"name": "乙方"}, ...],
         )
         for field_name in ["产品型号", "产品说明", "单价", "数量", "金额"]:
@@ -240,13 +262,13 @@ description: "在财务部门 AP（应付账款）审单业务场景，调用 Do
         ```java
         // 国内票-数电票
         String invoiceId = createCategory(workspaceId, "国内票-数电票",
-                SAMPLE_DIR + "/示例_发票.pdf", invoiceFields, "增值税电子发票（数电票）...");
+                SAMPLE_DIR + "/sample_invoice.pdf", invoiceFields, "增值税电子发票（数电票）...");
         for (String fn : new String[]{"商品名称", "规格型号", "单位", "数量", "单价", "金额", "税率", "税额"}) {
             addCategoryField(workspaceId, invoiceId, fn, "-1");
         }
         // 采购合同
         String contractId = createCategory(workspaceId, "采购合同",
-                SAMPLE_DIR + "/示例_采购合同.pdf", contractFields, "");
+                SAMPLE_DIR + "/sample_contract.pdf", contractFields, "");
         for (String fn : new String[]{"产品型号", "产品说明", "单价", "数量", "金额"}) {
             addCategoryField(workspaceId, contractId, fn, "-1");
         }
@@ -280,32 +302,370 @@ description: "在财务部门 AP（应付账款）审单业务场景，调用 Do
   </Accordion>
 </AccordionGroup>
 
-## 07 运行示例
+### 抽取结果示例
 
-<Steps>
-  <Step title="下载示例文件">
-    下载[示例样本文件](https://github.com/intsig-textin/docflow-docs/tree/master/examples/sample_files/AP审单)，放入本地 `examples/sample_files/AP审单/` 目录。
-  </Step>
-  <Step title="填写配置项">
-    打开示例代码，将 `APP_ID`、`SECRET_CODE`、`ENTERPRISE_ID` 替换为您在 [TextIn 控制台](https://www.textin.com/console/dashboard/setting) 获取的实际值。
-  </Step>
-  <Step title="安装依赖并运行">
-    <Tabs>
-      <Tab title="Python">
-        ```bash
-        pip install requests
-        python examples/python/ap_review.py
-        ```
-      </Tab>
-      <Tab title="Java">
-        ```bash
-        cd examples/java
-        mvn compile exec:java -Dexec.mainClass="com.docflow.ApReview"
-        ```
-      </Tab>
-    </Tabs>
-  </Step>
-  <Step title="查看结果">
-    控制台会依次打印各文件的分类与字段抽取结果，以及每条审核规则的通过/不通过结论和 AI 依据。
-  </Step>
-</Steps>
+![抽取结果示例](../images/senario_extract_result.png)
+
+### 审核结果示例
+
+![审核结果示例](../images/senario_review_result.png)
+
+## 07 完整示例代码下载
+
+完整可运行代码（含 Python、Java 两个版本）已内置在文档仓库的 `examples/` 目录下：
+
+```
+examples/
+├── python/
+│   ├── ap_review.py               # Python 完整示例
+│   ├── requirements.txt
+│   └── README.md
+├── java/
+│   ├── src/main/java/com/docflow/ApReview.java
+│   ├── pom.xml
+│   └── README.md
+└── sample_files/
+    └── ap_review/
+        ├── sample_invoice.pdf
+        ├── sample_contract.pdf
+        ├── sample_inbound.pdf
+        └── sample_acceptance.pdf
+```
+
+<CardGroup cols={2}>
+  <Card title="Python 示例" icon="python" href="https://github.com/ichaozai/docflow-docs/tree/master/examples/python">
+    查看 Python 完整示例代码
+  </Card>
+  <Card title="Java 示例" icon="java" href="https://github.com/ichaozai/docflow-docs/tree/master/examples/java">
+    查看 Java 完整示例代码
+  </Card>
+</CardGroup>
+
+## 08 运行示例
+
+<Tabs>
+  <Tab title="Python">
+    **环境要求**：Python 3.8+
+
+    **1. 安装依赖**
+
+    ```bash
+    cd examples/python
+    pip install -r requirements.txt
+    ```
+
+    **2. 填写配置**
+
+    打开 `ap_review.py`，填写文件顶部的配置项：
+
+    ```python
+    APP_ID        = "your-app-id"      # x-ti-app-id
+    SECRET_CODE   = "your-secret-code" # x-ti-secret-code
+    ```
+
+    **3. 运行**
+
+    ```bash
+    python ap_review.py
+    ```
+  </Tab>
+  <Tab title="Java">
+    **环境要求**：JDK 11+，Maven 3.6+
+
+    **1. 填写配置**
+
+    打开 `src/main/java/com/docflow/ApReview.java`，填写文件顶部的配置项：
+
+    ```java
+    private static final String APP_ID        = "your-app-id";
+    private static final String SECRET_CODE   = "your-secret-code";
+    ```
+
+    **2. 编译并运行**
+
+    ```bash
+    cd examples/java
+    mvn compile -q
+    mvn exec:java -Dexec.mainClass="com.docflow.ApReview"
+    ```
+  </Tab>
+</Tabs>
+
+<Tip>
+  运行成功后，可登录 [DocFlow Web 页面](https://docflow.textin.com/)，在对应工作空间下直观查看每份文件的分类、字段抽取结果和智能审核结果，便于与代码输出对照验证。
+</Tip>
+
+### 预期控制台输出
+
+成功运行后，控制台将输出如下内容（workspace_id、category_id 等 ID 因运行环境不同而变化）：
+
+```
+============================================================
+  DocFlow AP 审单场景示例
+============================================================
+[步骤1] 工作空间创建成功  workspace_id=<workspace_id>
+[步骤2] 文件类别创建成功  name=国内票-数电票  category_id=<category_id>
+  追加字段成功  name=商品名称  field_id=<field_id>
+  追加字段成功  name=规格型号  field_id=<field_id>
+  追加字段成功  name=单位  field_id=<field_id>
+  追加字段成功  name=数量  field_id=<field_id>
+  追加字段成功  name=单价  field_id=<field_id>
+  追加字段成功  name=金额  field_id=<field_id>
+  追加字段成功  name=税率  field_id=<field_id>
+  追加字段成功  name=税额  field_id=<field_id>
+[步骤2] 文件类别创建成功  name=采购合同  category_id=<category_id>
+  追加字段成功  name=产品型号  field_id=<field_id>
+  追加字段成功  name=产品说明  field_id=<field_id>
+  追加字段成功  name=单价  field_id=<field_id>
+  追加字段成功  name=数量  field_id=<field_id>
+  追加字段成功  name=金额  field_id=<field_id>
+[步骤2] 文件类别创建成功  name=入库单  category_id=<category_id>
+  追加字段成功  name=收货入库明细-物料编码  field_id=<field_id>
+  追加字段成功  name=收货入库明细-物料描述  field_id=<field_id>
+  追加字段成功  name=收货入库明细-单位  field_id=<field_id>
+  追加字段成功  name=收货入库明细-应收  field_id=<field_id>
+  追加字段成功  name=收货入库明细-实收  field_id=<field_id>
+  追加字段成功  name=收货入库明细-差异  field_id=<field_id>
+  追加字段成功  name=收货入库明细-质检  field_id=<field_id>
+  追加字段成功  name=收货入库明细-签收人  field_id=<field_id>
+[步骤2] 文件类别创建成功  name=验收单  category_id=<category_id>
+
+配置完成  workspace_id=<workspace_id>
+  国内票-数电票: category_id=<category_id>
+  采购合同:      category_id=<category_id>
+  入库单:        category_id=<category_id>
+  验收单:        category_id=<category_id>
+
+开始上传待处理文件...
+[步骤3] 文件上传成功  name=sample_invoice.pdf  batch_number=<batch_number>
+[步骤3] 文件上传成功  name=sample_contract.pdf  batch_number=<batch_number>
+[步骤3] 文件上传成功  name=sample_inbound.pdf  batch_number=<batch_number>
+[步骤3] 文件上传成功  name=sample_acceptance.pdf  batch_number=<batch_number>
+
+开始获取处理结果...
+[步骤4] 等待处理结果（batch_number=<batch_number>）..... 完成
+
+============================================================
+文件名   : sample_invoice.pdf
+分类结果 : 国内票-数电票
+
+── 普通字段 ──────────────────────────
+  发票号码                : 25442000000012345678
+  开票日期                : 2025-01-15
+  价税合计                : 50,900.00
+  税前金额                : 48,000.00
+  税额                   : 2,900.00
+  销售方名称               : 上海某某科技有限公司
+  销售方纳税人识别号         : 91310000XXXXXXXXXX
+  购买方名称               : 合合信息科技（上海）有限公司
+  购买方纳税人识别号         : 91310000YYYYYYYYYY
+
+── 表格行数据 ────────────────────────
+  第1行: 商品名称=智能硬件设备  |  规格型号=XH-2000  |  单位=台  |  数量=10  |  单价=4,800.00  |  金额=48,000.00  |  税率=6%  |  税额=2,880.00
+
+[步骤4] 等待处理结果（batch_number=<batch_number>）......... 完成
+
+============================================================
+文件名   : sample_contract.pdf
+分类结果 : 采购合同
+
+── 普通字段 ──────────────────────────
+  编号                   : HT-2025-001
+  甲方                   : 合合信息科技（上海）有限公司
+  乙方                   : 上海某某科技有限公司
+  签订日期                : 2025-01-10
+  采购金额                : 50,900.00
+  税率                   : 6%
+  乙方税号                : 91310000XXXXXXXXXX
+
+[步骤4] 等待处理结果（batch_number=<batch_number>）...... 完成
+
+============================================================
+文件名   : sample_inbound.pdf
+分类结果 : 入库单
+
+── 普通字段 ──────────────────────────
+  收货单编号               : RK-2025-0115
+  收货日期                : 2025-01-20
+  对应合同号               : HT-2025-001
+  供应商名称               : 上海某某科技有限公司
+  入库总金额               : 50,900.00
+  供应商税号               : 91310000XXXXXXXXXX
+
+[步骤4] 等待处理结果（batch_number=<batch_number>）.... 完成
+
+============================================================
+文件名   : sample_acceptance.pdf
+分类结果 : 验收单
+
+── 普通字段 ──────────────────────────
+  合同编号                : HT-2025-001
+  甲方单位名称              : 合合信息科技（上海）有限公司
+  乙方单位名称              : 上海某某科技有限公司
+  验收结论                : 验收合格
+
+开始配置审核规则库...
+[步骤5] 规则库创建成功  name=AP审单场景审核规则库  repo_id=<repo_id>
+  规则组创建成功  name=供应商一致性校验  group_id=<group_id>
+    规则创建成功  name=供应商一致性  rule_id=<rule_id>
+    规则创建成功  name=发票与合同金额匹配  rule_id=<rule_id>
+    规则创建成功  name=发票购买方与合同甲方一致  rule_id=<rule_id>
+  规则组创建成功  name=入库与合同一致性  group_id=<group_id>
+    规则创建成功  name=入库数量与合同数量匹配  rule_id=<rule_id>
+    规则创建成功  name=入库单号关联合同号  rule_id=<rule_id>
+  规则组创建成功  name=验收合规性  group_id=<group_id>
+    规则创建成功  name=验收单与入库单物料一致  rule_id=<rule_id>
+[步骤6] 审核任务提交成功  task_id=<task_id>
+[步骤7] 等待审核结果（task_id=<task_id>）................. 完成
+
+============================================================
+审核任务状态  : 审核通过
+规则通过数    : 6
+规则不通过数  : 0
+
+── 规则组：供应商一致性校验 ───────────────────
+  ✓ [高风险] 供应商一致性: 审核通过
+    依据: 发票销售方纳税人识别号与采购合同乙方税号均为 91310000XXXXXXXXXX，一致。
+  ✓ [高风险] 发票与合同金额匹配: 审核通过
+    依据: 发票价税合计 50,900.00 与采购合同采购金额 50,900.00 完全一致。
+  ✓ [中风险] 发票购买方与合同甲方一致: 审核通过
+    依据: 发票购买方"合合信息科技（上海）有限公司"与合同甲方一致。
+
+── 规则组：入库与合同一致性 ───────────────────
+  ✓ [高风险] 入库数量与合同数量匹配: 审核通过
+    依据: 入库单实收数量 10 台与采购合同约定数量 10 台一致。
+  ✓ [中风险] 入库单号关联合同号: 审核通过
+    依据: 入库单对应合同号 HT-2025-001 与采购合同编号一致。
+
+── 规则组：验收合规性 ───────────────────
+  ✓ [中风险] 验收单与入库单物料一致: 审核通过
+    依据: 验收单合同编号与入库单对应合同号均为 HT-2025-001，物料关联一致。
+
+============================================================
+  示例运行完成
+============================================================
+```
+
+## 09 结果说明
+
+### 抽取结果
+
+处理完成后，每份文件将返回分类结果和字段抽取结果。字段抽取结果位于 `data.fields[]`，表格字段位于 `data.items[][]`，每个字段包含 `key`、`value` 及坐标 `position`（可用于原文高亮回显）。
+
+以下为发票样本文件的实际接口返回（来自 `file/fetch`，省略了部分 `position` 坐标）：
+
+<AccordionGroup>
+  <Accordion defaultOpen title="sample_invoice.pdf">
+    ```json
+    {
+      "id": "2029124607672344576",
+      "name": "sample_invoice.pdf",
+      "format": "pdf",
+      "category": "国内票-数电票",
+      "recognition_status": 1,
+      "duration_ms": 4832,
+      "data": {
+        "fields": [
+          { "key": "发票号码",           "value": "25442000000012345678" },
+          { "key": "开票日期",           "value": "2025-01-15" },
+          { "key": "价税合计",           "value": "50900.00" },
+          { "key": "税前金额",           "value": "48000.00" },
+          { "key": "税额",              "value": "2900.00" },
+          { "key": "销售方名称",          "value": "上海某某科技有限公司" },
+          { "key": "销售方纳税人识别号",   "value": "91310000XXXXXXXXXX" },
+          { "key": "购买方名称",          "value": "合合信息科技（上海）有限公司" },
+          { "key": "购买方纳税人识别号",   "value": "91310000YYYYYYYYYY" },
+          { "key": "发票备注",           "value": "" }
+        ],
+        "items": [
+          [
+            { "key": "商品名称", "value": "智能硬件设备" },
+            { "key": "规格型号", "value": "XH-2000" },
+            { "key": "单位",    "value": "台" },
+            { "key": "数量",    "value": "10" },
+            { "key": "单价",    "value": "4800.00" },
+            { "key": "金额",    "value": "48000.00" },
+            { "key": "税率",    "value": "6%" },
+            { "key": "税额",    "value": "2880.00" }
+          ]
+        ],
+        "stamps": [],
+        "handwritings": []
+      }
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### 审核结果
+
+审核完成后，可从 `review/task/result` 接口获取以下信息：
+
+- **`status`**：任务整体状态（`1`=审核通过，`4`=审核不通过，`2`=审核失败）
+- **`statistics`**：规则通过数、不通过数汇总
+- **`groups[].review_tasks[]`**：每条规则的详细审核结果，包含：
+  - `review_result`：该规则的审核结论（`1`=通过，`4`=不通过）
+  - `reasoning`：AI 给出的审核依据说明
+  - `anchors`：依据在原文中的坐标位置（可用于高亮回显）
+
+```json
+{
+  "task_id": "31415926",
+  "task_name": "AP审核",
+  "status": 1,
+  "statistics": { "pass_count": 6, "failure_count": 0, "error_count": 0 },
+  "groups": [
+    {
+      "group_name": "供应商一致性校验",
+      "review_tasks": [
+        {
+          "rule_name": "供应商一致性",
+          "risk_level": 10,
+          "review_result": 1,
+          "reasoning": "发票销售方纳税人识别号与采购合同乙方税号均为 91310000XXXXXXXXXX，一致，审核通过。"
+        },
+        {
+          "rule_name": "发票与合同金额匹配",
+          "risk_level": 10,
+          "review_result": 1,
+          "reasoning": "发票价税合计 50900.00 与采购合同采购金额 50900.00 完全一致，审核通过。"
+        },
+        {
+          "rule_name": "发票购买方与合同甲方一致",
+          "risk_level": 20,
+          "review_result": 1,
+          "reasoning": "发票购买方"合合信息科技（上海）有限公司"与采购合同甲方一致，审核通过。"
+        }
+      ]
+    },
+    {
+      "group_name": "入库与合同一致性",
+      "review_tasks": [
+        {
+          "rule_name": "入库数量与合同数量匹配",
+          "risk_level": 10,
+          "review_result": 1,
+          "reasoning": "入库单实收数量 10 台与采购合同约定数量 10 台一致，审核通过。"
+        },
+        {
+          "rule_name": "入库单号关联合同号",
+          "risk_level": 20,
+          "review_result": 1,
+          "reasoning": "入库单对应合同号 HT-2025-001 与采购合同编号一致，审核通过。"
+        }
+      ]
+    },
+    {
+      "group_name": "验收合规性",
+      "review_tasks": [
+        {
+          "rule_name": "验收单与入库单物料一致",
+          "risk_level": 20,
+          "review_result": 1,
+          "reasoning": "验收单合同编号与入库单对应合同号均为 HT-2025-001，物料关联一致，审核通过。"
+        }
+      ]
+    }
+  ]
+}
+```

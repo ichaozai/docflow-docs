@@ -37,7 +37,7 @@ public class ExpenseReimbursementConfigured {
 
     // 待处理文件目录（默认指向内置示例文件，可替换为您自己的文件路径）
     private static final String FILES_DIR =
-            resolveDir("../sample_files/费用报销");
+            resolveDir("../sample_files/expense_reimbursement");
 
     // ============================================================
     // 全局工具对象
@@ -409,7 +409,7 @@ public class ExpenseReimbursementConfigured {
         // ----------------------------------------------------------
         System.out.println("\n开始上传待处理文件...");
         String[] sampleFiles = {
-                FILES_DIR + "/报销申请单.XLS",
+                FILES_DIR + "/sample_expense_form.xls",
                 FILES_DIR + "/sample_hotel_receipt.png",
                 FILES_DIR + "/sample_payment_record.pdf"
         };

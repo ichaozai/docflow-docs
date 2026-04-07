@@ -32,13 +32,12 @@ public class ExpenseReimbursement {
     // ============================================================
     private static final String APP_ID        = "your-app-id";       // x-ti-app-id
     private static final String SECRET_CODE   = "your-secret-code";  // x-ti-secret-code
-    private static final Long   ENTERPRISE_ID = null;                 // 企业组织 ID，不需要时留 null
 
     private static final String BASE_URL = "https://docflow.textin.com";
 
     // 样本文件目录（相对 examples/ 根目录）
     private static final String SAMPLE_DIR =
-            resolveDir("../sample_files/费用报销");
+            resolveDir("../sample_files/expense_reimbursement");
 
     // ============================================================
     // 全局工具对象
@@ -115,7 +114,6 @@ public class ExpenseReimbursement {
         JsonObject payload = new JsonObject();
         payload.addProperty("name", name);
         payload.addProperty("description", description);
-        if (ENTERPRISE_ID != null) payload.addProperty("enterprise_id", ENTERPRISE_ID);
         payload.addProperty("auth_scope", 0); // 0: 仅自己可见；1: 企业成员可见
 
         Request req = new Request.Builder()
@@ -634,7 +632,7 @@ public class ExpenseReimbursement {
         // 2.1 报销申请单
         String baoxiaoId = createCategory(
                 workspaceId, "报销申请单",
-                SAMPLE_DIR + "/报销申请单.XLS",
+                SAMPLE_DIR + "/sample_expense_form.xls",
                 Arrays.asList(
                         field("申请人"), field("出差目的"), field("报销期间"),
                         field("目的地"), field("费用发生日期"), field("费用项目"),
@@ -682,7 +680,7 @@ public class ExpenseReimbursement {
         // ----------------------------------------------------------
         System.out.println("\n开始上传待处理文件...");
         String[] sampleFiles = {
-                SAMPLE_DIR + "/报销申请单.XLS",
+                SAMPLE_DIR + "/sample_expense_form.xls",
                 SAMPLE_DIR + "/sample_hotel_receipt.png",
                 SAMPLE_DIR + "/sample_payment_record.pdf"
         };

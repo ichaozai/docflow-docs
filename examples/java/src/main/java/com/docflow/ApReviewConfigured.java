@@ -37,7 +37,7 @@ public class ApReviewConfigured {
 
     // 待处理文件目录
     private static final String FILES_DIR =
-            new File("../sample_files/AP审单").getAbsolutePath();
+            new File("../sample_files/ap_review").getAbsolutePath();
 
     // ============================================================
     // 全局工具对象
@@ -319,10 +319,10 @@ public class ApReviewConfigured {
         // 步骤 1：上传待处理文件
         System.out.println("\n开始上传待处理文件...");
         String[] sampleFiles = {
-                FILES_DIR + "/示例_发票.pdf",
-                FILES_DIR + "/示例_采购合同.pdf",
-                FILES_DIR + "/示例_入库单.pdf",
-                FILES_DIR + "/示例_验收单.pdf"
+                FILES_DIR + "/sample_invoice.pdf",
+                FILES_DIR + "/sample_contract.pdf",
+                FILES_DIR + "/sample_inbound.pdf",
+                FILES_DIR + "/sample_acceptance.pdf"
         };
         List<String> batchNumbers = new ArrayList<>();
         for (String path : sampleFiles) {

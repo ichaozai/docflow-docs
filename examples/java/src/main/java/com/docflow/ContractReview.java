@@ -32,13 +32,12 @@ public class ContractReview {
     // ============================================================
     private static final String APP_ID        = "your-app-id";       // x-ti-app-id
     private static final String SECRET_CODE   = "your-secret-code";  // x-ti-secret-code
-    private static final Long   ENTERPRISE_ID = null;                 // 企业组织 ID，不需要时留 null
 
     private static final String BASE_URL = "https://docflow.textin.com";
 
     // 示例文件目录（相对 examples/ 根目录）
     private static final String SAMPLE_DIR =
-            new File("../sample_files/合同审核").getAbsolutePath();
+            new File("../sample_files/contract_review").getAbsolutePath();
 
     // ============================================================
     // 全局工具对象
@@ -97,7 +96,6 @@ public class ContractReview {
         JsonObject payload = new JsonObject();
         payload.addProperty("name", name);
         payload.addProperty("description", description);
-        if (ENTERPRISE_ID != null) payload.addProperty("enterprise_id", ENTERPRISE_ID);
         payload.addProperty("auth_scope", 0);
 
         Request req = new Request.Builder()
@@ -456,7 +454,7 @@ public class ContractReview {
         // 步骤 2：创建文件类别（采购合同）
         String contractId = createCategory(
                 workspaceId, "采购合同",
-                SAMPLE_DIR + "/示例_采购合同.docx",
+                SAMPLE_DIR + "/sample_contract.docx",
                 Arrays.asList(
                         field("合同编号"),               field("合同名称"),
                         field("签订日期"),               field("生效条件"),
@@ -484,7 +482,7 @@ public class ContractReview {
 
         // 步骤 3：上传待处理文件
         System.out.println("\n开始上传待处理文件...");
-        String batchNumber = uploadFile(workspaceId, SAMPLE_DIR + "/示例_采购合同.docx");
+        String batchNumber = uploadFile(workspaceId, SAMPLE_DIR + "/sample_contract.docx");
 
         // 步骤 4：获取并展示抽取结果
         System.out.println("\n开始获取处理结果...");

@@ -36,7 +36,7 @@ BASE_URL = "https://docflow.textin.com"
 # 待处理文件目录（默认指向内置示例文件，可替换为您自己的文件路径）
 FILES_DIR = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
-    "..", "sample_files", "AP审单"
+    "..", "sample_files", "ap_review"
 )
 
 # ============================================================
@@ -251,10 +251,10 @@ def main():
     # ----------------------------------------------------------
     print("\n开始上传待处理文件...")
     upload_targets = [
-        os.path.join(FILES_DIR, "示例_发票.pdf"),
-        os.path.join(FILES_DIR, "示例_采购合同.pdf"),
-        os.path.join(FILES_DIR, "示例_入库单.pdf"),
-        os.path.join(FILES_DIR, "示例_验收单.pdf"),
+        os.path.join(FILES_DIR, "sample_invoice.pdf"),
+        os.path.join(FILES_DIR, "sample_contract.pdf"),
+        os.path.join(FILES_DIR, "sample_inbound.pdf"),
+        os.path.join(FILES_DIR, "sample_acceptance.pdf"),
     ]
     batch_numbers = [upload_file(WORKSPACE_ID, p) for p in upload_targets]
 

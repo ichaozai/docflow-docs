@@ -1,0 +1,682 @@
+> 使用 docflow-sdk Python SDK 快速集成 Docflow 文档流程管理能力
+
+`docflow-sdk` 是 TextIn Docflow 的官方 Python SDK，提供工作空间管理、文档分类、智能审核、类型安全的响应模型和完善的错误处理。
+
+* PyPI: [docflow-sdk](https://pypi.org/project/docflow-sdk/)
+* GitHub: [docflow-python-sdk](https://github.com/intsig-textin/docflow-python-sdk)
+
+## 安装
+
+<CodeGroup>
+  ```bash pip theme={null}
+  pip install docflow-sdk
+  ```
+
+  ```bash 从源码安装 theme={null}
+  git clone https://github.com/intsig-textin/docflow-python-sdk.git
+  cd docflow-python-sdk
+  pip install -e .
+  ```
+</CodeGroup>
+
+**系统要求：** Python >= 3.8
+
+## 认证与初始化
+
+SDK 支持多种认证方式（优先级：构造参数 > 环境变量 > .env 文件）：
+
+<CodeGroup>
+  ```python 环境变量（推荐） theme={null}
+  import os
+  os.environ["DOCFLOW_APP_ID"] = "your-app-id"
+  os.environ["DOCFLOW_SECRET_CODE"] = "your-secret-code"
+  os.environ["DOCFLOW_BASE_URL"] = "https://docflow.textin.com/api"
+
+  from docflow import DocflowClient
+  client = DocflowClient.from_env()
+  ```
+
+  ```python 直接传参 theme={null}
+  from docflow import DocflowClient
+  client = DocflowClient(
+      app_id="your-app-id",
+      secret_code="your-secret-code",
+      base_url="https://docflow.textin.com/api",
+  )
+  ```
+
+  ```python .env 文件 theme={null}
+  # 需要安装 dotenv: pip install python-dotenv
+  # .env 文件内容:
+  # DOCFLOW_APP_ID=your-app-id
+  # DOCFLOW_SECRET_CODE=your-secret-code
+  # DOCFLOW_BASE_URL=https://docflow.textin.com/api
+
+  from dotenv import load_dotenv
+  from docflow import DocflowClient
+  
+  load_dotenv()
+  client = DocflowClient.from_env()
+  ```
+</CodeGroup>
+
+<Tip>
+  推荐使用环境变量方式，避免在代码中硬编码密钥。
+</Tip>
+
+## API 概览
+
+| 资源                            | 说明                  | 主要方法                                  |
+| ----------------------------- | ------------------- | ------------------------------------- |
+| `client.workspace`            | 工作空间管理              | `create()`, `list()`, `get()`, `update()`, `delete()`, `iter()` |
+| `client.category`             | 文档类别管理              | `create()`, `list()`, `get()`, `update()`, `delete()`, `iter()` |
+| `client.category.fields`      | 类别字段管理              | `add()`, `list()`, `update()`, `delete()` |
+| `client.category.tables`      | 类别表格管理              | `add()`, `list()`, `update()`, `delete()` |
+| `client.category.samples`     | 类别样本管理              | `upload()`, `list()`, `download()`, `delete()` |
+| `client.file`                 | 文件管理与识别             | `upload()`, `fetch()`, `download()`, `delete()` |
+| `client.review`               | 智能审核规则管理            | `create_repo()`, `create_group()`, `create_rule()`, `submit_task()` |
+
+## 工作空间管理
+
+工作空间是 Docflow 的顶层组织单位，用于隔离不同业务场景的文档处理流程。
+
+### 创建工作空间
+
+```python theme={null}
+from docflow import DocflowClient, AuthScope
+
+client = DocflowClient.from_env()
+
+workspace = client.workspace.create(
+    name="费用报销处理空间",
+    auth_scope=AuthScope.PUBLIC,  # 公开权限
+    description="处理公司费用报销单据"
+)
+
+print(f"工作空间ID: {workspace.workspace_id}")
+```
+
+### 获取工作空间列表
+
+```python theme={null}
+# 分页获取
+workspaces = client.workspace.list(page=1, page_size=20)
+
+for ws in workspaces.workspaces:
+    print(f"{ws.workspace_id}: {ws.name}")
+
+# 使用迭代器自动分页
+for workspace in client.workspace.iter():
+    print(f"{workspace.workspace_id}: {workspace.name}")
+```
+
+### 链式调用（推荐）
+
+通过上下文绑定简化代码，减少重复参数传递：
+
+```python theme={null}
+# 绑定工作空间
+ws = client.workspace("123")
+
+# 获取工作空间详情
+detail = ws.get()
+
+# 更新工作空间
+ws.update(
+    name="新的工作空间名称",
+    auth_scope=AuthScope.PRIVATE
+)
+
+# 链式调用：操作类别
+cat = ws.category("456")
+cat.fields.add(name="发票号码")
+cat.tables.add(name="商品明细表")
+```
+
+## 文档类别管理
+
+类别定义文档的结构化字段和抽取规则。
+
+### 创建类别（带样本文件）
+
+```python theme={null}
+from docflow import ExtractModel, FieldType
+
+# 定义字段配置
+fields = [
+    {
+        "name": "发票号码",
+        "description": "发票唯一标识"
+    },
+    {
+        "name": "开票日期",
+        "transform_settings": {
+            "type": FieldType.DATETIME.value,
+            "datetime_settings": {
+                "format": "yyyy-MM-dd"
+            }
+        }
+    },
+    {
+        "name": "发票类型",
+        "transform_settings": {
+            "type": FieldType.ENUMERATE.value,
+            "enumerate_settings": {
+                "items": ["增值税专用发票", "增值税普通发票"]
+            }
+        }
+    }
+]
+
+# 创建类别
+category = client.category.create(
+    workspace_id="123",
+    name="增值税发票",
+    extract_model=ExtractModel.Model_1,  # 使用模型1
+    sample_files=[
+        "/path/to/invoice_sample1.pdf",
+        "/path/to/invoice_sample2.pdf"
+    ],
+    fields=fields,
+    category_prompt="增值税发票，包含发票信息和商品明细"
+)
+
+print(f"类别ID: {category.category_id}")
+
+# 创建类别后，添加表格
+cat = client.workspace("123").category(category.category_id)
+table = cat.tables.add(
+    name="商品明细表",
+    prompt="抽取商品名称、规格、数量、单价、金额"
+)
+print(f"表格ID: {table.table_id}")
+```
+
+### 字段管理
+
+```python theme={null}
+# 绑定类别上下文
+cat = client.workspace("123").category("456")
+
+# 新增字段
+field = cat.fields.add(name="税率", description="税率百分比")
+
+# 获取字段列表
+fields = cat.fields.list()
+for field in fields.fields:
+    print(f"{field.id}: {field.name}")
+
+# 更新字段
+cat.fields.update(
+    field_id="789",
+    name="税率(%)",
+    required=True
+)
+
+# 删除字段
+cat.fields.delete(field_ids=["789"])
+```
+
+### 表格管理
+
+```python theme={null}
+# 添加表格
+table = cat.tables.add(
+    name="商品明细表",
+    prompt="抽取商品名称、规格、数量、单价、金额"
+)
+
+# 为表格添加列字段
+cat.fields.add(
+    table_id=table.table_id,
+    name="商品名称"
+)
+cat.fields.add(
+    table_id=table.table_id,
+    name="数量"
+)
+cat.fields.add(
+    table_id=table.table_id,
+    name="单价"
+)
+
+# 获取表格列表
+tables = cat.tables.list()
+for table in tables.tables:
+    print(f"{table.table_id}: {table.name}")
+```
+
+### 样本管理
+
+```python theme={null}
+# 上传样本文件
+sample = cat.samples.upload(file="/path/to/invoice_sample.pdf")
+
+# 获取样本列表
+samples = cat.samples.list()
+
+# 下载样本
+cat.samples.download(
+    sample_id="789",
+    save_path="/path/to/save.pdf"
+)
+
+# 删除样本
+cat.samples.delete(sample_ids=["789"])
+```
+
+## 文件处理
+
+### 上传文件并识别
+
+```python theme={null}
+# 上传文件（自动开始识别）
+response = client.file.upload(
+    workspace_id="123",
+    category="增值税发票",  # 类别名称
+    file_path="/path/to/invoice.pdf"
+)
+
+batch_number = response.batch_number
+print(f"批次号: {batch_number}")
+```
+
+### 获取识别结果
+
+```python theme={null}
+import time
+
+# 轮询等待识别完成
+max_wait = 60
+wait_interval = 3
+elapsed = 0
+
+while elapsed < max_wait:
+    result = client.file.fetch(
+        workspace_id="123",
+        batch_number=batch_number
+    )
+    
+    if result.files and result.files[0].recognition_status == 1:
+        file_info = result.files[0]
+        print(f"识别完成: {file_info.name}")
+        
+        # 访问抽取的字段数据
+        if file_info.data and 'fields' in file_info.data:
+            for field in file_info.data['fields']:
+                print(f"{field['name']}: {field['value']}")
+        
+        # 访问表格数据
+        if file_info.data and 'items' in file_info.data:
+            for row in file_info.data['items']:
+                print(row)
+        
+        break
+    
+    time.sleep(wait_interval)
+    elapsed += wait_interval
+```
+
+## 智能审核
+
+Docflow 提供基于 LLM 的智能审核能力，支持单文档规则校验和跨文档交叉审核。
+
+### 创建审核规则库
+
+```python theme={null}
+# 1. 创建规则库
+repo = client.review.create_repo(
+    workspace_id="123",
+    name="费用报销审核规则库"
+)
+
+# 2. 创建规则组
+group = client.review.create_group(
+    workspace_id="123",
+    repo_id=repo.repo_id,
+    name="发票合规性检查"
+)
+
+# 3. 创建审核规则
+# 获取字段ID映射
+fields_response = client.category.fields.list(
+    workspace_id="123",
+    category_id="456"
+)
+field_map = {f.name: f.id for f in fields_response.fields}
+
+# 创建规则：必填字段完整性校验
+client.review.create_rule(
+    workspace_id="123",
+    repo_id=int(repo.repo_id),
+    group_id=group.group_id,
+    name="必填字段完整性校验",
+    prompt='检查"发票号码"、"开票日期"、"金额"是否都已填写，任一字段为空则审核不通过',
+    category_ids=["456"],
+    risk_level=10,  # 高风险
+    referenced_fields=[
+        {
+            "category_id": "456",
+            "category_name": "增值税发票",
+            "fields": [
+                {"field_id": field_map["发票号码"], "field_name": "发票号码"},
+                {"field_id": field_map["开票日期"], "field_name": "开票日期"},
+                {"field_id": field_map["金额"], "field_name": "金额"}
+            ],
+            "tables": []
+        }
+    ]
+)
+```
+
+### 跨文档交叉审核
+
+```python theme={null}
+# 创建跨文档规则：验证发票金额与付款金额一致
+client.review.create_rule(
+    workspace_id="123",
+    repo_id=int(repo.repo_id),
+    group_id=group.group_id,
+    name="跨文档金额匹配",
+    prompt="验证发票金额与支付记录交易金额一致，允许±0.1元误差",
+    category_ids=["456", "789"],  # 多个类别
+    risk_level=10,
+    referenced_fields=[
+        {
+            "category_id": "456",
+            "category_name": "增值税发票",
+            "fields": [
+                {"field_id": invoice_field_map["金额"], "field_name": "金额"}
+            ],
+            "tables": []
+        },
+        {
+            "category_id": "789",
+            "category_name": "支付记录",
+            "fields": [
+                {"field_id": payment_field_map["交易金额"], "field_name": "交易金额"}
+            ],
+            "tables": []
+        }
+    ]
+)
+```
+
+### 提交审核任务
+
+```python theme={null}
+# 提交审核任务
+review_task = client.review.submit_task(
+    workspace_id="123",
+    name="2024年3月费用报销审核",
+    repo_id=repo.repo_id,
+    extract_task_ids=["task_001", "task_002", "task_003"]
+)
+
+task_id = review_task['task_id']
+print(f"审核任务ID: {task_id}")
+```
+
+### 获取审核结果
+
+```python theme={null}
+import time
+
+# 轮询等待审核完成
+max_wait = 120
+wait_interval = 5
+elapsed = 0
+
+while elapsed < max_wait:
+    result = client.review.get_task_result(
+        workspace_id="123",
+        task_id=task_id
+    )
+    
+    status = result.get('status')
+    # 状态：0=待审核, 1=审核通过, 2=审核失败, 4=审核不通过, 7=识别失败
+    if status in (1, 2, 4, 7):
+        print("审核完成")
+        
+        # 输出审核结果
+        stats = result.get('statistics', {})
+        print(f"规则通过数: {stats.get('pass_count', 0)}")
+        print(f"规则不通过数: {stats.get('failure_count', 0)}")
+        
+        # 详细审核结果
+        for group in result.get('groups', []):
+            print(f"\n【{group['group_name']}】")
+            for task in group.get('review_tasks', []):
+                result_icon = "✓" if task['review_result'] == 0 else "✗"
+                print(f"  {result_icon} {task['rule_name']}")
+                print(f"    {task['reasoning']}")
+        
+        break
+    
+    time.sleep(wait_interval)
+    elapsed += wait_interval
+```
+
+## 枚举类型
+
+SDK 提供完整的枚举类型定义，避免参数传错：
+
+```python theme={null}
+from docflow import (
+    ExtractModel,      # 提取模型类型
+    EnabledStatus,     # 启用状态（查询用）
+    EnabledFlag,       # 启用标志（更新用）
+    AuthScope,         # 权限范围
+    FieldType,         # 字段类型
+    MismatchAction,    # 不匹配处理模式
+    RecognitionStatus, # 识别状态
+)
+
+# ExtractModel - 提取模型
+ExtractModel.Model_1  # 速度快，抽取结果稳定
+ExtractModel.Model_2  # 适用复杂文档理解
+ExtractModel.Model_3  # 多模态，适用简单抽取
+
+# AuthScope - 权限范围
+AuthScope.PRIVATE  # 0 - 私有权限
+AuthScope.PUBLIC   # 1 - 公共权限
+
+# EnabledStatus - 启用状态（查询用）
+EnabledStatus.ALL       # "all" - 全部
+EnabledStatus.DISABLED  # "0"   - 未启用
+EnabledStatus.ENABLED   # "1"   - 已启用
+
+# EnabledFlag - 启用标志（更新用）
+EnabledFlag.DISABLED  # 0 - 未启用
+EnabledFlag.ENABLED   # 1 - 已启用
+
+# FieldType - 字段转换类型
+FieldType.DATETIME   # "datetime"   - 日期时间
+FieldType.ENUMERATE  # "enumerate"  - 枚举
+FieldType.REGEX      # "regex"      - 正则表达式
+
+# RecognitionStatus - 识别状态
+RecognitionStatus.PENDING    # 0 - 待识别
+RecognitionStatus.SUCCESS    # 1 - 识别成功
+RecognitionStatus.FAILED     # 2 - 识别失败
+```
+
+## 自动分页迭代器
+
+使用迭代器自动处理分页，无需手动循环：
+
+```python theme={null}
+# 工作空间迭代器
+for workspace in client.workspace.iter():
+    print(f"{workspace.workspace_id}: {workspace.name}")
+    if some_condition:
+        break  # 可以随时中断
+
+# 类别迭代器
+for category in client.category.iter(workspace_id="123"):
+    print(f"{category.category_id}: {category.name}")
+
+# 限制最大页数
+for category in client.category.iter(workspace_id="123", max_pages=5):
+    print(category.name)
+
+# 转换为列表（获取所有数据）
+all_workspaces = list(client.workspace.iter())
+```
+
+## 错误处理
+
+SDK 提供了完善的错误分类，方便精确处理不同的异常情况。
+
+### 错误类型
+
+| 错误类                      | 说明                                    |
+| ------------------------ | ------------------------------------- |
+| `DocflowException`       | 基础错误类，捕获所有 SDK 错误                     |
+| `ValidationError`        | 参数校验失败                                |
+| `AuthenticationError`    | 认证失败（app-id 或 secret-code 错误）        |
+| `PermissionDeniedError`  | 权限不足                                  |
+| `ResourceNotFoundError`  | 资源不存在                                 |
+| `APIError`               | API 调用失败（HTTP 4xx/5xx）               |
+| `NetworkError`           | 网络连接错误                                |
+
+### 错误处理示例
+
+```python theme={null}
+from docflow.exceptions import (
+    DocflowException,
+    AuthenticationError,
+    ValidationError,
+    ResourceNotFoundError,
+    APIError,
+)
+
+try:
+    workspace = client.workspace.get(workspace_id="123")
+except AuthenticationError as e:
+    print(f"认证失败: {e.message}")
+except ResourceNotFoundError as e:
+    print(f"工作空间不存在: {e.message}")
+except ValidationError as e:
+    print(f"参数校验失败: {e.message}")
+except APIError as e:
+    print(f"API错误 [HTTP {e.status_code}]: {e.message}")
+except DocflowException as e:
+    print(f"SDK错误: {e.message}")
+```
+
+## 国际化（i18n）
+
+SDK 支持多语言错误消息：
+
+```python theme={null}
+from docflow import DocflowClient, set_language
+
+# 使用英文
+set_language('en_US')
+client = DocflowClient.from_env()
+
+# 使用中文（默认）
+set_language('zh_CN')
+
+# 动态切换语言
+client.set_language('en_US')
+
+# 获取当前语言
+current_lang = client.get_language()  # 'en_US' 或 'zh_CN'
+```
+
+## 高级配置
+
+### 超时与重试
+
+```python theme={null}
+client = DocflowClient(
+    app_id="your-app-id",
+    secret_code="your-secret-code",
+    timeout=60,           # 请求超时（秒），默认 30
+    max_retries=5,        # 最大重试次数，默认 3
+    retry_backoff_factor=1.0,  # 退避因子，默认 1.0
+)
+```
+
+### 自定义重试配置
+
+```python theme={null}
+# 自定义重试状态码
+client = DocflowClient(
+    app_id="your-app-id",
+    secret_code="your-secret-code",
+    retry_status_codes=[429, 503],  # 只重试 429 和 503
+)
+
+# 自定义重试方法
+client = DocflowClient(
+    app_id="your-app-id",
+    secret_code="your-secret-code",
+    retry_methods=["GET"],  # 只允许 GET 请求重试
+)
+
+# 禁用重试
+client = DocflowClient(
+    app_id="your-app-id",
+    secret_code="your-secret-code",
+    max_retries=0  # 禁用重试
+)
+```
+
+### 自定义 API 地址
+
+```python theme={null}
+client = DocflowClient(
+    app_id="your-app-id",
+    secret_code="your-secret-code",
+    base_url="https://custom-api.example.com"
+)
+```
+
+### 资源管理
+
+使用上下文管理器自动关闭连接：
+
+```python theme={null}
+with DocflowClient.from_env() as client:
+    workspaces = client.workspace.list()
+    # 退出时自动关闭连接
+```
+
+## 调试日志
+
+启用 DEBUG 级别日志查看请求详情：
+
+```python theme={null}
+import logging
+logging.getLogger("docflow").setLevel(logging.DEBUG)
+```
+
+## 完整示例
+
+查看 [examples 目录](https://github.com/intsig-textin/docflow-python-sdk/tree/master/examples) 获取完整的使用示例：
+
+- **快速开始**: [quick_start.py](https://github.com/intsig-textin/docflow-python-sdk/blob/master/examples/quick_start.py) - 费用报销场景端到端流程
+- **完整工作流**: [complete_workflow_example.py](https://github.com/intsig-textin/docflow-python-sdk/blob/master/examples/complete_workflow_example.py) - 发票处理完整流程
+- **文件处理**: [file_examples.py](https://github.com/intsig-textin/docflow-python-sdk/blob/master/examples/file_examples.py) - 文件上传、识别、下载示例
+- **审核规则**: [review_examples.py](https://github.com/intsig-textin/docflow-python-sdk/blob/master/examples/review_examples.py) - 审核规则配置示例
+
+## 常见问题
+
+| 问题                        | 解决方案                                                       |
+| ------------------------- | ---------------------------------------------------------- |
+| `AuthenticationError`     | 检查 `DOCFLOW_APP_ID` 和 `DOCFLOW_SECRET_CODE` 是否正确           |
+| `ResourceNotFoundError`   | 确认工作空间ID/类别ID是否存在且有权限访问                                     |
+| `ValidationError`         | 检查参数格式和取值范围（如工作空间名称最大50字符）                                 |
+| 识别结果为空                    | 确认类别配置正确（字段、表格、样本文件），等待识别完成后再获取结果                          |
+| 审核任务失败                    | 检查规则配置（referenced_fields 的 field_id 必须正确）和 extract_task_ids 有效性 |
+
+## 相关链接
+
+* [GitHub 仓库](https://github.com/intsig-textin/docflow-python-sdk)
+* [PyPI 主页](https://pypi.org/project/docflow-sdk/)
+* [快速开始指南](https://github.com/intsig-textin/docflow-python-sdk/blob/master/examples/QUICKSTART.md)
+* [完整 API 文档](https://github.com/intsig-textin/docflow-python-sdk/blob/master/README.md)
+

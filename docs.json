@@ -159,6 +159,18 @@
           {
             "tab": "API",
             "openapi": "docflow/cn/rest-api/openapi.bundle.yaml"
+          },
+          {
+            "tab": "SDK",
+            "groups": [
+              {
+                "group": "SDK",
+                "pages": [
+                  "docflow/cn/11-sdk/python_sdk"
+                ]
+              }
+            ]
+            
           }
         ]
       },
@@ -279,6 +291,18 @@
           {
             "tab": "API",
             "openapi": "docflow/en/rest-api/openapi.bundle.yaml"
+          },
+          {
+            "tab": "SDK",
+            "groups": [
+              {
+                "group": "SDK",
+                "pages": [
+                  "docflow/en/11-sdk/python_sdk"
+                ]
+              }
+            ]
+            
           }
 
         ]

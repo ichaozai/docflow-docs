@@ -48,6 +48,26 @@
                       "docflow/cn/00-overview/contract_review",
                       "docflow/cn/00-overview/contract_review_already_configured"
                     ]
+                  },
+                  {
+                    "group": "底层原子能力 - 文档解析",
+                    "pages": [
+                      "docflow/cn/00-overview/atomic_capabilities_parse",
+                      "xparse/parse-quickstart",
+                      "xparse/parse-getjson",
+                      "xparse/parse-gettable",
+                      "xparse/parse-getcatalog",
+                      "xparse/parse-getimage",
+                      "xparse/parse-getpos",
+                      "xparse/parse-max-workers"
+                    ]
+                  },
+                  {
+                    "group": "底层原子能力 - 文档抽取",
+                    "pages": [
+                      "docflow/cn/00-overview/atomic_capabilities_extract",
+                      "xparse/entity-extraction"
+                    ]
                   }
                 ]
               },

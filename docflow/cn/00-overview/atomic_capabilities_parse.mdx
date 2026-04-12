@@ -1,0 +1,27 @@
+---
+title: "与 Docflow 文档解析的区别"
+sidebarTitle: "与 Docflow 解析的区别"
+description: "了解底层文档解析 API (xParse) 与 Docflow 内置文档解析的区别及适用场景"
+---
+
+## 什么是底层文档解析 API
+
+底层文档解析 API（xParse）是 TextIn 提供的独立文档解析服务，可将 PDF、图片、Word 等文件直接转换为 Markdown / JSON 结构化内容，支持表格、目录、图片、坐标等丰富输出。
+
+该 API 是 Docflow 平台内部使用的底层解析引擎，也可以脱离 Docflow 独立调用。
+
+## 与 Docflow 文档解析的区别
+
+| 对比项 | Docflow 文档解析 | 底层文档解析 API (xParse) |
+|---|---|---|
+| **调用方式** | 通过 Docflow 获取结果接口，加 `with_document=true` 参数 | 直接调用 TextIn 文档解析 API |
+| **接口类型** | 异步接口：上传文件后通过任务 ID 查询结果 | **同步接口**：请求即返回解析结果，无需轮询 |
+| **任务记录** | 有完整的任务记录，可随时查询历史结果 | **无任务记录**，结果不会持久化存储，需调用方自行保存 |
+| **前置条件** | 需先将文件上传到 Docflow 工作空间 | 无需 Docflow，直接上传文件即可 |
+| **返回格式** | 集成在 Docflow 文件结果中 `result.files[].document`，包含 pages/lines/position | 独立返回完整解析结果，包括 Markdown、detail、pages、catalog、表格、图片等 |
+| **配置灵活度** | 由 Docflow 内部管理 | 支持丰富的参数配置（`parse_mode`、`page_details`、`markdown_details` 等） |
+| **适用场景** | 已接入 Docflow 完整流程，需要结合分类、抽取、审核等后续环节 | 仅需文档解析能力，如构建知识库、RAG 应用、文档格式转换等 |
+
+<Note>
+  底层文档解析 API 是同步接口，调用后直接返回解析结果，不会在平台侧产生任务记录，也无法事后查询历史结果。如果您需要持久化存储和历史查询能力，请使用 Docflow 的文档解析流程。
+</Note>

@@ -4,7 +4,7 @@ info:
   description: >-
     DocFlow REST API, providing file upload and file processing result retrieval
     capabilities
-  version: 2.0.0
+  version: 2.4.2
 servers:
   - url: 'https://docflow.textin.com'
 x-codeSamples: custom
@@ -2758,9 +2758,11 @@ components:
             type: object
             properties:
               urls:
-                description: |
+                description: >
                   File URL list
-                  Supports up to 10 file URLs per upload, each file maximum 50MB
+
+                  Supports up to 10 file URLs per upload, each file maximum
+                  100MB
                 type: array
                 items:
                   type: string

@@ -16,7 +16,7 @@ FileUploadRequestBody:
           urls:
             description: |
               文件URL列表
-              一次最多支持上传10个文件URL，每个文件最大不超过50MB
+              一次最多支持上传10个文件URL，每个文件最大不超过100MB
             type: array
             items:
               type: string

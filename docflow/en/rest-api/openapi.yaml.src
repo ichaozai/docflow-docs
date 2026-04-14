@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: DocFlow API
   description: DocFlow REST API, providing file upload and file processing result retrieval capabilities
-  version: 2.0.0
+  version: 2.4.2
 servers:
 - url: https://docflow.textin.com
   

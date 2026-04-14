@@ -16,7 +16,7 @@ FileUploadRequestBody:
           urls:
             description: |
               File URL list
-              Supports up to 10 file URLs per upload, each file maximum 50MB
+              Supports up to 10 file URLs per upload, each file maximum 100MB
             type: array
             items:
               type: string

@@ -707,6 +707,13 @@ DocumentParserParam:
       type: integer
       description: Remove watermark (0 no, 1 yes)
       example: 0
+    dpi:
+      type: integer
+      description: File resolution (144 default, 216 high precision)
+      example: 144
+      enum:
+        - 144
+        - 216
 
 TokenResult:
   type: object

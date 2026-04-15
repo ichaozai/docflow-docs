@@ -116,6 +116,18 @@ ParserTableTextSplitMode:
     type: integer
     default: 0
 
+ParserDpi:
+  name: parser_dpi
+  in: query
+  description: 文件分辨率（144:默认、216:高精度）
+  required: false
+  schema:
+    type: integer
+    default: 144
+    enum:
+      - 144
+      - 216
+
 WithTaskDetailUrl:
   name: with_task_detail_url
   in: query

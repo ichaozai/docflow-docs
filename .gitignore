@@ -1,21 +1,35 @@
+# OS
 .DS_Store
+
+# IDE
+.idea/
+.cursor/
+*.iml
+
+# Node
+node_modules/
+package.json
+package-lock.json
+
+# Java
+/examples/java/target/
+/examples/java/src/main/java/rebel.xml
+
+# Python
+__pycache__/
+.venv/
+/examples/python/results.json
+
+# 临时脚本/产物
 export_pdf
 merge_docflow_cn.sh
 docflow_cn_combined_ordered.md
-/node_modules/
-/docflow-docs.iml
-/CLAUDE.md
-/package.json
-/package-lock.json
-/examples/java/src/main/java/rebel.xml
-/examples/java/target/
-/examples/java/.idea/
-/examples/python/.venv/
-/examples/python/results.json
-/examples/python/__pycache__/
-
-# IDE
-.cursor/
 
 # vibe coding
 vibe
+
+# Claude Code
+CLAUDE.md
+
+# CHANGELOG
+CHANGELOG.md

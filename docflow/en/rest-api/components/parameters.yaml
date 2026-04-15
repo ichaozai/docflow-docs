@@ -111,6 +111,18 @@ ParserTableTextSplitMode:
     type: integer
     default: 0
 
+ParserDpi:
+  name: parser_dpi
+  in: query
+  description: File resolution (144 default, 216 high precision)
+  required: false
+  schema:
+    type: integer
+    default: 144
+    enum:
+      - 144
+      - 216
+
 WithTaskDetailUrl:
   name: with_task_detail_url
   in: query

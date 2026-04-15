@@ -705,6 +705,13 @@ DocumentParserParam:
       type: integer
       description: 是否去水印(0 不去水印、1 去水印)
       example: 0
+    dpi:
+      type: integer
+      description: 文件分辨率(144 默认、216 高精度)
+      example: 144
+      enum:
+        - 144
+        - 216
 
 TokenResult:
   type: object

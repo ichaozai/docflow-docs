@@ -25,6 +25,7 @@ paths:
         - $ref: '#/components/parameters/ParserApplyMerge'
         - $ref: '#/components/parameters/ParserFormulaLevel'
         - $ref: '#/components/parameters/ParserTableTextSplitMode'
+        - $ref: '#/components/parameters/ParserDpi'
       requestBody:
         $ref: '#/components/requestBodies/FileUploadRequestBody'
       responses:
@@ -90,6 +91,7 @@ paths:
         - $ref: '#/components/parameters/ParserApplyMerge'
         - $ref: '#/components/parameters/ParserFormulaLevel'
         - $ref: '#/components/parameters/ParserTableTextSplitMode'
+        - $ref: '#/components/parameters/ParserDpi'
         - $ref: '#/components/parameters/WithTaskDetailUrl'
       requestBody:
         $ref: '#/components/requestBodies/FileUploadRequestBody'
@@ -2642,6 +2644,17 @@ components:
       schema:
         type: integer
         default: 0
+    ParserDpi:
+      name: parser_dpi
+      in: query
+      description: '文件分辨率（144:默认、216:高精度）'
+      required: false
+      schema:
+        type: integer
+        default: 144
+        enum:
+          - 144
+          - 216
     WithTaskDetailUrl:
       name: with_task_detail_url
       in: query
@@ -3597,6 +3610,13 @@ components:
           type: integer
           description: 是否去水印(0 不去水印、1 去水印)
           example: 0
+        dpi:
+          type: integer
+          description: 文件分辨率(144 默认、216 高精度)
+          example: 144
+          enum:
+            - 144
+            - 216
     TokenResult:
       type: object
       properties:

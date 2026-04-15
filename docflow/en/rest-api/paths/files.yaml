@@ -16,6 +16,7 @@
       - $ref: '../components/parameters.yaml#/ParserApplyMerge'
       - $ref: '../components/parameters.yaml#/ParserFormulaLevel'
       - $ref: '../components/parameters.yaml#/ParserTableTextSplitMode'
+      - $ref: '../components/parameters.yaml#/ParserDpi'
     requestBody:
       $ref: '../components/request-bodies.yaml#/FileUploadRequestBody'
     responses:
@@ -82,6 +83,7 @@
       - $ref: '../components/parameters.yaml#/ParserApplyMerge'
       - $ref: '../components/parameters.yaml#/ParserFormulaLevel'
       - $ref: '../components/parameters.yaml#/ParserTableTextSplitMode'
+      - $ref: '../components/parameters.yaml#/ParserDpi'
       - $ref: '../components/parameters.yaml#/WithTaskDetailUrl'
     requestBody:
       $ref: '../components/request-bodies.yaml#/FileUploadRequestBody'

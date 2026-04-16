@@ -2207,6 +2207,10 @@ paths:
                   type: string
                   description: 批次号
                   example: '1234567890'
+                model:
+                  type: string
+                  description: '审核任务模型，支持的模型：deepseek-r1, qwq-32b, qwen3-max, ORM-O1'
+                  example: deepseek-r1
               required:
                 - workspace_id
                 - name
@@ -2465,6 +2469,10 @@ paths:
                                         type: string
                                         description: 人工复核批注
                                         example: 人工复核批注
+                          model:
+                            type: string
+                            description: 审核任务模型
+                            example: deepseek-r1
   /api/app-api/sip/platform/v2/review/task/retry:
     post:
       summary: 重新审核任务
@@ -2644,6 +2652,14 @@ components:
       schema:
         type: integer
         default: 0
+    WithTaskDetailUrl:
+      name: with_task_detail_url
+      in: query
+      description: 是否返回任务详情页URL
+      required: false
+      schema:
+        type: boolean
+        default: false
     ParserDpi:
       name: parser_dpi
       in: query
@@ -2655,14 +2671,6 @@ components:
         enum:
           - 144
           - 216
-    WithTaskDetailUrl:
-      name: with_task_detail_url
-      in: query
-      description: 是否返回任务详情页URL
-      required: false
-      schema:
-        type: boolean
-        default: false
   requestBodies:
     FileUploadRequestBody:
       description: 文件上传请求体
@@ -3990,6 +3998,7 @@ components:
         - 5: 识别中
         - 6: 排队中
         - 7: 识别失败
+        - 8: 未触发
       enum:
         - 0
         - 1
@@ -3999,6 +4008,7 @@ components:
         - 5
         - 6
         - 7
+        - 8
 security:
   - ApiId: []
     SecretCode: []

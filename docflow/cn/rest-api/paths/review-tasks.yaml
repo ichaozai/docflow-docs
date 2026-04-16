@@ -35,6 +35,10 @@
                 type: string
                 description: 批次号
                 example: "1234567890"
+              model:
+                type: string
+                description: 审核任务模型，支持的模型：deepseek-r1, qwq-32b, qwen3-max, ORM-O1
+                example: "deepseek-r1"
             required:
               - workspace_id
               - name
@@ -251,6 +255,10 @@
                                       type: string
                                       description: 人工复核批注
                                       example: "人工复核批注"
+                        model:
+                          type: string
+                          description: 审核任务模型
+                          example: "deepseek-r1"
 
 /api/app-api/sip/platform/v2/review/task/delete:
   post:

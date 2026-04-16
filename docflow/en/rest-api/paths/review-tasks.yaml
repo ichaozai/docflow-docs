@@ -35,6 +35,10 @@
                 type: string
                 description: Batch number
                 example: "1234567890"
+              model:
+                type: string
+                description: "Review task model. Supported models: deepseek-r1, qwq-32b, qwen3-max, ORM-O1"
+                example: "deepseek-r1"
             required:
               - workspace_id
               - name
@@ -251,6 +255,10 @@
                                       type: string
                                       description: Manual review comments
                                       example: "Manual review comments"
+                        model:
+                          type: string
+                          description: Review task model
+                          example: "deepseek-r1"
 
 /api/app-api/sip/platform/v2/review/task/delete:
   post:

@@ -154,6 +154,39 @@ def upload_file(workspace_id: str, file_path: str) -> str:
 
 
 # ============================================================
+# 步骤 3（替代）：同步上传文件（上传即返回抽取结果，无需轮询）
+# REST API: POST /api/app-api/sip/platform/v2/file/upload/sync
+# ============================================================
+
+def upload_file_sync(workspace_id: str, file_path: str) -> dict:
+    """
+    同步上传文件至指定工作空间，等待处理完成后直接返回抽取结果。
+
+    与异步 upload + 轮询 fetch 的效果相同，但无需轮询，适合对接简单或文件量少的场景。
+    返回结构与 file/fetch 一致（含 task_id、category、data 等字段）。
+    """
+    url = f"{BASE_URL}/api/app-api/sip/platform/v2/file/upload/sync"
+    params = {"workspace_id": workspace_id}
+    mime = _mime(file_path)
+    with open(file_path, "rb") as f:
+        resp = requests.post(
+            url,
+            params=params,
+            files={"file": (os.path.basename(file_path), f, mime)},
+            headers=_headers(),
+            timeout=300,
+        )
+    data = _check(resp, f"同步上传文件[{os.path.basename(file_path)}]")
+    files = data.get("result", {}).get("files", [])
+    if not files:
+        raise RuntimeError(f"同步上传未返回文件结果: {data}")
+    file_result = files[0]
+    print(f"[同步上传] 处理完成  name={os.path.basename(file_path)}"
+          f"  category={file_result.get('category', '未分类')}")
+    return file_result
+
+
+# ============================================================
 # 步骤 4：轮询等待抽取结果
 # REST API: GET /api/app-api/sip/platform/v2/file/fetch
 # ============================================================

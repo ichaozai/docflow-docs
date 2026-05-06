@@ -1,0 +1,294 @@
+---
+title: "更新日志"
+sidebarTitle: "更新日志"
+description: "DocFlow API 文档更新记录"
+---
+
+## 2026-05-06
+
+**Guides**
+- 更新：[费用报销场景（无工作空间）](/docflow/cn/00-overview/expense_reimbursement)、[AP 审单场景（无工作空间）](/docflow/cn/00-overview/ap_review)、[合同审核场景（无工作空间）](/docflow/cn/00-overview/contract_review) — 优化审核规则风险等级标识和描述文案
+- 新增：更新日志页面
+## 2026-04-30
+
+**Guides**
+- 更新：[费用报销场景（无工作空间）](/docflow/cn/00-overview/expense_reimbursement)、[费用报销场景（已有工作空间）](/docflow/cn/00-overview/expense_reimbursement_already_configured)、[AP 审单场景（无工作空间）](/docflow/cn/00-overview/ap_review)、[AP 审单场景（已有工作空间）](/docflow/cn/00-overview/ap_review_already_configured)、[合同审核场景（无工作空间）](/docflow/cn/00-overview/contract_review)、[合同审核场景（已有工作空间）](/docflow/cn/00-overview/contract_review_already_configured) 共 6 篇场景文档，在「上传文件」步骤中新增**同步上传** `file/upload/sync` 的代码示例（Python + Java），标注异步/同步两种方式的区别和适用场景
+- 更新：示例代码文件（`expense_reimbursement.py`、`contract_review.py`、`ap_review.py` 及各 `_configured` 版本）新增 `upload_file_sync` 函数
+
+## 2026-04-16
+
+**API**
+- 更新：智能审核 Review API 升级至 v2.1，完善 [新建审核任务](/api-reference/%E6%99%BA%E8%83%BD%E5%AE%A1%E6%A0%B8/%E6%96%B0%E5%BB%BA%E5%AE%A1%E6%A0%B8%E4%BB%BB%E5%8A%A1)、[获取审核结果](/api-reference/%E6%99%BA%E8%83%BD%E5%AE%A1%E6%A0%B8/%E8%8E%B7%E5%8F%96%E5%AE%A1%E6%A0%B8%E7%BB%93%E6%9E%9C) 等接口的 Schema 定义
+
+## 2026-04-15
+
+**API**
+- 更新：[上传文件](/api-reference/%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6)、[同步上传文件](/api-reference/%E5%90%8C%E6%AD%A5%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6)、[重新处理文件](/api-reference/%E9%87%8D%E6%96%B0%E5%A4%84%E7%90%86%E6%96%87%E4%BB%B6) 接口新增 `parser_dpi` 参数，支持自定义文档解析分辨率
+
+## 2026-04-14
+
+**Guides**
+- 更新：[文件格式支持](/docflow/cn/01-upload/support_format)、[通过URL上传](/docflow/cn/01-upload/upload_by_urls) — 文件上传大小限制由 50MB 调整为 **100MB**
+
+**API**
+- 更新：[上传文件](/api-reference/%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6)、[同步上传文件](/api-reference/%E5%90%8C%E6%AD%A5%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6) 文件大小上限调整为 100MB
+
+## 2026-04-12
+
+**Guides**
+- 新增：[与 Docflow 文档抽取的区别](/docflow/cn/00-overview/atomic_capabilities_extract) — 底层原子能力：智能文档抽取（Entity Extraction），含与 Docflow 抽取流程的对比
+- 新增：[与 Docflow 文档解析的区别](/docflow/cn/00-overview/atomic_capabilities_parse) — 底层原子能力：文档解析（Document Parse），含与 Docflow 解析流程的对比
+
+## 2026-04-08
+
+**SDK**
+- 新增：Python SDK 使用文档
+## 2026-04-07
+
+**Guides**
+- 更新：[费用报销场景（无工作空间）](/docflow/cn/00-overview/expense_reimbursement)、[AP 审单场景（无工作空间）](/docflow/cn/00-overview/ap_review)、[合同审核场景（无工作空间）](/docflow/cn/00-overview/contract_review) 等 6 篇场景文档，完善标题、描述、样本文件说明
+- 新增：Java 完整示例代码（`ApReview.java`、`ContractReview.java` 等 6 个文件）及对应样本文件
+
+## 2026-04-03
+
+**Guides**
+- 新增：[AP 审单场景（无工作空间）](/docflow/cn/00-overview/ap_review) — 含 Python/Java 完整示例
+- 新增：[AP 审单场景（已有工作空间）](/docflow/cn/00-overview/ap_review_already_configured)
+- 新增：[合同审核场景（无工作空间）](/docflow/cn/00-overview/contract_review) — 含 Python/Java 完整示例
+- 新增：[合同审核场景（已有工作空间）](/docflow/cn/00-overview/contract_review_already_configured)
+- 新增：[费用报销场景（已有工作空间）](/docflow/cn/00-overview/expense_reimbursement_already_configured)
+- 新增：`entity_extraction.py` — 独立文档抽取 API 示例
+
+**API**
+- 更新：工作空间管理接口移除 `enterprise_id` 必填要求（[创建空间](/api-reference/%E7%A9%BA%E9%97%B4%E7%AE%A1%E7%90%86/%E5%88%9B%E5%BB%BA%E7%A9%BA%E9%97%B4)、[获取空间列表](/api-reference/%E7%A9%BA%E9%97%B4%E7%AE%A1%E7%90%86/%E8%8E%B7%E5%8F%96%E7%A9%BA%E9%97%B4%E5%88%97%E8%A1%A8) 等）
+
+## 2026-04-01
+
+**API**
+- 新增（英文）：完整的工作空间管理、文件类别管理 REST API 接口
+- 新增：[修改文件类别](/api-reference/%E4%BF%AE%E6%94%B9%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB)、[获取文件类别下的表格列表](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E8%8E%B7%E5%8F%96%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E4%B8%8B%E7%9A%84%E8%A1%A8%E6%A0%BC%E5%88%97%E8%A1%A8)、[新增文件类别表格](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E6%96%B0%E5%A2%9E%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E8%A1%A8%E6%A0%BC)、[更新文件类别表格](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E6%9B%B4%E6%96%B0%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E8%A1%A8%E6%A0%BC)、[删除文件类别表格](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E5%88%A0%E9%99%A4%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E8%A1%A8%E6%A0%BC) 接口
+
+## 2026-03-24
+
+**Guides**
+- 新增：[费用报销场景（无工作空间）](/docflow/cn/00-overview/expense_reimbursement) — 含流程图和 Python/Java 完整示例
+- 更新：[快速启动](/docflow/cn/00-overview/quickstart)
+
+## 2026-03-12
+
+**Guides**
+- 新增：[工作空间管理 - 快速启动](/docflow/cn/02-workspace/quickstart)
+- 新增：[文件类别管理 - 快速启动](/docflow/cn/10-category-management/quickstart)
+- 新增：[字段管理](/docflow/cn/10-category-management/fields_management)
+- 新增：[表格管理](/docflow/cn/10-category-management/tables_management)
+- 新增：[样本管理](/docflow/cn/10-category-management/samples_management)
+
+**API**
+- 新增接口：[更新文件处理结果](/api-reference/%E6%9B%B4%E6%96%B0%E6%96%87%E4%BB%B6%E5%A4%84%E7%90%86%E7%BB%93%E6%9E%9C)、[抽取特定字段](/api-reference/%E6%8A%BD%E5%8F%96%E7%89%B9%E5%AE%9A%E5%AD%97%E6%AE%B5)、[重新处理文件](/api-reference/%E9%87%8D%E6%96%B0%E5%A4%84%E7%90%86%E6%96%87%E4%BB%B6)、[生成短时间有效的token](/api-reference/%E7%94%9F%E6%88%90%E7%9F%AD%E6%97%B6%E9%97%B4%E6%9C%89%E6%95%88%E7%9A%84token)、工作空间 CRUD、文件类别 CRUD、[获取文件类别下的表格列表](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E8%8E%B7%E5%8F%96%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E4%B8%8B%E7%9A%84%E8%A1%A8%E6%A0%BC%E5%88%97%E8%A1%A8)、[新增文件类别表格](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E6%96%B0%E5%A2%9E%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E8%A1%A8%E6%A0%BC)、[更新文件类别表格](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E6%9B%B4%E6%96%B0%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E8%A1%A8%E6%A0%BC)、[删除文件类别表格](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E5%88%A0%E9%99%A4%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E8%A1%A8%E6%A0%BC)
+- 新增审核相关接口：[创建审核规则库](/api-reference/%E6%99%BA%E8%83%BD%E5%AE%A1%E6%A0%B8/%E5%88%9B%E5%BB%BA%E5%AE%A1%E6%A0%B8%E8%A7%84%E5%88%99%E5%BA%93)、[新建审核任务](/api-reference/%E6%99%BA%E8%83%BD%E5%AE%A1%E6%A0%B8/%E6%96%B0%E5%BB%BA%E5%AE%A1%E6%A0%B8%E4%BB%BB%E5%8A%A1)、[获取审核结果](/api-reference/%E6%99%BA%E8%83%BD%E5%AE%A1%E6%A0%B8/%E8%8E%B7%E5%8F%96%E5%AE%A1%E6%A0%B8%E7%BB%93%E6%9E%9C) 等
+
+## 2026-03-02
+
+**API**
+- 新增接口：[创建空间](/api-reference/%E7%A9%BA%E9%97%B4%E7%AE%A1%E7%90%86/%E5%88%9B%E5%BB%BA%E7%A9%BA%E9%97%B4)、[创建文件类别](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E5%88%9B%E5%BB%BA%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB)、[新增文件类别字段](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E6%96%B0%E5%A2%9E%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E5%AD%97%E6%AE%B5)
+
+## 2026-02-03
+
+**Guides**
+- 新增：[前端 iframe 嵌入](/docflow/cn/10-web/iframe)
+
+## 2026-01-28
+
+**API**
+- 新增工作空间管理接口：[创建空间](/api-reference/%E7%A9%BA%E9%97%B4%E7%AE%A1%E7%90%86/%E5%88%9B%E5%BB%BA%E7%A9%BA%E9%97%B4)、[获取空间列表](/api-reference/%E7%A9%BA%E9%97%B4%E7%AE%A1%E7%90%86/%E8%8E%B7%E5%8F%96%E7%A9%BA%E9%97%B4%E5%88%97%E8%A1%A8)、[获取空间详情](/api-reference/%E7%A9%BA%E9%97%B4%E7%AE%A1%E7%90%86/%E8%8E%B7%E5%8F%96%E7%A9%BA%E9%97%B4%E8%AF%A6%E6%83%85)、[更新空间](/api-reference/%E7%A9%BA%E9%97%B4%E7%AE%A1%E7%90%86/%E6%9B%B4%E6%96%B0%E7%A9%BA%E9%97%B4)、[删除空间](/api-reference/%E7%A9%BA%E9%97%B4%E7%AE%A1%E7%90%86/%E5%88%A0%E9%99%A4%E7%A9%BA%E9%97%B4)
+- 新增文件类别管理接口：[创建文件类别](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E5%88%9B%E5%BB%BA%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB)、[更新文件类别](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E6%9B%B4%E6%96%B0%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB)、[删除文件类别](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E5%88%A0%E9%99%A4%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB)、[上传类别样本](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E6%A0%B7%E6%9C%AC/%E4%B8%8A%E4%BC%A0%E7%B1%BB%E5%88%AB%E6%A0%B7%E6%9C%AC)、[获取类别样本列表](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E6%A0%B7%E6%9C%AC/%E8%8E%B7%E5%8F%96%E7%B1%BB%E5%88%AB%E6%A0%B7%E6%9C%AC%E5%88%97%E8%A1%A8)、[下载类别样本](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E6%A0%B7%E6%9C%AC/%E4%B8%8B%E8%BD%BD%E7%B1%BB%E5%88%AB%E6%A0%B7%E6%9C%AC)
+- 新增文件类别字段管理接口：[新增文件类别字段](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E6%96%B0%E5%A2%9E%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E5%AD%97%E6%AE%B5)、[更新文件类别字段](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E6%9B%B4%E6%96%B0%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E5%AD%97%E6%AE%B5)、[删除文件类别字段](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E5%88%A0%E9%99%A4%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E5%AD%97%E6%AE%B5)
+
+## 2026-01-27
+
+**Guides**
+- 新增：[OpenAPI 文件下载](/docflow/cn/100-faq/openapi_download)
+## 2026-01-21
+
+**API**
+- [生成短时间有效的token](/api-reference/%E7%94%9F%E6%88%90%E7%9F%AD%E6%97%B6%E9%97%B4%E6%9C%89%E6%95%88%E7%9A%84token) 接口新增过期时间配置
+- [获取文件处理结果列表](/api-reference/%E8%8E%B7%E5%8F%96%E6%96%87%E4%BB%B6%E5%A4%84%E7%90%86%E7%BB%93%E6%9E%9C%E5%88%97%E8%A1%A8) 返回结果新增 `total_page_num` 字段
+
+## 2025-12-25
+
+**Guides**
+- 更新：[新建审核任务](/docflow/cn/07-review/create_task) — 新增 `batch_number` 参数说明
+
+**API**
+- [新建审核任务](/api-reference/%E6%99%BA%E8%83%BD%E5%AE%A1%E6%A0%B8/%E6%96%B0%E5%BB%BA%E5%AE%A1%E6%A0%B8%E4%BB%BB%E5%8A%A1) 接口新增 `batch_number` 参数
+- [上传文件](/api-reference/%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6)、[同步上传文件](/api-reference/%E5%90%8C%E6%AD%A5%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6)、[重新处理文件](/api-reference/%E9%87%8D%E6%96%B0%E5%A4%84%E7%90%86%E6%96%87%E4%BB%B6) 接口新增图像解析参数（去水印 `parser_remove_watermark`、裁边矫正 `parser_crop_dewarp` 等）
+
+## 2025-12-24
+
+**Guides**
+- 新增：[规则库管理](/docflow/cn/07-review/rule_management) — 审核规则库/规则组/规则的创建、查询、更新、删除
+- 新增：[新建审核任务](/docflow/cn/07-review/create_task)
+- 新增：[获取审核结果](/docflow/cn/07-review/get_result)
+- 新增：[重试审核任务](/docflow/cn/07-review/retry_task)
+- 更新：[智能审核 - 快速启动](/docflow/cn/07-review/quickstart)
+
+**API**
+- 新增接口：[获取审核规则库列表](/api-reference/%E6%99%BA%E8%83%BD%E5%AE%A1%E6%A0%B8/%E8%8E%B7%E5%8F%96%E5%AE%A1%E6%A0%B8%E8%A7%84%E5%88%99%E5%BA%93%E5%88%97%E8%A1%A8)、[获取审核规则库](/api-reference/%E6%99%BA%E8%83%BD%E5%AE%A1%E6%A0%B8/%E8%8E%B7%E5%8F%96%E5%AE%A1%E6%A0%B8%E8%A7%84%E5%88%99%E5%BA%93)、[重新审核任务](/api-reference/%E6%99%BA%E8%83%BD%E5%AE%A1%E6%A0%B8/%E9%87%8D%E6%96%B0%E5%AE%A1%E6%A0%B8%E4%BB%BB%E5%8A%A1)、[重新审核任务中的某条规则](/api-reference/%E6%99%BA%E8%83%BD%E5%AE%A1%E6%A0%B8/%E9%87%8D%E6%96%B0%E5%AE%A1%E6%A0%B8%E4%BB%BB%E5%8A%A1%E4%B8%AD%E7%9A%84%E6%9F%90%E6%9D%A1%E8%A7%84%E5%88%99)
+- 移除旧版审核 API
+
+## 2025-12-19
+
+**Guides**
+- 新增：[同步上传](/docflow/cn/01-upload/upload_sync)
+**API**
+- 新增接口：[同步上传文件](/api-reference/%E5%90%8C%E6%AD%A5%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6)
+- 新增接口：[获取空间文件类别列表](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E8%8E%B7%E5%8F%96%E7%A9%BA%E9%97%B4%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E5%88%97%E8%A1%A8)、[获取文件类别字段列表](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E8%8E%B7%E5%8F%96%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E5%AD%97%E6%AE%B5%E5%88%97%E8%A1%A8)
+- 新增审核规则库管理接口：[创建审核规则库](/api-reference/%E6%99%BA%E8%83%BD%E5%AE%A1%E6%A0%B8/%E5%88%9B%E5%BB%BA%E5%AE%A1%E6%A0%B8%E8%A7%84%E5%88%99%E5%BA%93)、[删除审核规则库](/api-reference/%E6%99%BA%E8%83%BD%E5%AE%A1%E6%A0%B8/%E5%88%A0%E9%99%A4%E5%AE%A1%E6%A0%B8%E8%A7%84%E5%88%99%E5%BA%93)、[更新审核规则库](/api-reference/%E6%99%BA%E8%83%BD%E5%AE%A1%E6%A0%B8/%E6%9B%B4%E6%96%B0%E5%AE%A1%E6%A0%B8%E8%A7%84%E5%88%99%E5%BA%93)
+
+## 2025-12-17
+
+**Guides**
+- 新增：[抽取特定字段](/docflow/cn/06-extract/extract_specific_fields)
+- 更新：[文档抽取 - 快速启动](/docflow/cn/06-extract/quickstart)
+
+**API**
+- 新增接口：[抽取特定字段](/api-reference/%E6%8A%BD%E5%8F%96%E7%89%B9%E5%AE%9A%E5%AD%97%E6%AE%B5)
+- 移除旧版审核 API 接口
+
+## 2025-12-11
+
+**Guides**
+- 新增：[企业多租户](/docflow/cn/00-overview/enterprise_multi_tenant)
+- 新增：[如何获取企业ID](/docflow/cn/100-faq/get_enterprise_id)
+## 2025-12-08
+
+**Guides**
+- 新增：[文档重试 - 快速启动](/docflow/cn/09-retry/quickstart)
+**API**
+- 新增接口：[重新处理文件](/api-reference/%E9%87%8D%E6%96%B0%E5%A4%84%E7%90%86%E6%96%87%E4%BB%B6)
+
+## 2025-11-12
+
+**API**
+- 更新：[获取文件处理结果列表](/api-reference/%E8%8E%B7%E5%8F%96%E6%96%87%E4%BB%B6%E5%A4%84%E7%90%86%E7%BB%93%E6%9E%9C%E5%88%97%E8%A1%A8) 接口返回结果新增导出字段名（`export_name`）
+
+## 2025-11-04
+
+**Guides**
+- 新增：[修改文件类别](/docflow/cn/04-classify/amend_category)
+- 新增：[修改文件类别（文件拆分）](/docflow/cn/05-split/amend_category_split)
+- 新增：[修改文件类别（多图切分）](/docflow/cn/05-split/amend_category_crop)
+**API**
+- 新增接口：[修改文件类别](/api-reference/%E4%BF%AE%E6%94%B9%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB)
+
+## 2025-10-27
+
+**Guides**
+- 新增：[通过URL上传](/docflow/cn/01-upload/upload_by_urls)
+- 新增：[任务状态查询](/docflow/cn/01-upload/task_status) — 含失败原因和耗时说明
+- 更新：[返回JSON结构说明](/docflow/cn/01-upload/response) — 新增 `task_id` 字段说明
+
+**API**
+- 更新：[上传文件](/api-reference/%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6) 接口支持通过 URL 上传（`urls` 请求体）
+- 更新：[上传文件](/api-reference/%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6) 响应新增 `task_id` 字段
+- 更新：[获取文件处理结果列表](/api-reference/%E8%8E%B7%E5%8F%96%E6%96%87%E4%BB%B6%E5%A4%84%E7%90%86%E7%BB%93%E6%9E%9C%E5%88%97%E8%A1%A8) 响应新增 `failure_causes`（失败原因）和 `duration_ms`（任务耗时）
+- 更新：[获取文件处理结果列表](/api-reference/%E8%8E%B7%E5%8F%96%E6%96%87%E4%BB%B6%E5%A4%84%E7%90%86%E7%BB%93%E6%9E%9C%E5%88%97%E8%A1%A8) 表格（tables）坐标结构与字段（fields）和行数据（items）统一
+
+## 2025-10-16
+
+**Guides**
+- 新增：[文档删除 - 快速启动](/docflow/cn/08-delete/quickstart)
+**API**
+- 新增接口：[删除任务](/api-reference/%E5%88%A0%E9%99%A4%E4%BB%BB%E5%8A%A1)
+
+## 2025-09-01 ~ 2025-09-05
+
+**Guides**
+- 新增：英文版全部 Guides 文档首次上线（25+ 页面，覆盖产品概览、文档上传、文档解析、文档分类、文档拆分、文档抽取、智能审核、常见问题）
+- 更新：[多图切分](/docflow/cn/05-split/crop) — 拆分结果新增切图所在页码和角度信息
+
+**API**
+- 新增：英文版 OpenAPI 文档
+
+## 2025-08-26 ~ 2025-08-28
+
+**Guides**
+- 新增：[文档分类 - 快速启动](/docflow/cn/04-classify/quickstart)
+- 新增：[仅使用分类](/docflow/cn/04-classify/target_process)
+- 新增：[指定分类上传](/docflow/cn/04-classify/manual)
+- 新增：[文档拆分 - 快速启动](/docflow/cn/05-split/quickstart)
+- 新增：[文件拆分](/docflow/cn/05-split/split)
+- 新增：[多图切分](/docflow/cn/05-split/crop)
+- 新增：[文档抽取 - 快速启动](/docflow/cn/06-extract/quickstart)
+- 新增：[基本字段信息](/docflow/cn/06-extract/fields)
+- 新增：[表格字段信息](/docflow/cn/06-extract/tables)
+- 新增：[印章信息](/docflow/cn/06-extract/stamps)
+- 新增：[手写信息](/docflow/cn/06-extract/handwritings)
+- 新增：[坐标体系](/docflow/cn/03-parse/coordinate)
+- 新增：[如何获取工作空间ID](/docflow/cn/100-faq/get_workspace_id)、[如何配置文件类别](/docflow/cn/100-faq/setup_category)、[中文类别参数传参问题](/docflow/cn/100-faq/chinese_category_param)、[计费说明](/docflow/cn/100-faq/product_charge)
+
+## 2025-08-14
+
+**Guides**
+- 新增：[文档解析 - 快速启动](/docflow/cn/03-parse/quickstart)
+- 新增：[解析结果可视化](/docflow/cn/03-parse/visualization)
+- 新增：[返回JSON结构说明](/docflow/cn/01-upload/response)
+
+## 2025-08-13
+
+**Guides**
+- DocFlow API 文档站上线，首批页面：
+  - [产品简介](/docflow/cn/00-overview/intro)
+  - [快速启动](/docflow/cn/00-overview/quickstart)
+  - [访问凭证](/docflow/cn/00-overview/auth)
+  - [文档上传 - 快速启动](/docflow/cn/01-upload/quickstart)
+  - [文件格式支持](/docflow/cn/01-upload/support_format)
+  - [工作空间管理](/docflow/cn/02-workspace/quickstart)
+  - [智能审核 - 快速启动](/docflow/cn/07-review/quickstart)
+
+**API**
+- 首版 API 文档上线，包含 [上传文件](/api-reference/%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6)、[获取文件处理结果列表](/api-reference/%E8%8E%B7%E5%8F%96%E6%96%87%E4%BB%B6%E5%A4%84%E7%90%86%E7%BB%93%E6%9E%9C%E5%88%97%E8%A1%A8) 基础接口
+
+## 2025-07-09
+
+**API**
+- 修正：表格（tables）和印章（stamps）结果字段定义
+
+## 2025-05-20 ~ 2025-05-21
+
+**API**
+- 更新：[上传文件](/api-reference/%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6) 接口新增 `split_flag`（文件拆分）和 `crop_flag`（多图切分）参数
+- 更新：[上传文件](/api-reference/%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6) 接口新增 `auto_verify_vat`（自动发票验真）参数
+- 更新：[上传文件](/api-reference/%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6) 接口新增 `target_process` 参数，支持控制处理流程（仅分类 / 分类+抽取）
+- 更新：[获取文件处理结果列表](/api-reference/%E8%8E%B7%E5%8F%96%E6%96%87%E4%BB%B6%E5%A4%84%E7%90%86%E7%BB%93%E6%9E%9C%E5%88%97%E8%A1%A8) 返回结果支持子任务和子图在原文件的位置坐标
+
+## 2025-05-07 ~ 2025-05-12
+
+**API**
+- 新增接口（旧版）：[新建审核任务](/api-reference/%E6%99%BA%E8%83%BD%E5%AE%A1%E6%A0%B8/%E6%96%B0%E5%BB%BA%E5%AE%A1%E6%A0%B8%E4%BB%BB%E5%8A%A1) 等智能审核接口
+
+## 2025-04-15
+
+**API**
+- 更新：[获取空间文件类别列表](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E8%8E%B7%E5%8F%96%E7%A9%BA%E9%97%B4%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E5%88%97%E8%A1%A8) 接口新增 `enabled` 筛选参数
+- 新增：[获取文件处理结果列表](/api-reference/%E8%8E%B7%E5%8F%96%E6%96%87%E4%BB%B6%E5%A4%84%E7%90%86%E7%BB%93%E6%9E%9C%E5%88%97%E8%A1%A8) 接口文档
+- 修正：印章、手写体、表格字段定义
+
+## 2025-02-18
+
+**API**
+- 新增接口：[创建空间](/api-reference/%E7%A9%BA%E9%97%B4%E7%AE%A1%E7%90%86/%E5%88%9B%E5%BB%BA%E7%A9%BA%E9%97%B4)、[获取空间列表](/api-reference/%E7%A9%BA%E9%97%B4%E7%AE%A1%E7%90%86/%E8%8E%B7%E5%8F%96%E7%A9%BA%E9%97%B4%E5%88%97%E8%A1%A8)、[获取空间详情](/api-reference/%E7%A9%BA%E9%97%B4%E7%AE%A1%E7%90%86/%E8%8E%B7%E5%8F%96%E7%A9%BA%E9%97%B4%E8%AF%A6%E6%83%85)、[更新空间](/api-reference/%E7%A9%BA%E9%97%B4%E7%AE%A1%E7%90%86/%E6%9B%B4%E6%96%B0%E7%A9%BA%E9%97%B4)、[删除空间](/api-reference/%E7%A9%BA%E9%97%B4%E7%AE%A1%E7%90%86/%E5%88%A0%E9%99%A4%E7%A9%BA%E9%97%B4) — 工作空间管理
+- 更新：[获取文件处理结果列表](/api-reference/%E8%8E%B7%E5%8F%96%E6%96%87%E4%BB%B6%E5%A4%84%E7%90%86%E7%BB%93%E6%9E%9C%E5%88%97%E8%A1%A8) 返回结果新增 `task_id` 字段
+
+## 2025-01-02 ~ 2025-01-03
+
+**API**
+- 新增接口：[更新文件处理结果](/api-reference/%E6%9B%B4%E6%96%B0%E6%96%87%E4%BB%B6%E5%A4%84%E7%90%86%E7%BB%93%E6%9E%9C) — 更新文件抽取结果，支持批量更新
+- 更新：[获取文件处理结果列表](/api-reference/%E8%8E%B7%E5%8F%96%E6%96%87%E4%BB%B6%E5%A4%84%E7%90%86%E7%BB%93%E6%9E%9C%E5%88%97%E8%A1%A8) 字段抽取结果新增 `position` 坐标信息
+
+## 2024-12-20 ~ 2024-12-23
+
+**API**
+- DocFlow API 首版发布
+- [上传文件](/api-reference/%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6) 接口采用 `multipart/form-data` 格式，支持一次上传多个文件
+- 认证签名示例（Python）

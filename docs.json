@@ -190,7 +190,17 @@
                 ]
               }
             ]
-            
+          },
+          {
+            "tab": "更新日志",
+            "groups": [
+              {
+                "group": "更新日志",
+                "pages": [
+                  "docflow/cn/12-changelog/changelog"
+                ]
+              }
+            ]
           }
         ]
       },
@@ -322,9 +332,18 @@
                 ]
               }
             ]
-            
+          },
+          {
+            "tab": "Changelog",
+            "groups": [
+              {
+                "group": "Changelog",
+                "pages": [
+                  "docflow/en/12-changelog/changelog"
+                ]
+              }
+            ]
           }
-
         ]
       }
     ]

@@ -193,6 +193,7 @@
           },
           {
             "tab": "更新日志",
+            "hidden": true,
             "groups": [
               {
                 "group": "更新日志",
@@ -338,6 +339,7 @@
             "groups": [
               {
                 "group": "Changelog",
+                "hidden": true,
                 "pages": [
                   "docflow/en/12-changelog/changelog"
                 ]

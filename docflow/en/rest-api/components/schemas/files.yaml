@@ -236,6 +236,10 @@ TaskProcessResult:
                 type: integer
                 description: Total number of pages in the current file
                 example: 10
+              parser_params:
+                description: File parsing parameter configuration
+                allOf:
+                  - $ref: '#/DocumentParserParam'
             required:
               - id
               - name
@@ -714,6 +718,21 @@ DocumentParserParam:
       enum:
         - 144
         - 216
+    parse_mode:
+      type: string
+      description: |
+        Parse mode
+        - `auto`: Automatic (default)
+        - `scan`: Scanned document mode
+        - `vlm`: VLM mode
+      example: auto
+      enum:
+        - auto
+        - scan
+        - vlm
+    pdf_pwd:
+      type: string
+      description: PDF file password for decrypting encrypted PDF files
 
 TokenResult:
   type: object

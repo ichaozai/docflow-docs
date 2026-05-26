@@ -128,6 +128,30 @@ ParserDpi:
       - 144
       - 216
 
+ParserParseMode:
+  name: parser_parse_mode
+  in: query
+  description: |
+    解析模式
+    - `auto`: 自动（默认）
+    - `scan`: 扫描件模式
+    - `vlm`: VLM模式
+  required: false
+  schema:
+    type: string
+    enum:
+      - auto
+      - scan
+      - vlm
+
+ParserPdfPwd:
+  name: parser_pdf_pwd
+  in: query
+  description: PDF文件密码，用于解密加密的PDF文件
+  required: false
+  schema:
+    type: string
+
 WithTaskDetailUrl:
   name: with_task_detail_url
   in: query

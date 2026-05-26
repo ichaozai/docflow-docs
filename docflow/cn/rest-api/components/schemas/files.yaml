@@ -236,6 +236,10 @@ TaskProcessResult:
                 type: integer
                 description: 当前文件总页数
                 example: 10
+              parser_params:
+                description: 文件解析参数配置
+                allOf:
+                  - $ref: '#/DocumentParserParam'
             required:
               - id
               - name
@@ -712,6 +716,21 @@ DocumentParserParam:
       enum:
         - 144
         - 216
+    parse_mode:
+      type: string
+      description: |
+        解析模式
+        - `auto`: 自动（默认）
+        - `scan`: 扫描件模式
+        - `vlm`: VLM模式
+      example: auto
+      enum:
+        - auto
+        - scan
+        - vlm
+    pdf_pwd:
+      type: string
+      description: PDF文件密码，用于解密加密的PDF文件
 
 TokenResult:
   type: object

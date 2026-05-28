@@ -192,6 +192,33 @@
             ]
           },
           {
+            "tab": "MCP&Skill",
+            "groups": [
+              {
+                "group": "开始使用",
+                "pages": [
+                  "docflow/cn/20-coding-guide/intro",
+                  "docflow/cn/20-coding-guide/quickstart"
+                ]
+              },
+              {
+                "group": "接入指引",
+                "pages": [
+                  "docflow/cn/20-coding-guide/install-coding-agent",
+                  "docflow/cn/20-coding-guide/install-docflow-mcp",
+                  "docflow/cn/20-coding-guide/install-docflow-skill"
+                ]
+              },
+              {
+                "group": "场景示例",
+                "pages": [
+                  "docflow/cn/20-coding-guide/example-search-docs",
+                  "docflow/cn/20-coding-guide/example-generate-code"
+                ]
+              }
+            ]
+          },
+          {
             "tab": "更新日志",
             "groups": [
               {
@@ -329,6 +356,33 @@
                 "group": "SDK",
                 "pages": [
                   "docflow/en/11-sdk/python_sdk"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "MCP&Skill",
+            "groups": [
+              {
+                "group": "Getting Started",
+                "pages": [
+                  "docflow/en/20-coding-guide/intro",
+                  "docflow/en/20-coding-guide/quickstart"
+                ]
+              },
+              {
+                "group": "Integration Guide",
+                "pages": [
+                  "docflow/en/20-coding-guide/install-coding-agent",
+                  "docflow/en/20-coding-guide/install-docflow-mcp",
+                  "docflow/en/20-coding-guide/install-docflow-skill"
+                ]
+              },
+              {
+                "group": "Examples",
+                "pages": [
+                  "docflow/en/20-coding-guide/example-search-docs",
+                  "docflow/en/20-coding-guide/example-generate-code"
                 ]
               }
             ]

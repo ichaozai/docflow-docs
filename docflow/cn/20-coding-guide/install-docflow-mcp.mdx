@@ -1,0 +1,79 @@
+---
+title: "安装 Docflow 文档 MCP"
+description: "连接 TextIn Docflow 文档 MCP 服务，让 Agent 获得文档检索能力"
+---
+
+## 01 什么是 Docflow 文档 MCP
+
+TextIn Docflow 文档 MCP 是一个基于 [Model Context Protocol](https://modelcontextprotocol.io/) 的服务，为 AI Coding Agent 提供 TextIn Docflow 的文档检索能力。
+
+接入后，你的 Agent 可以：
+- 查询 Docflow API 文档
+- 获取接口参数说明
+- 检索使用示例和最佳实践
+
+## 02 安装步骤
+
+<Tabs>
+  <Tab title="Codex">
+    ### 添加 MCP 服务
+
+    在终端中执行以下命令：
+
+    ```bash
+    codex mcp add textin-docflow-docs --url http://docs-docflow.textin.com/mcp
+    ```
+
+    ### 确认安装成功
+
+    运行以下命令查看已添加的 MCP 服务列表：
+
+    ```bash
+    codex mcp list
+    ```
+
+    输出中应包含 `textin-docflow-docs`。
+  </Tab>
+  <Tab title="Claude Code">
+    ### 添加 MCP 服务
+
+    在终端中执行以下命令：
+
+    ```bash
+    claude mcp add textin-docflow-docs --transport sse http://docs-docflow.textin.com/mcp
+    ```
+
+    ### 确认安装成功
+
+    运行以下命令查看已添加的 MCP 服务列表：
+
+    ```bash
+    claude mcp list
+    ```
+
+    输出中应包含 `textin-docflow-docs`。
+  </Tab>
+  <Tab title="Trae">
+    ### 添加 MCP 服务
+
+    1. 打开 Trae **设置** → **MCP**
+    2. 点击下拉 **添加**，选择 **手动配置**
+    3. 填入以下 JSON 配置：
+
+    ```json
+    {
+      "mcpServers": {
+        "textin-docflow-docs": {
+          "url": "http://docs-docflow.textin.com/mcp"
+        }
+      }
+    }
+    ```
+
+    4. 保存后确认 `textin-docflow-docs` 状态为已连接
+  </Tab>
+</Tabs>
+
+<Warning>
+  请确保你的网络环境可以访问 `docs-docflow.textin.com`，如有网络限制请联系管理员开通白名单。
+</Warning>

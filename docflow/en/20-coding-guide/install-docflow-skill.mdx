@@ -64,15 +64,15 @@ The Agent will automatically download and configure the Skill.
     <CodeGroup>
 
     ```bash macOS / Linux
-    mkdir -p "$HOME/.trae-cn/skills/textin-docflow-document" && \
+    mkdir -p "$HOME/.trae/skills/textin-docflow-document" && \
     curl -sS -L "http://docflow.textin.com/textin-docs/skills/docflow/document" \
-      -o "$HOME/.trae-cn/skills/textin-docflow-document/SKILL.md"
+      -o "$HOME/.trae/skills/textin-docflow-document/SKILL.md"
     ```
 
     ```powershell Windows
-    New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.trae-cn\skills\textin-docflow-document" | Out-Null
+    New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.trae\skills\textin-docflow-document" | Out-Null
     Invoke-WebRequest -Uri "http://docflow.textin.com/textin-docs/skills/docflow/document" `
-      -OutFile "$env:USERPROFILE\.trae-cn\skills\textin-docflow-document\SKILL.md"
+      -OutFile "$env:USERPROFILE\.trae\skills\textin-docflow-document\SKILL.md"
     ```
 
     </CodeGroup>

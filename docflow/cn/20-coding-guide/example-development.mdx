@@ -1,0 +1,123 @@
+---
+title: "场景：辅助开发"
+description: "在实际开发过程中使用 Docflow 文档 Skill 提升效率"
+---
+
+## 01 场景说明
+
+在日常开发中，Docflow 文档 Skill 可以帮助你快速完成与 TextIn Docflow 相关的开发任务，从接口调试到功能集成。
+
+## 02 示例
+
+### 2.1 集成 Docflow 到现有项目
+
+```text
+我的项目需要集成 Docflow 的文档解析功能，帮我：
+1. 创建一个 Docflow 服务封装类
+2. 添加必要的配置项
+3. 编写单元测试
+```
+
+Agent 会根据你的项目结构和技术栈，生成完整的集成代码。
+
+### 2.2 调试 API 调用问题
+
+```text
+调用 Docflow API 返回了 401 错误，帮我排查可能的原因
+```
+
+Agent 会结合文档说明，帮你分析可能的认证问题：
+- 检查 `x-ti-app-id` 和 `x-ti-secret-code` 是否正确
+- 确认 API Key 是否过期
+- 验证请求头格式是否符合要求
+
+### 2.3 批量处理文档
+
+```text
+帮我写一个批量处理 PDF 文件的脚本，使用 Docflow API 将目录下所有 PDF 转为 Markdown
+```
+
+<CodeGroup>
+
+```python Agent 生成的代码
+import os
+import time
+from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import requests
+
+
+def parse_single_file(file_path: str, app_id: str, secret_code: str) -> str:
+    url = "https://api.textin.com/ai/service/v1/pdf_to_markdown"
+    headers = {
+        "x-ti-app-id": app_id,
+        "x-ti-secret-code": secret_code,
+    }
+
+    with open(file_path, "rb") as f:
+        response = requests.post(url, headers=headers, files={"file": f})
+
+    response.raise_for_status()
+    return response.json()["data"]["markdown"]
+
+
+def batch_convert(
+    input_dir: str,
+    output_dir: str,
+    app_id: str,
+    secret_code: str,
+    max_workers: int = 3,
+):
+    input_path = Path(input_dir)
+    output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    pdf_files = list(input_path.glob("*.pdf"))
+    print(f"Found {len(pdf_files)} PDF files")
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = {}
+        for pdf_file in pdf_files:
+            future = executor.submit(
+                parse_single_file, str(pdf_file), app_id, secret_code
+            )
+            futures[future] = pdf_file
+
+        for future in as_completed(futures):
+            pdf_file = futures[future]
+            try:
+                markdown = future.result()
+                out_file = output_path / f"{pdf_file.stem}.md"
+                out_file.write_text(markdown, encoding="utf-8")
+                print(f"✓ {pdf_file.name} -> {out_file.name}")
+            except Exception as e:
+                print(f"✗ {pdf_file.name}: {e}")
+
+
+if __name__ == "__main__":
+    batch_convert(
+        input_dir="./documents",
+        output_dir="./output",
+        app_id="your-app-id",
+        secret_code="your-secret-code",
+    )
+```
+
+</CodeGroup>
+
+## 03 开发技巧
+
+<CardGroup cols={2}>
+  <Card title="结合项目上下文" icon="folder-open">
+    在项目目录中使用 Agent 时，它会结合项目现有代码风格和依赖来生成代码
+  </Card>
+  <Card title="迭代式开发" icon="arrows-rotate">
+    可以在生成的代码基础上继续提出修改需求，Agent 会持续优化代码
+  </Card>
+  <Card title="实时文档参考" icon="book">
+    开发过程中随时询问 API 细节，无需切换到浏览器查文档
+  </Card>
+  <Card title="测试生成" icon="vial">
+    让 Agent 为生成的代码自动编写对应的单元测试
+  </Card>
+</CardGroup>

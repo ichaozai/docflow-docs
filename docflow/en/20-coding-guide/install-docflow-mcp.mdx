@@ -1,0 +1,79 @@
+---
+title: "Install Docflow Document MCP"
+description: "Connect to TextIn Docflow Document MCP service to enable document retrieval for your Agent"
+---
+
+## 01 What is Docflow Document MCP
+
+TextIn Docflow Document MCP is a service based on [Model Context Protocol](https://modelcontextprotocol.io/) that provides AI Coding Agents with document retrieval capabilities for TextIn Docflow.
+
+After integration, your Agent can:
+- Query Docflow API documentation
+- Get API parameter descriptions
+- Search for usage examples and best practices
+
+## 02 Installation
+
+<Tabs>
+  <Tab title="Codex">
+    ### Add MCP Service
+
+    Run the following command in your terminal:
+
+    ```bash
+    codex mcp add textin-docflow-docs --url http://docs-docflow.textin.com/mcp
+    ```
+
+    ### Verify Installation
+
+    Run the following command to view added MCP services:
+
+    ```bash
+    codex mcp list
+    ```
+
+    The output should include `textin-docflow-docs`.
+  </Tab>
+  <Tab title="Claude Code">
+    ### Add MCP Service
+
+    Run the following command in your terminal:
+
+    ```bash
+    claude mcp add textin-docflow-docs --transport sse http://docs-docflow.textin.com/mcp
+    ```
+
+    ### Verify Installation
+
+    Run the following command to view added MCP services:
+
+    ```bash
+    claude mcp list
+    ```
+
+    The output should include `textin-docflow-docs`.
+  </Tab>
+  <Tab title="Trae">
+    ### Add MCP Service
+
+    1. Open Trae **Settings** → **MCP**
+    2. Click the dropdown **Add**, select **Manual Configuration**
+    3. Enter the following JSON:
+
+    ```json
+    {
+      "mcpServers": {
+        "textin-docflow-docs": {
+          "url": "http://docs-docflow.textin.com/mcp"
+        }
+      }
+    }
+    ```
+
+    4. Save and confirm `textin-docflow-docs` status shows connected
+  </Tab>
+</Tabs>
+
+<Warning>
+  Ensure your network can access `docs-docflow.textin.com`. If there are network restrictions, contact your administrator to whitelist the domain.
+</Warning>

@@ -26,6 +26,23 @@ Agent 会自动完成 Skill 的下载和配置。
 ### 方式二：使用命令手动安装
 
 <Tabs>
+  <Tab title="Claude Code">
+    <CodeGroup>
+
+    ```bash macOS / Linux
+    mkdir -p "$HOME/.claude/skills/textin-docflow-document" && \
+    curl -sS -L "http://docflow.textin.com/textin-docs/skills/docflow/document" \
+      -o "$HOME/.claude/skills/textin-docflow-document/SKILL.md"
+    ```
+
+    ```powershell Windows
+    New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.claude\skills\textin-docflow-document" | Out-Null
+    Invoke-WebRequest -Uri "http://docflow.textin.com/textin-docs/skills/docflow/document" `
+      -OutFile "$env:USERPROFILE\.claude\skills\textin-docflow-document\SKILL.md"
+    ```
+
+    </CodeGroup>
+  </Tab>
   <Tab title="Codex">
     <CodeGroup>
 
@@ -43,19 +60,36 @@ Agent 会自动完成 Skill 的下载和配置。
 
     </CodeGroup>
   </Tab>
-  <Tab title="Claude Code">
+  <Tab title="Cursor">
     <CodeGroup>
 
     ```bash macOS / Linux
-    mkdir -p "$HOME/.claude/skills/textin-docflow-document" && \
+    mkdir -p "$HOME/.cursor/skills/textin-docflow-document" && \
     curl -sS -L "http://docflow.textin.com/textin-docs/skills/docflow/document" \
-      -o "$HOME/.claude/skills/textin-docflow-document/SKILL.md"
+      -o "$HOME/.cursor/skills/textin-docflow-document/SKILL.md"
     ```
 
     ```powershell Windows
-    New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.claude\skills\textin-docflow-document" | Out-Null
+    New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.cursor\skills\textin-docflow-document" | Out-Null
     Invoke-WebRequest -Uri "http://docflow.textin.com/textin-docs/skills/docflow/document" `
-      -OutFile "$env:USERPROFILE\.claude\skills\textin-docflow-document\SKILL.md"
+      -OutFile "$env:USERPROFILE\.cursor\skills\textin-docflow-document\SKILL.md"
+    ```
+
+    </CodeGroup>
+  </Tab>
+  <Tab title="VS Code Chat">
+    <CodeGroup>
+
+    ```bash macOS / Linux
+    mkdir -p "$HOME/.copilot/skills/textin-docflow-document" && \
+    curl -sS -L "http://docflow.textin.com/textin-docs/skills/docflow/document" \
+      -o "$HOME/.copilot/skills/textin-docflow-document/SKILL.md"
+    ```
+
+    ```powershell Windows
+    New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.copilot\skills\textin-docflow-document" | Out-Null
+    Invoke-WebRequest -Uri "http://docflow.textin.com/textin-docs/skills/docflow/document" `
+      -OutFile "$env:USERPROFILE\.copilot\skills\textin-docflow-document\SKILL.md"
     ```
 
     </CodeGroup>
@@ -81,7 +115,7 @@ Agent 会自动完成 Skill 的下载和配置。
 
 ## 03 验证安装
 
-安装完成后，重启工具以重新加载 Skill。然后搜索 `docflow`，确认 Skill 已成功加载。
+安装完成后，重启工具以重新加载 Skill。然后在技能（Skill）页面找到或搜索 `textin-docflow-document`，确认 Skill 已成功加载。
 
 ## 04 安装后效果
 

@@ -26,25 +26,30 @@
                 ]
               },
               {
-                "group": "MCP&Skill - 开始使用",
+                "group": "MCP&Skill",
                 "pages": [
-                  "docflow/cn/20-coding-guide/intro",
-                  "docflow/cn/20-coding-guide/quickstart"
-                ]
-              },
-              {
-                "group": "MCP&Skill - 接入指引",
-                "pages": [
-                  "docflow/cn/20-coding-guide/install-coding-agent",
-                  "docflow/cn/20-coding-guide/install-docflow-mcp",
-                  "docflow/cn/20-coding-guide/install-docflow-skill"
-                ]
-              },
-              {
-                "group": "MCP&Skill - 场景示例",
-                "pages": [
-                  "docflow/cn/20-coding-guide/example-search-docs",
-                  "docflow/cn/20-coding-guide/example-generate-code"
+                  {
+                    "group": "开始使用",
+                    "pages": [
+                      "docflow/cn/20-coding-guide/intro",
+                      "docflow/cn/20-coding-guide/quickstart"
+                    ]
+                  },
+                  {
+                    "group": "接入指引",
+                    "pages": [
+                      "docflow/cn/20-coding-guide/install-coding-agent",
+                      "docflow/cn/20-coding-guide/install-docflow-mcp",
+                      "docflow/cn/20-coding-guide/install-docflow-skill"
+                    ]
+                  },
+                  {
+                    "group": "场景示例",
+                    "pages": [
+                      "docflow/cn/20-coding-guide/example-search-docs",
+                      "docflow/cn/20-coding-guide/example-generate-code"
+                    ]
+                  }
                 ]
               },
               {
@@ -242,25 +247,30 @@
                 ]
               },
               {
-                "group": "MCP&Skill - Getting Started",
+                "group": "MCP&Skill",
                 "pages": [
-                  "docflow/en/20-coding-guide/intro",
-                  "docflow/en/20-coding-guide/quickstart"
-                ]
-              },
-              {
-                "group": "MCP&Skill - Integration Guide",
-                "pages": [
-                  "docflow/en/20-coding-guide/install-coding-agent",
-                  "docflow/en/20-coding-guide/install-docflow-mcp",
-                  "docflow/en/20-coding-guide/install-docflow-skill"
-                ]
-              },
-              {
-                "group": "MCP&Skill - Examples",
-                "pages": [
-                  "docflow/en/20-coding-guide/example-search-docs",
-                  "docflow/en/20-coding-guide/example-generate-code"
+                  {
+                    "group": "Getting Started",
+                    "pages": [
+                      "docflow/en/20-coding-guide/intro",
+                      "docflow/en/20-coding-guide/quickstart"
+                    ]
+                  },
+                  {
+                    "group": "Integration Guide",
+                    "pages": [
+                      "docflow/en/20-coding-guide/install-coding-agent",
+                      "docflow/en/20-coding-guide/install-docflow-mcp",
+                      "docflow/en/20-coding-guide/install-docflow-skill"
+                    ]
+                  },
+                  {
+                    "group": "Examples",
+                    "pages": [
+                      "docflow/en/20-coding-guide/example-search-docs",
+                      "docflow/en/20-coding-guide/example-generate-code"
+                    ]
+                  }
                 ]
               },
               {

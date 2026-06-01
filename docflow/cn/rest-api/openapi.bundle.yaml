@@ -2,12 +2,10 @@ openapi: 3.0.0
 info:
   title: DocFlow API
   description: DocFlow REST API，提供文件上传和获取文件处理结果能力
-  version: 2.4.2
+  version: 2.8.3
 servers:
-  - url: https://docflow.textin.com
-security:
-  - ApiId: []
-    SecretCode: []
+  - url: 'https://docflow.textin.com'
+x-codeSamples: custom
 paths:
   /api/app-api/sip/platform/v2/file/upload:
     post:
@@ -167,20 +165,20 @@ paths:
             $ref: '#/components/schemas/VerificationStatus'
         - name: start_time
           in: query
-          description: 以更新时间搜索的开始时间, RFC3339格式(YYYY-MM-DDTHH:MM:SSZ)
+          description: '以更新时间搜索的开始时间, RFC3339格式(YYYY-MM-DDTHH:MM:SSZ)'
           required: false
           schema:
             type: string
             format: date-time
-            example: '2024-01-01T00:00:00Z'
+            example: 2024-01-01T00:00:00.000Z
         - name: end_time
           in: query
-          description: 以更新时间搜索的结束时间, RFC3339格式(YYYY-MM-DDTHH:MM:SSZ)
+          description: '以更新时间搜索的结束时间, RFC3339格式(YYYY-MM-DDTHH:MM:SSZ)'
           required: false
           schema:
             type: string
             format: date-time
-            example: '2024-01-01T10:00:00Z'
+            example: 2024-01-01T10:00:00.000Z
         - name: with_document
           in: query
           description: 是否返回文档的全部文字识别结果
@@ -360,11 +358,16 @@ paths:
       x-codeSamples:
         - lang: bash
           label: cURL
-          source: |
+          source: >
             curl -X POST \
+
             -H 'x-ti-app-id: 1234567890' \
+
             -H 'x-ti-secret-code: 1234567890' \
-            -d '[{"workspace_id": "1234567890", "file_id": "202412190001", "data": {"fields": [{"key": "发票代码", "value": "3100231130"}]}}]' \
+
+            -d '[{"workspace_id": "1234567890", "file_id": "202412190001",
+            "data": {"fields": [{"key": "发票代码", "value": "3100231130"}]}}]' \
+
             'https://docflow.textin.com/api/app-api/sip/platform/v2/file/update'
   /api/app-api/sip/platform/v2/file/delete:
     post:
@@ -640,7 +643,7 @@ paths:
                   maxLength: 200
                 auth_scope:
                   type: integer
-                  description: 协作范围 0:仅自己可见 1:企业成员可见
+                  description: '协作范围 0:仅自己可见 1:企业成员可见'
                   example: 1
                   enum:
                     - 0
@@ -775,7 +778,7 @@ paths:
                   maxLength: 500
                 auth_scope:
                   type: integer
-                  description: 协作范围 0:仅自己可见 1:企业成员可见
+                  description: '协作范围 0:仅自己可见 1:企业成员可见'
                   example: 1
                   enum:
                     - 0
@@ -783,7 +786,7 @@ paths:
                 callback_url:
                   type: string
                   description: 回调URL
-                  example: https://example.com/callback
+                  example: 'https://example.com/callback'
                 callback_retry_time:
                   type: integer
                   description: 回调重试次数
@@ -834,7 +837,10 @@ paths:
   /api/app-api/sip/platform/v2/category/create:
     post:
       summary: 创建文件类别
-      description: 在指定空间中创建一个新的文件类别，需要上传至少一个样本文件并配置至少一个字段
+      description: |
+        在指定空间中创建一个新的文件类别，需要上传至少一个样本文件并配置至少一个字段。
+
+        支持一站式创建：可同时传入 `tables` 参数，创建表格及表格内嵌字段。
       operationId: createCategory
       tags:
         - 文件类别
@@ -859,10 +865,13 @@ paths:
                   description: 用于分类的提示词
                   example: 增值税发票，包含发票代码、发票号码等字段
                   maxLength: 150
+                description:
+                  type: string
+                  description: 文件类别描述
                 extract_model:
                   type: string
                   description: |
-                    选填，抽取模型，不填默认 Model 1
+                    抽取模型
                     - Model 1: 速度快，抽取结果稳定
                     - Model 2: 适用复杂文档理解
                     - Model 3: 多模态，适用简单抽取
@@ -880,12 +889,20 @@ paths:
                   minItems: 1
                   maxItems: 10
                 fields:
-                  type: array
-                  description: 字段配置列表，至少配置一个字段
-                  items:
-                    allOf:
-                      - $ref: '#/components/schemas/CategoryFieldConfig'
-                  minItems: 1
+                  type: string
+                  description: |
+                    字段配置 JSON 数组字符串，至少配置一个字段。
+                    数组元素结构参考 CategoryFieldConfig schema。
+                tables:
+                  type: string
+                  description: |
+                    选填，表格配置 JSON 数组字符串（一站式创建）。
+                    数组元素结构参考 CategoryTableConfig schema，支持内嵌 fields。
+                with_detail:
+                  type: boolean
+                  description: |
+                    是否返回完整详情。传 true 时响应包含完整的分类信息（含字段、表格、样本）。
+                    不传或为 false 时仅返回 category_id。
               required:
                 - workspace_id
                 - name
@@ -909,6 +926,38 @@ paths:
                             type: string
                             description: 文件类别ID
                             example: '1234567890'
+                          name:
+                            type: string
+                            description: 文件类别名称（with_detail=true 时返回）
+                          description:
+                            type: string
+                            description: 文件类别描述（with_detail=true 时返回）
+                          category_prompt:
+                            type: string
+                            description: 分类提示词（with_detail=true 时返回）
+                          extract_model:
+                            type: string
+                            description: 抽取模型（with_detail=true 时返回）
+                          enabled:
+                            type: integer
+                            description: 启用状态（with_detail=true 时返回）
+                          fields:
+                            type: array
+                            description: 字段列表（with_detail=true 时返回）
+                            items:
+                              $ref: '#/components/schemas/CategoryField'
+                          tables:
+                            type: array
+                            description: 表格列表（with_detail=true 时返回）
+                            items:
+                              $ref: '#/components/schemas/CategoryTable'
+                          samples:
+                            type: array
+                            description: 样本列表（with_detail=true 时返回）
+                            items:
+                              $ref: '#/components/schemas/CategorySample'
+                        required:
+                          - category_id
   /api/app-api/sip/platform/v2/category/list:
     get:
       summary: 获取空间文件类别列表
@@ -943,7 +992,7 @@ paths:
         - name: enabled
           in: query
           description: |
-            启用状态  
+            启用状态
             - all: 所有
             - 1: 启用
             - 0: 禁用
@@ -989,7 +1038,10 @@ paths:
   /api/app-api/sip/platform/v2/category/update:
     post:
       summary: 更新文件类别
-      description: 更新指定文件类别的信息
+      description: |
+        更新指定文件类别的信息。
+
+        注意：设置 extract_model 时将级联覆盖该分类下所有字段和表格的抽取模型。
       operationId: updateCategory
       tags:
         - 文件类别
@@ -1023,7 +1075,7 @@ paths:
                 extract_model:
                   type: string
                   description: |
-                    抽取模型
+                    抽取模型，设置后级联覆盖所有字段和表格
                     - Model 1: 速度快，抽取结果稳定
                     - Model 2: 适用复杂文档理解
                     - Model 3: 多模态，适用简单抽取
@@ -1032,6 +1084,11 @@ paths:
                     - Model 1
                     - Model 2
                     - Model 3
+                with_detail:
+                  type: boolean
+                  description: |
+                    是否返回完整详情。传 true 时响应返回分类自身信息（不含子层级字段/表格）。
+                    不传或为 false 时仅返回 code/msg。
               required:
                 - workspace_id
                 - category_id
@@ -1041,7 +1098,32 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CodeMessage'
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        description: with_detail=true 时返回分类自身信息，否则为 null
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            description: 分类ID
+                          name:
+                            type: string
+                            description: 分类名称
+                          description:
+                            type: string
+                            description: 分类描述
+                          category_prompt:
+                            type: string
+                            description: 分类提示词
+                          extract_model:
+                            type: string
+                            description: 抽取模型
+                          enabled:
+                            type: integer
+                            description: 启用状态
   /api/app-api/sip/platform/v2/category/delete:
     post:
       summary: 删除文件类别
@@ -1067,13 +1149,438 @@ paths:
                   description: 要删除的文件类别ID列表
                   example:
                     - '1234567890'
-                    - '0987654321'
+                    - 0987654321
               required:
                 - workspace_id
                 - category_ids
       responses:
         '200':
           description: 成功删除文件类别
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeMessage'
+  /api/app-api/sip/platform/v2/category/fields/list:
+    get:
+      summary: 获取文件类别字段列表
+      description: 获取文件类别字段列表，包含普通字段和表格（含表格字段）
+      operationId: listCategoryFields
+      tags:
+        - 文件类别
+      parameters:
+        - name: workspace_id
+          in: query
+          description: 空间ID
+          required: true
+          schema:
+            type: string
+            example: '1234567890'
+        - name: category_id
+          in: query
+          description: 文件类别ID
+          required: true
+          schema:
+            type: string
+            example: '1234567890'
+      responses:
+        '200':
+          description: 成功获取文件类别字段列表
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          fields:
+                            type: array
+                            description: 普通字段列表
+                            items:
+                              $ref: '#/components/schemas/CategoryField'
+                          tables:
+                            type: array
+                            description: 表格列表（含表格字段）
+                            items:
+                              $ref: '#/components/schemas/CategoryTable'
+  /api/app-api/sip/platform/v2/category/fields/add:
+    post:
+      summary: 新增文件类别字段
+      description: 在指定文件类别下新增一个字段，支持新增普通字段和表格字段
+      operationId: addCategoryField
+      tags:
+        - 文件类别
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/CategoryFieldConfig'
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: 空间ID
+                  example: '1234567890'
+                category_id:
+                  type: string
+                  description: 文件类别ID
+                  example: '1234567890'
+                table_id:
+                  type: string
+                  description: |
+                    表格ID
+                    - 不传或为空：创建普通字段，结果会出现在 result.fields 中
+                    - 传入表格ID：创建对应表格下的表格字段，结果会出现在 result.tables[].fields 中
+                  example: '1234567890'
+                extract_model:
+                  type: string
+                  description: |
+                    选填，字段级抽取模型，仅普通字段（非表格字段）支持，不填默认 Model 1
+                    - Model 1: 速度快，抽取结果稳定
+                    - Model 2: 适用复杂文档理解
+                    - Model 3: 多模态，适用简单抽取
+                  example: Model 1
+                  enum:
+                    - Model 1
+                    - Model 2
+                    - Model 3
+                with_detail:
+                  type: boolean
+                  description: |
+                    是否返回完整详情。传 true 时响应包含新建字段的完整信息。
+                    不传或为 false 时仅返回 field_id。
+              required:
+                - workspace_id
+                - category_id
+                - name
+      responses:
+        '200':
+          description: 成功新增文件类别字段
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          field_id:
+                            type: string
+                            description: 新创建的字段ID
+                            example: '1234567890'
+                          name:
+                            type: string
+                            description: 字段名称（with_detail=true 时返回）
+                          description:
+                            type: string
+                            description: 字段描述（with_detail=true 时返回）
+                          prompt:
+                            type: string
+                            description: 语义抽取提示词（with_detail=true 时返回）
+                          use_prompt:
+                            type: boolean
+                            description: 是否使用语义提示词（with_detail=true 时返回）
+                          alias:
+                            type: array
+                            items:
+                              type: string
+                            description: 字段别名（with_detail=true 时返回）
+                          identity:
+                            type: string
+                            description: 导出字段名（with_detail=true 时返回）
+                          multi_value:
+                            type: boolean
+                            description: 是否多值抽取（with_detail=true 时返回）
+                          duplicate_value_distinct:
+                            type: boolean
+                            description: 是否重复值去重（with_detail=true 时返回）
+                          transform_settings:
+                            $ref: '#/components/schemas/TransformSettings'
+                          extract_model:
+                            type: string
+                            description: 字段抽取模型（with_detail=true 时返回）
+                          enabled:
+                            type: integer
+                            description: 启用状态（with_detail=true 时返回）
+                        required:
+                          - field_id
+  /api/app-api/sip/platform/v2/category/fields/batch_add:
+    post:
+      summary: 批量新增文件类别字段
+      description: 在指定文件类别下批量新增多个字段。全有全无语义：任一字段校验不通过则全部失败。
+      operationId: batchAddCategoryFields
+      tags:
+        - 文件类别
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: 空间ID
+                  example: '1234567890'
+                category_id:
+                  type: string
+                  description: 文件类别ID
+                  example: '1234567890'
+                table_id:
+                  type: string
+                  description: |
+                    表格ID
+                    - 不传或为空：创建普通字段
+                    - 传入表格ID：创建对应表格下的表格字段
+                fields:
+                  type: array
+                  description: 批量新增的字段列表
+                  items:
+                    $ref: '#/components/schemas/CategoryFieldConfig'
+                  minItems: 1
+                with_detail:
+                  type: boolean
+                  description: 是否返回每个字段的完整详情
+              required:
+                - workspace_id
+                - category_id
+                - fields
+      responses:
+        '200':
+          description: 批量新增字段成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        description: 创建结果列表，顺序与请求一致
+                        items:
+                          type: object
+                          properties:
+                            field_id:
+                              type: string
+                              description: 字段ID
+                            name:
+                              type: string
+                              description: 字段名称（with_detail=true 时返回）
+                            description:
+                              type: string
+                            prompt:
+                              type: string
+                            use_prompt:
+                              type: boolean
+                            alias:
+                              type: array
+                              items:
+                                type: string
+                            identity:
+                              type: string
+                            multi_value:
+                              type: boolean
+                            duplicate_value_distinct:
+                              type: boolean
+                            transform_settings:
+                              $ref: '#/components/schemas/TransformSettings'
+                            extract_model:
+                              type: string
+                            enabled:
+                              type: integer
+                          required:
+                            - field_id
+  /api/app-api/sip/platform/v2/category/fields/update:
+    post:
+      summary: 更新文件类别字段
+      description: 更新指定文件类别字段的信息，支持普通字段和表格字段
+      operationId: updateCategoryField
+      tags:
+        - 文件类别
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/CategoryFieldConfig'
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: 空间ID
+                  example: '1234567890'
+                category_id:
+                  type: string
+                  description: 文件类别ID
+                  example: '1234567890'
+                field_id:
+                  type: string
+                  description: 字段ID
+                  example: '1234567890'
+                table_id:
+                  type: string
+                  description: |
+                    表格ID
+                    - 对普通字段可不传
+                    - 对表格字段需要传入其所属的表格ID
+                  example: '1234567890'
+                extract_model:
+                  type: string
+                  description: |
+                    字段级抽取模型
+                    - Model 1: 速度快，抽取结果稳定
+                    - Model 2: 适用复杂文档理解
+                    - Model 3: 多模态，适用简单抽取
+                  example: Model 1
+                  enum:
+                    - Model 1
+                    - Model 2
+                    - Model 3
+                with_detail:
+                  type: boolean
+                  description: |
+                    是否返回完整详情。传 true 时响应返回更新后的字段完整信息。
+                    不传或为 false 时仅返回 code/msg。
+              required:
+                - workspace_id
+                - category_id
+                - field_id
+      responses:
+        '200':
+          description: 成功更新文件类别字段
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeMessage'
+  /api/app-api/sip/platform/v2/category/fields/batch_update:
+    post:
+      summary: 批量更新文件类别字段
+      description: 批量更新指定文件类别下的多个字段。全有全无语义：任一字段校验不通过则全部失败。
+      operationId: batchUpdateCategoryFields
+      tags:
+        - 文件类别
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: 空间ID
+                  example: '1234567890'
+                category_id:
+                  type: string
+                  description: 文件类别ID
+                  example: '1234567890'
+                fields:
+                  type: array
+                  description: 批量更新的字段列表
+                  items:
+                    $ref: '#/components/schemas/CategoryFieldUpdateItem'
+                  minItems: 1
+                with_detail:
+                  type: boolean
+                  description: 是否返回每个字段更新后的完整详情
+              required:
+                - workspace_id
+                - category_id
+                - fields
+      responses:
+        '200':
+          description: 批量更新字段成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        description: with_detail=true 时返回更新后字段列表，否则为 null
+                        items:
+                          type: object
+                          properties:
+                            field_id:
+                              type: string
+                            name:
+                              type: string
+                            description:
+                              type: string
+                            prompt:
+                              type: string
+                            use_prompt:
+                              type: boolean
+                            alias:
+                              type: array
+                              items:
+                                type: string
+                            identity:
+                              type: string
+                            multi_value:
+                              type: boolean
+                            duplicate_value_distinct:
+                              type: boolean
+                            transform_settings:
+                              $ref: '#/components/schemas/TransformSettings'
+                            extract_model:
+                              type: string
+                            enabled:
+                              type: integer
+  /api/app-api/sip/platform/v2/category/fields/delete:
+    post:
+      summary: 删除文件类别字段
+      description: 删除指定的文件类别字段，支持批量删除普通字段和表格字段
+      operationId: deleteCategoryFields
+      tags:
+        - 文件类别
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: 空间ID
+                  example: '1234567890'
+                category_id:
+                  type: string
+                  description: 文件类别ID
+                  example: '1234567890'
+                field_ids:
+                  type: array
+                  description: 要删除的字段ID列表
+                  items:
+                    type: string
+                  example:
+                    - '1234567890'
+                    - 0987654321
+                table_id:
+                  type: string
+                  description: |
+                    表格ID
+                    - 不传：删除普通字段（result.fields 中的字段）
+                    - 传入表格ID：删除对应表格下的表格字段（result.tables[].fields 中的字段）
+                  example: '1234567890'
+              required:
+                - workspace_id
+                - category_id
+                - field_ids
+      responses:
+        '200':
+          description: 成功删除文件类别字段
           content:
             application/json:
               schema:
@@ -1187,6 +1694,11 @@ paths:
                     - Model 1
                     - Model 2
                     - Model 3
+                with_detail:
+                  type: boolean
+                  description: |
+                    是否返回完整详情。传 true 时响应包含表格完整信息（含字段列表）。
+                    不传或为 false 时仅返回 table_id。
               required:
                 - workspace_id
                 - category_id
@@ -1208,6 +1720,100 @@ paths:
                             type: string
                             description: 新增表格ID
                             example: '1234567890'
+                          name:
+                            type: string
+                            description: 表格名称（with_detail=true 时返回）
+                          description:
+                            type: string
+                            description: 表格描述（with_detail=true 时返回）
+                          prompt:
+                            type: string
+                            description: 表格语义抽取提示词（with_detail=true 时返回）
+                          collect_from_multi_table:
+                            type: boolean
+                            description: 多表合并（with_detail=true 时返回）
+                          extract_model:
+                            type: string
+                            description: 表格级抽取模型（with_detail=true 时返回）
+                          fields:
+                            type: array
+                            description: 表格字段列表（with_detail=true 时返回）
+                            items:
+                              $ref: '#/components/schemas/CategoryField'
+                        required:
+                          - table_id
+  /api/app-api/sip/platform/v2/category/tables/batch_add:
+    post:
+      summary: 批量新增文件类别表格
+      description: 在指定文件类别下批量新增多个表格（支持内嵌字段）。全有全无语义。
+      operationId: batchAddCategoryTables
+      tags:
+        - 文件类别
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: 空间ID
+                  example: '1234567890'
+                category_id:
+                  type: string
+                  description: 文件类别ID
+                  example: '1234567890'
+                tables:
+                  type: array
+                  description: 批量新增的表格列表
+                  items:
+                    $ref: '#/components/schemas/CategoryTableConfig'
+                  minItems: 1
+                with_detail:
+                  type: boolean
+                  description: 是否返回每个表格的完整详情（含字段列表）
+              required:
+                - workspace_id
+                - category_id
+                - tables
+      responses:
+        '200':
+          description: 批量新增表格成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        description: 创建结果列表，顺序与请求一致
+                        items:
+                          type: object
+                          properties:
+                            table_id:
+                              type: string
+                              description: 表格ID
+                            name:
+                              type: string
+                              description: 表格名称（with_detail=true 时返回）
+                            description:
+                              type: string
+                            prompt:
+                              type: string
+                            collect_from_multi_table:
+                              type: boolean
+                            extract_model:
+                              type: string
+                            fields:
+                              type: array
+                              description: 表格字段列表（with_detail=true 时返回）
+                              items:
+                                $ref: '#/components/schemas/CategoryField'
+                          required:
+                            - table_id
   /api/app-api/sip/platform/v2/category/tables/update:
     post:
       summary: 更新文件类别表格
@@ -1246,7 +1852,7 @@ paths:
                   maxLength: 200
                 collect_from_multi_table:
                   type: boolean
-                  description: 多表合并
+                  description: 多表合并，抽取模型 Model 3 暂不支持多表合并
                   example: true
                 extract_model:
                   type: string
@@ -1260,6 +1866,9 @@ paths:
                     - Model 1
                     - Model 2
                     - Model 3
+                with_detail:
+                  type: boolean
+                  description: 是否返回完整详情
               required:
                 - workspace_id
                 - category_id
@@ -1268,6 +1877,45 @@ paths:
       responses:
         '200':
           description: 成功更新文件类别表格
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeMessage'
+  /api/app-api/sip/platform/v2/category/tables/batch_update:
+    post:
+      summary: 批量更新文件类别表格
+      description: 批量更新指定文件类别下的多个表格。全有全无语义。
+      operationId: batchUpdateCategoryTables
+      tags:
+        - 文件类别
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: 空间ID
+                  example: '1234567890'
+                category_id:
+                  type: string
+                  description: 文件类别ID
+                  example: '1234567890'
+                tables:
+                  type: array
+                  description: 批量更新的表格列表
+                  items:
+                    $ref: '#/components/schemas/CategoryTableUpdateItem'
+                  minItems: 1
+              required:
+                - workspace_id
+                - category_id
+                - tables
+      responses:
+        '200':
+          description: 批量更新表格成功
           content:
             application/json:
               schema:
@@ -1301,7 +1949,7 @@ paths:
                     type: string
                   example:
                     - '1234567890'
-                    - '0987654321'
+                    - 0987654321
               required:
                 - workspace_id
                 - category_id
@@ -1309,236 +1957,6 @@ paths:
       responses:
         '200':
           description: 成功删除文件类别表格
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CodeMessage'
-  /api/app-api/sip/platform/v2/category/fields/list:
-    get:
-      summary: 获取文件类别字段列表
-      description: 获取文件类别字段列表
-      operationId: listCategoryFields
-      tags:
-        - 文件类别
-      parameters:
-        - name: workspace_id
-          in: query
-          description: 空间ID
-          required: true
-          schema:
-            type: string
-            example: '1234567890'
-        - name: category_id
-          in: query
-          description: 文件类别ID
-          required: true
-          schema:
-            type: string
-            example: '1234567890'
-      responses:
-        '200':
-          description: 成功获取文件类别字段列表
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/CodeMessage'
-                  - type: object
-                    properties:
-                      result:
-                        type: object
-                        properties:
-                          fields:
-                            type: array
-                            items:
-                              $ref: '#/components/schemas/CategoryField'
-                          tables:
-                            type: array
-                            items:
-                              type: object
-                              properties:
-                                id:
-                                  type: string
-                                  description: 表格ID
-                                  example: '1234567890'
-                                name:
-                                  type: string
-                                  description: 表格名称
-                                  example: 表格1
-                                description:
-                                  type: string
-                                  description: 表格描述
-                                  example: 表格描述
-                                fields:
-                                  type: array
-                                  items:
-                                    $ref: '#/components/schemas/CategoryField'
-  /api/app-api/sip/platform/v2/category/fields/add:
-    post:
-      summary: 新增文件类别字段
-      description: 在指定文件类别下新增一个字段，支持新增普通字段和表格字段
-      operationId: addCategoryField
-      tags:
-        - 文件类别
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              allOf:
-                - $ref: '#/components/schemas/CategoryFieldConfig'
-              type: object
-              properties:
-                workspace_id:
-                  type: string
-                  description: 空间ID
-                  example: '1234567890'
-                category_id:
-                  type: string
-                  description: 文件类别ID
-                  example: '1234567890'
-                table_id:
-                  type: string
-                  description: |
-                    表格ID
-                    - 不传或为空：创建普通字段，结果会出现在 result.fields 中
-                    - 传入表格ID：创建对应表格下的表格字段，结果会出现在 result.tables[].fields 中
-                  example: '1234567890'
-                extract_model:
-                  type: string
-                  description: |
-                    选填，字段级抽取模型，仅普通字段（非表格字段）支持，不填默认 Model 1
-                    - Model 1: 速度快，抽取结果稳定
-                    - Model 2: 适用复杂文档理解
-                    - Model 3: 多模态，适用简单抽取
-                  example: Model 1
-                  enum:
-                    - Model 1
-                    - Model 2
-                    - Model 3
-              required:
-                - workspace_id
-                - category_id
-                - name
-      responses:
-        '200':
-          description: 成功新增文件类别字段
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/CodeMessage'
-                  - type: object
-                    properties:
-                      result:
-                        type: object
-                        properties:
-                          field_id:
-                            type: string
-                            description: 新创建的字段ID
-                            example: '1234567890'
-  /api/app-api/sip/platform/v2/category/fields/update:
-    post:
-      summary: 更新文件类别字段
-      description: 更新指定文件类别字段的信息，支持普通字段和表格字段
-      operationId: updateCategoryField
-      tags:
-        - 文件类别
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              allOf:
-                - $ref: '#/components/schemas/CategoryFieldConfig'
-              type: object
-              properties:
-                workspace_id:
-                  type: string
-                  description: 空间ID
-                  example: '1234567890'
-                category_id:
-                  type: string
-                  description: 文件类别ID
-                  example: '1234567890'
-                field_id:
-                  type: string
-                  description: 字段ID
-                  example: '1234567890'
-                table_id:
-                  type: string
-                  description: |
-                    表格ID
-                    - 对普通字段可不传
-                    - 对表格字段需要传入其所属的表格ID
-                  example: '1234567890'
-                extract_model:
-                  type: string
-                  description: |
-                    字段级抽取模型
-                    - Model 1: 速度快，抽取结果稳定
-                    - Model 2: 适用复杂文档理解
-                    - Model 3: 多模态，适用简单抽取
-                  example: Model 1
-                  enum:
-                    - Model 1
-                    - Model 2
-                    - Model 3
-              required:
-                - workspace_id
-                - category_id
-                - field_id
-      responses:
-        '200':
-          description: 成功更新文件类别字段
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CodeMessage'
-  /api/app-api/sip/platform/v2/category/fields/delete:
-    post:
-      summary: 删除文件类别字段
-      description: 删除指定的文件类别字段，支持批量删除普通字段和表格字段
-      operationId: deleteCategoryFields
-      tags:
-        - 文件类别
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                workspace_id:
-                  type: string
-                  description: 空间ID
-                  example: '1234567890'
-                category_id:
-                  type: string
-                  description: 文件类别ID
-                  example: '1234567890'
-                field_ids:
-                  type: array
-                  description: 要删除的字段ID列表
-                  items:
-                    type: string
-                  example:
-                    - '1234567890'
-                    - '0987654321'
-                table_id:
-                  type: string
-                  description: |
-                    表格ID  
-                    - 不传：删除普通字段（result.fields 中的字段）  
-                    - 传入表格ID：删除对应表格下的表格字段（result.tables[].fields 中的字段）
-                  example: '1234567890'
-              required:
-                - workspace_id
-                - category_id
-                - field_ids
-      responses:
-        '200':
-          description: 成功删除文件类别字段
           content:
             application/json:
               schema:
@@ -1569,6 +1987,11 @@ paths:
                   type: string
                   format: binary
                   description: 样本文件
+                with_detail:
+                  type: boolean
+                  description: |
+                    是否返回完整详情。传 true 时响应额外返回该分类的全部样本列表。
+                    不传或为 false 时仅返回 sample_id。
               required:
                 - workspace_id
                 - category_id
@@ -1590,6 +2013,68 @@ paths:
                             type: string
                             description: 样本ID
                             example: '1234567890'
+                          samples:
+                            type: array
+                            description: 该分类的全部样本列表（with_detail=true 时返回）
+                            items:
+                              $ref: '#/components/schemas/CategorySample'
+                        required:
+                          - sample_id
+  /api/app-api/sip/platform/v2/category/sample/batch_upload:
+    post:
+      summary: 批量上传类别样本
+      description: 为指定文件类别批量上传多个样本文件，最多10个
+      operationId: batchUploadCategorySample
+      tags:
+        - 文件类别样本
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: 空间ID
+                  example: '1234567890'
+                category_id:
+                  type: string
+                  description: 文件类别ID
+                  example: '1234567890'
+                files:
+                  type: array
+                  description: 样本文件列表，最多10个
+                  items:
+                    type: string
+                    format: binary
+                  minItems: 1
+                  maxItems: 10
+                with_detail:
+                  type: boolean
+                  description: 传 true 时响应返回该分类的全部样本列表
+              required:
+                - workspace_id
+                - category_id
+                - files
+      responses:
+        '200':
+          description: 批量上传成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          samples:
+                            type: array
+                            description: 该分类的全部样本列表（with_detail=true 时返回）
+                            items:
+                              $ref: '#/components/schemas/CategorySample'
   /api/app-api/sip/platform/v2/category/sample/list:
     get:
       summary: 获取类别样本列表
@@ -1692,6 +2177,47 @@ paths:
               schema:
                 type: string
                 format: binary
+  /api/app-api/sip/platform/v2/category/sample/batch_download:
+    post:
+      summary: 批量下载类别样本（ZIP）
+      description: 批量下载指定类别的多个样本文件，打包为 ZIP 格式返回。不传 sample_ids 时下载全部样本。
+      operationId: batchDownloadCategorySample
+      tags:
+        - 文件类别样本
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: 空间ID
+                  example: '1234567890'
+                category_id:
+                  type: string
+                  description: 文件类别ID
+                  example: '1234567890'
+                sample_ids:
+                  type: array
+                  description: 要下载的样本ID列表。不传时下载该类别全部样本。
+                  items:
+                    type: string
+                  example:
+                    - '1234567890'
+                    - 0987654321
+              required:
+                - workspace_id
+                - category_id
+      responses:
+        '200':
+          description: 成功下载样本 ZIP 文件
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
   /api/app-api/sip/platform/v2/category/sample/delete:
     post:
       summary: 删除类别样本
@@ -1721,7 +2247,7 @@ paths:
                   description: 要删除的样本ID列表
                   example:
                     - '1234567890'
-                    - '0987654321'
+                    - 0987654321
               required:
                 - workspace_id
                 - category_id
@@ -1852,7 +2378,7 @@ paths:
   /api/app-api/sip/platform/v2/review/rule_repo/list:
     get:
       summary: 获取审核规则库列表
-      description: 获取审核规则库列表, 包含规则库下的规则组和规则信息
+      description: '获取审核规则库列表, 包含规则库下的规则组和规则信息'
       operationId: listReviewRuleRepo
       tags:
         - 智能审核
@@ -2210,7 +2736,7 @@ paths:
                   example: '1234567890'
                 model:
                   type: string
-                  description: 审核任务模型，支持的模型：deepseek-r1, qwq-32b, qwen3-max, ORM-O1
+                  description: '审核任务模型，支持的模型：deepseek-r1, qwq-32b, qwen3-max, ORM-O1'
                   example: deepseek-r1
               required:
                 - workspace_id
@@ -2616,7 +3142,7 @@ components:
     ParserRemoveWatermark:
       name: parser_remove_watermark
       in: query
-      description: 是否去水印（0:不去水印、1:去水印）
+      description: '是否去水印（0:不去水印、1:去水印）'
       required: false
       schema:
         type: integer
@@ -2624,7 +3150,7 @@ components:
     ParserCropDewarp:
       name: parser_crop_dewarp
       in: query
-      description: 是否进行切边矫正（0:不进行切边矫正、1:进行切边矫正）
+      description: '是否进行切边矫正（0:不进行切边矫正、1:进行切边矫正）'
       required: false
       schema:
         type: integer
@@ -2632,7 +3158,7 @@ components:
     ParserApplyMerge:
       name: parser_apply_merge
       in: query
-      description: 是否进行跨页段落表格合并（0:不合并、1:合并）
+      description: '是否进行跨页段落表格合并（0:不合并、1:合并）'
       required: false
       schema:
         type: integer
@@ -2648,7 +3174,7 @@ components:
     ParserTableTextSplitMode:
       name: parser_table_text_split_mode
       in: query
-      description: 表格线是否分割ocr文本（0:不切割、1:切割）
+      description: '表格线是否分割ocr文本（0:不切割、1:切割）'
       required: false
       schema:
         type: integer
@@ -2664,7 +3190,7 @@ components:
     ParserDpi:
       name: parser_dpi
       in: query
-      description: 文件分辨率（144:默认、216:高精度）
+      description: '文件分辨率（144:默认、216:高精度）'
       required: false
       schema:
         type: integer
@@ -2718,8 +3244,8 @@ components:
                 items:
                   type: string
                   description: 文件URL
-                  example: https://example.com/file.pdf
-                  pattern: ^https?://.*$
+                  example: 'https://example.com/file.pdf'
+                  pattern: '^https?://.*$'
                 maxItems: 10
             required:
               - urls
@@ -2748,12 +3274,18 @@ components:
         - msg
     TaskType:
       type: integer
-      description: |
+      description: >
         任务类型
-        - `0`: **文件拆分子任务**：打开"文件拆分"开关的文件任务执行成功后，该文件批次任务中因文件拆分操作产生的子任务即为拆分子任务，按照文件类别下实际文件套数区分子任务
+
+        - `0`:
+        **文件拆分子任务**：打开"文件拆分"开关的文件任务执行成功后，该文件批次任务中因文件拆分操作产生的子任务即为拆分子任务，按照文件类别下实际文件套数区分子任务
+
         - `1`: **普通任务**：未打开"文件拆分"和"多图切分"开关的文件任务
+
         - `2`: **父任务**：打开"文件拆分"或"多图切分"开关的文件任务执行后，该文件批次任务中的每份文件即为父任务
-        - `3`: **切图子任务**：打开"多图切分"开关的文件任务执行成功后，该文件批次任务中因多图切分操作产生的子任务即为切分子任务，按照文件类别下实际切图结果数量区分子任务
+
+        - `3`:
+        **切图子任务**：打开"多图切分"开关的文件任务执行成功后，该文件批次任务中因多图切分操作产生的子任务即为切分子任务，按照文件类别下实际切图结果数量区分子任务
       example: 1
     RecognitionStatus:
       type: integer
@@ -2799,7 +3331,7 @@ components:
         properties:
           page:
             type: integer
-            description: 页码,从0开始
+            description: '页码,从0开始'
             example: 1
           angle:
             type: integer
@@ -2832,7 +3364,9 @@ components:
             description: 字段所在页。是`pages`数组的索引
           vertices:
             type: array
-            description: 字段值的外接四边形坐标。图像以左上为原点，数组值为 [左上角x, 左上角y, 右上角x, 右上角y, 右下角x, 右下角y, 左下角x, 左下角y]
+            description: >-
+              字段值的外接四边形坐标。图像以左上为原点，数组值为 [左上角x, 左上角y, 右上角x, 右上角y, 右下角x, 右下角y,
+              左下角x, 左下角y]
             items:
               type: integer
             minItems: 8
@@ -3261,7 +3795,7 @@ components:
               properties:
                 invoiceVerifyStatus:
                   type: integer
-                  description: 发票验真是否成功(0:否,1:是, null:未验真)
+                  description: '发票验真是否成功(0:否,1:是, null:未验真)'
                   example: 0
                 invoiceVerifyErrorCode:
                   type: integer
@@ -3269,7 +3803,7 @@ components:
                   example: 0
                 invoiceVerifyCanRetry:
                   type: integer
-                  description: 发票验真是否可以重试/发起(0:否,1:是)
+                  description: '发票验真是否可以重试/发起(0:否,1:是)'
                   example: 0
                 invoiceVerifyFailMsg:
                   type: string
@@ -3593,7 +4127,7 @@ components:
                         properties:
                           invoiceVerifyStatus:
                             type: integer
-                            description: 发票验真是否成功(0:否,1:是, null:未验真)
+                            description: '发票验真是否成功(0:否,1:是, null:未验真)'
                             example: 0
                           invoiceVerifyErrorCode:
                             type: integer
@@ -3601,7 +4135,7 @@ components:
                             example: 0
                           invoiceVerifyCanRetry:
                             type: integer
-                            description: 发票验真是否可以重试/发起(0:否,1:是)
+                            description: '发票验真是否可以重试/发起(0:否,1:是)'
                             example: 0
                           invoiceVerifyFailMsg:
                             type: string
@@ -3691,7 +4225,7 @@ components:
           example: 这是一个用于处理发票的工作空间
         auth_scope:
           type: integer
-          description: 协作范围 0:仅自己可见 1:企业成员可见
+          description: '协作范围 0:仅自己可见 1:企业成员可见'
           example: 1
           enum:
             - 0
@@ -3707,7 +4241,7 @@ components:
         callback_url:
           type: string
           description: 回调URL
-          example: https://example.com/callback
+          example: 'https://example.com/callback'
         callback_retry_time:
           type: integer
           description: 回调重试次数
@@ -3715,6 +4249,119 @@ components:
       required:
         - workspace_id
         - name
+    TransformSettings:
+      type: object
+      description: |
+        字段输出转换配置。根据 type 的不同，对应的 *_settings 字段会出现：
+        - type=text → text_settings
+        - type=number → number_settings
+        - type=datetime → datetime_settings
+        - type=enumerate → enumerate_settings
+        - type=regex → regex_settings
+
+        mismatch_action 适用于所有类型，表示无抽取结果或值不匹配时的处理方式。
+      properties:
+        type:
+          type: string
+          description: 转换类型
+          enum:
+            - text
+            - number
+            - datetime
+            - enumerate
+            - regex
+        text_settings:
+          type: object
+          description: 文本类型转换配置（type=text 时出现）
+          properties:
+            strip:
+              type: array
+              description: 去除的字符列表，抽取结果中包含这些字符时将被自动删除
+              items:
+                type: string
+              example:
+                - 空格
+                - ，
+                - 。
+        number_settings:
+          type: object
+          description: 数字类型转换配置（type=number 时出现）
+          properties:
+            format:
+              type: string
+              description: 输出格式
+              enum:
+                - normal
+                - percentage
+                - chinese_amount
+            unit_remove:
+              type: array
+              description: 单位去除列表，抽取结果中包含这些单位时将被自动删除
+              items:
+                type: string
+              example:
+                - 元
+                - ¥
+                - RMB
+            decimal_places:
+              type: integer
+              description: 保留小数位数
+            omit_trailing_zeros:
+              type: boolean
+              description: 省去末尾的0
+            thousand_separator:
+              type: boolean
+              description: 显示千位分隔符
+        datetime_settings:
+          type: object
+          description: 时间类型转换配置（type=datetime 时出现）
+          properties:
+            format:
+              type: string
+              description: >
+                日期时间输出格式。抽取结果将被标准化为此格式输出。
+
+                参考 DocFlow 日期格式说明
+                (https://docflow.textin.com/markdown?key=dateFormatGuide)
+              example: yyyy-MM-dd
+        enumerate_settings:
+          type: object
+          description: 枚举类型转换配置（type=enumerate 时出现）
+          properties:
+            items:
+              type: array
+              description: 可选枚举值列表，抽取结果必须命中其中一个值
+              items:
+                type: string
+        regex_settings:
+          type: object
+          description: 正则类型转换配置（type=regex 时出现）
+          properties:
+            match:
+              type: string
+              description: 匹配用的正则表达式
+              example: '^\d{4}-\d{2}-\d{2}$'
+            replace:
+              type: string
+              description: 替换用的正则表达式
+              example: $1-$2-$3
+        mismatch_action:
+          type: object
+          description: |
+            无抽取结果或字段值不匹配时的处理动作。适用于所有转换类型。
+            - mode=warning：仅标记提醒，不修改抽取结果
+            - mode=default：使用 default_value 作为输出值
+          properties:
+            mode:
+              type: string
+              description: 处理模式
+              enum:
+                - default
+                - warning
+            default_value:
+              type: string
+              description: 当 mode 为 default 时使用的输出值
+              example: N/A
     CategoryFieldConfig:
       type: object
       properties:
@@ -3747,58 +4394,7 @@ components:
           type: boolean
           description: 是否重复值去重，仅当 multi_value 为 true 时有效
         transform_settings:
-          type: object
-          description: 转换配置
-          properties:
-            type:
-              type: string
-              description: 转换类型
-              enum:
-                - datetime
-                - enumerate
-                - regex
-            datetime_settings:
-              type: object
-              description: 时间类型转换配置
-              properties:
-                format:
-                  type: string
-                  description: 日期时间格式，参考 DocFlow 日期格式说明 (https://docflow.textin.com/markdown?key=dateFormatGuide)
-                  example: yyyy-MM-dd HH:mm:ss
-            enumerate_settings:
-              type: object
-              description: 枚举类型转换配置
-              properties:
-                items:
-                  type: array
-                  description: 可选枚举值列表
-                  items:
-                    type: string
-            regex_settings:
-              type: object
-              description: 正则类型转换配置
-              properties:
-                match:
-                  type: string
-                  description: 匹配用的正则表达式
-                  example: ^\d{4}-\d{2}-\d{2}$
-                replace:
-                  type: string
-                  description: 替换用的正则表达式
-                  example: $1-$2-$3
-            mismatch_action:
-              type: object
-              description: 字段值不匹配时的处理动作
-              properties:
-                mode:
-                  type: string
-                  description: 不匹配时的处理模式
-                  enum:
-                    - default
-                    - warning
-                default_value:
-                  type: string
-                  description: 当模式为 default 时使用的默认值
+          $ref: '#/components/schemas/TransformSettings'
     EnabledStatus:
       type: integer
       description: |
@@ -3810,6 +4406,72 @@ components:
         - 0
         - 1
         - 2
+    CategoryField:
+      allOf:
+        - $ref: '#/components/schemas/CategoryFieldConfig'
+        - type: object
+          properties:
+            id:
+              type: string
+              description: 字段ID
+              example: '1234567890'
+            enabled:
+              $ref: '#/components/schemas/EnabledStatus'
+            extract_model:
+              type: string
+              description: |
+                字段抽取模型
+                - Model 1: 速度快，抽取结果稳定
+                - Model 2: 适用复杂文档理解
+                - Model 3: 多模态，适用简单抽取
+                - 表格字段取所属表格的模型，普通字段取字段级配置；历史数据按分类配置推断
+              example: Model 1
+    CategoryTable:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 表格ID
+          example: '1234567890'
+        name:
+          type: string
+          description: 表格名称
+          example: 表格1
+        description:
+          type: string
+          description: 表格描述
+          example: 表格描述
+        prompt:
+          type: string
+          description: 表格语义抽取提示词
+          example: 请抽取每行的品名、数量和金额
+        collect_from_multi_table:
+          type: boolean
+          description: 多表合并
+          example: true
+        extract_model:
+          type: string
+          description: 表格级抽取模型
+          example: Model 1
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryField'
+    CategorySample:
+      type: object
+      description: 文件类别样本
+      properties:
+        sample_id:
+          type: string
+          description: 样本ID
+          example: '1234567890'
+        file_name:
+          type: string
+          description: 文件名
+          example: invoice_sample.pdf
+      required:
+        - sample_id
+        - file_name
     Category:
       type: object
       description: 文件类别
@@ -3849,30 +4511,81 @@ components:
       required:
         - id
         - name
-    CategoryField:
+    CategoryFieldUpdateItem:
       allOf:
         - $ref: '#/components/schemas/CategoryFieldConfig'
         - type: object
           properties:
-            id:
+            field_id:
               type: string
               description: 字段ID
               example: '1234567890'
-    CategorySample:
+            extract_model:
+              type: string
+              description: 字段级抽取模型
+              enum:
+                - Model 1
+                - Model 2
+                - Model 3
+          required:
+            - field_id
+    CategoryTableConfig:
       type: object
-      description: 文件类别样本
+      description: 一站式创建时的表格配置（含内嵌字段）
       properties:
-        sample_id:
+        name:
           type: string
-          description: 样本ID
-          example: '1234567890'
-        file_name:
+          description: 表格名称
+          example: 明细表
+          maxLength: 50
+        prompt:
           type: string
-          description: 文件名
-          example: invoice_sample.pdf
+          description: 表格语义抽取提示词
+          maxLength: 200
+        collect_from_multi_table:
+          type: boolean
+          description: 多表合并
+        extract_model:
+          type: string
+          description: 表格级抽取模型
+          enum:
+            - Model 1
+            - Model 2
+            - Model 3
+        fields:
+          type: array
+          description: 表格内嵌字段列表
+          items:
+            $ref: '#/components/schemas/CategoryFieldConfig'
       required:
-        - sample_id
-        - file_name
+        - name
+    CategoryTableUpdateItem:
+      type: object
+      properties:
+        table_id:
+          type: string
+          description: 表格ID
+          example: '1234567890'
+        name:
+          type: string
+          description: 表格名称
+          maxLength: 50
+        prompt:
+          type: string
+          description: 表格语义抽取提示词
+          maxLength: 200
+        extract_model:
+          type: string
+          description: 表格级抽取模型
+          enum:
+            - Model 1
+            - Model 2
+            - Model 3
+        collect_from_multi_table:
+          type: boolean
+          description: 多表合并
+      required:
+        - table_id
     RiskLevel:
       type: integer
       description: |
@@ -4041,4 +4754,6 @@ components:
         - 6
         - 7
         - 8
-x-codeSamples: custom
+security:
+  - ApiId: []
+    SecretCode: []

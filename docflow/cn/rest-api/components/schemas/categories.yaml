@@ -70,58 +70,7 @@ CategoryFieldConfig:
       type: boolean
       description: 是否重复值去重，仅当 multi_value 为 true 时有效
     transform_settings:
-      type: object
-      description: 转换配置
-      properties:
-        type:
-          type: string
-          description: 转换类型
-          enum:
-            - datetime
-            - enumerate
-            - regex
-        datetime_settings:
-          type: object
-          description: 时间类型转换配置
-          properties:
-            format:
-              type: string
-              description: 日期时间格式，参考 DocFlow 日期格式说明 (https://docflow.textin.com/markdown?key=dateFormatGuide)
-              example: yyyy-MM-dd HH:mm:ss
-        enumerate_settings:
-          type: object
-          description: 枚举类型转换配置
-          properties:
-            items:
-              type: array
-              description: 可选枚举值列表
-              items:
-                type: string
-        regex_settings:
-          type: object
-          description: 正则类型转换配置
-          properties:
-            match:
-              type: string
-              description: 匹配用的正则表达式
-              example: ^\d{4}-\d{2}-\d{2}$
-            replace:
-              type: string
-              description: 替换用的正则表达式
-              example: $1-$2-$3
-        mismatch_action:
-          type: object
-          description: 字段值不匹配时的处理动作
-          properties:
-            mode:
-              type: string
-              description: 不匹配时的处理模式
-              enum:
-                - default
-                - warning
-            default_value:
-              type: string
-              description: 当模式为 default 时使用的默认值
+      $ref: '#/TransformSettings'
 
 CategoryField:
   allOf:
@@ -132,6 +81,49 @@ CategoryField:
           type: string
           description: 字段ID
           example: "1234567890"
+        enabled:
+          $ref: '#/EnabledStatus'
+        extract_model:
+          type: string
+          description: |
+            字段抽取模型
+            - Model 1: 速度快，抽取结果稳定
+            - Model 2: 适用复杂文档理解
+            - Model 3: 多模态，适用简单抽取
+            - 表格字段取所属表格的模型，普通字段取字段级配置；历史数据按分类配置推断
+          example: "Model 1"
+
+CategoryTable:
+  type: object
+  properties:
+    id:
+      type: string
+      description: 表格ID
+      example: "1234567890"
+    name:
+      type: string
+      description: 表格名称
+      example: "表格1"
+    description:
+      type: string
+      description: 表格描述
+      example: "表格描述"
+    prompt:
+      type: string
+      description: 表格语义抽取提示词
+      example: "请抽取每行的品名、数量和金额"
+    collect_from_multi_table:
+      type: boolean
+      description: 多表合并
+      example: true
+    extract_model:
+      type: string
+      description: 表格级抽取模型
+      example: "Model 1"
+    fields:
+      type: array
+      items:
+        $ref: '#/CategoryField'
 
 CategorySample:
   type: object
@@ -148,6 +140,190 @@ CategorySample:
   required:
     - sample_id
     - file_name
+
+TransformSettings:
+  type: object
+  description: |
+    字段输出转换配置。根据 type 的不同，对应的 *_settings 字段会出现：
+    - type=text → text_settings
+    - type=number → number_settings
+    - type=datetime → datetime_settings
+    - type=enumerate → enumerate_settings
+    - type=regex → regex_settings
+
+    mismatch_action 适用于所有类型，表示无抽取结果或值不匹配时的处理方式。
+  properties:
+    type:
+      type: string
+      description: 转换类型
+      enum:
+        - text
+        - number
+        - datetime
+        - enumerate
+        - regex
+    text_settings:
+      type: object
+      description: 文本类型转换配置（type=text 时出现）
+      properties:
+        strip:
+          type: array
+          description: 去除的字符列表，抽取结果中包含这些字符时将被自动删除
+          items:
+            type: string
+          example: ["空格", "，", "。"]
+    number_settings:
+      type: object
+      description: 数字类型转换配置（type=number 时出现）
+      properties:
+        format:
+          type: string
+          description: 输出格式
+          enum:
+            - normal
+            - percentage
+            - chinese_amount
+        unit_remove:
+          type: array
+          description: 单位去除列表，抽取结果中包含这些单位时将被自动删除
+          items:
+            type: string
+          example: ["元", "¥", "RMB"]
+        decimal_places:
+          type: integer
+          description: 保留小数位数
+        omit_trailing_zeros:
+          type: boolean
+          description: 省去末尾的0
+        thousand_separator:
+          type: boolean
+          description: 显示千位分隔符
+    datetime_settings:
+      type: object
+      description: 时间类型转换配置（type=datetime 时出现）
+      properties:
+        format:
+          type: string
+          description: |
+            日期时间输出格式。抽取结果将被标准化为此格式输出。
+            参考 DocFlow 日期格式说明 (https://docflow.textin.com/markdown?key=dateFormatGuide)
+          example: yyyy-MM-dd
+    enumerate_settings:
+      type: object
+      description: 枚举类型转换配置（type=enumerate 时出现）
+      properties:
+        items:
+          type: array
+          description: 可选枚举值列表，抽取结果必须命中其中一个值
+          items:
+            type: string
+    regex_settings:
+      type: object
+      description: 正则类型转换配置（type=regex 时出现）
+      properties:
+        match:
+          type: string
+          description: 匹配用的正则表达式
+          example: ^\d{4}-\d{2}-\d{2}$
+        replace:
+          type: string
+          description: 替换用的正则表达式
+          example: $1-$2-$3
+    mismatch_action:
+      type: object
+      description: |
+        无抽取结果或字段值不匹配时的处理动作。适用于所有转换类型。
+        - mode=warning：仅标记提醒，不修改抽取结果
+        - mode=default：使用 default_value 作为输出值
+      properties:
+        mode:
+          type: string
+          description: 处理模式
+          enum:
+            - default
+            - warning
+        default_value:
+          type: string
+          description: 当 mode 为 default 时使用的输出值
+          example: "N/A"
+
+CategoryTableConfig:
+  type: object
+  description: 一站式创建时的表格配置（含内嵌字段）
+  properties:
+    name:
+      type: string
+      description: 表格名称
+      example: "明细表"
+      maxLength: 50
+    prompt:
+      type: string
+      description: 表格语义抽取提示词
+      maxLength: 200
+    collect_from_multi_table:
+      type: boolean
+      description: 多表合并
+    extract_model:
+      type: string
+      description: 表格级抽取模型
+      enum:
+        - Model 1
+        - Model 2
+        - Model 3
+    fields:
+      type: array
+      description: 表格内嵌字段列表
+      items:
+        $ref: '#/CategoryFieldConfig'
+  required:
+    - name
+
+CategoryFieldUpdateItem:
+  allOf:
+    - $ref: '#/CategoryFieldConfig'
+    - type: object
+      properties:
+        field_id:
+          type: string
+          description: 字段ID
+          example: "1234567890"
+        extract_model:
+          type: string
+          description: 字段级抽取模型
+          enum:
+            - Model 1
+            - Model 2
+            - Model 3
+      required:
+        - field_id
+
+CategoryTableUpdateItem:
+  type: object
+  properties:
+    table_id:
+      type: string
+      description: 表格ID
+      example: "1234567890"
+    name:
+      type: string
+      description: 表格名称
+      maxLength: 50
+    prompt:
+      type: string
+      description: 表格语义抽取提示词
+      maxLength: 200
+    extract_model:
+      type: string
+      description: 表格级抽取模型
+      enum:
+        - Model 1
+        - Model 2
+        - Model 3
+    collect_from_multi_table:
+      type: boolean
+      description: 多表合并
+  required:
+    - table_id
 
 EnabledStatus:
   type: integer

@@ -57,12 +57,14 @@ CategoryFieldConfig:
       description: 是否使用语义提示词
     alias:
       type: array
-      description: 字段别名
+      description: 字段别名。更新时：不传=不修改，传空数组[]=清空别名，传非空数组=覆盖
       items:
         type: string
+      example: ["发票号", "票号", "Invoice No."]
     identity:
       type: string
-      description: 导出字段名
+      description: 导出字段名。更新时：不传=不修改，传空字符串""=清空，传非空值=覆盖
+      example: invoice_number
     multi_value:
       type: boolean
       description: 是否多值抽取
@@ -279,23 +281,57 @@ CategoryTableConfig:
     - name
 
 CategoryFieldUpdateItem:
-  allOf:
-    - $ref: '#/CategoryFieldConfig'
-    - type: object
-      properties:
-        field_id:
-          type: string
-          description: 字段ID
-          example: "1234567890"
-        extract_model:
-          type: string
-          description: 字段级抽取模型
-          enum:
-            - Model 1
-            - Model 2
-            - Model 3
-      required:
-        - field_id
+  type: object
+  description: 批量更新字段的单项配置（仅包含可更新字段，multi_value/duplicate_value_distinct 不可通过此接口修改）
+  properties:
+    field_id:
+      type: string
+      description: 字段ID
+      example: "1234567890"
+    name:
+      type: string
+      description: 字段名称
+    description:
+      type: string
+      description: 字段描述
+    prompt:
+      type: string
+      description: 语义抽取提示词
+    use_prompt:
+      type: boolean
+      description: 是否使用语义提示词
+    alias:
+      type: array
+      description: 字段别名。不传=不修改，传空数组[]=清空别名，传非空数组=覆盖
+      items:
+        type: string
+      example: ["发票号", "票号"]
+    identity:
+      type: string
+      description: 导出字段名。不传=不修改，传空字符串""=清空，传非空值=覆盖
+      example: invoice_number
+    multi_value:
+      type: boolean
+      description: 是否多值抽取。不传=不修改
+    duplicate_value_distinct:
+      type: boolean
+      description: 是否重复值去重，仅当 multi_value 为 true 时有效。不传=不修改
+    transform_settings:
+      $ref: '#/TransformSettings'
+    extract_model:
+      type: string
+      description: |
+        字段级抽取模型，仅普通字段可独立设置，表格字段不可设置。不传则保持原有配置。
+        - Model 1: 速度快，抽取结果稳定
+        - Model 2: 适用复杂文档理解
+        - Model 3: 多模态，适用简单抽取
+      example: "Model 1"
+      enum:
+        - Model 1
+        - Model 2
+        - Model 3
+  required:
+    - field_id
 
 CategoryTableUpdateItem:
   type: object

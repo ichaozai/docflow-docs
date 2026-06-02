@@ -491,7 +491,7 @@
         application/json:
           schema:
             allOf:
-              - $ref: '../components/schemas/categories.yaml#/CategoryFieldConfig'
+              - $ref: '../components/schemas/categories.yaml#/CategoryFieldUpdateItem'
             type: object
             properties:
               workspace_id:
@@ -502,10 +502,6 @@
                 type: string
                 description: File category ID
                 example: "1234567890"
-              field_id:
-                type: string
-                description: Field ID
-                example: "1234567890"
               table_id:
                 type: string
                 description: |
@@ -513,18 +509,6 @@
                   - Not required for regular fields
                   - Required for table fields (provide the table ID the field belongs to)
                 example: "1234567890"
-              extract_model:
-                type: string
-                description: |
-                  Field-level extraction model
-                  - Model 1: Fast speed with stable extraction results
-                  - Model 2: Suitable for complex document understanding
-                  - Model 3: VLM, suitable for simple extraction
-                example: "Model 1"
-                enum:
-                  - Model 1
-                  - Model 2
-                  - Model 3
               with_detail:
                 type: boolean
                 description: |

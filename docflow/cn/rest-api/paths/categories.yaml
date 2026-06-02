@@ -491,7 +491,7 @@
         application/json:
           schema:
             allOf:
-              - $ref: '../components/schemas/categories.yaml#/CategoryFieldConfig'
+              - $ref: '../components/schemas/categories.yaml#/CategoryFieldUpdateItem'
             type: object
             properties:
               workspace_id:
@@ -502,10 +502,6 @@
                 type: string
                 description: 文件类别ID
                 example: "1234567890"
-              field_id:
-                type: string
-                description: 字段ID
-                example: "1234567890"
               table_id:
                 type: string
                 description: |
@@ -513,18 +509,6 @@
                   - 对普通字段可不传
                   - 对表格字段需要传入其所属的表格ID
                 example: "1234567890"
-              extract_model:
-                type: string
-                description: |
-                  字段级抽取模型
-                  - Model 1: 速度快，抽取结果稳定
-                  - Model 2: 适用复杂文档理解
-                  - Model 3: 多模态，适用简单抽取
-                example: "Model 1"
-                enum:
-                  - Model 1
-                  - Model 2
-                  - Model 3
               with_detail:
                 type: boolean
                 description: |

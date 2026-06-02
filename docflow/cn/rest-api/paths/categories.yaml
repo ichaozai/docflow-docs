@@ -53,15 +53,16 @@
                 minItems: 1
                 maxItems: 10
               fields:
-                type: string
-                description: |
-                  字段配置 JSON 数组字符串，至少配置一个字段。
-                  数组元素结构参考 CategoryFieldConfig schema。
+                type: array
+                description: 字段配置列表，至少配置一个字段
+                items:
+                  $ref: '../components/schemas/categories.yaml#/CategoryFieldConfig'
+                minItems: 1
               tables:
-                type: string
-                description: |
-                  选填，表格配置 JSON 数组字符串（一站式创建）。
-                  数组元素结构参考 CategoryTableConfig schema，支持内嵌 fields。
+                type: array
+                description: 选填，表格配置列表（一站式创建），支持内嵌 fields
+                items:
+                  $ref: '../components/schemas/categories.yaml#/CategoryTableConfig'
               with_detail:
                 type: boolean
                 description: |

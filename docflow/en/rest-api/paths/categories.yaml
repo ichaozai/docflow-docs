@@ -53,15 +53,16 @@
                 minItems: 1
                 maxItems: 10
               fields:
-                type: string
-                description: |
-                  Field configuration JSON array string, at least one field must be configured.
-                  Array element structure refers to CategoryFieldConfig schema.
+                type: array
+                description: Field configuration list, at least one field must be configured
+                items:
+                  $ref: '../components/schemas/categories.yaml#/CategoryFieldConfig'
+                minItems: 1
               tables:
-                type: string
-                description: |
-                  Optional, table configuration JSON array string (one-stop creation).
-                  Array element structure refers to CategoryTableConfig schema, supports nested fields.
+                type: array
+                description: Optional, table configuration list (one-stop creation), supports nested fields
+                items:
+                  $ref: '../components/schemas/categories.yaml#/CategoryTableConfig'
               with_detail:
                 type: boolean
                 description: |

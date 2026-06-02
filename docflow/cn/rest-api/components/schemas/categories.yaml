@@ -145,108 +145,65 @@ CategorySample:
 
 TransformSettings:
   type: object
-  description: |
-    字段输出转换配置。根据 type 的不同，对应的 *_settings 字段会出现：
-    - type=text → text_settings
-    - type=number → number_settings
-    - type=datetime → datetime_settings
-    - type=enumerate → enumerate_settings
-    - type=regex → regex_settings
-
-    mismatch_action 适用于所有类型，表示无抽取结果或值不匹配时的处理方式。
+  description: 字段输出转换配置，对抽取结果进行格式化处理后再输出。
   properties:
     type:
       type: string
-      description: 转换类型
+      description: |
+        转换类型，决定使用哪种转换规则：
+        - `datetime`：将抽取结果标准化为指定日期格式
+        - `enumerate`：限定抽取结果必须是预设枚举值之一
+        - `regex`：用正则表达式对抽取结果进行匹配和替换
       enum:
-        - text
-        - number
         - datetime
         - enumerate
         - regex
-    text_settings:
-      type: object
-      description: 文本类型转换配置（type=text 时出现）
-      properties:
-        strip:
-          type: array
-          description: 去除的字符列表，抽取结果中包含这些字符时将被自动删除
-          items:
-            type: string
-          example: ["空格", "，", "。"]
-    number_settings:
-      type: object
-      description: 数字类型转换配置（type=number 时出现）
-      properties:
-        format:
-          type: string
-          description: 输出格式
-          enum:
-            - normal
-            - percentage
-            - chinese_amount
-        unit_remove:
-          type: array
-          description: 单位去除列表，抽取结果中包含这些单位时将被自动删除
-          items:
-            type: string
-          example: ["元", "¥", "RMB"]
-        decimal_places:
-          type: integer
-          description: 保留小数位数
-        omit_trailing_zeros:
-          type: boolean
-          description: 省去末尾的0
-        thousand_separator:
-          type: boolean
-          description: 显示千位分隔符
     datetime_settings:
       type: object
-      description: 时间类型转换配置（type=datetime 时出现）
+      description: 时间格式化配置，type=datetime 时必填
       properties:
         format:
           type: string
-          description: |
-            日期时间输出格式。抽取结果将被标准化为此格式输出。
-            参考 DocFlow 日期格式说明 (https://docflow.textin.com/markdown?key=dateFormatGuide)
+          description: 目标日期格式，抽取结果将被标准化为此格式输出
           example: yyyy-MM-dd
     enumerate_settings:
       type: object
-      description: 枚举类型转换配置（type=enumerate 时出现）
+      description: 枚举限定配置，type=enumerate 时必填
       properties:
         items:
           type: array
-          description: 可选枚举值列表，抽取结果必须命中其中一个值
+          description: 允许的枚举值列表。抽取结果不在列表中时，按 mismatch_action 处理
           items:
             type: string
+          example: ["增值税专用发票", "增值税普通发票", "电子发票"]
     regex_settings:
       type: object
-      description: 正则类型转换配置（type=regex 时出现）
+      description: 正则转换配置，type=regex 时必填
       properties:
         match:
           type: string
-          description: 匹配用的正则表达式
-          example: ^\d{4}-\d{2}-\d{2}$
+          description: 匹配正则表达式，用于校验或捕获抽取结果
+          example: ^(\d{4})-(\d{2})-(\d{2})$
         replace:
           type: string
-          description: 替换用的正则表达式
-          example: $1-$2-$3
+          description: 替换表达式，支持 $1、$2 等捕获组引用
+          example: $1/$2/$3
     mismatch_action:
       type: object
-      description: |
-        无抽取结果或字段值不匹配时的处理动作。适用于所有转换类型。
-        - mode=warning：仅标记提醒，不修改抽取结果
-        - mode=default：使用 default_value 作为输出值
+      description: 抽取结果不匹配转换规则时的处理方式（适用于所有转换类型，选填）
       properties:
         mode:
           type: string
-          description: 处理模式
+          description: |
+            处理模式：
+            - `default`：输出指定的默认值（需配合 default_value）
+            - `warning`：保留原始抽取结果，仅标记告警提醒人工复核
           enum:
             - default
             - warning
         default_value:
           type: string
-          description: 当 mode 为 default 时使用的输出值
+          description: mode=default 时输出的默认值
           example: "N/A"
 
 CategoryTableConfig:

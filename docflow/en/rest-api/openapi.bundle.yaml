@@ -938,21 +938,20 @@ paths:
                   minItems: 1
                   maxItems: 10
                 fields:
-                  type: string
-                  description: >
-                    Field configuration JSON array string, at least one field
-                    must be configured.
-
-                    Array element structure refers to CategoryFieldConfig
-                    schema.
+                  type: array
+                  description: >-
+                    Field configuration list, at least one field must be
+                    configured
+                  items:
+                    $ref: '#/components/schemas/CategoryFieldConfig'
+                  minItems: 1
                 tables:
-                  type: string
-                  description: >
-                    Optional, table configuration JSON array string (one-stop
-                    creation).
-
-                    Array element structure refers to CategoryTableConfig
-                    schema, supports nested fields.
+                  type: array
+                  description: >-
+                    Optional, table configuration list (one-stop creation),
+                    supports nested fields
+                  items:
+                    $ref: '#/components/schemas/CategoryTableConfig'
                 with_detail:
                   type: boolean
                   description: >
@@ -4459,137 +4458,86 @@ components:
         - name
     TransformSettings:
       type: object
-      description: >
-        Field output transform configuration. Based on the type value, the
-        corresponding *_settings field will be present:
-
-        - type=text → text_settings
-
-        - type=number → number_settings
-
-        - type=datetime → datetime_settings
-
-        - type=enumerate → enumerate_settings
-
-        - type=regex → regex_settings
-
-
-        mismatch_action applies to all types, indicating how to handle cases
-        when no extraction result is found or the value does not match.
+      description: >-
+        Field output transform configuration. Formats the extraction result
+        before output.
       properties:
         type:
           type: string
-          description: Transform type
+          description: >
+            Transform type, determines which transform rule to apply:
+
+            - `datetime`: Normalize the extraction result to a specified date
+            format
+
+            - `enumerate`: Restrict the extraction result to one of the preset
+            enumeration values
+
+            - `regex`: Match and replace the extraction result using regular
+            expressions
           enum:
-            - text
-            - number
             - datetime
             - enumerate
             - regex
-        text_settings:
-          type: object
-          description: Text type transform configuration (present when type=text)
-          properties:
-            strip:
-              type: array
-              description: >-
-                List of characters to remove. Characters found in the extraction
-                result will be automatically stripped.
-              items:
-                type: string
-              example:
-                - space
-                - ','
-                - .
-        number_settings:
-          type: object
-          description: Number type transform configuration (present when type=number)
-          properties:
-            format:
-              type: string
-              description: Output format
-              enum:
-                - normal
-                - percentage
-                - chinese_amount
-            unit_remove:
-              type: array
-              description: >-
-                List of units to remove. Units found in the extraction result
-                will be automatically stripped.
-              items:
-                type: string
-              example:
-                - USD
-                - $
-                - EUR
-            decimal_places:
-              type: integer
-              description: Number of decimal places to retain
-            omit_trailing_zeros:
-              type: boolean
-              description: Omit trailing zeros
-            thousand_separator:
-              type: boolean
-              description: Show thousand separator
         datetime_settings:
           type: object
-          description: Datetime type transform configuration (present when type=datetime)
+          description: Datetime formatting configuration. Required when type=datetime.
           properties:
             format:
               type: string
-              description: >
-                Date time output format. The extraction result will be
-                normalized to this format.
-
-                Refer to DocFlow date format guide
-                (https://docflow.textin.com/markdown?key=dateFormatGuide)
+              description: >-
+                Target date format. The extraction result will be normalized to
+                this format.
               example: yyyy-MM-dd
         enumerate_settings:
           type: object
-          description: >-
-            Enumeration type transform configuration (present when
-            type=enumerate)
+          description: Enumeration constraint configuration. Required when type=enumerate.
           properties:
             items:
               type: array
               description: >-
-                List of valid enumeration values. The extraction result must
-                match one of these values.
+                Allowed enumeration values. If the extraction result is not in
+                this list, mismatch_action applies.
               items:
                 type: string
+              example:
+                - VAT Special Invoice
+                - VAT General Invoice
+                - Electronic Invoice
         regex_settings:
           type: object
-          description: Regex type transform configuration (present when type=regex)
+          description: Regex transform configuration. Required when type=regex.
           properties:
             match:
               type: string
-              description: Regex pattern for matching
-              example: '^\d{4}-\d{2}-\d{2}$'
+              description: Regex pattern for matching or capturing the extraction result
+              example: '^(\d{4})-(\d{2})-(\d{2})$'
             replace:
               type: string
-              description: Regex pattern for replacement
-              example: $1-$2-$3
+              description: 'Replacement expression, supports $1, $2 capture group references'
+              example: $1/$2/$3
         mismatch_action:
           type: object
-          description: >
-            Action when no extraction result is found or the field value does
-            not match. Applies to all transform types.
-
-            - mode=warning: Mark as a warning only, do not modify the extraction
-            result
-
-            - mode=default: Use default_value as the output value
+          description: >-
+            How to handle extraction results that don't match the transform rule
+            (applies to all types, optional).
           properties:
             mode:
               type: string
-              description: Handling mode
+              description: >
+                Handling mode:
+
+                - `default`: Output the specified default value (requires
+                default_value)
+
+                - `warning`: Keep the original extraction result, flag a warning
+                for manual review
               enum:
                 - default
                 - warning
             default_value:
               type: string
-              description: Output value when mode is default
+              description: Output value when mode=default
               example: N/A
     CategoryFieldConfig:
       type: object
@@ -4634,6 +4582,36 @@ components:
             true
         transform_settings:
           $ref: '#/components/schemas/TransformSettings'
+    CategoryTableConfig:
+      type: object
+      description: Table configuration for one-stop creation (with nested fields)
+      properties:
+        name:
+          type: string
+          description: Table name
+          example: Detail Table
+          maxLength: 50
+        prompt:
+          type: string
+          description: Table semantic extraction prompt
+          maxLength: 200
+        collect_from_multi_table:
+          type: boolean
+          description: Merge multiple tables
+        extract_model:
+          type: string
+          description: Table-level extraction model
+          enum:
+            - Model 1
+            - Model 2
+            - Model 3
+        fields:
+          type: array
+          description: Nested field list within the table
+          items:
+            $ref: '#/components/schemas/CategoryFieldConfig'
+      required:
+        - name
     EnabledStatus:
       type: integer
       description: |
@@ -4831,36 +4809,6 @@ components:
             - Model 3
       required:
         - field_id
-    CategoryTableConfig:
-      type: object
-      description: Table configuration for one-stop creation (with nested fields)
-      properties:
-        name:
-          type: string
-          description: Table name
-          example: Detail Table
-          maxLength: 50
-        prompt:
-          type: string
-          description: Table semantic extraction prompt
-          maxLength: 200
-        collect_from_multi_table:
-          type: boolean
-          description: Merge multiple tables
-        extract_model:
-          type: string
-          description: Table-level extraction model
-          enum:
-            - Model 1
-            - Model 2
-            - Model 3
-        fields:
-          type: array
-          description: Nested field list within the table
-          items:
-            $ref: '#/components/schemas/CategoryFieldConfig'
-      required:
-        - name
     CategoryTableUpdateItem:
       type: object
       properties:

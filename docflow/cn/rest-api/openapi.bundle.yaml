@@ -1443,7 +1443,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CodeMessage'
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        description: with_detail=true 时返回更新后的字段信息，否则为 null
+                        $ref: '#/components/schemas/CategoryField'
   /api/app-api/sip/platform/v2/category/fields/batch_update:
     post:
       summary: 批量更新文件类别字段
@@ -1864,7 +1870,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CodeMessage'
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        description: with_detail=true 时返回更新后的表格信息，否则为 null
+                        $ref: '#/components/schemas/CategoryTable'
   /api/app-api/sip/platform/v2/category/tables/batch_update:
     post:
       summary: 批量更新文件类别表格
@@ -1893,6 +1905,11 @@ paths:
                   items:
                     $ref: '#/components/schemas/CategoryTableUpdateItem'
                   minItems: 1
+                with_detail:
+                  type: boolean
+                  description: |
+                    是否返回完整详情。传 true 时响应返回更新后的每个表格完整信息。
+                    不传或为 false 时 result 为 null。
               required:
                 - workspace_id
                 - category_id
@@ -1903,7 +1920,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CodeMessage'
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        description: 更新后的表格列表（with_detail=true 时返回），否则为 null
+                        items:
+                          $ref: '#/components/schemas/CategoryTable'
   /api/app-api/sip/platform/v2/category/tables/delete:
     post:
       summary: 删除文件类别表格

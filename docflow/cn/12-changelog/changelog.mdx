@@ -4,6 +4,52 @@ sidebarTitle: "更新日志"
 description: "DocFlow API 文档更新记录"
 ---
 
+## 2026-06-02
+
+### API
+
+#### 批量操作接口
+
+一次请求处理多个对象，减少网络往返。所有批量接口均为「全有全无」语义——任一项校验失败则整批拒绝，不会出现部分成功。
+
+| 接口 | 说明 |
+|------|------|
+| [批量新增文件类别字段](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E6%89%B9%E9%87%8F%E6%96%B0%E5%A2%9E%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E5%AD%97%E6%AE%B5) | 批量创建字段（上限 100） |
+| [批量更新文件类别字段](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E6%89%B9%E9%87%8F%E6%9B%B4%E6%96%B0%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E5%AD%97%E6%AE%B5) | 批量更新字段配置 |
+| [批量新增文件类别表格](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E6%89%B9%E9%87%8F%E6%96%B0%E5%A2%9E%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E8%A1%A8%E6%A0%BC) | 批量创建表格（支持内嵌字段一站式创建） |
+| [批量更新文件类别表格](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E6%89%B9%E9%87%8F%E6%9B%B4%E6%96%B0%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E8%A1%A8%E6%A0%BC) | 批量更新表格配置 |
+| [批量上传类别样本](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E6%A0%B7%E6%9C%AC/%E6%89%B9%E9%87%8F%E4%B8%8A%E4%BC%A0%E7%B1%BB%E5%88%AB%E6%A0%B7%E6%9C%AC) | 多文件上传样本（上限 10） |
+| [批量下载类别样本（ZIP）](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E6%A0%B7%E6%9C%AC/%E6%89%B9%E9%87%8F%E4%B8%8B%E8%BD%BD%E7%B1%BB%E5%88%AB%E6%A0%B7%E6%9C%AC%EF%BC%88ZIP%EF%BC%89) | 打包下载样本 |
+
+#### 一站式创建分类
+
+[创建文件类别](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E5%88%9B%E5%BB%BA%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB) 新增 `tables` 参数——创建分类时可同时配置表格及表格内嵌字段，一次调用完成完整配置。
+
+#### 字段高级配置开放
+
+[更新文件类别字段](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E6%9B%B4%E6%96%B0%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E5%AD%97%E6%AE%B5)（单条 + [批量](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E6%89%B9%E9%87%8F%E6%9B%B4%E6%96%B0%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E5%AD%97%E6%AE%B5)）新增以下可修改属性：
+
+| 属性 | 说明 | 更新语义 |
+|------|------|---------|
+| `alias` | 字段别名 | 不传=不修改，`[]`=清空，`["a","b"]`=覆盖 |
+| `identity` | 导出字段名 | 不传=不修改，`""`=清空，非空=覆盖 |
+| `multi_value` | 多值抽取 | 不传=不修改，`true`/`false`=覆盖 |
+| `duplicate_value_distinct` | 重复值去重 | 仅 `multi_value=true` 时有效 |
+| `transform_settings` | 输出转换配置 | 支持 datetime / enumerate / regex 三种类型 |
+
+#### 返参补全
+
+无需额外查询即可获取完整配置：
+
+- [获取文件类别字段列表](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E8%8E%B7%E5%8F%96%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E5%AD%97%E6%AE%B5%E5%88%97%E8%A1%A8) — 新增 `enabled`、`prompt`、`use_prompt`、`extract_model`、`alias`、`identity`、`multi_value`、`duplicate_value_distinct`、`transform_settings`
+- [获取文件类别下的表格列表](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E8%8E%B7%E5%8F%96%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E4%B8%8B%E7%9A%84%E8%A1%A8%E6%A0%BC%E5%88%97%E8%A1%A8) — 新增 `prompt`、`collect_from_multi_table`、`extract_model`
+- [获取空间文件类别列表](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E8%8E%B7%E5%8F%96%E7%A9%BA%E9%97%B4%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E5%88%97%E8%A1%A8) — 新增 `category_prompt`、`extract_model`
+- **with_detail 开关** — 创建/更新接口传 `with_detail=true` 时，响应直接返回完整对象信息
+
+### SDK
+
+- Python SDK `fields.update()` 和 `fields.batch_update()` 补充高级配置参数文档及清空语义示例
+
 ## 2026-05-27
 
 **API**

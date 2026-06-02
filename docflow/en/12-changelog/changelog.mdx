@@ -4,6 +4,52 @@ sidebarTitle: "Changelog"
 description: "DocFlow API documentation changelog"
 ---
 
+## 2026-06-02
+
+### API
+
+#### Batch Operations
+
+Process multiple objects in a single request. All batch endpoints use **all-or-nothing** semantics — if any item fails validation, the entire batch is rejected.
+
+| Endpoint | Description |
+|----------|-------------|
+| [Batch Add File Category Fields](/api-reference/file-category/batch-add-file-category-fields) | Create up to 100 fields at once |
+| [Batch Update File Category Fields](/api-reference/file-category/batch-update-file-category-fields) | Update multiple field configs |
+| [Batch Add File Category Tables](/api-reference/file-category/batch-add-file-category-tables) | Create tables (with embedded fields) |
+| [Batch Update File Category Tables](/api-reference/file-category/batch-update-file-category-tables) | Update multiple table configs |
+| [Batch Upload Category Samples](/api-reference/file-category-samples/batch-upload-category-samples) | Upload multiple samples (up to 10) |
+| [Batch Download Category Samples (ZIP)](/api-reference/file-category-samples/batch-download-category-samples-zip) | Download samples as ZIP |
+
+#### One-Step Category Creation
+
+[Create File Category](/api-reference/file-category/create-file-category) now accepts a `tables` parameter — configure tables and their fields in a single call when creating a category.
+
+#### Field Advanced Config
+
+[Update File Category Field](/api-reference/file-category/update-file-category-field) (single + [batch](/api-reference/file-category/batch-update-file-category-fields)) now support these properties:
+
+| Property | Description | Update Semantics |
+|----------|-------------|-----------------|
+| `alias` | Field aliases | omit=no change, `[]`=clear, `["a","b"]`=override |
+| `identity` | Export field name | omit=no change, `""`=clear, non-empty=override |
+| `multi_value` | Multi-value extraction | omit=no change, `true`/`false`=override |
+| `duplicate_value_distinct` | Deduplicate values | Only effective when `multi_value=true` |
+| `transform_settings` | Output transform config | Supports datetime / enumerate / regex |
+
+#### Enriched Responses
+
+Get full config without extra queries:
+
+- [Get File Category Field List](/api-reference/file-category/get-file-category-field-list) — added `enabled`, `prompt`, `use_prompt`, `extract_model`, `alias`, `identity`, `multi_value`, `duplicate_value_distinct`, `transform_settings`
+- [Get File Category Table List](/api-reference/file-category/get-file-category-table-list) — added `prompt`, `collect_from_multi_table`, `extract_model`
+- [List File Categories](/api-reference/file-category/list-file-categories) — added `category_prompt`, `extract_model`
+- **with_detail flag** — pass `with_detail=true` on create/update to get the complete object in the response
+
+### SDK
+
+- Python SDK `fields.update()` and `fields.batch_update()` — added advanced config parameters and clear semantics examples
+
 ## 2026-05-27
 
 **API**

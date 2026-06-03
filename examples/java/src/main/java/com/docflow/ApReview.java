@@ -193,6 +193,175 @@ public class ApReview {
         }
     }
 
+    /**
+     * 批量更新已有字段的配置。
+     *
+     * @param fields 字段更新列表 JSON 数组，每项须含 field_id
+     * @param withDetail 是否返回更新后的完整字段信息
+     */
+    public static JsonArray batchUpdateCategoryFields(
+            String workspaceId, String categoryId,
+            JsonArray fields, boolean withDetail) throws IOException {
+
+        String url = BASE_URL + "/api/app-api/sip/platform/v2/category/fields/batch_update";
+        JsonObject payload = new JsonObject();
+        payload.addProperty("workspace_id", workspaceId);
+        payload.addProperty("category_id",  categoryId);
+        payload.add("fields", fields);
+        payload.addProperty("with_detail", withDetail);
+
+        Request req = new Request.Builder()
+                .url(url).headers(authHeaders())
+                .post(RequestBody.create(GSON.toJson(payload), JSON_TYPE))
+                .build();
+
+        try (Response resp = HTTP.newCall(req).execute()) {
+            JsonObject data = checkResponse(resp.body().string(), "批量更新字段");
+            System.out.println("  批量更新字段成功  count=" + fields.size());
+            return data.has("result") && !data.get("result").isJsonNull()
+                    ? data.getAsJsonArray("result") : null;
+        }
+    }
+
+    /**
+     * 批量新增表格，支持在每个表格中内嵌 fields 一站式创建表格字段。
+     *
+     * @param tables 表格列表 JSON 数组
+     * @param withDetail 是否返回完整详情（含字段列表）
+     */
+    public static JsonArray batchAddCategoryTables(
+            String workspaceId, String categoryId,
+            JsonArray tables, boolean withDetail) throws IOException {
+
+        String url = BASE_URL + "/api/app-api/sip/platform/v2/category/tables/batch_add";
+        JsonObject payload = new JsonObject();
+        payload.addProperty("workspace_id", workspaceId);
+        payload.addProperty("category_id",  categoryId);
+        payload.add("tables", tables);
+        payload.addProperty("with_detail", withDetail);
+
+        Request req = new Request.Builder()
+                .url(url).headers(authHeaders())
+                .post(RequestBody.create(GSON.toJson(payload), JSON_TYPE))
+                .build();
+
+        try (Response resp = HTTP.newCall(req).execute()) {
+            JsonObject data = checkResponse(resp.body().string(), "批量新增表格");
+            JsonArray result = data.getAsJsonArray("result");
+            List<String> tableIds = new ArrayList<>();
+            for (JsonElement e : result) {
+                tableIds.add(e.getAsJsonObject().get("table_id").getAsString());
+            }
+            System.out.println("  批量新增表格成功  count=" + tables.size() + "  table_ids=" + tableIds);
+            return result;
+        }
+    }
+
+    /**
+     * 批量更新表格配置。
+     *
+     * @param tables 表格更新列表 JSON 数组，每项须含 table_id
+     * @param withDetail 是否返回更新后的完整信息
+     */
+    public static JsonArray batchUpdateCategoryTables(
+            String workspaceId, String categoryId,
+            JsonArray tables, boolean withDetail) throws IOException {
+
+        String url = BASE_URL + "/api/app-api/sip/platform/v2/category/tables/batch_update";
+        JsonObject payload = new JsonObject();
+        payload.addProperty("workspace_id", workspaceId);
+        payload.addProperty("category_id",  categoryId);
+        payload.add("tables", tables);
+        payload.addProperty("with_detail", withDetail);
+
+        Request req = new Request.Builder()
+                .url(url).headers(authHeaders())
+                .post(RequestBody.create(GSON.toJson(payload), JSON_TYPE))
+                .build();
+
+        try (Response resp = HTTP.newCall(req).execute()) {
+            JsonObject data = checkResponse(resp.body().string(), "批量更新表格");
+            System.out.println("  批量更新表格成功  count=" + tables.size());
+            return data.has("result") && !data.get("result").isJsonNull()
+                    ? data.getAsJsonArray("result") : null;
+        }
+    }
+
+    /**
+     * 为指定类别批量上传样本文件（最多 20 个）。
+     *
+     * @param filePaths 样本文件路径列表
+     */
+    public static JsonObject batchUploadCategorySamples(
+            String workspaceId, String categoryId,
+            List<String> filePaths) throws IOException {
+
+        String url = BASE_URL + "/api/app-api/sip/platform/v2/category/sample/batch_upload";
+        MultipartBody.Builder bodyBuilder = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("workspace_id", workspaceId)
+                .addFormDataPart("category_id",  categoryId);
+
+        for (String path : filePaths) {
+            File f = new File(path);
+            bodyBuilder.addFormDataPart("files", f.getName(),
+                    RequestBody.create(f, MediaType.get(mimeType(f.getName()))));
+        }
+
+        Request req = new Request.Builder()
+                .url(url).headers(authHeaders())
+                .post(bodyBuilder.build())
+                .build();
+
+        OkHttpClient longHttp = HTTP.newBuilder()
+                .readTimeout(120, TimeUnit.SECONDS).build();
+        try (Response resp = longHttp.newCall(req).execute()) {
+            JsonObject data = checkResponse(resp.body().string(), "批量上传样本");
+            System.out.println("  批量上传样本成功  count=" + filePaths.size());
+            return data.has("result") ? data.getAsJsonObject("result") : new JsonObject();
+        }
+    }
+
+    /**
+     * 批量下载样本文件，打包为 ZIP。不传 sampleIds 时下载全部样本。
+     *
+     * @param sampleIds 要下载的样本 ID 列表（可选，传 null 下载全部）
+     * @param savePath  ZIP 保存路径
+     * @return 保存路径
+     */
+    public static String batchDownloadCategorySamples(
+            String workspaceId, String categoryId,
+            List<String> sampleIds, String savePath) throws IOException {
+
+        String url = BASE_URL + "/api/app-api/sip/platform/v2/category/sample/batch_download";
+        JsonObject payload = new JsonObject();
+        payload.addProperty("workspace_id", workspaceId);
+        payload.addProperty("category_id",  categoryId);
+        if (sampleIds != null && !sampleIds.isEmpty()) {
+            JsonArray ids = new JsonArray();
+            sampleIds.forEach(ids::add);
+            payload.add("sample_ids", ids);
+        }
+
+        Request req = new Request.Builder()
+                .url(url).headers(authHeaders())
+                .post(RequestBody.create(GSON.toJson(payload), JSON_TYPE))
+                .build();
+
+        OkHttpClient longHttp = HTTP.newBuilder()
+                .readTimeout(120, TimeUnit.SECONDS).build();
+        try (Response resp = longHttp.newCall(req).execute()) {
+            if (resp.code() != 200) {
+                throw new RuntimeException("批量下载样本失败: HTTP " + resp.code());
+            }
+            byte[] bytes = resp.body().bytes();
+            java.nio.file.Files.write(java.nio.file.Paths.get(savePath), bytes);
+            System.out.println("  批量下载样本成功  save_path=" + savePath
+                    + "  size=" + bytes.length + " bytes");
+            return savePath;
+        }
+    }
+
     // ============================================================
     // 步骤 3：上传待处理文件
     // REST API: POST /api/app-api/sip/platform/v2/file/upload
@@ -533,8 +702,34 @@ public class ApReview {
                         field("采购单价"), field("税率"), field("乙方税号"),
                         field("采购物料/服务")
                 ), "");
-        batchAddCategoryFields(workspaceId, contractId, "-1",
+        List<String> contractFieldIds = batchAddCategoryFields(workspaceId, contractId, "-1",
                 Arrays.asList("产品型号", "产品说明", "单价", "数量", "金额"));
+
+        // 批量更新字段：为刚创建的表格字段补充描述
+        JsonArray updateFields = new JsonArray();
+        JsonObject uf0 = new JsonObject(); uf0.addProperty("field_id", contractFieldIds.get(0)); uf0.addProperty("description", "产品的具体型号"); updateFields.add(uf0);
+        JsonObject uf1 = new JsonObject(); uf1.addProperty("field_id", contractFieldIds.get(1)); uf1.addProperty("description", "产品的详细说明"); updateFields.add(uf1);
+        JsonObject uf2 = new JsonObject(); uf2.addProperty("field_id", contractFieldIds.get(2)); uf2.addProperty("description", "产品单价（含税）"); updateFields.add(uf2);
+        JsonObject uf3 = new JsonObject(); uf3.addProperty("field_id", contractFieldIds.get(3)); uf3.addProperty("description", "采购数量"); updateFields.add(uf3);
+        JsonObject uf4 = new JsonObject(); uf4.addProperty("field_id", contractFieldIds.get(4)); uf4.addProperty("description", "行金额小计"); updateFields.add(uf4);
+        batchUpdateCategoryFields(workspaceId, contractId, updateFields, true);
+
+        // 批量新增表格（一站式创建表格 + 内嵌字段）
+        JsonArray tables = new JsonArray();
+        JsonObject table = new JsonObject();
+        table.addProperty("name", "付款计划");
+        table.addProperty("prompt", "抽取合同中的分期付款安排");
+        JsonArray tableFields = new JsonArray();
+        JsonObject tf0 = new JsonObject(); tf0.addProperty("name", "付款节点"); tableFields.add(tf0);
+        JsonObject tf1 = new JsonObject(); tf1.addProperty("name", "付款比例"); tableFields.add(tf1);
+        JsonObject tf2 = new JsonObject(); tf2.addProperty("name", "付款金额"); tableFields.add(tf2);
+        table.add("fields", tableFields);
+        tables.add(table);
+        batchAddCategoryTables(workspaceId, contractId, tables, true);
+
+        // 批量上传额外样本文件
+        batchUploadCategorySamples(workspaceId, contractId,
+                Arrays.asList(SAMPLE_DIR + "/sample_contract.pdf"));
 
         // 2.3 入库单
         String inboundId = createCategory(

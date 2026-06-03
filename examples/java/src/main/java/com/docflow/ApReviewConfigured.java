@@ -80,6 +80,269 @@ public class ApReviewConfigured {
         return "application/octet-stream";
     }
 
+    // ============================================================
+    // 批量追加字段
+    // REST API: POST /api/app-api/sip/platform/v2/category/fields/batch_add
+    // ============================================================
+
+    /**
+     * 在已有类别中批量追加字段。
+     *
+     * @param tableId    若要创建表格字段，传入 "-1" 表示默认表格；否则传 null。
+     * @param fieldNames 字段名列表
+     * @return field_ids 列表
+     */
+    public static List<String> batchAddCategoryFields(
+            String workspaceId,
+            String categoryId,
+            String tableId,
+            List<String> fieldNames) throws IOException {
+
+        String url = BASE_URL + "/api/app-api/sip/platform/v2/category/fields/batch_add";
+        JsonObject payload = new JsonObject();
+        payload.addProperty("workspace_id", workspaceId);
+        payload.addProperty("category_id",  categoryId);
+        if (tableId != null && !tableId.isEmpty()) {
+            payload.addProperty("table_id", tableId);
+        }
+        JsonArray fieldsArr = new JsonArray();
+        for (String fn : fieldNames) {
+            JsonObject f = new JsonObject();
+            f.addProperty("name", fn);
+            fieldsArr.add(f);
+        }
+        payload.add("fields", fieldsArr);
+
+        Request req = new Request.Builder()
+                .url(url)
+                .headers(authHeaders())
+                .post(RequestBody.create(GSON.toJson(payload), JSON_TYPE))
+                .build();
+
+        try (Response resp = HTTP.newCall(req).execute()) {
+            JsonObject data = checkResponse(resp.body().string(), "批量追加字段");
+            JsonArray resultArr = data.getAsJsonArray("result");
+            List<String> fieldIds = new ArrayList<>();
+            for (JsonElement e : resultArr) {
+                fieldIds.add(e.getAsJsonObject().get("field_id").getAsString());
+            }
+            System.out.println("  批量追加字段成功  count=" + fieldNames.size() + "  field_ids=" + fieldIds);
+            return fieldIds;
+        }
+    }
+
+    // ============================================================
+    // 批量更新字段
+    // REST API: POST /api/app-api/sip/platform/v2/category/fields/batch_update
+    // ============================================================
+
+    /**
+     * 批量更新已有字段的配置。
+     *
+     * @param fields     字段更新列表，每项须含 field_id 及要更新的属性
+     * @param withDetail 是否返回更新后的完整字段信息
+     * @return 更新后的字段列表（withDetail=true 时）或 null
+     */
+    public static JsonArray batchUpdateCategoryFields(
+            String workspaceId,
+            String categoryId,
+            JsonArray fields,
+            boolean withDetail) throws IOException {
+
+        String url = BASE_URL + "/api/app-api/sip/platform/v2/category/fields/batch_update";
+        JsonObject payload = new JsonObject();
+        payload.addProperty("workspace_id", workspaceId);
+        payload.addProperty("category_id",  categoryId);
+        payload.add("fields", fields);
+        payload.addProperty("with_detail", withDetail);
+
+        Request req = new Request.Builder()
+                .url(url)
+                .headers(authHeaders())
+                .post(RequestBody.create(GSON.toJson(payload), JSON_TYPE))
+                .build();
+
+        try (Response resp = HTTP.newCall(req).execute()) {
+            JsonObject data = checkResponse(resp.body().string(), "批量更新字段");
+            System.out.println("  批量更新字段成功  count=" + fields.size());
+            return data.has("result") && !data.get("result").isJsonNull()
+                    ? data.getAsJsonArray("result") : null;
+        }
+    }
+
+    // ============================================================
+    // 批量新增表格（支持内嵌字段一站式创建）
+    // REST API: POST /api/app-api/sip/platform/v2/category/tables/batch_add
+    // ============================================================
+
+    /**
+     * 批量新增表格，支持在每个表格中内嵌 fields 一站式创建表格字段。
+     *
+     * @param tables     表格列表 JSON 数组
+     * @param withDetail 是否返回完整详情（含字段列表）
+     * @return 创建结果列表
+     */
+    public static JsonArray batchAddCategoryTables(
+            String workspaceId,
+            String categoryId,
+            JsonArray tables,
+            boolean withDetail) throws IOException {
+
+        String url = BASE_URL + "/api/app-api/sip/platform/v2/category/tables/batch_add";
+        JsonObject payload = new JsonObject();
+        payload.addProperty("workspace_id", workspaceId);
+        payload.addProperty("category_id",  categoryId);
+        payload.add("tables", tables);
+        payload.addProperty("with_detail", withDetail);
+
+        Request req = new Request.Builder()
+                .url(url)
+                .headers(authHeaders())
+                .post(RequestBody.create(GSON.toJson(payload), JSON_TYPE))
+                .build();
+
+        try (Response resp = HTTP.newCall(req).execute()) {
+            JsonObject data = checkResponse(resp.body().string(), "批量新增表格");
+            JsonArray result = data.getAsJsonArray("result");
+            List<String> tableIds = new ArrayList<>();
+            for (JsonElement e : result) {
+                tableIds.add(e.getAsJsonObject().get("table_id").getAsString());
+            }
+            System.out.println("  批量新增表格成功  count=" + tables.size() + "  table_ids=" + tableIds);
+            return result;
+        }
+    }
+
+    // ============================================================
+    // 批量更新表格
+    // REST API: POST /api/app-api/sip/platform/v2/category/tables/batch_update
+    // ============================================================
+
+    /**
+     * 批量更新表格配置。
+     *
+     * @param tables     表格更新列表 JSON 数组，每项须含 table_id
+     * @param withDetail 是否返回更新后的完整信息
+     * @return 更新后的表格列表（withDetail=true 时）或 null
+     */
+    public static JsonArray batchUpdateCategoryTables(
+            String workspaceId,
+            String categoryId,
+            JsonArray tables,
+            boolean withDetail) throws IOException {
+
+        String url = BASE_URL + "/api/app-api/sip/platform/v2/category/tables/batch_update";
+        JsonObject payload = new JsonObject();
+        payload.addProperty("workspace_id", workspaceId);
+        payload.addProperty("category_id",  categoryId);
+        payload.add("tables", tables);
+        payload.addProperty("with_detail", withDetail);
+
+        Request req = new Request.Builder()
+                .url(url)
+                .headers(authHeaders())
+                .post(RequestBody.create(GSON.toJson(payload), JSON_TYPE))
+                .build();
+
+        try (Response resp = HTTP.newCall(req).execute()) {
+            JsonObject data = checkResponse(resp.body().string(), "批量更新表格");
+            System.out.println("  批量更新表格成功  count=" + tables.size());
+            return data.has("result") && !data.get("result").isJsonNull()
+                    ? data.getAsJsonArray("result") : null;
+        }
+    }
+
+    // ============================================================
+    // 批量上传样本
+    // REST API: POST /api/app-api/sip/platform/v2/category/sample/batch_upload
+    // ============================================================
+
+    /**
+     * 为指定类别批量上传样本文件（最多 20 个）。
+     *
+     * @param filePaths 样本文件路径列表
+     * @return 上传结果 JSON 对象
+     */
+    public static JsonObject batchUploadCategorySamples(
+            String workspaceId,
+            String categoryId,
+            List<String> filePaths) throws IOException {
+
+        String url = BASE_URL + "/api/app-api/sip/platform/v2/category/sample/batch_upload";
+        MultipartBody.Builder bodyBuilder = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("workspace_id", workspaceId)
+                .addFormDataPart("category_id",  categoryId);
+
+        for (String path : filePaths) {
+            File f = new File(path);
+            bodyBuilder.addFormDataPart("files", f.getName(),
+                    RequestBody.create(f, MediaType.get(mimeType(f.getName()))));
+        }
+
+        Request req = new Request.Builder()
+                .url(url)
+                .headers(authHeaders())
+                .post(bodyBuilder.build())
+                .build();
+
+        OkHttpClient longHttp = HTTP.newBuilder()
+                .readTimeout(120, TimeUnit.SECONDS).build();
+        try (Response resp = longHttp.newCall(req).execute()) {
+            JsonObject data = checkResponse(resp.body().string(), "批量上传样本");
+            System.out.println("  批量上传样本成功  count=" + filePaths.size());
+            return data.has("result") ? data.getAsJsonObject("result") : new JsonObject();
+        }
+    }
+
+    // ============================================================
+    // 批量下载样本（ZIP）
+    // REST API: POST /api/app-api/sip/platform/v2/category/sample/batch_download
+    // ============================================================
+
+    /**
+     * 批量下载样本文件，打包为 ZIP。不传 sampleIds 时下载全部样本。
+     *
+     * @param sampleIds 要下载的样本 ID 列表（可选，传 null 下载全部）
+     * @param savePath  ZIP 保存路径
+     * @return 保存路径
+     */
+    public static String batchDownloadCategorySamples(
+            String workspaceId,
+            String categoryId,
+            List<String> sampleIds,
+            String savePath) throws IOException {
+
+        String url = BASE_URL + "/api/app-api/sip/platform/v2/category/sample/batch_download";
+        JsonObject payload = new JsonObject();
+        payload.addProperty("workspace_id", workspaceId);
+        payload.addProperty("category_id",  categoryId);
+        if (sampleIds != null && !sampleIds.isEmpty()) {
+            JsonArray ids = new JsonArray();
+            sampleIds.forEach(ids::add);
+            payload.add("sample_ids", ids);
+        }
+
+        Request req = new Request.Builder()
+                .url(url)
+                .headers(authHeaders())
+                .post(RequestBody.create(GSON.toJson(payload), JSON_TYPE))
+                .build();
+
+        OkHttpClient longHttp = HTTP.newBuilder()
+                .readTimeout(120, TimeUnit.SECONDS).build();
+        try (Response resp = longHttp.newCall(req).execute()) {
+            if (resp.code() != 200) {
+                throw new RuntimeException("批量下载样本失败: HTTP " + resp.code());
+            }
+            byte[] bytes = resp.body().bytes();
+            java.nio.file.Files.write(java.nio.file.Paths.get(savePath), bytes);
+            System.out.println("  批量下载样本成功  save_path=" + savePath
+                    + "  size=" + bytes.length + " bytes");
+            return savePath;
+        }
+    }
+
     public static void displayResult(JsonObject fileResult) {
         System.out.println("\n" + "=".repeat(60));
         System.out.println("文件名   : " + str(fileResult, "name"));

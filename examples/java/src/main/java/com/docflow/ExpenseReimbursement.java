@@ -178,33 +178,40 @@ public class ExpenseReimbursement {
     }
 
     // ============================================================
-    // 步骤 2b：追加字段（可选）
-    // REST API: POST /api/app-api/sip/platform/v2/category/fields/add
+    // 步骤 2b：批量追加字段（可选）
+    // REST API: POST /api/app-api/sip/platform/v2/category/fields/batch_add
     // ============================================================
 
     /**
-     * 在已有类别中追加一个字段。
+     * 在已有类别中批量追加字段。
      *
      * <p>如需创建「表格字段」，先通过 category/fields/list 接口获取 table_id，
      * 再传入 tableId 参数；传 null 则创建普通字段。
      *
-     * @return field_id
+     * @param fieldNames 字段名列表
+     * @return field_ids 列表
      */
-    public static String addCategoryField(
+    public static List<String> batchAddCategoryFields(
             String workspaceId,
             String categoryId,
-            String fieldName,
-            String tableId) throws IOException {
+            String tableId,
+            List<String> fieldNames) throws IOException {
 
-        String url = BASE_URL + "/api/app-api/sip/platform/v2/category/fields/add";
+        String url = BASE_URL + "/api/app-api/sip/platform/v2/category/fields/batch_add";
 
         JsonObject payload = new JsonObject();
         payload.addProperty("workspace_id", workspaceId);
         payload.addProperty("category_id",  categoryId);
-        payload.addProperty("name",         fieldName);
         if (tableId != null && !tableId.isEmpty()) {
             payload.addProperty("table_id", tableId);
         }
+        JsonArray fieldsArr = new JsonArray();
+        for (String fn : fieldNames) {
+            JsonObject f = new JsonObject();
+            f.addProperty("name", fn);
+            fieldsArr.add(f);
+        }
+        payload.add("fields", fieldsArr);
 
         Request req = new Request.Builder()
                 .url(url)
@@ -213,10 +220,14 @@ public class ExpenseReimbursement {
                 .build();
 
         try (Response resp = HTTP.newCall(req).execute()) {
-            JsonObject data = checkResponse(resp.body().string(), "追加字段[" + fieldName + "]");
-            String fieldId = data.getAsJsonObject("result").get("field_id").getAsString();
-            System.out.println("  追加字段成功  name=" + fieldName + "  field_id=" + fieldId);
-            return fieldId;
+            JsonObject data = checkResponse(resp.body().string(), "批量追加字段");
+            JsonArray resultArr = data.getAsJsonArray("result");
+            List<String> fieldIds = new ArrayList<>();
+            for (JsonElement e : resultArr) {
+                fieldIds.add(e.getAsJsonObject().get("field_id").getAsString());
+            }
+            System.out.println("  批量追加字段成功  count=" + fieldNames.size() + "  field_ids=" + fieldIds);
+            return fieldIds;
         }
     }
 
@@ -651,10 +662,9 @@ public class ExpenseReimbursement {
                 ),
                 ""
         );
-        // 追加表格字段（传 "-1" 自动归入默认表格）
-        for (String fn : new String[]{"日期", "费用类型", "金额", "备注"}) {
-            addCategoryField(workspaceId, hotelId, fn, "-1");
-        }
+        // 批量追加表格字段（传 "-1" 自动归入默认表格）
+        batchAddCategoryFields(workspaceId, hotelId, "-1",
+                Arrays.asList("日期", "费用类型", "金额", "备注"));
 
         // 2.3 支付记录
         String paymentId = createCategory(

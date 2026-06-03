@@ -137,39 +137,41 @@ def create_category(
 
 
 # ============================================================
-# 步骤 2b：在已有类别中追加字段（可选）
-# REST API: POST /api/app-api/sip/platform/v2/category/fields/add
+# 步骤 2b：在已有类别中批量追加字段（可选）
+# REST API: POST /api/app-api/sip/platform/v2/category/fields/batch_add
 # ============================================================
 
-def add_category_field(
+def batch_add_category_fields(
     workspace_id: str,
     category_id: str,
-    field_name: str,
+    fields: list,
     table_id: str = None,
-) -> str:
+) -> list:
     """
-    在已有类别中追加一个字段。
+    在已有类别中批量追加字段。
 
     Args:
+        fields:   字段列表，格式为 [{"name": "字段名"}, ...]
         table_id: 若要创建「表格字段」，先通过 category/fields/list 获取
                   table_id 后传入；不传则创建普通字段。
 
     Returns:
-        field_id
+        field_ids 列表
     """
-    url = f"{BASE_URL}/api/app-api/sip/platform/v2/category/fields/add"
+    url = f"{BASE_URL}/api/app-api/sip/platform/v2/category/fields/batch_add"
     payload = {
         "workspace_id": workspace_id,
         "category_id":  category_id,
-        "name":         field_name,
+        "fields":       fields,
     }
-    if table_id:
-        payload["table_id"] = table_id
+    if table_id is not None:
+        payload["table_id"] = str(table_id)
     resp = requests.post(url, json=payload, headers=_headers(), timeout=30)
-    data = _check(resp, f"追加字段[{field_name}]")
-    field_id = data["result"]["field_id"]
-    print(f"  追加字段成功  name={field_name}  field_id={field_id}")
-    return field_id
+    data = _check(resp, "批量追加字段")
+    result = data["result"]
+    field_ids = [item["field_id"] for item in result]
+    print(f"  批量追加字段成功  count={len(fields)}  field_ids={field_ids}")
+    return field_ids
 
 
 # ============================================================
@@ -489,11 +491,14 @@ def main():
         ],
         category_prompt="",
     )
-    # 追加表格字段
+    # 批量追加表格字段
     # 说明：如需将字段挂载到特定表格下，先调用 category/fields/list 取得
     #   table_id，再作为 table_id 参数传入；传 -1 则自动归入默认表格。
-    for field_name in ["日期", "费用类型", "金额", "备注"]:
-        add_category_field(workspace_id, hotel_id, field_name, -1)
+    batch_add_category_fields(
+        workspace_id, hotel_id,
+        fields=[{"name": n} for n in ["日期", "费用类型", "金额", "备注"]],
+        table_id="-1",
+    )
 
     # 2.3 支付记录
     payment_id = create_category(

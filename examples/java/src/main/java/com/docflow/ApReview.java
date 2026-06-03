@@ -151,21 +151,30 @@ public class ApReview {
     }
 
     /**
-     * 在已有类别中追加一个字段。
+     * 在已有类别中批量追加字段。
      *
-     * @param tableId 若要创建表格字段，传入 "-1" 表示默认表格；否则传 null。
+     * @param tableId    若要创建表格字段，传入 "-1" 表示默认表格；否则传 null。
+     * @param fieldNames 字段名列表
+     * @return field_ids 列表
      */
-    public static String addCategoryField(
-            String workspaceId, String categoryId, String fieldName, String tableId) throws IOException {
+    public static List<String> batchAddCategoryFields(
+            String workspaceId, String categoryId, String tableId,
+            List<String> fieldNames) throws IOException {
 
-        String url = BASE_URL + "/api/app-api/sip/platform/v2/category/fields/add";
+        String url = BASE_URL + "/api/app-api/sip/platform/v2/category/fields/batch_add";
         JsonObject payload = new JsonObject();
         payload.addProperty("workspace_id", workspaceId);
         payload.addProperty("category_id",  categoryId);
-        payload.addProperty("name",         fieldName);
         if (tableId != null && !tableId.isEmpty()) {
             payload.addProperty("table_id", tableId);
         }
+        JsonArray fieldsArr = new JsonArray();
+        for (String fn : fieldNames) {
+            JsonObject f = new JsonObject();
+            f.addProperty("name", fn);
+            fieldsArr.add(f);
+        }
+        payload.add("fields", fieldsArr);
 
         Request req = new Request.Builder()
                 .url(url).headers(authHeaders())
@@ -173,10 +182,14 @@ public class ApReview {
                 .build();
 
         try (Response resp = HTTP.newCall(req).execute()) {
-            JsonObject data = checkResponse(resp.body().string(), "追加字段[" + fieldName + "]");
-            String fieldId = data.getAsJsonObject("result").get("field_id").getAsString();
-            System.out.println("  追加字段成功  name=" + fieldName + "  field_id=" + fieldId);
-            return fieldId;
+            JsonObject data = checkResponse(resp.body().string(), "批量追加字段");
+            JsonArray resultArr = data.getAsJsonArray("result");
+            List<String> fieldIds = new ArrayList<>();
+            for (JsonElement e : resultArr) {
+                fieldIds.add(e.getAsJsonObject().get("field_id").getAsString());
+            }
+            System.out.println("  批量追加字段成功  count=" + fieldNames.size() + "  field_ids=" + fieldIds);
+            return fieldIds;
         }
     }
 
@@ -505,9 +518,8 @@ public class ApReview {
                         field("购买方纳税人识别号"), field("发票备注")
                 ),
                 "增值税电子发票（数电票），含发票号码、开票日期、购买方、销售方及价税合计等字段");
-        for (String fn : new String[]{"商品名称", "规格型号", "单位", "数量", "单价", "金额", "税率", "税额"}) {
-            addCategoryField(workspaceId, invoiceId, fn, "-1");
-        }
+        batchAddCategoryFields(workspaceId, invoiceId, "-1",
+                Arrays.asList("商品名称", "规格型号", "单位", "数量", "单价", "金额", "税率", "税额"));
 
         // 2.2 采购合同
         String contractId = createCategory(
@@ -521,9 +533,8 @@ public class ApReview {
                         field("采购单价"), field("税率"), field("乙方税号"),
                         field("采购物料/服务")
                 ), "");
-        for (String fn : new String[]{"产品型号", "产品说明", "单价", "数量", "金额"}) {
-            addCategoryField(workspaceId, contractId, fn, "-1");
-        }
+        batchAddCategoryFields(workspaceId, contractId, "-1",
+                Arrays.asList("产品型号", "产品说明", "单价", "数量", "金额"));
 
         // 2.3 入库单
         String inboundId = createCategory(
@@ -537,12 +548,10 @@ public class ApReview {
                         field("质检确认日期"), field("供应商送货人"), field("供应商送货人日期"),
                         field("供应商税号")
                 ), "");
-        for (String fn : new String[]{
-                "收货入库明细-物料编码", "收货入库明细-物料描述", "收货入库明细-单位",
-                "收货入库明细-应收", "收货入库明细-实收", "收货入库明细-差异",
-                "收货入库明细-质检", "收货入库明细-签收人"}) {
-            addCategoryField(workspaceId, inboundId, fn, "-1");
-        }
+        batchAddCategoryFields(workspaceId, inboundId, "-1",
+                Arrays.asList("收货入库明细-物料编码", "收货入库明细-物料描述", "收货入库明细-单位",
+                        "收货入库明细-应收", "收货入库明细-实收", "收货入库明细-差异",
+                        "收货入库明细-质检", "收货入库明细-签收人"));
 
         // 2.4 验收单
         String acceptanceId = createCategory(

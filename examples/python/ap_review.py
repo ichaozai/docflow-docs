@@ -134,35 +134,37 @@ def create_category(
     return category_id
 
 
-def add_category_field(
+def batch_add_category_fields(
     workspace_id: str,
     category_id: str,
-    field_name: str,
+    fields: list,
     table_id: str = None,
-) -> str:
+) -> list:
     """
-    在已有类别中追加一个字段。
+    在已有类别中批量追加字段。
 
     Args:
+        fields:   字段列表，格式为 [{"name": "字段名"}, ...]
         table_id: 若要创建表格字段，传入 table_id（-1 表示默认表格）；
                   不传则创建普通基本信息字段。
 
     Returns:
-        field_id
+        field_ids 列表
     """
-    url = f"{BASE_URL}/api/app-api/sip/platform/v2/category/fields/add"
+    url = f"{BASE_URL}/api/app-api/sip/platform/v2/category/fields/batch_add"
     payload = {
         "workspace_id": workspace_id,
         "category_id":  category_id,
-        "name":         field_name,
+        "fields":       fields,
     }
     if table_id is not None:
-        payload["table_id"] = table_id
+        payload["table_id"] = str(table_id)
     resp = requests.post(url, json=payload, headers=_headers(), timeout=30)
-    data = _check(resp, f"追加字段[{field_name}]")
-    field_id = data["result"]["field_id"]
-    print(f"  追加字段成功  name={field_name}  field_id={field_id}")
-    return field_id
+    data = _check(resp, "批量追加字段")
+    result = data["result"]
+    field_ids = [item["field_id"] for item in result]
+    print(f"  批量追加字段成功  count={len(fields)}  field_ids={field_ids}")
+    return field_ids
 
 
 # ============================================================
@@ -463,9 +465,12 @@ def main():
         ],
         category_prompt="增值税电子发票（数电票），含发票号码、开票日期、购买方、销售方及价税合计等字段",
     )
-    # 追加明细表格字段
-    for field_name in ["商品名称", "规格型号", "单位", "数量", "单价", "金额", "税率", "税额"]:
-        add_category_field(workspace_id, invoice_id, field_name, table_id=-1)
+    # 批量追加明细表格字段
+    batch_add_category_fields(
+        workspace_id, invoice_id,
+        fields=[{"name": n} for n in ["商品名称", "规格型号", "单位", "数量", "单价", "金额", "税率", "税额"]],
+        table_id="-1",
+    )
 
     # 2.2 采购合同（基本信息字段 + 表格字段）
     contract_id = create_category(
@@ -481,9 +486,12 @@ def main():
             {"name": "采购物料/服务"},
         ],
     )
-    # 追加表格字段（table_id=-1 表示默认表格）
-    for field_name in ["产品型号", "产品说明", "单价", "数量", "金额"]:
-        add_category_field(workspace_id, contract_id, field_name, table_id=-1)
+    # 批量追加表格字段（table_id="-1" 表示默认表格）
+    batch_add_category_fields(
+        workspace_id, contract_id,
+        fields=[{"name": n} for n in ["产品型号", "产品说明", "单价", "数量", "金额"]],
+        table_id="-1",
+    )
 
     # 2.3 入库单（基本信息字段 + 表格字段）
     inbound_id = create_category(
@@ -499,12 +507,15 @@ def main():
             {"name": "供应商税号"},
         ],
     )
-    for field_name in [
-        "收货入库明细-物料编码", "收货入库明细-物料描述", "收货入库明细-单位",
-        "收货入库明细-应收",    "收货入库明细-实收",    "收货入库明细-差异",
-        "收货入库明细-质检",    "收货入库明细-签收人",
-    ]:
-        add_category_field(workspace_id, inbound_id, field_name, table_id=-1)
+    batch_add_category_fields(
+        workspace_id, inbound_id,
+        fields=[{"name": n} for n in [
+            "收货入库明细-物料编码", "收货入库明细-物料描述", "收货入库明细-单位",
+            "收货入库明细-应收",    "收货入库明细-实收",    "收货入库明细-差异",
+            "收货入库明细-质检",    "收货入库明细-签收人",
+        ]],
+        table_id="-1",
+    )
 
     # 2.4 验收单（仅基本信息字段）
     acceptance_id = create_category(

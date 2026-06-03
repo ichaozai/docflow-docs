@@ -113,7 +113,7 @@ else:
 
 ## 新增字段
 
-在指定文件类别下新增一个字段，支持新增普通字段和表格字段：
+在指定文件类别下批量新增字段，支持新增普通字段和表格字段：
 
 ### 新增普通字段
 
@@ -127,15 +127,19 @@ curl -X POST \
   -d '{
     "workspace_id": "<your-workspace-id>",
     "category_id": "<category-id>",
-    "name": "发票号码",
-    "description": "发票号码描述",
-    "prompt": "请抽取发票号码",
-    "use_prompt": true,
-    "alias": ["Invoice Number", "编号"],
-    "identity": "invoice_number",
-    "multi_value": false
+    "fields": [
+      {
+        "name": "发票号码",
+        "description": "发票号码描述",
+        "prompt": "请抽取发票号码",
+        "use_prompt": true,
+        "alias": ["Invoice Number", "编号"],
+        "identity": "invoice_number",
+        "multi_value": false
+      }
+    ]
   }' \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/category/fields/add"
+  "https://docflow.textin.com/api/app-api/sip/platform/v2/category/fields/batch_add"
 ```
 
 ```python Python icon=python expandable lines
@@ -147,18 +151,22 @@ workspace_id = "<your-workspace-id>"
 category_id = "<category-id>"
 
 host = "https://docflow.textin.com"
-url = "/api/app-api/sip/platform/v2/category/fields/add"
+url = "/api/app-api/sip/platform/v2/category/fields/batch_add"
 
 payload = {
     "workspace_id": workspace_id,
     "category_id": category_id,
-    "name": "发票号码",
-    "description": "发票号码描述",
-    "prompt": "请抽取发票号码",
-    "use_prompt": True,
-    "alias": ["Invoice Number", "编号"],
-    "identity": "invoice_number",
-    "multi_value": False
+    "fields": [
+        {
+            "name": "发票号码",
+            "description": "发票号码描述",
+            "prompt": "请抽取发票号码",
+            "use_prompt": True,
+            "alias": ["Invoice Number", "编号"],
+            "identity": "invoice_number",
+            "multi_value": False
+        }
+    ]
 }
 
 resp = requests.post(
@@ -173,8 +181,8 @@ resp = requests.post(
 
 result = resp.json()
 if result.get("code") == 200:
-    field_id = result.get("result", {}).get("field_id")
-    print(f"字段创建成功，ID: {field_id}")
+    field_ids = result.get("result", {}).get("field_ids", [])
+    print(f"字段创建成功，IDs: {field_ids}")
 else:
     print(f"创建失败: {result.get('msg')}")
 ```
@@ -196,10 +204,14 @@ curl -X POST \
     "workspace_id": "<your-workspace-id>",
     "category_id": "<category-id>",
     "table_id": "<table-id>",
-    "name": "单价",
-    "description": "商品单价"
+    "fields": [
+      {
+        "name": "单价",
+        "description": "商品单价"
+      }
+    ]
   }' \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/category/fields/add"
+  "https://docflow.textin.com/api/app-api/sip/platform/v2/category/fields/batch_add"
 ```
 
 ```python Python icon=python expandable lines
@@ -212,14 +224,18 @@ category_id = "<category-id>"
 table_id = "<table-id>"
 
 host = "https://docflow.textin.com"
-url = "/api/app-api/sip/platform/v2/category/fields/add"
+url = "/api/app-api/sip/platform/v2/category/fields/batch_add"
 
 payload = {
     "workspace_id": workspace_id,
     "category_id": category_id,
     "table_id": table_id,  # 指定表格ID，创建表格字段
-    "name": "单价",
-    "description": "商品单价"
+    "fields": [
+        {
+            "name": "单价",
+            "description": "商品单价"
+        }
+    ]
 }
 
 resp = requests.post(
@@ -234,8 +250,8 @@ resp = requests.post(
 
 result = resp.json()
 if result.get("code") == 200:
-    field_id = result.get("result", {}).get("field_id")
-    print(f"表格字段创建成功，ID: {field_id}")
+    field_ids = result.get("result", {}).get("field_ids", [])
+    print(f"表格字段创建成功，IDs: {field_ids}")
 else:
     print(f"创建失败: {result.get('msg')}")
 ```
@@ -246,15 +262,16 @@ else:
 - `workspace_id` (必填): 工作空间 ID
 - `category_id` (必填): 文件类别 ID
 - `table_id` (选填): 表格 ID。不传或为空：创建普通字段；传入表格ID：创建表格字段
-- `name` (必填): 字段名称
-- `description` (选填): 字段描述
-- `prompt` (选填): 语义抽取提示词
-- `use_prompt` (选填): 是否使用语义提示词
-- `alias` (选填): 字段别名数组
-- `identity` (选填): 导出字段名
-- `multi_value` (选填): 是否多值抽取
-- `duplicate_value_distinct` (选填): 是否重复值去重（仅当 multi_value 为 true 时有效）
-- `transform_settings` (选填): 转换配置
+- `fields` (必填): 字段数组，每个元素包含以下属性：
+  - `name` (必填): 字段名称
+  - `description` (选填): 字段描述
+  - `prompt` (选填): 语义抽取提示词
+  - `use_prompt` (选填): 是否使用语义提示词
+  - `alias` (选填): 字段别名数组
+  - `identity` (选填): 导出字段名
+  - `multi_value` (选填): 是否多值抽取
+  - `duplicate_value_distinct` (选填): 是否重复值去重（仅当 multi_value 为 true 时有效）
+  - `transform_settings` (选填): 转换配置
 
 **响应示例：**
 
@@ -263,14 +280,14 @@ else:
   "code": 200,
   "msg": "success",
   "result": {
-    "field_id": "field_new_123"
+    "field_ids": ["field_new_123"]
   }
 }
 ```
 
 ## 更新字段
 
-更新指定字段的信息，支持更新普通字段和表格字段：
+批量更新指定字段的信息，支持更新普通字段和表格字段：
 
 <CodeGroup>
 
@@ -282,12 +299,16 @@ curl -X POST \
   -d '{
     "workspace_id": "<your-workspace-id>",
     "category_id": "<category-id>",
-    "field_id": "<field-id>",
-    "name": "更新后的字段名称",
-    "description": "更新后的描述",
-    "prompt": "更新后的提示词"
+    "fields": [
+      {
+        "field_id": "<field-id>",
+        "name": "更新后的字段名称",
+        "description": "更新后的描述",
+        "prompt": "更新后的提示词"
+      }
+    ]
   }' \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/category/fields/update"
+  "https://docflow.textin.com/api/app-api/sip/platform/v2/category/fields/batch_update"
 ```
 
 ```python Python icon=python expandable lines
@@ -300,15 +321,19 @@ category_id = "<category-id>"
 field_id = "<field-id>"
 
 host = "https://docflow.textin.com"
-url = "/api/app-api/sip/platform/v2/category/fields/update"
+url = "/api/app-api/sip/platform/v2/category/fields/batch_update"
 
 payload = {
     "workspace_id": workspace_id,
     "category_id": category_id,
-    "field_id": field_id,
-    "name": "更新后的字段名称",
-    "description": "更新后的描述",
-    "prompt": "更新后的提示词"
+    "fields": [
+        {
+            "field_id": field_id,
+            "name": "更新后的字段名称",
+            "description": "更新后的描述",
+            "prompt": "更新后的提示词"
+        }
+    ]
 }
 
 resp = requests.post(
@@ -333,9 +358,10 @@ else:
 **请求参数：**
 - `workspace_id` (必填): 工作空间 ID
 - `category_id` (必填): 文件类别 ID
-- `field_id` (必填): 字段 ID
 - `table_id` (选填): 表格 ID。对普通字段可不传；对表格字段需要传入其所属的表格ID
-- 其他参数与创建字段相同
+- `fields` (必填): 字段数组，每个元素包含以下属性：
+  - `field_id` (必填): 字段 ID
+  - 其他属性与创建字段相同（name、description、prompt 等）
 
 <Note>
   更新表格字段时，需要传入 `table_id` 参数指定该字段所属的表格。

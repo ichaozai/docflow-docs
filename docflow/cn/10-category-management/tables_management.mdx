@@ -89,7 +89,7 @@ else:
 
 ## 新增表格
 
-在指定文件类别下新增一个表格：
+在指定文件类别下批量新增表格：
 
 <CodeGroup>
 
@@ -101,11 +101,21 @@ curl -X POST \
   -d '{
     "workspace_id": "<your-workspace-id>",
     "category_id": "<category-id>",
-    "name": "货物明细",
-    "prompt": "请抽取每行的品名、数量和金额",
-    "collect_from_multi_table": true
+    "tables": [
+      {
+        "name": "货物明细",
+        "prompt": "请抽取每行的品名、数量和金额",
+        "collect_from_multi_table": true,
+        "fields": [
+          {"name": "货物名称", "description": "货物或服务名称"},
+          {"name": "数量", "description": "货物数量"},
+          {"name": "单价", "description": "货物单价"},
+          {"name": "金额", "description": "货物金额"}
+        ]
+      }
+    ]
   }' \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/category/tables/add"
+  "https://docflow.textin.com/api/app-api/sip/platform/v2/category/tables/batch_add"
 ```
 
 ```python Python icon=python expandable lines
@@ -117,14 +127,24 @@ workspace_id = "<your-workspace-id>"
 category_id = "<category-id>"
 
 host = "https://docflow.textin.com"
-url = "/api/app-api/sip/platform/v2/category/tables/add"
+url = "/api/app-api/sip/platform/v2/category/tables/batch_add"
 
 payload = {
     "workspace_id": workspace_id,
     "category_id": category_id,
-    "name": "货物明细",
-    "prompt": "请抽取每行的品名、数量和金额",
-    "collect_from_multi_table": True  # 是否合并文档中的多个表格
+    "tables": [
+        {
+            "name": "货物明细",
+            "prompt": "请抽取每行的品名、数量和金额",
+            "collect_from_multi_table": True,  # 是否合并文档中的多个表格
+            "fields": [
+                {"name": "货物名称", "description": "货物或服务名称"},
+                {"name": "数量", "description": "货物数量"},
+                {"name": "单价", "description": "货物单价"},
+                {"name": "金额", "description": "货物金额"}
+            ]
+        }
+    ]
 }
 
 resp = requests.post(
@@ -139,8 +159,8 @@ resp = requests.post(
 
 result = resp.json()
 if result.get("code") == 200:
-    table_id = result.get("result", {}).get("table_id")
-    print(f"表格创建成功，ID: {table_id}")
+    table_ids = result.get("result", {}).get("table_ids", [])
+    print(f"表格创建成功，IDs: {table_ids}")
 else:
     print(f"创建失败: {result.get('msg')}")
 ```
@@ -150,9 +170,11 @@ else:
 **请求参数：**
 - `workspace_id` (必填): 工作空间 ID
 - `category_id` (必填): 文件类别 ID
-- `name` (必填): 表格名称，最大长度 50
-- `prompt` (选填): 表格语义抽取提示词，最大长度 200
-- `collect_from_multi_table` (选填): 是否多表合并，默认为 false
+- `tables` (必填): 表格数组，每个元素包含以下属性：
+  - `name` (必填): 表格名称，最大长度 50
+  - `prompt` (选填): 表格语义抽取提示词，最大长度 200
+  - `collect_from_multi_table` (选填): 是否多表合并，默认为 false
+  - `fields` (选填): 表格字段数组，可在创建表格时直接内嵌字段定义
 
 **响应示例：**
 
@@ -161,7 +183,7 @@ else:
   "code": 200,
   "msg": "success",
   "result": {
-    "table_id": "table_new_789"
+    "table_ids": ["table_new_789"]
   }
 }
 ```
@@ -172,7 +194,7 @@ else:
 
 ## 更新表格
 
-更新指定表格的信息：
+批量更新指定表格的信息：
 
 <CodeGroup>
 
@@ -184,12 +206,16 @@ curl -X POST \
   -d '{
     "workspace_id": "<your-workspace-id>",
     "category_id": "<category-id>",
-    "table_id": "<table-id>",
-    "name": "更新后的表格名称",
-    "prompt": "更新后的提示词",
-    "collect_from_multi_table": true
+    "tables": [
+      {
+        "table_id": "<table-id>",
+        "name": "更新后的表格名称",
+        "prompt": "更新后的提示词",
+        "collect_from_multi_table": true
+      }
+    ]
   }' \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/category/tables/update"
+  "https://docflow.textin.com/api/app-api/sip/platform/v2/category/tables/batch_update"
 ```
 
 ```python Python icon=python expandable lines
@@ -202,15 +228,19 @@ category_id = "<category-id>"
 table_id = "<table-id>"
 
 host = "https://docflow.textin.com"
-url = "/api/app-api/sip/platform/v2/category/tables/update"
+url = "/api/app-api/sip/platform/v2/category/tables/batch_update"
 
 payload = {
     "workspace_id": workspace_id,
     "category_id": category_id,
-    "table_id": table_id,
-    "name": "更新后的表格名称",
-    "prompt": "更新后的提示词",
-    "collect_from_multi_table": True
+    "tables": [
+        {
+            "table_id": table_id,
+            "name": "更新后的表格名称",
+            "prompt": "更新后的提示词",
+            "collect_from_multi_table": True
+        }
+    ]
 }
 
 resp = requests.post(
@@ -235,10 +265,11 @@ else:
 **请求参数：**
 - `workspace_id` (必填): 工作空间 ID
 - `category_id` (必填): 文件类别 ID
-- `table_id` (必填): 表格 ID
-- `name` (选填): 表格名称，最大长度 50
-- `prompt` (选填): 表格语义抽取提示词，最大长度 200
-- `collect_from_multi_table` (必填): 是否多表合并
+- `tables` (必填): 表格数组，每个元素包含以下属性：
+  - `table_id` (必填): 表格 ID
+  - `name` (选填): 表格名称，最大长度 50
+  - `prompt` (选填): 表格语义抽取提示词，最大长度 200
+  - `collect_from_multi_table` (必填): 是否多表合并
 
 ## 删除表格
 
@@ -306,9 +337,9 @@ else:
 
 ## 表格字段管理
 
-创建表格后，需要为表格添加字段来定义表格的列。表格字段的管理请参考[字段管理](./fields_management)文档中的"新增表格字段"部分。
+使用 `tables/batch_add` 接口可以在创建表格时直接内嵌字段定义，无需分步调用。也可以单独通过[字段管理](./fields_management)的批量接口为已有表格添加字段。
 
-### 示例：创建表格并添加字段
+### 示例：一次性创建表格及其字段
 
 ```python Python icon=python expandable
 import requests
@@ -319,50 +350,38 @@ workspace_id = "<your-workspace-id>"
 category_id = "<category-id>"
 host = "https://docflow.textin.com"
 
-# 1. 创建表格
-table_resp = requests.post(
-    url=f"{host}/api/app-api/sip/platform/v2/category/tables/add",
+# 创建表格并内嵌字段（一次调用完成）
+resp = requests.post(
+    url=f"{host}/api/app-api/sip/platform/v2/category/tables/batch_add",
     json={
         "workspace_id": workspace_id,
         "category_id": category_id,
-        "name": "货物明细",
-        "prompt": "请抽取每行的品名、数量和金额",
-        "collect_from_multi_table": True
+        "tables": [
+            {
+                "name": "货物明细",
+                "prompt": "请抽取每行的品名、数量和金额",
+                "collect_from_multi_table": True,
+                "fields": [
+                    {"name": "货物名称", "description": "货物或服务名称"},
+                    {"name": "数量", "description": "货物数量"},
+                    {"name": "单价", "description": "货物单价"},
+                    {"name": "金额", "description": "货物金额"}
+                ]
+            }
+        ]
     },
     headers={
         "x-ti-app-id": ti_app_id,
         "x-ti-secret-code": ti_secret_code,
     },
 )
-table_id = table_resp.json()["result"]["table_id"]
-print(f"表格创建成功，ID: {table_id}")
 
-# 2. 为表格添加字段
-fields_to_add = [
-    {"name": "货物名称", "description": "货物或服务名称"},
-    {"name": "数量", "description": "货物数量"},
-    {"name": "单价", "description": "货物单价"},
-    {"name": "金额", "description": "货物金额"}
-]
-
-for field_config in fields_to_add:
-    field_resp = requests.post(
-        url=f"{host}/api/app-api/sip/platform/v2/category/fields/add",
-        json={
-            "workspace_id": workspace_id,
-            "category_id": category_id,
-            "table_id": table_id,  # 指定表格ID
-            **field_config
-        },
-        headers={
-            "x-ti-app-id": ti_app_id,
-            "x-ti-secret-code": ti_secret_code,
-        },
-    )
-    field_id = field_resp.json()["result"]["field_id"]
-    print(f"字段 '{field_config['name']}' 创建成功，ID: {field_id}")
-
-print("表格及字段创建完成")
+result = resp.json()
+if result.get("code") == 200:
+    table_ids = result.get("result", {}).get("table_ids", [])
+    print(f"表格及字段创建完成，表格IDs: {table_ids}")
+else:
+    print(f"创建失败: {result.get('msg')}")
 ```
 
 ## 表格配置说明

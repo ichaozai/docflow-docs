@@ -9,7 +9,7 @@ description: "管理文件类别的样本文件"
 
 ## 上传样本
 
-为指定文件类别上传样本文件：
+为指定文件类别批量上传样本文件：
 
 <CodeGroup>
 
@@ -19,8 +19,9 @@ curl -X POST \
   -H "x-ti-secret-code: <your-secret-code>" \
   -F "workspace_id=<your-workspace-id>" \
   -F "category_id=<category-id>" \
-  -F "file=@/path/to/sample.pdf" \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/category/sample/upload"
+  -F "files=@/path/to/sample1.pdf" \
+  -F "files=@/path/to/sample2.pdf" \
+  "https://docflow.textin.com/api/app-api/sip/platform/v2/category/sample/batch_upload"
 ```
 
 ```python Python icon=python expandable lines
@@ -32,12 +33,13 @@ workspace_id = "<your-workspace-id>"
 category_id = "<category-id>"
 
 host = "https://docflow.textin.com"
-url = "/api/app-api/sip/platform/v2/category/sample/upload"
+url = "/api/app-api/sip/platform/v2/category/sample/batch_upload"
 
-# 准备样本文件
-files = {
-    'file': open('/path/to/sample.pdf', 'rb')
-}
+# 准备样本文件（支持多个）
+files = [
+    ("files", ("sample1.pdf", open('/path/to/sample1.pdf', 'rb'))),
+    ("files", ("sample2.pdf", open('/path/to/sample2.pdf', 'rb'))),
+]
 
 # 准备表单数据
 data = {
@@ -58,8 +60,8 @@ resp = requests.post(
 
 result = resp.json()
 if result.get("code") == 200:
-    sample_id = result.get("result", {}).get("sample_id")
-    print(f"样本上传成功，ID: {sample_id}")
+    sample_ids = result.get("result", {}).get("sample_ids", [])
+    print(f"样本上传成功，IDs: {sample_ids}")
 else:
     print(f"上传失败: {result.get('msg')}")
 ```
@@ -69,7 +71,7 @@ else:
 **请求参数：**
 - `workspace_id` (必填): 工作空间 ID
 - `category_id` (必填): 文件类别 ID
-- `file` (必填): 样本文件
+- `files` (必填): 样本文件，支持同时上传多个文件
 
 **响应示例：**
 
@@ -78,7 +80,7 @@ else:
   "code": 200,
   "msg": "success",
   "result": {
-    "sample_id": "sample_123"
+    "sample_ids": ["sample_123", "sample_456"]
   }
 }
 ```
@@ -174,16 +176,22 @@ else:
 
 ## 下载样本
 
-下载指定的样本文件：
+批量下载指定的样本文件：
 
 <CodeGroup>
 
 ```bash curl icon=terminal wrap
-curl \
+curl -X POST \
   -H "x-ti-app-id: <your-app-id>" \
   -H "x-ti-secret-code: <your-secret-code>" \
-  -o "sample.pdf" \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/category/sample/download?workspace_id=<your-workspace-id>&category_id=<category-id>&sample_id=<sample-id>"
+  -H "Content-Type: application/json" \
+  -o "samples.zip" \
+  -d '{
+    "workspace_id": "<your-workspace-id>",
+    "category_id": "<category-id>",
+    "sample_ids": ["<sample-id>"]
+  }' \
+  "https://docflow.textin.com/api/app-api/sip/platform/v2/category/sample/batch_download"
 ```
 
 ```python Python icon=python expandable lines
@@ -196,14 +204,14 @@ category_id = "<category-id>"
 sample_id = "<sample-id>"
 
 host = "https://docflow.textin.com"
-url = "/api/app-api/sip/platform/v2/category/sample/download"
+url = "/api/app-api/sip/platform/v2/category/sample/batch_download"
 
-resp = requests.get(
+resp = requests.post(
     url=f"{host}{url}",
-    params={
+    json={
         "workspace_id": workspace_id,
         "category_id": category_id,
-        "sample_id": sample_id
+        "sample_ids": [sample_id]
     },
     headers={
         "x-ti-app-id": ti_app_id,
@@ -214,7 +222,7 @@ resp = requests.get(
 
 if resp.status_code == 200:
     # 保存文件
-    with open("sample_downloaded.pdf", "wb") as f:
+    with open("samples_downloaded.zip", "wb") as f:
         f.write(resp.content)
     print("样本下载成功")
 else:
@@ -223,10 +231,10 @@ else:
 
 </CodeGroup>
 
-**请求参数：**
+**请求参数（JSON Body）：**
 - `workspace_id` (必填): 工作空间 ID
 - `category_id` (必填): 文件类别 ID
-- `sample_id` (必填): 样本 ID
+- `sample_ids` (必填): 样本 ID 数组
 
 **响应**：返回文件二进制流（`application/octet-stream`）
 
@@ -330,7 +338,7 @@ ti_secret_code = "<your-secret-code>"
 workspace_id = "<your-workspace-id>"
 category_id = "<category-id>"
 host = "https://docflow.textin.com"
-url = "/api/app-api/sip/platform/v2/category/sample/upload"
+url = "/api/app-api/sip/platform/v2/category/sample/batch_upload"
 
 # 样本文件目录
 sample_dir = "/path/to/samples"
@@ -338,33 +346,40 @@ sample_files = [f for f in os.listdir(sample_dir) if f.endswith('.pdf')]
 
 print(f"准备上传 {len(sample_files)} 个样本文件")
 
-for filename in sample_files:
-    file_path = os.path.join(sample_dir, filename)
+# 构建多文件上传列表
+files = [
+    ("files", (filename, open(os.path.join(sample_dir, filename), 'rb')))
+    for filename in sample_files
+]
 
-    with open(file_path, 'rb') as f:
-        files = {'file': f}
-        data = {
-            'workspace_id': workspace_id,
-            'category_id': category_id
-        }
+data = {
+    'workspace_id': workspace_id,
+    'category_id': category_id
+}
 
-        resp = requests.post(
-            url=f"{host}{url}",
-            data=data,
-            files=files,
-            headers={
-                "x-ti-app-id": ti_app_id,
-                "x-ti-secret-code": ti_secret_code,
-            },
-            timeout=60,
-        )
+resp = requests.post(
+    url=f"{host}{url}",
+    data=data,
+    files=files,
+    headers={
+        "x-ti-app-id": ti_app_id,
+        "x-ti-secret-code": ti_secret_code,
+    },
+    timeout=60,
+)
 
-        result = resp.json()
-        if result.get("code") == 200:
-            sample_id = result.get("result", {}).get("sample_id")
-            print(f"✓ {filename} 上传成功，ID: {sample_id}")
-        else:
-            print(f"✗ {filename} 上传失败: {result.get('msg')}")
+result = resp.json()
+if result.get("code") == 200:
+    sample_ids = result.get("result", {}).get("sample_ids", [])
+    print(f"批量上传成功，共 {len(sample_ids)} 个样本")
+    for sid in sample_ids:
+        print(f"  样本ID: {sid}")
+else:
+    print(f"上传失败: {result.get('msg')}")
+
+# 关闭文件句柄
+for _, (_, f) in files:
+    f.close()
 
 print("样本上传完成")
 ```

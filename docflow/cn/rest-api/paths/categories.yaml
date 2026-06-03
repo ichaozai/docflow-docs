@@ -589,12 +589,14 @@
 # 以下为已废弃接口，推荐使用上方的批量接口
 /api/app-api/sip/platform/v2/category/fields/add:
   post:
-    deprecated: true
-    summary: 新增单个文件类别字段（已废弃）
-    description: 在指定文件类别下新增一个字段，支持新增普通字段和表格字段
+    summary: 新增单个文件类别字段
+    description: |
+      在指定文件类别下新增一个字段，支持新增普通字段和表格字段
+
+      > ⚠️ 该接口目前仍在提供服务，但后续将停止维护。推荐使用 [新增文件类别字段](/api-reference/文件类别/新增文件类别字段) 接口替代。
     operationId: addCategoryField
     tags:
-      - 文件类别
+      - 已废弃
     requestBody:
       required: true
       content:
@@ -696,12 +698,14 @@
 
 /api/app-api/sip/platform/v2/category/fields/update:
   post:
-    deprecated: true
-    summary: 更新单个文件类别字段（已废弃）
-    description: 更新指定文件类别字段的信息，支持普通字段和表格字段
+    summary: 更新单个文件类别字段
+    description: |
+      更新指定文件类别字段的信息，支持普通字段和表格字段
+
+      > ⚠️ 该接口目前仍在提供服务，但后续将停止维护。推荐使用 [更新文件类别字段](/api-reference/文件类别/更新文件类别字段) 接口替代。
     operationId: updateCategoryField
     tags:
-      - 文件类别
+      - 已废弃
     requestBody:
       required: true
       content:
@@ -981,12 +985,14 @@
 # 以下为已废弃接口，推荐使用上方的批量接口
 /api/app-api/sip/platform/v2/category/tables/add:
   post:
-    deprecated: true
-    summary: 新增单个文件类别表格（已废弃）
-    description: 在指定文件类别下新增一个表格
+    summary: 新增单个文件类别表格
+    description: |
+      在指定文件类别下新增一个表格
+
+      > ⚠️ 该接口目前仍在提供服务，但后续将停止维护。推荐使用 [新增文件类别表格](/api-reference/文件类别/新增文件类别表格) 接口替代。
     operationId: addCategoryTable
     tags:
-      - 文件类别
+      - 已废弃
     requestBody:
       required: true
       content:
@@ -1079,12 +1085,14 @@
 
 /api/app-api/sip/platform/v2/category/tables/update:
   post:
-    deprecated: true
-    summary: 更新单个文件类别表格（已废弃）
-    description: 更新指定文件类别表格的信息
+    summary: 更新单个文件类别表格
+    description: |
+      更新指定文件类别表格的信息
+
+      > ⚠️ 该接口目前仍在提供服务，但后续将停止维护。推荐使用 [更新文件类别表格](/api-reference/文件类别/更新文件类别表格) 接口替代。
     operationId: updateCategoryTable
     tags:
-      - 文件类别
+      - 已废弃
     requestBody:
       required: true
       content:
@@ -1155,11 +1163,14 @@
 # 类别样本相关接口
 /api/app-api/sip/platform/v2/category/sample/upload:
   post:
-    summary: 上传类别样本
-    description: 为指定文件类别上传样本文件
+    summary: 上传单个类别样本
+    description: |
+      为指定文件类别上传样本文件
+
+      > ⚠️ 该接口目前仍在提供服务，但后续将停止维护。推荐使用 [上传类别样本](/api-reference/文件类别样本/上传类别样本) 接口替代。
     operationId: uploadCategorySample
     tags:
-      - 文件类别样本
+      - 已废弃
     requestBody:
       required: true
       content:
@@ -1215,8 +1226,8 @@
 
 /api/app-api/sip/platform/v2/category/sample/batch_upload:
   post:
-    summary: 批量上传类别样本
-    description: 为指定文件类别批量上传多个样本文件，最多20个
+    summary: 上传类别样本
+    description: 为指定文件类别上传多个样本文件，最多20个
     operationId: batchUploadCategorySample
     tags:
       - 文件类别样本
@@ -1337,11 +1348,14 @@
 
 /api/app-api/sip/platform/v2/category/sample/download:
   get:
-    summary: 下载类别样本
-    description: 下载指定的类别样本文件
+    summary: 下载单个类别样本
+    description: |
+      下载指定的类别样本文件
+
+      > ⚠️ 该接口目前仍在提供服务，但后续将停止维护。推荐使用 [下载类别样本（ZIP）](/api-reference/文件类别样本/下载类别样本（ZIP）) 接口替代。
     operationId: downloadCategorySample
     tags:
-      - 文件类别样本
+      - 已废弃
     parameters:
       - name: workspace_id
         in: query
@@ -1375,8 +1389,8 @@
 
 /api/app-api/sip/platform/v2/category/sample/batch_download:
   post:
-    summary: 批量下载类别样本（ZIP）
-    description: 批量下载指定类别的多个样本文件，打包为 ZIP 格式返回。不传 sample_ids 时下载全部样本。
+    summary: 下载类别样本（ZIP）
+    description: 下载指定类别的多个样本文件，打包为 ZIP 格式返回。不传 sample_ids 时下载全部样本。
     operationId: batchDownloadCategorySample
     tags:
       - 文件类别样本

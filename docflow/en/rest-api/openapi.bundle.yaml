@@ -931,7 +931,7 @@ paths:
                   type: array
                   description: >-
                     Sample file list, at least one sample file must be uploaded,
-                    a category can have at most 10 sample files
+                    a category can have at most 20 sample files
                   items:
                     type: string
                     format: binary
@@ -1281,7 +1281,8 @@ paths:
                               $ref: '#/components/schemas/CategoryTable'
   /api/app-api/sip/platform/v2/category/fields/add:
     post:
-      summary: Add File Category Field
+      deprecated: true
+      summary: Add Single File Category Field (Deprecated)
       description: >-
         Add a new field under the specified file category, supports both regular
         fields and table fields
@@ -1408,9 +1409,9 @@ paths:
                           - field_id
   /api/app-api/sip/platform/v2/category/fields/batch_add:
     post:
-      summary: Batch Add File Category Fields
+      summary: Add File Category Fields
       description: >-
-        Batch add multiple fields under the specified file category.
+        Add multiple fields under the specified file category.
         All-or-nothing semantics — if any field fails validation, the entire
         batch fails.
       operationId: batchAddCategoryFields
@@ -1501,7 +1502,8 @@ paths:
                             - field_id
   /api/app-api/sip/platform/v2/category/fields/update:
     post:
-      summary: Update File Category Field
+      deprecated: true
+      summary: Update Single File Category Field (Deprecated)
       description: >-
         Update the specified file category field, supports both regular fields
         and table fields
@@ -1555,9 +1557,9 @@ paths:
                 $ref: '#/components/schemas/CodeMessage'
   /api/app-api/sip/platform/v2/category/fields/batch_update:
     post:
-      summary: Batch Update File Category Fields
+      summary: Update File Category Fields
       description: >-
-        Batch update multiple fields under the specified file category.
+        Update multiple fields under the specified file category.
         All-or-nothing semantics.
       operationId: batchUpdateCategoryFields
       tags:
@@ -1753,7 +1755,8 @@ paths:
                                   example: Model 1
   /api/app-api/sip/platform/v2/category/tables/add:
     post:
-      summary: Add File Category Table
+      deprecated: true
+      summary: Add Single File Category Table (Deprecated)
       description: Add a new table under the specified file category
       operationId: addCategoryTable
       tags:
@@ -1857,9 +1860,9 @@ paths:
                           - table_id
   /api/app-api/sip/platform/v2/category/tables/batch_add:
     post:
-      summary: Batch Add File Category Tables
+      summary: Add File Category Tables
       description: >-
-        Batch add multiple tables under the specified file category (supports
+        Add multiple tables under the specified file category (supports
         nested fields). All-or-nothing semantics.
       operationId: batchAddCategoryTables
       tags:
@@ -1935,7 +1938,8 @@ paths:
                             - table_id
   /api/app-api/sip/platform/v2/category/tables/update:
     post:
-      summary: Update File Category Table
+      deprecated: true
+      summary: Update Single File Category Table (Deprecated)
       description: Update the specified file category table information
       operationId: updateCategoryTable
       tags:
@@ -2004,9 +2008,9 @@ paths:
                 $ref: '#/components/schemas/CodeMessage'
   /api/app-api/sip/platform/v2/category/tables/batch_update:
     post:
-      summary: Batch Update File Category Tables
+      summary: Update File Category Tables
       description: >-
-        Batch update multiple tables under the specified file category.
+        Update multiple tables under the specified file category.
         All-or-nothing semantics.
       operationId: batchUpdateCategoryTables
       tags:
@@ -2152,7 +2156,7 @@ paths:
       summary: Batch Upload Category Samples
       description: >-
         Batch upload multiple sample files for the specified file category,
-        maximum 10 files
+        maximum 20 files
       operationId: batchUploadCategorySample
       tags:
         - File Category Samples
@@ -2173,7 +2177,7 @@ paths:
                   example: '1234567890'
                 files:
                   type: array
-                  description: 'Sample file list, maximum 10 files'
+                  description: 'Sample file list, maximum 20 files'
                   items:
                     type: string
                     format: binary

@@ -46,7 +46,7 @@
                   - Model 3
               sample_files:
                 type: array
-                description: 样本文件列表，至少上传一个样本文件，一个类别最多有10个样本文件
+                description: 样本文件列表，至少上传一个样本文件，一个类别最多有20个样本文件
                 items:
                   type: string
                   format: binary
@@ -373,9 +373,224 @@
                           items:
                             $ref: '../components/schemas/categories.yaml#/CategoryTable'
 
-/api/app-api/sip/platform/v2/category/fields/add:
+/api/app-api/sip/platform/v2/category/fields/batch_add:
   post:
     summary: 新增文件类别字段
+    description: 在指定文件类别下新增多个字段。全有全无语义：任一字段校验不通过则全部失败。
+    operationId: batchAddCategoryFields
+    tags:
+      - 文件类别
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              workspace_id:
+                type: string
+                description: 空间ID
+                example: "1234567890"
+              category_id:
+                type: string
+                description: 文件类别ID
+                example: "1234567890"
+              table_id:
+                type: string
+                description: |
+                  表格ID
+                  - 不传或为空：创建普通字段
+                  - 传入表格ID：创建对应表格下的表格字段
+              fields:
+                type: array
+                description: 批量新增的字段列表
+                items:
+                  $ref: '../components/schemas/categories.yaml#/CategoryFieldConfig'
+                minItems: 1
+              with_detail:
+                type: boolean
+                description: 是否返回每个字段的完整详情
+            required:
+              - workspace_id
+              - category_id
+              - fields
+    responses:
+      '200':
+        description: 批量新增字段成功
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas/common.yaml#/CodeMessage'
+                - type: object
+                  properties:
+                    result:
+                      type: array
+                      description: 创建结果列表，顺序与请求一致
+                      items:
+                        type: object
+                        properties:
+                          field_id:
+                            type: string
+                            description: 字段ID
+                          name:
+                            type: string
+                            description: 字段名称（with_detail=true 时返回）
+                          description:
+                            type: string
+                          prompt:
+                            type: string
+                          use_prompt:
+                            type: boolean
+                          alias:
+                            type: array
+                            items:
+                              type: string
+                          identity:
+                            type: string
+                          multi_value:
+                            type: boolean
+                          duplicate_value_distinct:
+                            type: boolean
+                          transform_settings:
+                            $ref: '../components/schemas/categories.yaml#/TransformSettings'
+                          extract_model:
+                            type: string
+                          enabled:
+                            type: integer
+                        required:
+                          - field_id
+
+/api/app-api/sip/platform/v2/category/fields/batch_update:
+  post:
+    summary: 更新文件类别字段
+    description: 更新指定文件类别下的多个字段。全有全无语义：任一字段校验不通过则全部失败。
+    operationId: batchUpdateCategoryFields
+    tags:
+      - 文件类别
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              workspace_id:
+                type: string
+                description: 空间ID
+                example: "1234567890"
+              category_id:
+                type: string
+                description: 文件类别ID
+                example: "1234567890"
+              fields:
+                type: array
+                description: 批量更新的字段列表
+                items:
+                  $ref: '../components/schemas/categories.yaml#/CategoryFieldUpdateItem'
+                minItems: 1
+              with_detail:
+                type: boolean
+                description: 是否返回每个字段更新后的完整详情
+            required:
+              - workspace_id
+              - category_id
+              - fields
+    responses:
+      '200':
+        description: 批量更新字段成功
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas/common.yaml#/CodeMessage'
+                - type: object
+                  properties:
+                    result:
+                      type: array
+                      description: with_detail=true 时返回更新后字段列表，否则为 null
+                      items:
+                        type: object
+                        properties:
+                          field_id:
+                            type: string
+                          name:
+                            type: string
+                          description:
+                            type: string
+                          prompt:
+                            type: string
+                          use_prompt:
+                            type: boolean
+                          alias:
+                            type: array
+                            items:
+                              type: string
+                          identity:
+                            type: string
+                          multi_value:
+                            type: boolean
+                          duplicate_value_distinct:
+                            type: boolean
+                          transform_settings:
+                            $ref: '../components/schemas/categories.yaml#/TransformSettings'
+                          extract_model:
+                            type: string
+                          enabled:
+                            type: integer
+
+/api/app-api/sip/platform/v2/category/fields/delete:
+  post:
+    summary: 删除文件类别字段
+    description: 删除指定的文件类别字段，支持批量删除普通字段和表格字段
+    operationId: deleteCategoryFields
+    tags:
+      - 文件类别
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              workspace_id:
+                type: string
+                description: 空间ID
+                example: "1234567890"
+              category_id:
+                type: string
+                description: 文件类别ID
+                example: "1234567890"
+              field_ids:
+                type: array
+                description: 要删除的字段ID列表
+                items:
+                  type: string
+                example: ["1234567890", "0987654321"]
+              table_id:
+                type: string
+                description: |
+                  表格ID
+                  - 不传：删除普通字段（result.fields 中的字段）
+                  - 传入表格ID：删除对应表格下的表格字段（result.tables[].fields 中的字段）
+                example: "1234567890"
+            required:
+              - workspace_id
+              - category_id
+              - field_ids
+    responses:
+      '200':
+        description: 成功删除文件类别字段
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/common.yaml#/CodeMessage'
+
+# 以下为已废弃接口，推荐使用上方的批量接口
+/api/app-api/sip/platform/v2/category/fields/add:
+  post:
+    deprecated: true
+    summary: 新增单个文件类别字段（已废弃）
     description: 在指定文件类别下新增一个字段，支持新增普通字段和表格字段
     operationId: addCategoryField
     tags:
@@ -481,7 +696,8 @@
 
 /api/app-api/sip/platform/v2/category/fields/update:
   post:
-    summary: 更新文件类别字段
+    deprecated: true
+    summary: 更新单个文件类别字段（已废弃）
     description: 更新指定文件类别字段的信息，支持普通字段和表格字段
     operationId: updateCategoryField
     tags:
@@ -532,220 +748,6 @@
                     result:
                       description: with_detail=true 时返回更新后的字段信息，否则为 null
                       $ref: '../components/schemas/categories.yaml#/CategoryField'
-
-/api/app-api/sip/platform/v2/category/fields/delete:
-  post:
-    summary: 删除文件类别字段
-    description: 删除指定的文件类别字段，支持批量删除普通字段和表格字段
-    operationId: deleteCategoryFields
-    tags:
-      - 文件类别
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              workspace_id:
-                type: string
-                description: 空间ID
-                example: "1234567890"
-              category_id:
-                type: string
-                description: 文件类别ID
-                example: "1234567890"
-              field_ids:
-                type: array
-                description: 要删除的字段ID列表
-                items:
-                  type: string
-                example: ["1234567890", "0987654321"]
-              table_id:
-                type: string
-                description: |
-                  表格ID
-                  - 不传：删除普通字段（result.fields 中的字段）
-                  - 传入表格ID：删除对应表格下的表格字段（result.tables[].fields 中的字段）
-                example: "1234567890"
-            required:
-              - workspace_id
-              - category_id
-              - field_ids
-    responses:
-      '200':
-        description: 成功删除文件类别字段
-        content:
-          application/json:
-            schema:
-              $ref: '../components/schemas/common.yaml#/CodeMessage'
-
-# 批量字段接口
-/api/app-api/sip/platform/v2/category/fields/batch_add:
-  post:
-    summary: 批量新增文件类别字段
-    description: 在指定文件类别下批量新增多个字段。全有全无语义：任一字段校验不通过则全部失败。
-    operationId: batchAddCategoryFields
-    tags:
-      - 文件类别
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              workspace_id:
-                type: string
-                description: 空间ID
-                example: "1234567890"
-              category_id:
-                type: string
-                description: 文件类别ID
-                example: "1234567890"
-              table_id:
-                type: string
-                description: |
-                  表格ID
-                  - 不传或为空：创建普通字段
-                  - 传入表格ID：创建对应表格下的表格字段
-              fields:
-                type: array
-                description: 批量新增的字段列表
-                items:
-                  $ref: '../components/schemas/categories.yaml#/CategoryFieldConfig'
-                minItems: 1
-              with_detail:
-                type: boolean
-                description: 是否返回每个字段的完整详情
-            required:
-              - workspace_id
-              - category_id
-              - fields
-    responses:
-      '200':
-        description: 批量新增字段成功
-        content:
-          application/json:
-            schema:
-              allOf:
-                - $ref: '../components/schemas/common.yaml#/CodeMessage'
-                - type: object
-                  properties:
-                    result:
-                      type: array
-                      description: 创建结果列表，顺序与请求一致
-                      items:
-                        type: object
-                        properties:
-                          field_id:
-                            type: string
-                            description: 字段ID
-                          name:
-                            type: string
-                            description: 字段名称（with_detail=true 时返回）
-                          description:
-                            type: string
-                          prompt:
-                            type: string
-                          use_prompt:
-                            type: boolean
-                          alias:
-                            type: array
-                            items:
-                              type: string
-                          identity:
-                            type: string
-                          multi_value:
-                            type: boolean
-                          duplicate_value_distinct:
-                            type: boolean
-                          transform_settings:
-                            $ref: '../components/schemas/categories.yaml#/TransformSettings'
-                          extract_model:
-                            type: string
-                          enabled:
-                            type: integer
-                        required:
-                          - field_id
-
-/api/app-api/sip/platform/v2/category/fields/batch_update:
-  post:
-    summary: 批量更新文件类别字段
-    description: 批量更新指定文件类别下的多个字段。全有全无语义：任一字段校验不通过则全部失败。
-    operationId: batchUpdateCategoryFields
-    tags:
-      - 文件类别
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              workspace_id:
-                type: string
-                description: 空间ID
-                example: "1234567890"
-              category_id:
-                type: string
-                description: 文件类别ID
-                example: "1234567890"
-              fields:
-                type: array
-                description: 批量更新的字段列表
-                items:
-                  $ref: '../components/schemas/categories.yaml#/CategoryFieldUpdateItem'
-                minItems: 1
-              with_detail:
-                type: boolean
-                description: 是否返回每个字段更新后的完整详情
-            required:
-              - workspace_id
-              - category_id
-              - fields
-    responses:
-      '200':
-        description: 批量更新字段成功
-        content:
-          application/json:
-            schema:
-              allOf:
-                - $ref: '../components/schemas/common.yaml#/CodeMessage'
-                - type: object
-                  properties:
-                    result:
-                      type: array
-                      description: with_detail=true 时返回更新后字段列表，否则为 null
-                      items:
-                        type: object
-                        properties:
-                          field_id:
-                            type: string
-                          name:
-                            type: string
-                          description:
-                            type: string
-                          prompt:
-                            type: string
-                          use_prompt:
-                            type: boolean
-                          alias:
-                            type: array
-                            items:
-                              type: string
-                          identity:
-                            type: string
-                          multi_value:
-                            type: boolean
-                          duplicate_value_distinct:
-                            type: boolean
-                          transform_settings:
-                            $ref: '../components/schemas/categories.yaml#/TransformSettings'
-                          extract_model:
-                            type: string
-                          enabled:
-                            type: integer
 
 # 文件类别表格相关接口
 /api/app-api/sip/platform/v2/category/tables/list:
@@ -810,9 +812,177 @@
                                 description: 表格级抽取模型
                                 example: "Model 1"
 
-/api/app-api/sip/platform/v2/category/tables/add:
+/api/app-api/sip/platform/v2/category/tables/batch_add:
   post:
     summary: 新增文件类别表格
+    description: 在指定文件类别下新增多个表格（支持内嵌字段）。全有全无语义。
+    operationId: batchAddCategoryTables
+    tags:
+      - 文件类别
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              workspace_id:
+                type: string
+                description: 空间ID
+                example: "1234567890"
+              category_id:
+                type: string
+                description: 文件类别ID
+                example: "1234567890"
+              tables:
+                type: array
+                description: 批量新增的表格列表
+                items:
+                  $ref: '../components/schemas/categories.yaml#/CategoryTableConfig'
+                minItems: 1
+              with_detail:
+                type: boolean
+                description: 是否返回每个表格的完整详情（含字段列表）
+            required:
+              - workspace_id
+              - category_id
+              - tables
+    responses:
+      '200':
+        description: 批量新增表格成功
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas/common.yaml#/CodeMessage'
+                - type: object
+                  properties:
+                    result:
+                      type: array
+                      description: 创建结果列表，顺序与请求一致
+                      items:
+                        type: object
+                        properties:
+                          table_id:
+                            type: string
+                            description: 表格ID
+                          name:
+                            type: string
+                            description: 表格名称（with_detail=true 时返回）
+                          description:
+                            type: string
+                          prompt:
+                            type: string
+                          collect_from_multi_table:
+                            type: boolean
+                          extract_model:
+                            type: string
+                          fields:
+                            type: array
+                            description: 表格字段列表（with_detail=true 时返回）
+                            items:
+                              $ref: '../components/schemas/categories.yaml#/CategoryField'
+                        required:
+                          - table_id
+
+/api/app-api/sip/platform/v2/category/tables/batch_update:
+  post:
+    summary: 更新文件类别表格
+    description: 更新指定文件类别下的多个表格。全有全无语义。
+    operationId: batchUpdateCategoryTables
+    tags:
+      - 文件类别
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              workspace_id:
+                type: string
+                description: 空间ID
+                example: "1234567890"
+              category_id:
+                type: string
+                description: 文件类别ID
+                example: "1234567890"
+              tables:
+                type: array
+                description: 批量更新的表格列表
+                items:
+                  $ref: '../components/schemas/categories.yaml#/CategoryTableUpdateItem'
+                minItems: 1
+              with_detail:
+                type: boolean
+                description: |
+                  是否返回完整详情。传 true 时响应返回更新后的每个表格完整信息。
+                  不传或为 false 时 result 为 null。
+            required:
+              - workspace_id
+              - category_id
+              - tables
+    responses:
+      '200':
+        description: 批量更新表格成功
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas/common.yaml#/CodeMessage'
+                - type: object
+                  properties:
+                    result:
+                      type: array
+                      description: 更新后的表格列表（with_detail=true 时返回），否则为 null
+                      items:
+                        $ref: '../components/schemas/categories.yaml#/CategoryTable'
+
+/api/app-api/sip/platform/v2/category/tables/delete:
+  post:
+    summary: 删除文件类别表格
+    description: 删除指定的文件类别表格，支持批量删除
+    operationId: deleteCategoryTables
+    tags:
+      - 文件类别
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              workspace_id:
+                type: string
+                description: 空间ID
+                example: "1234567890"
+              category_id:
+                type: string
+                description: 文件类别ID
+                example: "1234567890"
+              table_ids:
+                type: array
+                description: 要删除的表格ID列表
+                items:
+                  type: string
+                example: ["1234567890", "0987654321"]
+            required:
+              - workspace_id
+              - category_id
+              - table_ids
+    responses:
+      '200':
+        description: 成功删除文件类别表格
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/common.yaml#/CodeMessage'
+
+# 以下为已废弃接口，推荐使用上方的批量接口
+/api/app-api/sip/platform/v2/category/tables/add:
+  post:
+    deprecated: true
+    summary: 新增单个文件类别表格（已废弃）
     description: 在指定文件类别下新增一个表格
     operationId: addCategoryTable
     tags:
@@ -909,7 +1079,8 @@
 
 /api/app-api/sip/platform/v2/category/tables/update:
   post:
-    summary: 更新文件类别表格
+    deprecated: true
+    summary: 更新单个文件类别表格（已废弃）
     description: 更新指定文件类别表格的信息
     operationId: updateCategoryTable
     tags:
@@ -981,173 +1152,6 @@
                       description: with_detail=true 时返回更新后的表格信息，否则为 null
                       $ref: '../components/schemas/categories.yaml#/CategoryTable'
 
-/api/app-api/sip/platform/v2/category/tables/delete:
-  post:
-    summary: 删除文件类别表格
-    description: 删除指定的文件类别表格，支持批量删除
-    operationId: deleteCategoryTables
-    tags:
-      - 文件类别
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              workspace_id:
-                type: string
-                description: 空间ID
-                example: "1234567890"
-              category_id:
-                type: string
-                description: 文件类别ID
-                example: "1234567890"
-              table_ids:
-                type: array
-                description: 要删除的表格ID列表
-                items:
-                  type: string
-                example: ["1234567890", "0987654321"]
-            required:
-              - workspace_id
-              - category_id
-              - table_ids
-    responses:
-      '200':
-        description: 成功删除文件类别表格
-        content:
-          application/json:
-            schema:
-              $ref: '../components/schemas/common.yaml#/CodeMessage'
-
-# 批量表格接口
-/api/app-api/sip/platform/v2/category/tables/batch_add:
-  post:
-    summary: 批量新增文件类别表格
-    description: 在指定文件类别下批量新增多个表格（支持内嵌字段）。全有全无语义。
-    operationId: batchAddCategoryTables
-    tags:
-      - 文件类别
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              workspace_id:
-                type: string
-                description: 空间ID
-                example: "1234567890"
-              category_id:
-                type: string
-                description: 文件类别ID
-                example: "1234567890"
-              tables:
-                type: array
-                description: 批量新增的表格列表
-                items:
-                  $ref: '../components/schemas/categories.yaml#/CategoryTableConfig'
-                minItems: 1
-              with_detail:
-                type: boolean
-                description: 是否返回每个表格的完整详情（含字段列表）
-            required:
-              - workspace_id
-              - category_id
-              - tables
-    responses:
-      '200':
-        description: 批量新增表格成功
-        content:
-          application/json:
-            schema:
-              allOf:
-                - $ref: '../components/schemas/common.yaml#/CodeMessage'
-                - type: object
-                  properties:
-                    result:
-                      type: array
-                      description: 创建结果列表，顺序与请求一致
-                      items:
-                        type: object
-                        properties:
-                          table_id:
-                            type: string
-                            description: 表格ID
-                          name:
-                            type: string
-                            description: 表格名称（with_detail=true 时返回）
-                          description:
-                            type: string
-                          prompt:
-                            type: string
-                          collect_from_multi_table:
-                            type: boolean
-                          extract_model:
-                            type: string
-                          fields:
-                            type: array
-                            description: 表格字段列表（with_detail=true 时返回）
-                            items:
-                              $ref: '../components/schemas/categories.yaml#/CategoryField'
-                        required:
-                          - table_id
-
-/api/app-api/sip/platform/v2/category/tables/batch_update:
-  post:
-    summary: 批量更新文件类别表格
-    description: 批量更新指定文件类别下的多个表格。全有全无语义。
-    operationId: batchUpdateCategoryTables
-    tags:
-      - 文件类别
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              workspace_id:
-                type: string
-                description: 空间ID
-                example: "1234567890"
-              category_id:
-                type: string
-                description: 文件类别ID
-                example: "1234567890"
-              tables:
-                type: array
-                description: 批量更新的表格列表
-                items:
-                  $ref: '../components/schemas/categories.yaml#/CategoryTableUpdateItem'
-                minItems: 1
-              with_detail:
-                type: boolean
-                description: |
-                  是否返回完整详情。传 true 时响应返回更新后的每个表格完整信息。
-                  不传或为 false 时 result 为 null。
-            required:
-              - workspace_id
-              - category_id
-              - tables
-    responses:
-      '200':
-        description: 批量更新表格成功
-        content:
-          application/json:
-            schema:
-              allOf:
-                - $ref: '../components/schemas/common.yaml#/CodeMessage'
-                - type: object
-                  properties:
-                    result:
-                      type: array
-                      description: 更新后的表格列表（with_detail=true 时返回），否则为 null
-                      items:
-                        $ref: '../components/schemas/categories.yaml#/CategoryTable'
-
 # 类别样本相关接口
 /api/app-api/sip/platform/v2/category/sample/upload:
   post:
@@ -1212,7 +1216,7 @@
 /api/app-api/sip/platform/v2/category/sample/batch_upload:
   post:
     summary: 批量上传类别样本
-    description: 为指定文件类别批量上传多个样本文件，最多10个
+    description: 为指定文件类别批量上传多个样本文件，最多20个
     operationId: batchUploadCategorySample
     tags:
       - 文件类别样本
@@ -1233,7 +1237,7 @@
                 example: "1234567890"
               files:
                 type: array
-                description: 样本文件列表，最多10个
+                description: 样本文件列表，最多20个
                 items:
                   type: string
                   format: binary

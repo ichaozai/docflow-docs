@@ -18,7 +18,7 @@ Sample files are typical example documents of the file category. DocFlow uses th
 - **Optimize extraction performance**: Improve field extraction accuracy by learning format and layout patterns from samples
 - **Establish recognition templates**: Provide reference benchmarks for automatically recognizing similar documents
 
-**Requirements**: Each file category requires at least 1 sample file, with a maximum of 10. We recommend uploading 3-5 representative samples for best results.
+**Requirements**: Each file category requires at least 1 sample file, with a maximum of 20. We recommend uploading 3-5 representative samples for best results.
 
 ### Regular Fields
 
@@ -131,7 +131,7 @@ else:
 - `name` (required): File category name, max length 50
 - `category_prompt` (optional): Prompt for classification, max length 500
 - `extract_model` (required): Extraction model, options: `llm`, `vlm`
-- `sample_files` (required): Sample file list, at least one sample file required; maximum 10 sample files per category
+- `sample_files` (required): Sample file list, at least one sample file required; maximum 20 sample files per category
 - `fields` (required): Field configuration list (JSON string), at least one field required, table fields can only be configured in the default table (table_id=-1)
 
 **Response Example:**

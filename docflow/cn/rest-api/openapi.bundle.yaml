@@ -882,7 +882,7 @@ paths:
                     - Model 3
                 sample_files:
                   type: array
-                  description: 样本文件列表，至少上传一个样本文件，一个类别最多有10个样本文件
+                  description: 样本文件列表，至少上传一个样本文件，一个类别最多有20个样本文件
                   items:
                     type: string
                     format: binary
@@ -1208,7 +1208,8 @@ paths:
                               $ref: '#/components/schemas/CategoryTable'
   /api/app-api/sip/platform/v2/category/fields/add:
     post:
-      summary: 新增文件类别字段
+      deprecated: true
+      summary: 新增单个文件类别字段（已废弃）
       description: 在指定文件类别下新增一个字段，支持新增普通字段和表格字段
       operationId: addCategoryField
       tags:
@@ -1313,8 +1314,8 @@ paths:
                           - field_id
   /api/app-api/sip/platform/v2/category/fields/batch_add:
     post:
-      summary: 批量新增文件类别字段
-      description: 在指定文件类别下批量新增多个字段。全有全无语义：任一字段校验不通过则全部失败。
+      summary: 新增文件类别字段
+      description: 在指定文件类别下新增多个字段。全有全无语义：任一字段校验不通过则全部失败。
       operationId: batchAddCategoryFields
       tags:
         - 文件类别
@@ -1400,7 +1401,8 @@ paths:
                             - field_id
   /api/app-api/sip/platform/v2/category/fields/update:
     post:
-      summary: 更新文件类别字段
+      deprecated: true
+      summary: 更新单个文件类别字段（已废弃）
       description: 更新指定文件类别字段的信息，支持普通字段和表格字段
       operationId: updateCategoryField
       tags:
@@ -1453,8 +1455,8 @@ paths:
                         $ref: '#/components/schemas/CategoryField'
   /api/app-api/sip/platform/v2/category/fields/batch_update:
     post:
-      summary: 批量更新文件类别字段
-      description: 批量更新指定文件类别下的多个字段。全有全无语义：任一字段校验不通过则全部失败。
+      summary: 更新文件类别字段
+      description: 更新指定文件类别下的多个字段。全有全无语义：任一字段校验不通过则全部失败。
       operationId: batchUpdateCategoryFields
       tags:
         - 文件类别
@@ -1639,7 +1641,8 @@ paths:
                                   example: Model 1
   /api/app-api/sip/platform/v2/category/tables/add:
     post:
-      summary: 新增文件类别表格
+      deprecated: true
+      summary: 新增单个文件类别表格（已废弃）
       description: 在指定文件类别下新增一个表格
       operationId: addCategoryTable
       tags:
@@ -1735,8 +1738,8 @@ paths:
                           - table_id
   /api/app-api/sip/platform/v2/category/tables/batch_add:
     post:
-      summary: 批量新增文件类别表格
-      description: 在指定文件类别下批量新增多个表格（支持内嵌字段）。全有全无语义。
+      summary: 新增文件类别表格
+      description: 在指定文件类别下新增多个表格（支持内嵌字段）。全有全无语义。
       operationId: batchAddCategoryTables
       tags:
         - 文件类别
@@ -1807,7 +1810,8 @@ paths:
                             - table_id
   /api/app-api/sip/platform/v2/category/tables/update:
     post:
-      summary: 更新文件类别表格
+      deprecated: true
+      summary: 更新单个文件类别表格（已废弃）
       description: 更新指定文件类别表格的信息
       operationId: updateCategoryTable
       tags:
@@ -1880,8 +1884,8 @@ paths:
                         $ref: '#/components/schemas/CategoryTable'
   /api/app-api/sip/platform/v2/category/tables/batch_update:
     post:
-      summary: 批量更新文件类别表格
-      description: 批量更新指定文件类别下的多个表格。全有全无语义。
+      summary: 更新文件类别表格
+      description: 更新指定文件类别下的多个表格。全有全无语义。
       operationId: batchUpdateCategoryTables
       tags:
         - 文件类别
@@ -2033,7 +2037,7 @@ paths:
   /api/app-api/sip/platform/v2/category/sample/batch_upload:
     post:
       summary: 批量上传类别样本
-      description: 为指定文件类别批量上传多个样本文件，最多10个
+      description: 为指定文件类别批量上传多个样本文件，最多20个
       operationId: batchUploadCategorySample
       tags:
         - 文件类别样本
@@ -2054,7 +2058,7 @@ paths:
                   example: '1234567890'
                 files:
                   type: array
-                  description: 样本文件列表，最多10个
+                  description: 样本文件列表，最多20个
                   items:
                     type: string
                     format: binary

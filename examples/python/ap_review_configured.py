@@ -71,6 +71,225 @@ def _mime(file_path: str) -> str:
     }.get(ext, "application/octet-stream")
 
 
+# ============================================================
+# 批量追加字段
+# REST API: POST /api/app-api/sip/platform/v2/category/fields/batch_add
+# ============================================================
+
+def batch_add_category_fields(
+    workspace_id: str,
+    category_id: str,
+    fields: list,
+    table_id: str = None,
+) -> list:
+    """
+    在已有类别中批量追加字段。
+
+    Args:
+        fields:   字段列表，格式为 [{"name": "字段名"}, ...]
+        table_id: 若要创建「表格字段」，先通过 category/fields/list 获取
+                  table_id 后传入；不传则创建普通字段。
+
+    Returns:
+        field_ids 列表
+    """
+    url = f"{BASE_URL}/api/app-api/sip/platform/v2/category/fields/batch_add"
+    payload = {
+        "workspace_id": workspace_id,
+        "category_id":  category_id,
+        "fields":       fields,
+    }
+    if table_id is not None:
+        payload["table_id"] = str(table_id)
+    resp = requests.post(url, json=payload, headers=_headers(), timeout=30)
+    data = _check(resp, "批量追加字段")
+    result = data["result"]
+    field_ids = [item["field_id"] for item in result]
+    print(f"  批量追加字段成功  count={len(fields)}  field_ids={field_ids}")
+    return field_ids
+
+
+# ============================================================
+# 批量更新字段
+# REST API: POST /api/app-api/sip/platform/v2/category/fields/batch_update
+# ============================================================
+
+def batch_update_category_fields(
+    workspace_id: str,
+    category_id: str,
+    fields: list,
+    with_detail: bool = False,
+) -> list:
+    """
+    批量更新已有字段的配置。
+
+    Args:
+        fields: 字段更新列表，每项须含 field_id，例如：
+                [{"field_id": "123", "name": "新名称", "description": "新描述"}, ...]
+        with_detail: 是否返回更新后的完整字段信息
+
+    Returns:
+        更新后的字段列表（with_detail=True 时）或 None
+    """
+    url = f"{BASE_URL}/api/app-api/sip/platform/v2/category/fields/batch_update"
+    payload = {
+        "workspace_id": workspace_id,
+        "category_id":  category_id,
+        "fields":       fields,
+        "with_detail":  with_detail,
+    }
+    resp = requests.post(url, json=payload, headers=_headers(), timeout=30)
+    data = _check(resp, "批量更新字段")
+    print(f"  批量更新字段成功  count={len(fields)}")
+    return data.get("result")
+
+
+# ============================================================
+# 批量新增表格（支持内嵌字段一站式创建）
+# REST API: POST /api/app-api/sip/platform/v2/category/tables/batch_add
+# ============================================================
+
+def batch_add_category_tables(
+    workspace_id: str,
+    category_id: str,
+    tables: list,
+    with_detail: bool = False,
+) -> list:
+    """
+    批量新增表格，支持在每个表格中内嵌 fields 一站式创建表格字段。
+
+    Args:
+        tables: 表格列表，例如：
+                [{"name": "明细表", "fields": [{"name": "品名"}, {"name": "数量"}]}, ...]
+        with_detail: 是否返回完整详情（含字段列表）
+
+    Returns:
+        创建结果列表
+    """
+    url = f"{BASE_URL}/api/app-api/sip/platform/v2/category/tables/batch_add"
+    payload = {
+        "workspace_id": workspace_id,
+        "category_id":  category_id,
+        "tables":       tables,
+        "with_detail":  with_detail,
+    }
+    resp = requests.post(url, json=payload, headers=_headers(), timeout=30)
+    data = _check(resp, "批量新增表格")
+    result = data["result"]
+    table_ids = [item["table_id"] for item in result]
+    print(f"  批量新增表格成功  count={len(tables)}  table_ids={table_ids}")
+    return result
+
+
+# ============================================================
+# 批量更新表格
+# REST API: POST /api/app-api/sip/platform/v2/category/tables/batch_update
+# ============================================================
+
+def batch_update_category_tables(
+    workspace_id: str,
+    category_id: str,
+    tables: list,
+    with_detail: bool = False,
+) -> list:
+    """
+    批量更新表格配置。
+
+    Args:
+        tables: 表格更新列表，每项须含 table_id，例如：
+                [{"table_id": "123", "name": "新表格名", "prompt": "新提示词"}, ...]
+        with_detail: 是否返回更新后的完整信息
+
+    Returns:
+        更新后的表格列表（with_detail=True 时）或 None
+    """
+    url = f"{BASE_URL}/api/app-api/sip/platform/v2/category/tables/batch_update"
+    payload = {
+        "workspace_id": workspace_id,
+        "category_id":  category_id,
+        "tables":       tables,
+        "with_detail":  with_detail,
+    }
+    resp = requests.post(url, json=payload, headers=_headers(), timeout=30)
+    data = _check(resp, "批量更新表格")
+    print(f"  批量更新表格成功  count={len(tables)}")
+    return data.get("result")
+
+
+# ============================================================
+# 批量上传样本
+# REST API: POST /api/app-api/sip/platform/v2/category/sample/batch_upload
+# ============================================================
+
+def batch_upload_category_samples(
+    workspace_id: str,
+    category_id: str,
+    file_paths: list,
+) -> list:
+    """
+    为指定类别批量上传样本文件（最多 20 个）。
+
+    Args:
+        file_paths: 样本文件路径列表
+
+    Returns:
+        上传结果（含 sample_id 列表）
+    """
+    url = f"{BASE_URL}/api/app-api/sip/platform/v2/category/sample/batch_upload"
+    files = []
+    for path in file_paths:
+        files.append(("files", (os.path.basename(path), open(path, "rb"), _mime(path))))
+    form_data = [
+        ("workspace_id", (None, workspace_id)),
+        ("category_id",  (None, category_id)),
+    ]
+    resp = requests.post(url, files=form_data + files, headers=_headers(), timeout=120)
+    # 关闭文件句柄
+    for _, (_, fh, _) in files:
+        fh.close()
+    data = _check(resp, "批量上传样本")
+    result = data.get("result", {})
+    print(f"  批量上传样本成功  count={len(file_paths)}")
+    return result
+
+
+# ============================================================
+# 批量下载样本（ZIP）
+# REST API: POST /api/app-api/sip/platform/v2/category/sample/batch_download
+# ============================================================
+
+def batch_download_category_samples(
+    workspace_id: str,
+    category_id: str,
+    sample_ids: list = None,
+    save_path: str = "samples.zip",
+) -> str:
+    """
+    批量下载样本文件，打包为 ZIP。不传 sample_ids 时下载全部样本。
+
+    Args:
+        sample_ids: 要下载的样本 ID 列表（可选，不传则下载全部）
+        save_path:  ZIP 保存路径
+
+    Returns:
+        保存路径
+    """
+    url = f"{BASE_URL}/api/app-api/sip/platform/v2/category/sample/batch_download"
+    payload = {
+        "workspace_id": workspace_id,
+        "category_id":  category_id,
+    }
+    if sample_ids:
+        payload["sample_ids"] = sample_ids
+    resp = requests.post(url, json=payload, headers=_headers(), timeout=120)
+    if resp.status_code != 200:
+        raise RuntimeError(f"批量下载样本失败: HTTP {resp.status_code}")
+    with open(save_path, "wb") as f:
+        f.write(resp.content)
+    print(f"  批量下载样本成功  save_path={save_path}  size={len(resp.content)} bytes")
+    return save_path
+
+
 def display_result(file_result: dict):
     """格式化输出文件的分类结果和字段抽取结果。"""
     print("\n" + "=" * 60)

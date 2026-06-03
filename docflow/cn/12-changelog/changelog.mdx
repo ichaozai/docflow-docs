@@ -8,9 +8,9 @@ description: "DocFlow API 文档更新记录"
 
 ### API
 
-#### 批量操作接口
+#### 主推接口升级
 
-一次请求处理多个对象，减少网络往返。所有批量接口均为「全有全无」语义——任一项校验失败则整批拒绝，不会出现部分成功。
+一次请求处理多个对象，减少网络往返。所有接口均为「全有全无」语义——任一项校验失败则整批拒绝，不会出现部分成功。
 
 | 接口 | 说明 |
 |------|------|
@@ -18,8 +18,21 @@ description: "DocFlow API 文档更新记录"
 | [更新文件类别字段](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E6%9B%B4%E6%96%B0%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E5%AD%97%E6%AE%B5) | 更新字段配置 |
 | [新增文件类别表格](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E6%96%B0%E5%A2%9E%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E8%A1%A8%E6%A0%BC) | 创建表格（支持内嵌字段一站式创建） |
 | [更新文件类别表格](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E6%9B%B4%E6%96%B0%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E8%A1%A8%E6%A0%BC) | 更新表格配置 |
-| [批量上传类别样本](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E6%A0%B7%E6%9C%AC/%E6%89%B9%E9%87%8F%E4%B8%8A%E4%BC%A0%E7%B1%BB%E5%88%AB%E6%A0%B7%E6%9C%AC) | 多文件上传样本（上限 20） |
-| [批量下载类别样本（ZIP）](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E6%A0%B7%E6%9C%AC/%E6%89%B9%E9%87%8F%E4%B8%8B%E8%BD%BD%E7%B1%BB%E5%88%AB%E6%A0%B7%E6%9C%AC%EF%BC%88ZIP%EF%BC%89) | 打包下载样本 |
+| [上传类别样本](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E6%A0%B7%E6%9C%AC/%E4%B8%8A%E4%BC%A0%E7%B1%BB%E5%88%AB%E6%A0%B7%E6%9C%AC) | 多文件上传样本（上限 20） |
+| [下载类别样本（ZIP）](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E6%A0%B7%E6%9C%AC/%E4%B8%8B%E8%BD%BD%E7%B1%BB%E5%88%AB%E6%A0%B7%E6%9C%AC%EF%BC%88ZIP%EF%BC%89) | 打包下载样本 |
+
+#### 接口废弃
+
+以下单个操作接口已标记为 `deprecated`，目前仍可正常调用，但后续不再维护。请迁移到上方对应的主推接口：
+
+| 废弃接口 | 替代接口 |
+|---------|---------|
+| 新增单个文件类别字段 | [新增文件类别字段](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E6%96%B0%E5%A2%9E%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E5%AD%97%E6%AE%B5) |
+| 更新单个文件类别字段 | [更新文件类别字段](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E6%9B%B4%E6%96%B0%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E5%AD%97%E6%AE%B5) |
+| 新增单个文件类别表格 | [新增文件类别表格](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E6%96%B0%E5%A2%9E%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E8%A1%A8%E6%A0%BC) |
+| 更新单个文件类别表格 | [更新文件类别表格](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E6%9B%B4%E6%96%B0%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E8%A1%A8%E6%A0%BC) |
+| 上传单个类别样本 | [上传类别样本](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E6%A0%B7%E6%9C%AC/%E4%B8%8A%E4%BC%A0%E7%B1%BB%E5%88%AB%E6%A0%B7%E6%9C%AC) |
+| 下载单个类别样本 | [下载类别样本（ZIP）](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB%E6%A0%B7%E6%9C%AC/%E4%B8%8B%E8%BD%BD%E7%B1%BB%E5%88%AB%E6%A0%B7%E6%9C%AC%EF%BC%88ZIP%EF%BC%89) |
 
 #### 一站式创建分类
 

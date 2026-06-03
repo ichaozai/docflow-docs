@@ -72,9 +72,9 @@ The SDK supports multiple authentication methods (priority: constructor paramete
 | ----------------------------- | -------------------------- | -------------------------------------------- |
 | `client.workspace`            | Workspace Management       | `create()`, `list()`, `get()`, `update()`, `delete()`, `iter()` |
 | `client.category`             | Category Management        | `create()`, `list()`, `get()`, `update()`, `delete()`, `iter()` |
-| `client.category.fields`      | Category Field Management  | `add()`, `list()`, `update()`, `delete()` |
-| `client.category.tables`      | Category Table Management  | `add()`, `list()`, `update()`, `delete()` |
-| `client.category.samples`     | Category Sample Management | `upload()`, `list()`, `download()`, `delete()` |
+| `client.category.fields`      | Category Field Management  | `batch_add()`, `list()`, `batch_update()`, `delete()` |
+| `client.category.tables`      | Category Table Management  | `batch_add()`, `list()`, `batch_update()`, `delete()` |
+| `client.category.samples`     | Category Sample Management | `batch_upload()`, `list()`, `download()`, `delete()` |
 | `client.file`                 | File Management & Recognition | `upload()`, `fetch()`, `download()`, `delete()` |
 | `client.review`               | Intelligent Review Rule Management | `create_repo()`, `create_group()`, `create_rule()`, `submit_task()` |
 
@@ -131,8 +131,8 @@ ws.update(
 
 # Method chaining: operate on categories
 cat = ws.category("456")
-cat.fields.add(name="Invoice Number")
-cat.tables.add(name="Product Details Table")
+cat.fields.batch_add(fields=[{"name": "Invoice Number"}])
+cat.tables.batch_add(tables=[{"name": "Product Details Table"}])
 ```
 
 ## Document Category Management
@@ -187,11 +187,11 @@ print(f"Category ID: {category.category_id}")
 
 # After creating category, add tables
 cat = client.workspace("123").category(category.category_id)
-table = cat.tables.add(
-    name="Product Details Table",
-    prompt="Extract product name, specification, quantity, unit price, amount"
-)
-print(f"Table ID: {table.table_id}")
+result = cat.tables.batch_add(tables=[{
+    "name": "Product Details Table",
+    "prompt": "Extract product name, specification, quantity, unit price, amount"
+}])
+print(f"Table ID: {result.tables[0].table_id}")
 ```
 
 ### Field Management
@@ -200,20 +200,20 @@ print(f"Table ID: {table.table_id}")
 # Bind category context
 cat = client.workspace("123").category("456")
 
-# Add field
-field = cat.fields.add(name="Tax Rate", description="Tax rate percentage")
+# Batch add fields
+cat.fields.batch_add(fields=[
+    {"name": "Tax Rate", "description": "Tax rate percentage"}
+])
 
 # Get field list
 fields = cat.fields.list()
 for field in fields.fields:
     print(f"{field.id}: {field.name}")
 
-# Update field
-cat.fields.update(
-    field_id="789",
-    name="Tax Rate (%)",
-    required=True
-)
+# Batch update fields
+cat.fields.batch_update(fields=[
+    {"field_id": "789", "name": "Tax Rate (%)", "required": True}
+])
 
 # Delete field
 cat.fields.delete(field_ids=["789"])
@@ -222,25 +222,16 @@ cat.fields.delete(field_ids=["789"])
 ### Table Management
 
 ```python theme={null}
-# Add table
-table = cat.tables.add(
-    name="Product Details Table",
-    prompt="Extract product name, specification, quantity, unit price, amount"
-)
-
-# Add column fields to table
-cat.fields.add(
-    table_id=table.table_id,
-    name="Product Name"
-)
-cat.fields.add(
-    table_id=table.table_id,
-    name="Quantity"
-)
-cat.fields.add(
-    table_id=table.table_id,
-    name="Unit Price"
-)
+# Batch add table (with column fields)
+cat.tables.batch_add(tables=[{
+    "name": "Product Details Table",
+    "prompt": "Extract product name, specification, quantity, unit price, amount",
+    "fields": [
+        {"name": "Product Name"},
+        {"name": "Quantity"},
+        {"name": "Unit Price"}
+    ]
+}])
 
 # Get table list
 tables = cat.tables.list()
@@ -251,8 +242,10 @@ for table in tables.tables:
 ### Sample Management
 
 ```python theme={null}
-# Upload sample file
-sample = cat.samples.upload(file="/path/to/invoice_sample.pdf")
+# Batch upload sample files
+cat.samples.batch_upload(files=[
+    "/path/to/invoice_sample.pdf"
+])
 
 # Get sample list
 samples = cat.samples.list()

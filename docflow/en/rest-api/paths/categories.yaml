@@ -589,12 +589,14 @@
 # Deprecated - use batch endpoints above
 /api/app-api/sip/platform/v2/category/fields/add:
   post:
-    deprecated: true
-    summary: Add Single File Category Field (Deprecated)
-    description: Add a new field under the specified file category, supports both regular fields and table fields
+    summary: Add Single File Category Field
+    description: |
+      Add a new field under the specified file category, supports both regular fields and table fields
+
+      > ⚠️ This endpoint is still available but will no longer be maintained. Please use [Add File Category Fields](/api-reference/file-category/add-file-category-fields) instead.
     operationId: addCategoryField
     tags:
-      - File Category
+      - Deprecated
     requestBody:
       required: true
       content:
@@ -696,12 +698,14 @@
 
 /api/app-api/sip/platform/v2/category/fields/update:
   post:
-    deprecated: true
-    summary: Update Single File Category Field (Deprecated)
-    description: Update the specified file category field, supports both regular fields and table fields
+    summary: Update Single File Category Field
+    description: |
+      Update the specified file category field, supports both regular fields and table fields
+
+      > ⚠️ This endpoint is still available but will no longer be maintained. Please use [Update File Category Fields](/api-reference/file-category/update-file-category-fields) instead.
     operationId: updateCategoryField
     tags:
-      - File Category
+      - Deprecated
     requestBody:
       required: true
       content:
@@ -962,12 +966,14 @@
 # Deprecated - use batch endpoints above
 /api/app-api/sip/platform/v2/category/tables/add:
   post:
-    deprecated: true
-    summary: Add Single File Category Table (Deprecated)
-    description: Add a new table under the specified file category
+    summary: Add Single File Category Table
+    description: |
+      Add a new table under the specified file category
+
+      > ⚠️ This endpoint is still available but will no longer be maintained. Please use [Add File Category Tables](/api-reference/file-category/add-file-category-tables) instead.
     operationId: addCategoryTable
     tags:
-      - File Category
+      - Deprecated
     requestBody:
       required: true
       content:
@@ -1060,12 +1066,14 @@
 
 /api/app-api/sip/platform/v2/category/tables/update:
   post:
-    deprecated: true
-    summary: Update Single File Category Table (Deprecated)
-    description: Update the specified file category table information
+    summary: Update Single File Category Table
+    description: |
+      Update the specified file category table information
+
+      > ⚠️ This endpoint is still available but will no longer be maintained. Please use [Update File Category Tables](/api-reference/file-category/update-file-category-tables) instead.
     operationId: updateCategoryTable
     tags:
-      - File Category
+      - Deprecated
     requestBody:
       required: true
       content:
@@ -1130,11 +1138,14 @@
 # Category sample endpoints
 /api/app-api/sip/platform/v2/category/sample/upload:
   post:
-    summary: Upload Category Sample
-    description: Upload a sample file for the specified file category
+    summary: Upload Single Category Sample
+    description: |
+      Upload a sample file for the specified file category
+
+      > ⚠️ This endpoint is still available but will no longer be maintained. Please use [Upload Category Samples](/api-reference/file-category-samples/upload-category-samples) instead.
     operationId: uploadCategorySample
     tags:
-      - File Category Samples
+      - Deprecated
     requestBody:
       required: true
       content:
@@ -1190,8 +1201,8 @@
 
 /api/app-api/sip/platform/v2/category/sample/batch_upload:
   post:
-    summary: Batch Upload Category Samples
-    description: Batch upload multiple sample files for the specified file category, maximum 20 files
+    summary: Upload Category Samples
+    description: Upload multiple sample files for the specified file category, maximum 20 files
     operationId: batchUploadCategorySample
     tags:
       - File Category Samples
@@ -1312,11 +1323,14 @@
 
 /api/app-api/sip/platform/v2/category/sample/download:
   get:
-    summary: Download Category Sample
-    description: Download the specified category sample file
+    summary: Download Single Category Sample
+    description: |
+      Download the specified category sample file
+
+      > ⚠️ This endpoint is still available but will no longer be maintained. Please use [Download Category Samples (ZIP)](/api-reference/file-category-samples/download-category-samples-zip) instead.
     operationId: downloadCategorySample
     tags:
-      - File Category Samples
+      - Deprecated
     parameters:
       - name: workspace_id
         in: query
@@ -1350,8 +1364,8 @@
 
 /api/app-api/sip/platform/v2/category/sample/batch_download:
   post:
-    summary: Batch Download Category Samples (ZIP)
-    description: Batch download multiple sample files of the specified category, packaged as a ZIP file. When sample_ids is not provided, all samples are downloaded.
+    summary: Download Category Samples (ZIP)
+    description: Download multiple sample files of the specified category, packaged as a ZIP file. When sample_ids is not provided, all samples are downloaded.
     operationId: batchDownloadCategorySample
     tags:
       - File Category Samples

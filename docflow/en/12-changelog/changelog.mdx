@@ -8,9 +8,9 @@ description: "DocFlow API documentation changelog"
 
 ### API
 
-#### Batch Operations
+#### Primary Endpoints Upgrade
 
-Process multiple objects in a single request. All batch endpoints use **all-or-nothing** semantics — if any item fails validation, the entire batch is rejected.
+Process multiple objects in a single request. All endpoints use **all-or-nothing** semantics — if any item fails validation, the entire batch is rejected.
 
 | Endpoint | Description |
 |----------|-------------|
@@ -18,8 +18,21 @@ Process multiple objects in a single request. All batch endpoints use **all-or-n
 | [Update File Category Fields](/api-reference/file-category/update-file-category-fields) | Update multiple field configs |
 | [Add File Category Tables](/api-reference/file-category/add-file-category-tables) | Create tables (with embedded fields) |
 | [Update File Category Tables](/api-reference/file-category/update-file-category-tables) | Update multiple table configs |
-| [Batch Upload Category Samples](/api-reference/file-category-samples/batch-upload-category-samples) | Upload multiple samples (up to 20) |
-| [Batch Download Category Samples (ZIP)](/api-reference/file-category-samples/batch-download-category-samples-zip) | Download samples as ZIP |
+| [Upload Category Samples](/api-reference/file-category-samples/upload-category-samples) | Upload multiple samples (up to 20) |
+| [Download Category Samples (ZIP)](/api-reference/file-category-samples/download-category-samples-zip) | Download samples as ZIP |
+
+#### Deprecated Endpoints
+
+The following single-item endpoints are now marked as `deprecated`. They remain functional but will no longer be maintained. Please migrate to the primary endpoints above:
+
+| Deprecated | Replacement |
+|-----------|-------------|
+| Add Single File Category Field | [Add File Category Fields](/api-reference/file-category/add-file-category-fields) |
+| Update Single File Category Field | [Update File Category Fields](/api-reference/file-category/update-file-category-fields) |
+| Add Single File Category Table | [Add File Category Tables](/api-reference/file-category/add-file-category-tables) |
+| Update Single File Category Table | [Update File Category Tables](/api-reference/file-category/update-file-category-tables) |
+| Upload Single Category Sample | [Upload Category Samples](/api-reference/file-category-samples/upload-category-samples) |
+| Download Single Category Sample | [Download Category Samples (ZIP)](/api-reference/file-category-samples/download-category-samples-zip) |
 
 #### One-Step Category Creation
 

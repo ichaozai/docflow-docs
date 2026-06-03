@@ -1279,141 +1279,12 @@ paths:
                             description: Table list (with table fields)
                             items:
                               $ref: '#/components/schemas/CategoryTable'
-  /api/app-api/sip/platform/v2/category/fields/add:
-    post:
-      deprecated: true
-      summary: Add Single File Category Field (Deprecated)
-      description: >-
-        Add a new field under the specified file category, supports both regular
-        fields and table fields
-      operationId: addCategoryField
-      tags:
-        - File Category
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              allOf:
-                - $ref: '#/components/schemas/CategoryFieldConfig'
-              type: object
-              properties:
-                workspace_id:
-                  type: string
-                  description: Workspace ID
-                  example: '1234567890'
-                category_id:
-                  type: string
-                  description: File category ID
-                  example: '1234567890'
-                table_id:
-                  type: string
-                  description: >
-                    Table ID
-
-                    - Not provided or empty: Creates a regular field, result
-                    appears in result.fields
-
-                    - Provide table ID: Creates a table field under the
-                    specified table, result appears in result.tables[].fields
-                  example: '1234567890'
-                extract_model:
-                  type: string
-                  description: >
-                    Optional, field-level extraction model, only supported for
-                    regular fields (not table fields), defaults to Model 1
-
-                    - Model 1: Fast speed with stable extraction results
-
-                    - Model 2: Suitable for complex document understanding
-
-                    - Model 3: VLM, suitable for simple extraction
-                  example: Model 1
-                  enum:
-                    - Model 1
-                    - Model 2
-                    - Model 3
-                with_detail:
-                  type: boolean
-                  description: >
-                    Whether to return full details. When true, the response
-                    includes complete field info.
-
-                    When not set or false, only field_id is returned.
-              required:
-                - workspace_id
-                - category_id
-                - name
-      responses:
-        '200':
-          description: Successfully added file category field
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/CodeMessage'
-                  - type: object
-                    properties:
-                      result:
-                        type: object
-                        properties:
-                          field_id:
-                            type: string
-                            description: Newly created field ID
-                            example: '1234567890'
-                          name:
-                            type: string
-                            description: Field name (returned when with_detail=true)
-                          description:
-                            type: string
-                            description: Field description (returned when with_detail=true)
-                          prompt:
-                            type: string
-                            description: >-
-                              Semantic extraction prompt (returned when
-                              with_detail=true)
-                          use_prompt:
-                            type: boolean
-                            description: >-
-                              Whether to use semantic prompt (returned when
-                              with_detail=true)
-                          alias:
-                            type: array
-                            items:
-                              type: string
-                            description: Field aliases (returned when with_detail=true)
-                          identity:
-                            type: string
-                            description: Export field name (returned when with_detail=true)
-                          multi_value:
-                            type: boolean
-                            description: >-
-                              Whether multi-value extraction is enabled
-                              (returned when with_detail=true)
-                          duplicate_value_distinct:
-                            type: boolean
-                            description: >-
-                              Whether deduplication is enabled (returned when
-                              with_detail=true)
-                          transform_settings:
-                            $ref: '#/components/schemas/TransformSettings'
-                          extract_model:
-                            type: string
-                            description: >-
-                              Field extraction model (returned when
-                              with_detail=true)
-                          enabled:
-                            type: integer
-                            description: Enabled status (returned when with_detail=true)
-                        required:
-                          - field_id
   /api/app-api/sip/platform/v2/category/fields/batch_add:
     post:
       summary: Add File Category Fields
       description: >-
-        Add multiple fields under the specified file category.
-        All-or-nothing semantics — if any field fails validation, the entire
-        batch fails.
+        Add multiple fields under the specified file category. All-or-nothing
+        semantics — if any field fails validation, the entire batch fails.
       operationId: batchAddCategoryFields
       tags:
         - File Category
@@ -1456,7 +1327,7 @@ paths:
                 - fields
       responses:
         '200':
-          description: Successfully batch added fields
+          description: Successfully added fields
           content:
             application/json:
               schema:
@@ -1500,67 +1371,12 @@ paths:
                               type: integer
                           required:
                             - field_id
-  /api/app-api/sip/platform/v2/category/fields/update:
-    post:
-      deprecated: true
-      summary: Update Single File Category Field (Deprecated)
-      description: >-
-        Update the specified file category field, supports both regular fields
-        and table fields
-      operationId: updateCategoryField
-      tags:
-        - File Category
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              allOf:
-                - $ref: '#/components/schemas/CategoryFieldUpdateItem'
-              type: object
-              properties:
-                workspace_id:
-                  type: string
-                  description: Workspace ID
-                  example: '1234567890'
-                category_id:
-                  type: string
-                  description: File category ID
-                  example: '1234567890'
-                table_id:
-                  type: string
-                  description: >
-                    Table ID
-
-                    - Not required for regular fields
-
-                    - Required for table fields (provide the table ID the field
-                    belongs to)
-                  example: '1234567890'
-                with_detail:
-                  type: boolean
-                  description: >
-                    Whether to return full details. When true, the response
-                    returns the updated field's complete info.
-
-                    When not set or false, only code/msg is returned.
-              required:
-                - workspace_id
-                - category_id
-                - field_id
-      responses:
-        '200':
-          description: Successfully updated file category field
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CodeMessage'
   /api/app-api/sip/platform/v2/category/fields/batch_update:
     post:
       summary: Update File Category Fields
       description: >-
-        Update multiple fields under the specified file category.
-        All-or-nothing semantics.
+        Update multiple fields under the specified file category. All-or-nothing
+        semantics.
       operationId: batchUpdateCategoryFields
       tags:
         - File Category
@@ -1594,7 +1410,7 @@ paths:
                 - fields
       responses:
         '200':
-          description: Successfully batch updated fields
+          description: Successfully updated fields
           content:
             application/json:
               schema:
@@ -1753,117 +1569,12 @@ paths:
                                   type: string
                                   description: Table-level extraction model
                                   example: Model 1
-  /api/app-api/sip/platform/v2/category/tables/add:
-    post:
-      deprecated: true
-      summary: Add Single File Category Table (Deprecated)
-      description: Add a new table under the specified file category
-      operationId: addCategoryTable
-      tags:
-        - File Category
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                workspace_id:
-                  type: string
-                  description: Workspace ID
-                  example: '1234567890'
-                category_id:
-                  type: string
-                  description: File category ID
-                  example: '1234567890'
-                name:
-                  type: string
-                  description: Table name
-                  example: Table 1
-                  maxLength: 50
-                prompt:
-                  type: string
-                  description: Table semantic extraction prompt
-                  example: 'Extract item name, quantity and amount from each row'
-                  maxLength: 200
-                collect_from_multi_table:
-                  type: boolean
-                  description: Merge multiple tables
-                  example: true
-                extract_model:
-                  type: string
-                  description: |
-                    Table-level extraction model
-                    - Model 1: Fast speed with stable extraction results
-                    - Model 2: Suitable for complex document understanding
-                    - Model 3: VLM, suitable for simple extraction
-                  example: Model 1
-                  enum:
-                    - Model 1
-                    - Model 2
-                    - Model 3
-                with_detail:
-                  type: boolean
-                  description: >
-                    Whether to return full details. When true, the response
-                    includes complete table info (with field list).
-
-                    When not set or false, only table_id is returned.
-              required:
-                - workspace_id
-                - category_id
-                - name
-      responses:
-        '200':
-          description: Successfully added file category table
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/CodeMessage'
-                  - type: object
-                    properties:
-                      result:
-                        type: object
-                        properties:
-                          table_id:
-                            type: string
-                            description: New table ID
-                            example: '1234567890'
-                          name:
-                            type: string
-                            description: Table name (returned when with_detail=true)
-                          description:
-                            type: string
-                            description: Table description (returned when with_detail=true)
-                          prompt:
-                            type: string
-                            description: >-
-                              Table semantic extraction prompt (returned when
-                              with_detail=true)
-                          collect_from_multi_table:
-                            type: boolean
-                            description: >-
-                              Merge multiple tables (returned when
-                              with_detail=true)
-                          extract_model:
-                            type: string
-                            description: >-
-                              Table-level extraction model (returned when
-                              with_detail=true)
-                          fields:
-                            type: array
-                            description: Table field list (returned when with_detail=true)
-                            items:
-                              $ref: '#/components/schemas/CategoryField'
-                        required:
-                          - table_id
   /api/app-api/sip/platform/v2/category/tables/batch_add:
     post:
       summary: Add File Category Tables
       description: >-
-        Add multiple tables under the specified file category (supports
-        nested fields). All-or-nothing semantics.
+        Add multiple tables under the specified file category (supports nested
+        fields). All-or-nothing semantics.
       operationId: batchAddCategoryTables
       tags:
         - File Category
@@ -1899,7 +1610,7 @@ paths:
                 - tables
       responses:
         '200':
-          description: Successfully batch added tables
+          description: Successfully added tables
           content:
             application/json:
               schema:
@@ -1936,82 +1647,12 @@ paths:
                                 $ref: '#/components/schemas/CategoryField'
                           required:
                             - table_id
-  /api/app-api/sip/platform/v2/category/tables/update:
-    post:
-      deprecated: true
-      summary: Update Single File Category Table (Deprecated)
-      description: Update the specified file category table information
-      operationId: updateCategoryTable
-      tags:
-        - File Category
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                workspace_id:
-                  type: string
-                  description: Workspace ID
-                  example: '1234567890'
-                category_id:
-                  type: string
-                  description: File category ID
-                  example: '1234567890'
-                table_id:
-                  type: string
-                  description: Table ID
-                  example: '1234567890'
-                name:
-                  type: string
-                  description: Table name
-                  example: Table 1
-                  maxLength: 50
-                prompt:
-                  type: string
-                  description: Table semantic extraction prompt
-                  example: 'Extract item name, quantity and amount from each row'
-                  maxLength: 200
-                collect_from_multi_table:
-                  type: boolean
-                  description: >-
-                    Merge multiple tables, Model 3 does not support multi-table
-                    merge
-                  example: true
-                extract_model:
-                  type: string
-                  description: |
-                    Table-level extraction model
-                    - Model 1: Fast speed with stable extraction results
-                    - Model 2: Suitable for complex document understanding
-                    - Model 3: VLM, suitable for simple extraction
-                  example: Model 1
-                  enum:
-                    - Model 1
-                    - Model 2
-                    - Model 3
-                with_detail:
-                  type: boolean
-                  description: Whether to return full details
-              required:
-                - workspace_id
-                - category_id
-                - table_id
-                - collect_from_multi_table
-      responses:
-        '200':
-          description: Successfully updated file category table
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CodeMessage'
   /api/app-api/sip/platform/v2/category/tables/batch_update:
     post:
       summary: Update File Category Tables
       description: >-
-        Update multiple tables under the specified file category.
-        All-or-nothing semantics.
+        Update multiple tables under the specified file category. All-or-nothing
+        semantics.
       operationId: batchUpdateCategoryTables
       tags:
         - File Category
@@ -2042,7 +1683,7 @@ paths:
                 - tables
       responses:
         '200':
-          description: Successfully batch updated tables
+          description: Successfully updated tables
           content:
             application/json:
               schema:
@@ -2088,75 +1729,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CodeMessage'
-  /api/app-api/sip/platform/v2/category/sample/upload:
-    post:
-      summary: Upload Category Sample
-      description: Upload a sample file for the specified file category
-      operationId: uploadCategorySample
-      tags:
-        - File Category Samples
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                workspace_id:
-                  type: string
-                  description: Workspace ID
-                  example: '1234567890'
-                category_id:
-                  type: string
-                  description: File category ID
-                  example: '1234567890'
-                file:
-                  type: string
-                  format: binary
-                  description: Sample file
-                with_detail:
-                  type: boolean
-                  description: >
-                    Whether to return full details. When true, the response
-                    additionally returns the full sample list of this category.
-
-                    When not set or false, only sample_id is returned.
-              required:
-                - workspace_id
-                - category_id
-                - file
-      responses:
-        '200':
-          description: Successfully uploaded category sample
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/CodeMessage'
-                  - type: object
-                    properties:
-                      result:
-                        type: object
-                        properties:
-                          sample_id:
-                            type: string
-                            description: Sample ID
-                            example: '1234567890'
-                          samples:
-                            type: array
-                            description: >-
-                              Full sample list of this category (returned when
-                              with_detail=true)
-                            items:
-                              $ref: '#/components/schemas/CategorySample'
-                        required:
-                          - sample_id
   /api/app-api/sip/platform/v2/category/sample/batch_upload:
     post:
-      summary: Batch Upload Category Samples
+      summary: Upload Category Samples
       description: >-
-        Batch upload multiple sample files for the specified file category,
-        maximum 20 files
+        Upload multiple sample files for the specified file category, maximum 20
+        files
       operationId: batchUploadCategorySample
       tags:
         - File Category Samples
@@ -2277,50 +1855,12 @@ paths:
                             type: array
                             items:
                               $ref: '#/components/schemas/CategorySample'
-  /api/app-api/sip/platform/v2/category/sample/download:
-    get:
-      summary: Download Category Sample
-      description: Download the specified category sample file
-      operationId: downloadCategorySample
-      tags:
-        - File Category Samples
-      parameters:
-        - name: workspace_id
-          in: query
-          description: Workspace ID
-          required: true
-          schema:
-            type: string
-            example: '1234567890'
-        - name: category_id
-          in: query
-          description: File category ID
-          required: true
-          schema:
-            type: string
-            example: '1234567890'
-        - name: sample_id
-          in: query
-          description: Sample ID
-          required: true
-          schema:
-            type: string
-            example: '1234567890'
-      responses:
-        '200':
-          description: Successfully downloaded sample file
-          content:
-            application/octet-stream:
-              schema:
-                type: string
-                format: binary
   /api/app-api/sip/platform/v2/category/sample/batch_download:
     post:
-      summary: Batch Download Category Samples (ZIP)
+      summary: Download Category Samples (ZIP)
       description: >-
-        Batch download multiple sample files of the specified category, packaged
-        as a ZIP file. When sample_ids is not provided, all samples are
-        downloaded.
+        Download multiple sample files of the specified category, packaged as a
+        ZIP file. When sample_ids is not provided, all samples are downloaded.
       operationId: batchDownloadCategorySample
       tags:
         - File Category Samples
@@ -3224,6 +2764,498 @@ paths:
               schema:
                 allOf:
                   - $ref: '#/components/schemas/CodeMessage'
+  /api/app-api/sip/platform/v2/category/fields/add:
+    post:
+      summary: Add Single File Category Field
+      description: >
+        Add a new field under the specified file category, supports both regular
+        fields and table fields
+
+
+        > ⚠️ This endpoint is still available but will no longer be maintained.
+        Please use [Add File Category
+        Fields](/api-reference/file-category/add-file-category-fields) instead.
+      operationId: addCategoryField
+      tags:
+        - Deprecated
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/CategoryFieldConfig'
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: Workspace ID
+                  example: '1234567890'
+                category_id:
+                  type: string
+                  description: File category ID
+                  example: '1234567890'
+                table_id:
+                  type: string
+                  description: >
+                    Table ID
+
+                    - Not provided or empty: Creates a regular field, result
+                    appears in result.fields
+
+                    - Provide table ID: Creates a table field under the
+                    specified table, result appears in result.tables[].fields
+                  example: '1234567890'
+                extract_model:
+                  type: string
+                  description: >
+                    Optional, field-level extraction model, only supported for
+                    regular fields (not table fields), defaults to Model 1
+
+                    - Model 1: Fast speed with stable extraction results
+
+                    - Model 2: Suitable for complex document understanding
+
+                    - Model 3: VLM, suitable for simple extraction
+                  example: Model 1
+                  enum:
+                    - Model 1
+                    - Model 2
+                    - Model 3
+                with_detail:
+                  type: boolean
+                  description: >
+                    Whether to return full details. When true, the response
+                    includes complete field info.
+
+                    When not set or false, only field_id is returned.
+              required:
+                - workspace_id
+                - category_id
+                - name
+      responses:
+        '200':
+          description: Successfully added file category field
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          field_id:
+                            type: string
+                            description: Newly created field ID
+                            example: '1234567890'
+                          name:
+                            type: string
+                            description: Field name (returned when with_detail=true)
+                          description:
+                            type: string
+                            description: Field description (returned when with_detail=true)
+                          prompt:
+                            type: string
+                            description: >-
+                              Semantic extraction prompt (returned when
+                              with_detail=true)
+                          use_prompt:
+                            type: boolean
+                            description: >-
+                              Whether to use semantic prompt (returned when
+                              with_detail=true)
+                          alias:
+                            type: array
+                            items:
+                              type: string
+                            description: Field aliases (returned when with_detail=true)
+                          identity:
+                            type: string
+                            description: Export field name (returned when with_detail=true)
+                          multi_value:
+                            type: boolean
+                            description: >-
+                              Whether multi-value extraction is enabled
+                              (returned when with_detail=true)
+                          duplicate_value_distinct:
+                            type: boolean
+                            description: >-
+                              Whether deduplication is enabled (returned when
+                              with_detail=true)
+                          transform_settings:
+                            $ref: '#/components/schemas/TransformSettings'
+                          extract_model:
+                            type: string
+                            description: >-
+                              Field extraction model (returned when
+                              with_detail=true)
+                          enabled:
+                            type: integer
+                            description: Enabled status (returned when with_detail=true)
+                        required:
+                          - field_id
+  /api/app-api/sip/platform/v2/category/fields/update:
+    post:
+      summary: Update Single File Category Field
+      description: >
+        Update the specified file category field, supports both regular fields
+        and table fields
+
+
+        > ⚠️ This endpoint is still available but will no longer be maintained.
+        Please use [Update File Category
+        Fields](/api-reference/file-category/update-file-category-fields)
+        instead.
+      operationId: updateCategoryField
+      tags:
+        - Deprecated
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/CategoryFieldUpdateItem'
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: Workspace ID
+                  example: '1234567890'
+                category_id:
+                  type: string
+                  description: File category ID
+                  example: '1234567890'
+                table_id:
+                  type: string
+                  description: >
+                    Table ID
+
+                    - Not required for regular fields
+
+                    - Required for table fields (provide the table ID the field
+                    belongs to)
+                  example: '1234567890'
+                with_detail:
+                  type: boolean
+                  description: >
+                    Whether to return full details. When true, the response
+                    returns the updated field's complete info.
+
+                    When not set or false, only code/msg is returned.
+              required:
+                - workspace_id
+                - category_id
+                - field_id
+      responses:
+        '200':
+          description: Successfully updated file category field
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeMessage'
+  /api/app-api/sip/platform/v2/category/tables/add:
+    post:
+      summary: Add Single File Category Table
+      description: >
+        Add a new table under the specified file category
+
+
+        > ⚠️ This endpoint is still available but will no longer be maintained.
+        Please use [Add File Category
+        Tables](/api-reference/file-category/add-file-category-tables) instead.
+      operationId: addCategoryTable
+      tags:
+        - Deprecated
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: Workspace ID
+                  example: '1234567890'
+                category_id:
+                  type: string
+                  description: File category ID
+                  example: '1234567890'
+                name:
+                  type: string
+                  description: Table name
+                  example: Table 1
+                  maxLength: 50
+                prompt:
+                  type: string
+                  description: Table semantic extraction prompt
+                  example: 'Extract item name, quantity and amount from each row'
+                  maxLength: 200
+                collect_from_multi_table:
+                  type: boolean
+                  description: Merge multiple tables
+                  example: true
+                extract_model:
+                  type: string
+                  description: |
+                    Table-level extraction model
+                    - Model 1: Fast speed with stable extraction results
+                    - Model 2: Suitable for complex document understanding
+                    - Model 3: VLM, suitable for simple extraction
+                  example: Model 1
+                  enum:
+                    - Model 1
+                    - Model 2
+                    - Model 3
+                with_detail:
+                  type: boolean
+                  description: >
+                    Whether to return full details. When true, the response
+                    includes complete table info (with field list).
+
+                    When not set or false, only table_id is returned.
+              required:
+                - workspace_id
+                - category_id
+                - name
+      responses:
+        '200':
+          description: Successfully added file category table
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          table_id:
+                            type: string
+                            description: New table ID
+                            example: '1234567890'
+                          name:
+                            type: string
+                            description: Table name (returned when with_detail=true)
+                          description:
+                            type: string
+                            description: Table description (returned when with_detail=true)
+                          prompt:
+                            type: string
+                            description: >-
+                              Table semantic extraction prompt (returned when
+                              with_detail=true)
+                          collect_from_multi_table:
+                            type: boolean
+                            description: >-
+                              Merge multiple tables (returned when
+                              with_detail=true)
+                          extract_model:
+                            type: string
+                            description: >-
+                              Table-level extraction model (returned when
+                              with_detail=true)
+                          fields:
+                            type: array
+                            description: Table field list (returned when with_detail=true)
+                            items:
+                              $ref: '#/components/schemas/CategoryField'
+                        required:
+                          - table_id
+  /api/app-api/sip/platform/v2/category/tables/update:
+    post:
+      summary: Update Single File Category Table
+      description: >
+        Update the specified file category table information
+
+
+        > ⚠️ This endpoint is still available but will no longer be maintained.
+        Please use [Update File Category
+        Tables](/api-reference/file-category/update-file-category-tables)
+        instead.
+      operationId: updateCategoryTable
+      tags:
+        - Deprecated
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: Workspace ID
+                  example: '1234567890'
+                category_id:
+                  type: string
+                  description: File category ID
+                  example: '1234567890'
+                table_id:
+                  type: string
+                  description: Table ID
+                  example: '1234567890'
+                name:
+                  type: string
+                  description: Table name
+                  example: Table 1
+                  maxLength: 50
+                prompt:
+                  type: string
+                  description: Table semantic extraction prompt
+                  example: 'Extract item name, quantity and amount from each row'
+                  maxLength: 200
+                collect_from_multi_table:
+                  type: boolean
+                  description: >-
+                    Merge multiple tables, Model 3 does not support multi-table
+                    merge
+                  example: true
+                extract_model:
+                  type: string
+                  description: |
+                    Table-level extraction model
+                    - Model 1: Fast speed with stable extraction results
+                    - Model 2: Suitable for complex document understanding
+                    - Model 3: VLM, suitable for simple extraction
+                  example: Model 1
+                  enum:
+                    - Model 1
+                    - Model 2
+                    - Model 3
+                with_detail:
+                  type: boolean
+                  description: Whether to return full details
+              required:
+                - workspace_id
+                - category_id
+                - table_id
+                - collect_from_multi_table
+      responses:
+        '200':
+          description: Successfully updated file category table
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeMessage'
+  /api/app-api/sip/platform/v2/category/sample/upload:
+    post:
+      summary: Upload Single Category Sample
+      description: >
+        Upload a sample file for the specified file category
+
+
+        > ⚠️ This endpoint is still available but will no longer be maintained.
+        Please use [Upload Category
+        Samples](/api-reference/file-category-samples/upload-category-samples)
+        instead.
+      operationId: uploadCategorySample
+      tags:
+        - Deprecated
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                workspace_id:
+                  type: string
+                  description: Workspace ID
+                  example: '1234567890'
+                category_id:
+                  type: string
+                  description: File category ID
+                  example: '1234567890'
+                file:
+                  type: string
+                  format: binary
+                  description: Sample file
+                with_detail:
+                  type: boolean
+                  description: >
+                    Whether to return full details. When true, the response
+                    additionally returns the full sample list of this category.
+
+                    When not set or false, only sample_id is returned.
+              required:
+                - workspace_id
+                - category_id
+                - file
+      responses:
+        '200':
+          description: Successfully uploaded category sample
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          sample_id:
+                            type: string
+                            description: Sample ID
+                            example: '1234567890'
+                          samples:
+                            type: array
+                            description: >-
+                              Full sample list of this category (returned when
+                              with_detail=true)
+                            items:
+                              $ref: '#/components/schemas/CategorySample'
+                        required:
+                          - sample_id
+  /api/app-api/sip/platform/v2/category/sample/download:
+    get:
+      summary: Download Single Category Sample
+      description: >
+        Download the specified category sample file
+
+
+        > ⚠️ This endpoint is still available but will no longer be maintained.
+        Please use [Download Category Samples
+        (ZIP)](/api-reference/file-category-samples/download-category-samples-zip)
+        instead.
+      operationId: downloadCategorySample
+      tags:
+        - Deprecated
+      parameters:
+        - name: workspace_id
+          in: query
+          description: Workspace ID
+          required: true
+          schema:
+            type: string
+            example: '1234567890'
+        - name: category_id
+          in: query
+          description: File category ID
+          required: true
+          schema:
+            type: string
+            example: '1234567890'
+        - name: sample_id
+          in: query
+          description: Sample ID
+          required: true
+          schema:
+            type: string
+            example: '1234567890'
+      responses:
+        '200':
+          description: Successfully downloaded sample file
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
 components:
   parameters:
     WorkspaceId:

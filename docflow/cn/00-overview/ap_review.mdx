@@ -206,7 +206,7 @@ description: "在财务部门 AP（应付账款）审单业务场景中，调用
 |---|---|---|---|
 | `create_workspace` | `createWorkspace` | `POST /workspace/create` | 创建工作空间，返回 workspace_id |
 | `create_category` | `createCategory` | `POST /category/create` | 创建文件类别并上传样本，返回 category_id |
-| `add_category_field` | `addCategoryField` | `POST /category/fields/add` | 为已有类别追加字段（用于添加表格字段） |
+| `batch_add_category_fields` | `batchAddCategoryFields` | `POST /category/fields/batch_add` | 为已有类别追加字段（用于添加表格字段） |
 | `upload_file` | `uploadFile` | `POST /file/upload` | 异步上传文件，返回 batch_number，需轮询获取结果 |
 | `upload_file_sync` | `uploadFileSync` | `POST /file/upload/sync` | 同步上传文件，直接返回抽取结果，无需轮询 |
 | `create_rule_repo` | `createRuleRepo` | `POST /review/rule_repo/create` | 创建审核规则库，返回 repo_id |
@@ -230,7 +230,7 @@ description: "在财务部门 AP（应付账款）审单业务场景中，调用
 
 <AccordionGroup>
   <Accordion defaultOpen title="步骤 2：创建含表格字段的文件类别">
-    国内票-数电票、采购合同和入库单均包含表格字段，需先创建类别（配置基本信息字段），再通过 `add_category_field` 追加表格字段。`table_id=-1` 表示挂载到默认表格。
+    国内票-数电票、采购合同和入库单均包含表格字段，需先创建类别（配置基本信息字段），再通过 `batch_add_category_fields` 追加表格字段。`table_id=-1` 表示挂载到默认表格。
 
     <Tabs>
       <Tab title="Python">
@@ -245,8 +245,10 @@ description: "在财务部门 AP（应付账款）审单业务场景中，调用
                 # ... 其余基本信息字段
             ],
         )
-        for field_name in ["商品名称", "规格型号", "单位", "数量", "单价", "金额", "税率", "税额"]:
-            add_category_field(workspace_id, invoice_id, field_name, table_id=-1)
+        batch_add_category_fields(workspace_id, invoice_id, table_id=-1, fields=[
+            {"name": "商品名称"}, {"name": "规格型号"}, {"name": "单位"},
+            {"name": "数量"}, {"name": "单价"}, {"name": "金额"}, {"name": "税率"}, {"name": "税额"}
+        ])
 
         # 采购合同（基本信息字段 + 表格字段）
         contract_id = create_category(
@@ -255,8 +257,9 @@ description: "在财务部门 AP（应付账款）审单业务场景中，调用
             sample_file_path="sample_contract.pdf",
             fields=[{"name": "编号"}, {"name": "甲方"}, {"name": "乙方"}, ...],
         )
-        for field_name in ["产品型号", "产品说明", "单价", "数量", "金额"]:
-            add_category_field(workspace_id, contract_id, field_name, table_id=-1)
+        batch_add_category_fields(workspace_id, contract_id, table_id=-1, fields=[
+            {"name": "产品型号"}, {"name": "产品说明"}, {"name": "单价"}, {"name": "数量"}, {"name": "金额"}
+        ])
         ```
       </Tab>
       <Tab title="Java">
@@ -264,15 +267,13 @@ description: "在财务部门 AP（应付账款）审单业务场景中，调用
         // 国内票-数电票
         String invoiceId = createCategory(workspaceId, "国内票-数电票",
                 SAMPLE_DIR + "/sample_invoice.pdf", invoiceFields, "增值税电子发票（数电票）...");
-        for (String fn : new String[]{"商品名称", "规格型号", "单位", "数量", "单价", "金额", "税率", "税额"}) {
-            addCategoryField(workspaceId, invoiceId, fn, "-1");
-        }
+        batchAddCategoryFields(workspaceId, invoiceId, "-1",
+                List.of("商品名称", "规格型号", "单位", "数量", "单价", "金额", "税率", "税额"));
         // 采购合同
         String contractId = createCategory(workspaceId, "采购合同",
                 SAMPLE_DIR + "/sample_contract.pdf", contractFields, "");
-        for (String fn : new String[]{"产品型号", "产品说明", "单价", "数量", "金额"}) {
-            addCategoryField(workspaceId, contractId, fn, "-1");
-        }
+        batchAddCategoryFields(workspaceId, contractId, "-1",
+                List.of("产品型号", "产品说明", "单价", "数量", "金额"));
         ```
       </Tab>
     </Tabs>

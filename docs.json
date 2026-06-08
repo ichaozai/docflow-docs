@@ -442,21 +442,13 @@
                   {
                     "group": "基盤機能 - 文書解析",
                     "pages": [
-                      "docflow/ja/00-overview/atomic_capabilities_parse",
-                      "xparse/parse-quickstart",
-                      "xparse/parse-getjson",
-                      "xparse/parse-gettable",
-                      "xparse/parse-getcatalog",
-                      "xparse/parse-getimage",
-                      "xparse/parse-getpos",
-                      "xparse/parse-max-workers"
+                      "docflow/ja/00-overview/atomic_capabilities_parse"
                     ]
                   },
                   {
                     "group": "基盤機能 - エンティティ抽出",
                     "pages": [
-                      "docflow/ja/00-overview/atomic_capabilities_extract",
-                      "xparse/entity-extraction"
+                      "docflow/ja/00-overview/atomic_capabilities_extract"
                     ]
                   }
                 ]

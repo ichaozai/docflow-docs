@@ -1,15 +1,15 @@
 ReviewTaskStatus:
   type: integer
   description: |
-    Task status
-    - 0: Pending
-    - 1: Approved
-    - 2: Review failed
-    - 3: Reviewing
-    - 4: Rejected
-    - 5: Recognizing
-    - 6: In Queue
-    - 7: Recognition Failed
+    タスクステータス
+    - 0: 保留中
+    - 1: 承認済み
+    - 2: レビュー失敗
+    - 3: レビュー中
+    - 4: 却下
+    - 5: 認識中
+    - 6: キュー待ち
+    - 7: 認識失敗
   enum:
     - 0
     - 1
@@ -25,21 +25,21 @@ ReviewRuleProperties:
   properties:
     group_id:
       type: string
-      description: Review rule group ID
+      description: レビュー規則グループ ID
       example: "31415926"
     name:
       type: string
-      description: Rule name
-      example: "Review Rule 1"
+      description: 規則名
+      example: "レビュー規則 1"
     prompt:
       type: string
-      description: Rule prompt
-      example: "Review rule prompt"
+      description: 規則プロンプト
+      example: "レビュー規則プロンプト"
     category_ids:
       type: array
       items:
         type: string
-        description: Category ID
+        description: カテゴリ ID
         example: "1234567890"
     risk_level:
       $ref: '#/RiskLevel'
@@ -53,12 +53,12 @@ ReviewRuleReferencedField:
   properties:
     category_id:
       type: string
-      description: Category ID
+      description: カテゴリ ID
       example: "1234567890"
     category_name:
       type: string
-      description: Category name
-      example: "Invoice"
+      description: カテゴリ名
+      example: "インボイス"
     fields:
       type: array
       items:
@@ -70,12 +70,12 @@ ReviewRuleReferencedField:
         properties:
           table_id:
             type: string
-            description: Table ID
+            description: テーブル ID
             example: "1234567890"
           table_name:
             type: string
-            description: Table name
-            example: "Invoice Table"
+            description: テーブル名
+            example: "インボイステーブル"
           fields:
             type: array
             items:
@@ -84,10 +84,10 @@ ReviewRuleReferencedField:
 RiskLevel:
   type: integer
   description: |
-    Risk level
-    - 10: High risk
-    - 20: Medium risk
-    - 30: Low risk
+    リスクレベル
+    - 10: 高リスク
+    - 20: 中リスク
+    - 30: 低リスク
   enum:
     - 10
     - 20
@@ -98,26 +98,26 @@ ReviewRuleField:
   properties:
     field_id:
       type: string
-      description: Field ID
+      description: フィールド ID
       example: "1234567890"
     field_name:
       type: string
-      description: Field name
-      example: "Invoice Code"
+      description: フィールド名
+      example: "インボイスコード"
 
 ReviewRuleRepo:
   type: object
   properties:
     repo_id:
       type: string
-      description: Review rule repo ID
+      description: レビュー規則リポジトリ ID
       example: "31415926"
     name:
       type: string
-      description: Review rule repo name
-      example: "Review Rule Repo 1"
+      description: レビュー規則リポジトリ名
+      example: "レビュー規則リポジトリ 1"
     groups:
-      description: List of rule groups under the rule repo
+      description: 規則リポジトリ配下の規則グループリスト
       type: array
       items:
         $ref: '#/ReviewRuleGroup'
@@ -125,7 +125,7 @@ ReviewRuleRepo:
       type: array
       items:
         type: string
-        description: Category ID
+        description: カテゴリ ID
         example: "1234567890"
 
 ReviewRuleGroup:
@@ -133,12 +133,12 @@ ReviewRuleGroup:
   properties:
     group_id:
       type: string
-      description: Rule group ID
+      description: 規則グループ ID
       example: "31415926"
     name:
       type: string
-      description: Rule group name
-      example: "Review Rule Group 1"
+      description: 規則グループ名
+      example: "レビュー規則グループ 1"
     rules:
       type: array
       items:
@@ -149,21 +149,21 @@ ReviewRule:
   properties:
     rule_id:
       type: string
-      description: Rule ID
+      description: 規則 ID
       example: "31415926"
     name:
       type: string
-      description: Rule name
-      example: "Review Rule 1"
+      description: 規則名
+      example: "レビュー規則 1"
     prompt:
       type: string
-      description: Rule prompt
-      example: "Review rule prompt"
+      description: 規則プロンプト
+      example: "レビュー規則プロンプト"
     category_ids:
       type: array
       items:
         type: string
-        description: Category ID
+        description: カテゴリ ID
         example: "1234567890"
     risk_level:
       $ref: '#/RiskLevel'

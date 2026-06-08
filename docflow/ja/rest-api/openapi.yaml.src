@@ -20,7 +20,7 @@ tags:
     description: ファイルカテゴリサンプル関連 API
   - name: スマートレビュー
     description: スマートレビュー関連 API
-  - name: Deprecated
+  - name: 非推奨
     description: 非推奨 API
 
 paths:

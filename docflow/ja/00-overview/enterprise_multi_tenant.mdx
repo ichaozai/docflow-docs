@@ -1,19 +1,19 @@
 ---
 title: "エンタープライズマルチテナント"
-description: "API call instructions for enterprise multi-tenant scenarios"
+description: "エンタープライズマルチテナントシナリオでの API 呼び出し方法"
 ---
 
-## 01 Enterprise Multi-Tenant 概要
+## 01 エンタープライズマルチテナントの概要
 
-When a user belongs to multiple enterprise accounts and needs to operate or access content under a specific enterprise account, it is necessary to add `x-ti-enterprise-id` in the HTTP header to specify the enterprise ID.
+ユーザーが複数のエンタープライズアカウントに所属しており、特定のエンタープライズアカウント配下の内容を操作またはアクセスする必要がある場合は、HTTP ヘッダーに `x-ti-enterprise-id` を追加してエンタープライズ ID を指定する必要があります。
 
-If the user only belongs to one enterprise, this HTTP header is not required.
+ユーザーが 1 つのエンタープライズにのみ所属している場合、この HTTP ヘッダーは不要です。
 
-## 02 Usage
+## 02 使用方法
 
-### 2.1 Multiple Enterprises Scenario
+### 2.1 複数エンタープライズのシナリオ
 
-When a user belongs to multiple enterprises, it is necessary to add `x-ti-enterprise-id` in the request header to specify the enterprise to operate:
+ユーザーが複数のエンタープライズに所属している場合は、リクエストヘッダーに `x-ti-enterprise-id` を追加し、操作対象のエンタープライズを指定する必要があります。
 
 <CodeGroup>
 
@@ -27,9 +27,9 @@ curl \
 
 </CodeGroup>
 
-### 2.2 Single Enterprise Scenario
+### 2.2 単一エンタープライズのシナリオ
 
-If the user only belongs to one enterprise, it is not necessary to add the `x-ti-enterprise-id` header:
+ユーザーが 1 つのエンタープライズにのみ所属している場合、`x-ti-enterprise-id` ヘッダーを追加する必要はありません。
 
 <CodeGroup>
 
@@ -42,6 +42,6 @@ curl \
 
 </CodeGroup>
 
-## 03 Get Enterprise ID
+## 03 エンタープライズ ID を取得
 
-To obtain the enterprise ID, please refer to the [Enterprise ID の取得方法](../100-faq/get_enterprise_id) documentation.
+エンタープライズ ID の取得方法については、[Enterprise ID の取得方法](../100-faq/get_enterprise_id) を参照してください。

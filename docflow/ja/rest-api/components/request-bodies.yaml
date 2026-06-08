@@ -1,5 +1,5 @@
 FileUploadRequestBody:
-  description: File upload request body
+  description: ファイルアップロードのリクエストボディ
   required: true
   content:
     multipart/form-data:
@@ -15,12 +15,12 @@ FileUploadRequestBody:
         properties:
           urls:
             description: |
-              File URL list
-              Supports up to 10 file URLs per upload, each file maximum 100MB
+              ファイル URL リスト
+              1 回のアップロードで最大 10 個のファイル URL に対応し、各ファイルは最大 100MB です
             type: array
             items:
               type: string
-              description: File URL
+              description: ファイル URL
               example: https://example.com/file.pdf
               pattern: ^https?://.*$
             maxItems: 10

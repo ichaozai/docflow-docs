@@ -1,7 +1,7 @@
 WorkspaceId:
   name: workspace_id
   in: query
-  description: Workspace ID
+  description: ワークスペース ID
   required: true
   schema:
     type: string
@@ -20,7 +20,7 @@ BatchNumber:
   name: batch_number
   in: query
   description: |
-    Batch Number.            You can upload multiple times with the same batch number, and later retrieve processing results for multiple files in that batch using the batch number.            If the value is empty, the system automatically generates a string up to 20 characters long.
+    バッチ番号。同じバッチ番号で複数回アップロードできます。後からそのバッチ番号を使って、同一バッチ内の複数ファイルの処理結果を取得できます。値が空の場合、システムが最大 20 文字の文字列を自動生成します。
   required: false
   schema:
     type: string
@@ -29,7 +29,7 @@ BatchNumber:
 AutoVerifyVat:
   name: auto_verify_vat
   in: query
-  description: Whether to automatically verify VAT invoice
+  description: VAT インボイスを自動検証するかどうか
   required: false
   schema:
     type: boolean
@@ -38,7 +38,7 @@ AutoVerifyVat:
 SplitFlag:
   name: split_flag
   in: query
-  description: Whether to perform file splitting
+  description: ファイル分割を実行するかどうか
   required: false
   schema:
     type: boolean
@@ -47,7 +47,7 @@ SplitFlag:
 CropFlag:
   name: crop_flag
   in: query
-  description: Whether to perform multi-image cropping
+  description: 複数画像クロップを実行するかどうか
   required: false
   schema:
     type: boolean
@@ -57,7 +57,7 @@ TargetProcess:
   name: target_process
   in: query
   description: |
-    Target processing type.            Optional values:            - classify: Classification            - extract: Extraction
+    対象処理タイプ。指定可能な値: - classify: 分類 - extract: 抽出
   required: false
   schema:
     type: string
@@ -69,7 +69,7 @@ TargetProcess:
 ParserRemoveWatermark:
   name: parser_remove_watermark
   in: query
-  description: Remove watermark (0 no, 1 yes)
+  description: "透かし除去（0: いいえ、1: はい）"
   required: false
   schema:
     type: integer
@@ -78,7 +78,7 @@ ParserRemoveWatermark:
 ParserCropDewarp:
   name: parser_crop_dewarp
   in: query
-  description: Crop and dewarp (0 no, 1 yes)
+  description: "クロップと歪み補正（0: いいえ、1: はい）"
   required: false
   schema:
     type: integer
@@ -87,7 +87,7 @@ ParserCropDewarp:
 ParserApplyMerge:
   name: parser_apply_merge
   in: query
-  description: Merge cross-page paragraphs and tables (0 no, 1 yes)
+  description: "ページをまたぐ段落とテーブルを結合（0: いいえ、1: はい）"
   required: false
   schema:
     type: integer
@@ -96,7 +96,7 @@ ParserApplyMerge:
 ParserFormulaLevel:
   name: parser_formula_level
   in: query
-  description: Formula recognition level (0 recognizes both display and inline formulas, 1 recognizes display formulas only, 2 recognizes no formulas)
+  description: "数式認識レベル（0: 表示数式とインライン数式を認識、1: 表示数式のみ認識、2: 数式を認識しない）"
   required: false
   schema:
     type: integer
@@ -105,7 +105,7 @@ ParserFormulaLevel:
 ParserTableTextSplitMode:
   name: parser_table_text_split_mode
   in: query
-  description: Split text blocks crossed by table lines (0 no, 1 yes)
+  description: "テーブル罫線と交差するテキストブロックを分割（0: いいえ、1: はい）"
   required: false
   schema:
     type: integer
@@ -114,7 +114,7 @@ ParserTableTextSplitMode:
 ParserDpi:
   name: parser_dpi
   in: query
-  description: File resolution (144 default, 216 high precision)
+  description: "ファイル解像度（144: デフォルト、216: 高精度）"
   required: false
   schema:
     type: integer
@@ -127,10 +127,10 @@ ParserParseMode:
   name: parser_parse_mode
   in: query
   description: |
-    Parse mode
-    - `auto`: Automatic (default)
-    - `scan`: Scanned document mode
-    - `vlm`: VLM mode
+    解析モード
+    - `auto`: 自動（デフォルト）
+    - `scan`: スキャン文書モード
+    - `vlm`: VLM モード
   required: false
   schema:
     type: string
@@ -142,7 +142,7 @@ ParserParseMode:
 ParserPdfPwd:
   name: parser_pdf_pwd
   in: query
-  description: PDF file password for decrypting encrypted PDF files
+  description: 暗号化 PDF ファイルを復号するための PDF パスワード
   required: false
   schema:
     type: string
@@ -150,7 +150,7 @@ ParserPdfPwd:
 WithTaskDetailUrl:
   name: with_task_detail_url
   in: query
-  description: Whether to return the task details page URL
+  description: タスク詳細ページ URL を返すかどうか
   required: false
   schema:
     type: boolean

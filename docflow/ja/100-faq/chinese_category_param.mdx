@@ -1,42 +1,42 @@
 ---
 title: "中国語カテゴリパラメータの受け渡し問題"
-description: "Solving issues with Chinese or other non-English category names in API parameter passing"
+description: "中国語またはその他の非英語カテゴリ名を API パラメータとして渡す際の問題を解決します"
 ---
 
-When using the DocFlow API, if the file category name contains Chinese or other non-English characters, passing the raw category name may cause the following issues:
+DocFlow API を使用する際、ファイルカテゴリ名に中国語またはその他の非英語文字が含まれている場合、カテゴリ名をそのまま渡すと次の問題が発生する可能性があります。
 
-1. **Category matching failure**: API cannot correctly recognize Chinese category names
-2. **Processing errors**: Returns error messages that the category does not exist
-3. **Encoding issues**: URL parameters containing non-ASCII characters cause request failures
+1. **カテゴリのマッチング失敗**: API が中国語カテゴリ名を正しく認識できない
+2. **処理エラー**: カテゴリが存在しないというエラーメッセージが返される
+3. **エンコード問題**: 非 ASCII 文字を含む URL パラメータによりリクエストが失敗する
 
-## Solution
+## 解決方法
 
-### 1. URL Encoding Processing
+### 1. URL エンコード処理
 
-Chinese category names must be UTF-8 URL encoded before being passed as API parameters.
+中国語カテゴリ名は、API パラメータとして渡す前に UTF-8 URL エンコードする必要があります。
 
-#### Python Example
+#### Python の例
 
 ```python
 import urllib.parse
 
-# Original Chinese category name
+# 元の中国語カテゴリ名
 category = "发票"
 
-# URL encoding
+# URL エンコード
 encoded_category = urllib.parse.quote(category)
-print(f"After encoding: {encoded_category}")
-# Output: %E5%8F%91%E7%A5%A8
+print(f"エンコード後: {encoded_category}")
+# 出力: %E5%8F%91%E7%A5%A8
 ```
 
-#### JavaScript Example
+#### JavaScript の例
 
 ```javascript
-// Original Chinese category name
+// 元の中国語カテゴリ名
 const category = "发票";
 
-// URL encoding
+// URL エンコード
 const encodedCategory = encodeURIComponent(category);
-console.log(`After encoding: ${encodedCategory}`);
-// Output: %E5%8F%91%E7%A5%A8
+console.log(`エンコード後: ${encodedCategory}`);
+// 出力: %E5%8F%91%E7%A5%A8
 ```

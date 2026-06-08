@@ -55,7 +55,7 @@ host = "https://docflow.textin.com"
 url = "/api/app-api/sip/platform/v2/file/upload"
 params = { "workspace_id":workspace_id}
 
-# determine filepath is image or pdf
+# ファイルパスが画像か PDF かを判定
 if filepath.endswith(".jpg") or filepath.endswith(".jpeg") or filepath.endswith(".png"):
     mime_type = "image/jpeg"
 else:
@@ -81,11 +81,11 @@ resp_json = json.loads(resp.text)
 
 </CodeGroup>
 
-After executing the above example code with your parameters, you can view the just uploaded file in the corresponding workspace on the Web page.
+上記のサンプルコードに実際のパラメータを設定して実行すると、Web ページ上の対応するワークスペースで、アップロードしたファイルを確認できます。
 
-## 2.3 Retrieve Results
+## 2.3 結果を取得
 
-Example:
+例:
 
 <CodeGroup>
 
@@ -111,9 +111,7 @@ params = { "workspace_id":workspace_id}
 
 resp = requests.get(url=f"{host}{url}",
                     params=params,
-                    data=payload.to_string(),
-                    headers={"Content-Type": payload.content_type,
-                             "x-ti-app-id": ti_app_id,
+                    headers={"x-ti-app-id": ti_app_id,
                              "x-ti-secret-code": ti_secret_code,
                              })
 
@@ -123,22 +121,22 @@ resp_json = json.loads(resp.text)
 
 </CodeGroup>
 
-## 2.4 Result Parsing
+## 2.4 結果の解析
 
-The retrieved result is in JSON format containing the processed document results. You can obtain the document parsing, classification, and extraction results by parsing the JSON.
+取得した結果は、処理済みドキュメントの結果を含む JSON 形式です。JSON を解析することで、ドキュメント解析、分類、抽出の結果を取得できます。
 
 <Tip>
-  The example below shows the extracted document fields in the output. For parsing of other information, refer to the relevant sections of this documentation.
+  以下の例では、出力内の抽出済みドキュメントフィールドを表示しています。その他の情報の解析については、このドキュメントの関連セクションを参照してください。
 </Tip>
 
 <CodeGroup>
 
 ```python Python icon=python lines
-# Continuing from the "Retrieve Results" example code
+# 「結果を取得」のサンプルコードから続けて実行します
 
 for file in resp_json["result"]["files"]:
   for item in file["data"]["items"]:
-    print(f"{item["key"]}: {item["value"]}")
+    print(f"{item['key']}: {item['value']}")
 ```
 
 </CodeGroup>

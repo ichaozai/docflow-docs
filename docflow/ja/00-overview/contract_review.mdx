@@ -1,0 +1,581 @@
+---
+title: "契約レビューシナリオ（ワークスペース未作成）"
+description: "契約レビューシナリオで、DocFlow API を利用して財務条項、法務コンプライアンス、文面品質を自動レビューする方法。"
+---
+
+<Tip>
+  このページでは**購買契約書レビュー**为業務场景、演示如何API で 完了从作成スペース、設定カテゴリ、アップロード契約書ファイル、抽出結果を取得到スマートレビュー的完全なフロー。
+  DocFlow を初めて利用する場合は、このページを読む前に [Web ページ](https://docflow.textin.com/) で基本機能を確認することをおすすめします。
+</Tip>
+
+## 01 シナリオ概要
+
+在企業契約書管理業務中、法務部门必要对每一份契約書进行系统性レビュー、主要关注以下三个维度:
+
+- **财务条款レビュー**:金額计算与大小写整合性、税率コンプライアンス性、支払条件与比例明确性、违约金/滞纳金合理性など。
+- **法務コンプライアンスレビュー**:必备条款完全性、签约主体情報整合性、权力义务明确性、知识产权归属など。
+- **文面品質レビュー**:数字计算チェック、跨条款ロジック整合性、错别字与语义歧义检测など。
+
+DocFlow により、您只需将契約書ファイル（PDF 或 Word）アップロード到ワークスペース、系统即可自動完了**構造化フィールド抽出**、并依据预设規則リポジトリ进行**全面スマートレビュー**、显著降低人工逐条审阅的时间成本。
+
+<Note>
+  契約書レビュー场景只需設定**一个ファイルカテゴリ**（購買契約書）、但规则较多（3 个規則グループ、22 条规则）、覆盖契約書レビュー的常见风险点。
+</Note>
+
+## 02 業務フロー
+
+![契約書レビュー業務フロー](../images/expense_reimbursement_flow.png)
+
+<Note>
+  **ワークスペース、ファイルカテゴリ和レビュー規則リポジトリ只需設定一次**、后续可持续复用——直接アップロード新的契約書ファイル并作成新的レビュータスク即可。本例为演示完全なフロー、将設定步骤和処理步骤放在同一段コード中実行。
+</Note>
+
+## 03 前提条件
+
+1. [TextIn コンソール](https://www.textin.com/console/dashboard/setting) にログインし、`x-ti-app-id` と `x-ti-secret-code` を取得します
+2. [サンプルファイル](https://github.com/intsig-textin/docflow-docs/tree/master/examples/sample_files/contract_review)、或使用自己的購買契約書ファイル
+
+## 04 カテゴリとフィールド設定
+
+本例只設定一个ファイルカテゴリ:**購買契約書**。契約書是复杂的长文書、フィールド较多、建议使用 **Model 2（复杂文書理解）** 以获得更准确的抽出效果。
+
+<AccordionGroup>
+  <Accordion defaultOpen title="購買契約書（サンプル:sample_contract.docx）">
+    購買契約書包含主体情報、标的条款、财务条款、法務条款など多个维度的フィールド、全部为**基本情報フィールド**:
+
+    <Tip>
+      例サンプルファイル（Word 文書）、可クリック[ダウンロード確認](https://dllf.intsig.net/download/2026/CustomService/sample_contract.docx)。
+    </Tip>
+
+    | フィールド名 | タイプ |
+    |---|---|
+    | <span style={{color: "#3b82f6"}}>契約書番号</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>契約書名称</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>签订日付</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>生效条件</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>甲方全称</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>甲方统一社会信用コード</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>甲方联系方法</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>甲方地址</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>乙方全称</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>乙方统一社会信用コード</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>乙方联系方法</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>乙方地址</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>乙方法定代表人/授权委托人</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>标的名称</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>标的規格型番/标准</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>标的技术/质量标准</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>标的数量/服务范围</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>含税合計金額（大写）</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>不含税金額</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>税額</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>税率</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>請求書条款</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>支払方法</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>支払条件</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>支払比例</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>账期</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>受取口座情報</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>履约期限</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>履约地点</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>交付/検収标准与フロー</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>违约责任</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>免责条款</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>争议解决方法</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>契約書解除与终止条件</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>保密条款</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>知识产权声明</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>契約書份数</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>附件清单</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>签约人签字/盖章</span> | 基本情報フィールド |
+  </Accordion>
+</AccordionGroup>
+
+## 05 レビュー規則設定
+
+本例的レビュー規則リポジトリ包含 **3 个規則グループ、22 条レビュー規則**、全面覆盖契約書レビュー的常见风险:
+
+<AccordionGroup>
+  <Accordion defaultOpen title="規則グループ 1:财务条款レビュー（12 条规则）">
+    | 規則名 | リスクレベル | レビュー条件 |
+    |---|---|---|
+    | <span style={{color: "#3b82f6"}}>连带责任条款</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | 若存在三方关系（発行方/支払方/签约主体不一致）、契約書须明确各方债权债务关系 |
+    | <span style={{color: "#3b82f6"}}>履约保证金条款</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | 若约定保证金/质保金、须明确退还条件、时间节点及不予退还的情形 |
+    | <span style={{color: "#3b82f6"}}>滞纳金/违约金合理性</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | 逾期支払或逾期交付的违约金日费率 ≤ 0.05% |
+    | <span style={{color: "#3b82f6"}}>検収/交付标准明确性</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | 契約書须明确交付完了的判定标准 |
+    | <span style={{color: "#3b82f6"}}>币别整合性</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | 契約書全文涉及金額的币别须前后一致 |
+    | <span style={{color: "#3b82f6"}}>支払方法明确性</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | 支払方法须为銀行转账、承兑汇票或第三方支付之一 |
+    | <span style={{color: "#3b82f6"}}>支払条件明确性</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | 支払节点和期限须明确 |
+    | <span style={{color: "#3b82f6"}}>税率合理性</span> | <span style={{color: "#ef4444"}}>●</span> 高リスク | 税率须为有效值（6%/9%/13%/1%/3%/免税/0%）且与契約書标的タイプ照合 |
+    | <span style={{color: "#3b82f6"}}>支払比例合計</span> | <span style={{color: "#ef4444"}}>●</span> 高リスク | 分阶段支払比例合計须など于 100% |
+    | <span style={{color: "#3b82f6"}}>プロダクト明细合計与合計金額整合性</span> | <span style={{color: "#ef4444"}}>●</span> 高リスク | 各明细行単価×数量=金額、すべての明細行金額合計=契約書合計金額（許容±0.01元） |
+    | <span style={{color: "#3b82f6"}}>金額コンプライアンス检测</span> | <span style={{color: "#ef4444"}}>●</span> 高リスク | 不含税金額×税率=税額。不含税金額+税額=含税合計金額（許容±0.01元尾差） |
+    | <span style={{color: "#3b82f6"}}>契約書金額大小写整合性</span> | <span style={{color: "#ef4444"}}>●</span> 高リスク | 大小写金額须一致。仅有大写时チェック中文金額书写规范 |
+  </Accordion>
+  <Accordion defaultOpen title="規則グループ 2:法務コンプライアンスレビュー（9 条规则）">
+    | 規則名 | リスクレベル | レビュー条件 |
+    |---|---|---|
+    | <span style={{color: "#3b82f6"}}>不可抗力条款</span> | <span style={{color: "#22c55e"}}>●</span> 低リスク | 须包含不可抗力条款且定义清晰（范围、通知时限、责任豁免方法） |
+    | <span style={{color: "#3b82f6"}}>保密条款完全性</span> | <span style={{color: "#22c55e"}}>●</span> 低リスク | 保密情報定义、保密期限、违约责任三要素齐全 |
+    | <span style={{color: "#3b82f6"}}>知识产权归属</span> | <span style={{color: "#22c55e"}}>●</span> 低リスク | 涉及技术开发/软件开发时、须有明确的知识产权归属条款 |
+    | <span style={{color: "#3b82f6"}}>违约金上限合理性</span> | <span style={{color: "#22c55e"}}>●</span> 低リスク | 违约金须設定上限（如不超过契約書合計金額的 20%） |
+    | <span style={{color: "#3b82f6"}}>违约对など性チェック</span> | <span style={{color: "#22c55e"}}>●</span> 低リスク | 甲乙双方逾期违约金比例差异不超过设定阈值（如 ≥50% 时标记） |
+    | <span style={{color: "#3b82f6"}}>契約書日付合理性</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | 签订日付 ≤ 生效日付 ≤ 到期日付。生效日付不得早于当前日付 |
+    | <span style={{color: "#3b82f6"}}>签约主体名称整合性</span> | <span style={{color: "#ef4444"}}>●</span> 高リスク | 契約書首部、尾部签章处、正文中的签约主体名称须完全一致 |
+    | <span style={{color: "#3b82f6"}}>签约主体情報完全性</span> | <span style={{color: "#ef4444"}}>●</span> 高リスク | 甲乙双方的名称、地址、联系方法均不空 |
+    | <span style={{color: "#3b82f6"}}>必备条款完全性</span> | <span style={{color: "#ef4444"}}>●</span> 高リスク | 须包含主体情報、标的、数量、价款、履行期限、违约责任、争议解决など必备条款 |
+  </Accordion>
+  <Accordion defaultOpen title="規則グループ 3:文面品質与整合性レビュー（3 条规则）">
+    | 規則名 | リスクレベル | レビュー条件 |
+    |---|---|---|
+    | <span style={{color: "#3b82f6"}}>数字计算チェック</span> | <span style={{color: "#22c55e"}}>●</span> 低リスク | 単価×数量=金額（每行）。各分项金額合計=契約書合計金額 |
+    | <span style={{color: "#3b82f6"}}>内部整合性检测</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | 跨条款ロジック无矛盾:支払条件与交付条款不冲突、金額前后一致、期限起止合理 |
+    | <span style={{color: "#3b82f6"}}>错别字/语义错误检测</span> | <span style={{color: "#22c55e"}}>●</span> 低リスク | 检测错别字、用词不当、语义歧义 |
+  </Accordion>
+</AccordionGroup>
+
+## 06 コード構成
+
+例コード将完全な的七步フロー放在一起実行。在实际生产中、**ステップ 1、2、5 只需执行一次**。后续レビュー新契約書时、只需重复**ステップ 3、4、6、7**、直接复用已有設定即可。参见 [契約書レビュー场景（已完了設定）](./contract_review_already_configured)。
+
+例コード中的函数分为两类、理解この一点有助于对照 API 文書进行调试和扩展。
+
+### 2 種類の関数
+
+**REST API 呼び出し関数** — 各関数は API エンドポイントを直接ラップします、函数パラメータ与接口文書一一对应:
+
+| 関数（Python） | メソッド（Java） | 対応する API エンドポイント | 説明 |
+|---|---|---|---|
+| `create_workspace` | `createWorkspace` | `POST /workspace/create` | 作成ワークスペース、workspace_id を返す |
+| `create_category` | `createCategory` | `POST /category/create` | 作成ファイルカテゴリ并アップロードサンプル、category_id を返す |
+| `upload_file` | `uploadFile` | `POST /file/upload` | 非同期でファイルをアップロードし、batch_number を返します。結果取得にはポーリングが必要です |
+| `upload_file_sync` | `uploadFileSync` | `POST /file/upload/sync` | 同期でファイルをアップロードし、抽出結果を直接返します。ポーリングは不要です |
+| `create_rule_repo` | `createRuleRepo` | `POST /review/rule_repo/create` | 作成レビュー規則リポジトリ、repo_id を返す |
+| `create_rule_group` | `createRuleGroup` | `POST /review/rule_group/create` | 在規則リポジトリ内作成規則グループ、group_id を返す |
+| `create_rule` | `createRule` | `POST /review/rule/create` | 在規則グループ内作成レビュー規則、绑定適用カテゴリ |
+| `submit_review_task` | `submitReviewTask` | `POST /review/task/submit` | レビュータスクを送信し、レビュー task_id を返します |
+
+**補助関数** — 不直接対応する API エンドポイント、提供共通基礎能力或封装轮询/表示ロジック:
+
+| 関数（Python） | メソッド（Java） | 役割 |
+|---|---|---|
+| `_headers` | `authHeaders` | 認証リクエストヘッダーを構築 |
+| `_check` | `checkResponse` | レスポンス code を検証し、例外処理を統一 |
+| `_mime` | `mimeType` | 拡張子から MIME タイプを推定 |
+| `wait_for_result` | `waitForResult` | ループでポーリング `file/fetch`、抽出完了を待機 |
+| `display_result` | `displayResult` | 抽出結果を整形して出力 |
+| `wait_for_review` | `waitForReview` | ループでポーリング `review/task/result`、レビュー完了を待機 |
+| `display_review_result` | `displayReviewResult` | レビュー結果を整形して出力 |
+
+### ステップ別コード説明
+
+<AccordionGroup>
+  <Accordion defaultOpen title="ステップ 2:作成購買契約書カテゴリ">
+    契約書フィールド较多、直接在 `create_category` 的 `fields` パラメータ中一度だけの传入所有フィールド、不要额外调用 `batch_add_category_fields`。
+
+    <Tabs>
+      <Tab title="Python">
+        ```python
+        contract_id = create_category(
+            workspace_id=workspace_id,
+            name="購買契約書",
+            sample_file_path=os.path.join(SAMPLE_DIR, "sample_contract.docx"),
+            fields=[
+                {"name": "契約書番号"}, {"name": "契約書名称"}, {"name": "签订日付"},
+                {"name": "甲方全称"}, {"name": "乙方全称"},
+                # ... 其余フィールド
+            ],
+        )
+        ```
+      </Tab>
+      <Tab title="Java">
+        ```java
+        String contractId = createCategory(
+                workspaceId, "購買契約書",
+                SAMPLE_DIR + "/sample_contract.docx",
+                Arrays.asList(
+                        field("契約書番号"), field("契約書名称"), field("签订日付"),
+                        field("甲方全称"), field("乙方全称"),
+                        // ... 其余フィールド
+                ), "");
+        ```
+      </Tab>
+    </Tabs>
+  </Accordion>
+  <Accordion defaultOpen title="ステップ 3:処理対象ファイルをアップロード">
+    DocFlow 提供两种アップロード方法:
+
+    - **非同期アップロード** `file/upload`:立即返す `batch_number`、需配合ステップ 4 轮询 `file/fetch` 取得結果、適しています批量并行アップロード
+    - **同期アップロード** `file/upload/sync`:など待処理完了后抽出結果を直接返す（構造与 `file/fetch` 一致）、ポーリング不要、適しています对接简单或ファイル量少的场景
+
+    两者的リクエストパラメータ完全一致、仅 URL 路径不同。
+
+    **方法 1:非同期アップロード（需配合ステップ 4 轮询）**
+
+    <Tabs>
+      <Tab title="Python">
+        ```python
+        batch_number = upload_file(workspace_id, os.path.join(SAMPLE_DIR, "sample_contract.docx"))
+        ```
+      </Tab>
+      <Tab title="Java">
+        ```java
+        String batchNumber = uploadFile(workspaceId, SAMPLE_DIR + "/sample_contract.docx");
+        ```
+      </Tab>
+    </Tabs>
+
+    **方法 2:同期アップロード（抽出結果を直接返す、跳过ステップ 4）**
+
+    <Tabs>
+      <Tab title="Python">
+        ```python
+        def upload_file_sync(workspace_id: str, file_path: str) -> dict:
+            """同期アップロード:抽出結果を直接返す、ポーリング不要。"""
+            url = f"{BASE_URL}/api/app-api/sip/platform/v2/file/upload/sync"
+            with open(file_path, "rb") as f:
+                resp = requests.post(url,
+                    params={"workspace_id": workspace_id},
+                    files={"file": (os.path.basename(file_path), f, _mime(file_path))},
+                    headers=_headers(), timeout=300)
+            data = _check(resp, "ファイルを同期アップロード")
+            return data["result"]["files"][0]   # 戻り値構造は file/fetch と同じ
+
+        # 呼び出し例:アップロード即得到抽出結果、可直接用于レビュー
+        file_result = upload_file_sync(workspace_id, os.path.join(SAMPLE_DIR, "sample_contract.docx"))
+        ```
+      </Tab>
+      <Tab title="Java">
+        ```java
+        public static JsonObject uploadFileSync(String workspaceId, String filePath) throws IOException {
+            File file = new File(filePath);
+            HttpUrl url = HttpUrl.parse(BASE_URL + "/api/app-api/sip/platform/v2/file/upload/sync")
+                    .newBuilder().addQueryParameter("workspace_id", workspaceId).build();
+            MultipartBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                    .addFormDataPart("file", file.getName(),
+                            RequestBody.create(file, MediaType.get(mimeType(file.getName()))))
+                    .build();
+            Request req = new Request.Builder().url(url).headers(authHeaders()).post(body).build();
+            try (Response resp = HTTP.newCall(req).execute()) {
+                return checkResponse(resp.body().string(), "ファイルを同期アップロード")
+                        .getAsJsonObject("result").getAsJsonArray("files")
+                        .get(0).getAsJsonObject();
+            }
+        }
+
+        // 呼び出し例
+        JsonObject fileResult = uploadFileSync(workspaceId, SAMPLE_DIR + "/sample_contract.docx");
+        ```
+      </Tab>
+    </Tabs>
+  </Accordion>
+  <Accordion defaultOpen title="ステップ 4:抽出結果を取得（同期アップロード使用時は省略可能）">
+    <Note>若ステップ 3 使用了同期アップロード `file/upload/sync`、则已直接获得抽出結果、可跳过本步骤。</Note>
+
+    契約書文書较长、処理时间可能比普通票据更长（建议タイムアウト时间设为 180s）。結果中的 `fields` 数组包含所有抽出到的フィールド和值。
+
+    <Tabs>
+      <Tab title="Python">
+        ```python
+        # タイムアウト时间设为 180s（契約書文書较长）
+        file_result = wait_for_result(workspace_id, batch_number, timeout=180)
+        display_result(file_result)
+        ```
+      </Tab>
+      <Tab title="Java">
+        ```java
+        JsonObject fileResult = waitForResult(workspaceId, batchNumber, 180, 3);
+        displayResult(fileResult);
+        ```
+      </Tab>
+    </Tabs>
+  </Accordion>
+</AccordionGroup>
+
+### 抽出結果の例
+
+![抽出結果例](../images/senario_extract_result.png)
+
+### レビュー結果の例
+
+![レビュー結果例](../images/senario_review_result.png)
+
+## 07 完全なサンプルコードのダウンロード
+
+完全な可実行コード（含 Python、Java 两个版本）已内置在文書倉庫的 `examples/` 目录下:
+
+```
+examples/
+├── python/
+│   ├── contract_review.py         # Python 完全な例
+│   ├── requirements.txt
+│   └── README.md
+├── java/
+│   ├── src/main/java/com/docflow/ContractReview.java
+│   ├── pom.xml
+│   └── README.md
+└── sample_files/
+    └── contract_review/
+        └── sample_contract.docx
+```
+
+<CardGroup cols={2}>
+  <Card title="Python 例" icon="python" href="https://github.com/ichaozai/docflow-docs/tree/master/examples/python">
+    確認 Python 完全な例コード
+  </Card>
+  <Card title="Java 例" icon="java" href="https://github.com/ichaozai/docflow-docs/tree/master/examples/java">
+    確認 Java 完全な例コード
+  </Card>
+</CardGroup>
+
+## 08 サンプルの実行
+
+<Tabs>
+  <Tab title="Python">
+    **环境要求**:Python 3.8+
+
+    **1. 安装依赖**
+
+    ```bash
+    cd examples/python
+    pip install -r requirements.txt
+    ```
+
+    **2. 填写設定**
+
+    打开 `contract_review.py`、填写ファイル上部的設定项:
+
+    ```python
+    APP_ID        = "your-app-id"      # x-ti-app-id
+    SECRET_CODE   = "your-secret-code" # x-ti-secret-code
+    ```
+
+    **3. 実行**
+
+    ```bash
+    python contract_review.py
+    ```
+  </Tab>
+  <Tab title="Java">
+    **环境要求**:JDK 11+、Maven 3.6+
+
+    **1. 填写設定**
+
+    打开 `src/main/java/com/docflow/ContractReview.java`、填写ファイル上部的設定项:
+
+    ```java
+    private static final String APP_ID        = "your-app-id";
+    private static final String SECRET_CODE   = "your-secret-code";
+    ```
+
+    **2. 编译并実行**
+
+    ```bash
+    cd examples/java
+    mvn compile -q
+    mvn exec:java -Dexec.mainClass="com.docflow.ContractReview"
+    ```
+  </Tab>
+</Tabs>
+
+<Tip>
+  実行成功后、可登录 [DocFlow Web ページ](https://docflow.textin.com/)、在对应ワークスペース下直观確認契約書的フィールド抽出結果和スマートレビュー結果、便于与コード输出对照验证。
+</Tip>
+
+### 想定されるコンソール出力
+
+成功実行后、コンソール将输出如下内容（workspace_id、category_id など ID 因実行环境不同而变化）:
+
+```
+============================================================
+  DocFlow 契約書レビュー场景例
+============================================================
+[步骤1] ワークスペース作成成功  workspace_id=<workspace_id>
+[步骤2] ファイルカテゴリ作成成功  name=購買契約書  category_id=<category_id>
+
+設定完了  workspace_id=<workspace_id>
+  購買契約書: category_id=<category_id>
+
+开始処理対象ファイルをアップロード...
+[步骤3] ファイルアップロード成功  name=sample_contract.docx  batch_number=<batch_number>
+
+开始処理結果を取得...
+[步骤4] など待処理結果（batch_number=<batch_number>）......... 完了
+
+============================================================
+ファイル名   : sample_contract.docx
+分類結果 : 購買契約書
+
+── 普通フィールド ──────────────────────────
+  契約書番号                : HT-2025-001
+  契約書名称                : 智能硬件设备購買契約書
+  签订日付                : 2025-01-10
+  甲方全称                : 合合情報科技（上海）有限公司
+  乙方全称                : 上海某某科技有限公司
+  契約書金額                : 50,900.00
+  税率                   : 6%
+  乙方税番号                : 91310000XXXXXXXXXX
+  支付条款                : 検収合格后 30 日内支払
+  违约金条款               : 延迟交货每日按契約書总价 0.1% 计算违约金
+  ...（共 22 个フィールド）
+
+开始設定レビュー規則リポジトリ...
+[步骤5] 規則リポジトリ作成成功  name=契約書レビュー场景規則リポジトリ  repo_id=<repo_id>
+  規則グループ作成成功  name=基本条款完全性  group_id=<group_id>
+    规则作成成功  name=必填条款完全性チェック  rule_id=<rule_id>
+    规则作成成功  name=契約書金額与税率コンプライアンス  rule_id=<rule_id>
+    规则作成成功  name=双方主体情報完全な  rule_id=<rule_id>
+    规则作成成功  name=签订日付有效性  rule_id=<rule_id>
+  規則グループ作成成功  name=财务条款コンプライアンス性  group_id=<group_id>
+    规则作成成功  name=支払条款明确性  rule_id=<rule_id>
+    规则作成成功  name=請求書情報完全性  rule_id=<rule_id>
+    规则作成成功  name=税率コンプライアンス性  rule_id=<rule_id>
+  規則グループ作成成功  name=法務条款レビュー  group_id=<group_id>
+    规则作成成功  name=违约金条款存在性  rule_id=<rule_id>
+    规则作成成功  name=争议解决条款完全性  rule_id=<rule_id>
+    规则作成成功  name=不可抗力条款存在性  rule_id=<rule_id>
+[步骤6] レビュータスク提交成功  task_id=<task_id>
+[步骤7] など待レビュー結果（task_id=<task_id>）................... 完了
+
+============================================================
+レビュータスク状态  : レビュー通过
+规则通过数    : 11
+规则不通过数  : 0
+
+── 規則グループ:基本条款完全性 ───────────────────
+  ✓ [高リスク] 必填条款完全性チェック: レビュー通过
+    依据: 契約書番号、甲乙方全称、签订日付、契約書金額など必填条款均已填写。
+  ✓ [高リスク] 契約書金額与税率コンプライアンス: レビュー通过
+    依据: 契約書金額 50,900.00 元、税率 6%、符合增值税一般纳税人要求。
+  ✓ [中リスク] 双方主体情報完全な: レビュー通过
+    依据: 甲方"合合情報科技（上海）有限公司"与乙方"上海某某科技有限公司"情報完全な。
+  ✓ [中リスク] 签订日付有效性: レビュー通过
+    依据: 签订日付 2025-01-10 形式有效且不晚于当前日付。
+
+── 規則グループ:财务条款コンプライアンス性 ───────────────────
+  ✓ [高リスク] 支払条款明确性: レビュー通过
+    依据: 支付条款明确规定"検収合格后 30 日内支払"、条款清晰。
+  ✓ [中リスク] 請求書情報完全性: レビュー通过
+    依据: 発行情報完全な、包含税番号、発行地址など必要内容。
+  ✓ [高リスク] 税率コンプライアンス性: レビュー通过
+    依据: 契約書约定税率 6%、符合现行增值税税率规定。
+
+── 規則グループ:法務条款レビュー ───────────────────
+  ✓ [高リスク] 违约金条款存在性: レビュー通过
+    依据: 契約書包含明确的违约金条款、按延迟每日 0.1% 计算。
+  ✓ [中リスク] 争议解决条款完全性: レビュー通过
+    依据: 契約書约定争议解决方法、条款完全な。
+  ✓ [中リスク] 不可抗力条款存在性: レビュー通过
+    依据: 契約書包含不可抗力条款、明确了不可抗力事件的処理方法。
+
+============================================================
+  例実行完了
+============================================================
+```
+
+## 09 結果の説明
+
+### 抽出結果
+
+処理完了后、契約書ファイル将返す分類結果和フィールド抽出結果。フィールド抽出結果位于 `data.fields[]`、每个フィールド包含 `key`、`value` 及坐标 `position`（可用于原文高亮回显）。契約書场景使用 **Model 2（复杂文書理解）**、对长文書的深度理解和フィールド抽出效果更优。
+
+以下为購買契約書サンプルファイル的实际接口返す（来自 `file/fetch`、省略了部分 `position` 坐标）:
+
+<AccordionGroup>
+  <Accordion defaultOpen title="sample_contract.docx">
+    ```json
+    {
+      "id": "2029124607672344576",
+      "name": "sample_contract.docx",
+      "format": "docx",
+      "category": "購買契約書",
+      "recognition_status": 1,
+      "duration_ms": 12438,
+      "data": {
+        "fields": [
+          { "key": "契約書番号",   "value": "HT-2025-001" },
+          { "key": "契約書名称",   "value": "智能硬件设备購買契約書" },
+          { "key": "签订日付",   "value": "2025-01-10" },
+          { "key": "甲方全称",   "value": "合合情報科技（上海）有限公司" },
+          { "key": "乙方全称",   "value": "上海某某科技有限公司" },
+          { "key": "契約書金額",   "value": "50900.00" },
+          { "key": "税率",      "value": "6%" },
+          { "key": "乙方税番号",   "value": "91310000XXXXXXXXXX" },
+          { "key": "支付条款",   "value": "検収合格后 30 日内支払" },
+          { "key": "违约金条款", "value": "延迟交货每日按契約書总价 0.1% 计算违约金" },
+          { "key": "合作期间",   "value": "2025-01-10 至 2025-12-31" }
+        ],
+        "stamps": [],
+        "handwritings": []
+      }
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### レビュー結果
+
+レビュー完了后、可从 `review/task/result` 接口取得以下情報:
+
+- **`status`**:任务整体状态（`1`=レビュー通过、`4`=レビュー不通过、`2`=レビュー失敗）
+- **`statistics`**:规则通过数、不通过数汇总
+- **`groups[].review_tasks[]`**:每条规则的详细レビュー結果、包含:
+  - `review_result`:この规则的レビュー結論（`1`=通过、`4`=不通过）
+  - `reasoning`:AI 给出的レビュー依据説明
+  - `anchors`:依据在原文中的坐标位置（可用于高亮回显）
+
+```json
+{
+  "task_id": "31415926",
+  "task_name": "契約書レビュー_20250110_143022",
+  "status": 1,
+  "statistics": { "pass_count": 11, "failure_count": 0, "error_count": 0 },
+  "groups": [
+    {
+      "group_name": "基本条款完全性",
+      "review_tasks": [
+        {
+          "rule_name": "必填条款完全性チェック",
+          "risk_level": 10,
+          "review_result": 1,
+          "reasoning": "契約書番号、甲乙方全称、签订日付、契約書金額など必填条款均已填写、レビュー通过。"
+        },
+        {
+          "rule_name": "契約書金額与税率コンプライアンス",
+          "risk_level": 10,
+          "review_result": 1,
+          "reasoning": "契約書金額 50900.00 元、税率 6%、符合增值税一般纳税人要求、レビュー通过。"
+        }
+      ]
+    },
+    {
+      "group_name": "财务条款コンプライアンス性",
+      "review_tasks": [
+        {
+          "rule_name": "支払条款明确性",
+          "risk_level": 10,
+          "review_result": 1,
+          "reasoning": "支付条款明确规定"検収合格后 30 日内支払"、条款清晰、レビュー通过。"
+        },
+        {
+          "rule_name": "税率コンプライアンス性",
+          "risk_level": 10,
+          "review_result": 1,
+          "reasoning": "契約書约定税率 6%、符合现行增值税税率规定、レビュー通过。"
+        }
+      ]
+    },
+    {
+      "group_name": "法務条款レビュー",
+      "review_tasks": [
+        {
+          "rule_name": "违约金条款存在性",
+          "risk_level": 10,
+          "review_result": 1,
+          "reasoning": "契約書包含明确的违约金条款、按延迟每日 0.1% 计算、レビュー通过。"
+        }
+      ]
+    }
+  ]
+}
+```

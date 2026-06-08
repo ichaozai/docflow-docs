@@ -1,0 +1,1068 @@
+---
+title: "契約レビューシナリオ（既存ワークスペース）"
+description: "当已在docflowプロダクト页完了ワークスペース作成、ファイルカテゴリ和レビュー規則リポジトリ設定、DocFlow により API 完了ファイルアップロード、取得ファイル分類、抽出及スマートレビュー結果的処理フロー如下"
+---
+
+<Tip>
+  このページ対象:**已完了**ワークスペース作成、ファイルカテゴリ設定和レビュー規則リポジトリ設定的ユーザー、演示如何在既存設定基礎上、API で 完了日常的契約書ファイルアップロード、フィールド抽出和スマートレビューフロー。
+  もし还没有設定过 DocFlow、先に阅读 [契約レビューシナリオ（最初から設定）](./contract_review)。
+</Tip>
+
+## 01 シナリオ概要
+
+ワークスペース、ファイルカテゴリ、レビュー規則リポジトリは**一度だけの基礎設定**、完了後は継続して再利用できます。在日常契約書レビュー業務中、只需API で 次の 3 ステップを繰り返します:
+
+1. **ファイルをアップロード**:将待レビュー的購買契約書アップロード至ワークスペース
+2. **抽出結果を取得**:システムの分類認識とフィールド抽出完了を待機します、構造化データを取得します
+3. **スマートレビュー**:既存の規則リポジトリを指定します、レビュータスクを送信し、レビュー結論を取得します
+
+このページで説明する全体フローは次の図のとおりです:
+
+![契約書レビュー日常処理フロー](../images/expense_reimbursement_daily_flow.png)
+
+## 02 前提条件
+
+このページのコードを実行する前に、次を準備してください:
+
+1. **認証情報**:[TextIn コンソール] から(https://www.textin.com/console/dashboard/setting) `x-ti-app-id` と `x-ti-secret-code` を取得します
+2. **workspace_id**:作成済みワークスペース ID（確認方法は下記）
+3. **repo_id**:設定済みレビュー規則リポジトリ ID（確認方法は下記）
+4. **処理対象ファイル**:本次必要レビュー的購買契約書ファイル（PDF 或 Word 形式）
+
+### workspace_id の取得方法
+
+**ステップ 1**:左側のワークスペース一覧で対象スペース名にマウスオーバーし、表示される「スペース情報」ボタンをクリックします。
+
+![取得 workspace_id ステップ 1](../images/get_workspace_id_step_1.png)
+
+**ステップ 2**:スペースの「基本情報」ページに入り、右側の「スペースID」フィールドで `workspace_id` を確認します。コピーアイコンをクリックすると直接コピーできます。
+
+![取得 workspace_id ステップ 2](../images/get_workspace_id_step_2.png)
+
+### repo_id の取得方法
+
+**ステップ 1**:対象ワークスペースに入り、右上の「スマートレビュー」ボタンをクリックします。
+
+![取得 repo_id ステップ 1](../images/get_rule_repo_step_1.png)
+
+**ステップ 2**:スマートレビューページで、上部の「規則リポジトリ」タブをクリックします。
+
+![取得 repo_id ステップ 2](../images/get_rule_repo_step_2.png)
+
+**ステップ 3**:規則リポジトリ一覧の「規則リポジトリID」列が `repo_id` です。
+
+![取得 repo_id ステップ 3](../images/get_rule_repo_step_3.png)
+
+## 03 コード構成
+
+この例は日常処理に必要な **3 つのステップ** のみを含み、コード量はゼロから設定する版より約 60% 少なくなります。
+
+### API 调用函数
+
+| 関数（Python） | メソッド（Java） | 対応する API エンドポイント | 説明 |
+|---|---|---|---|
+| `upload_file` | `uploadFile` | `POST /file/upload` | 非同期でファイルをアップロードし、batch_number を返します。結果取得にはポーリングが必要です |
+| `upload_file_sync` | `uploadFileSync` | `POST /file/upload/sync` | 同期でファイルをアップロードし、抽出結果を直接返します。ポーリングは不要です |
+| `submit_review_task` | `submitReviewTask` | `POST /review/task/submit` | レビュータスクを送信し、レビュー task_id を返します |
+
+### ステップ別コード説明
+
+<AccordionGroup>
+  <Accordion defaultOpen title="ステップ 1:処理対象ファイルをアップロード">
+    DocFlow は 2 種類のアップロードモードを提供します:
+
+    - **非同期アップロード**（`file/upload`）:`batch_number` を返します。ステップ 2 で `file/fetch` をポーリングして抽出結果を取得します。一括アップロード後にまとめてポーリングするシーンに適しています。
+    - **同期アップロード**（`file/upload/sync`）:認識完了までリクエストが待機し、抽出結果を直接返します（構造は `file/fetch` と同じ）。ポーリングは不要で、ステップ 2 を省略できます。単一ファイルのリアルタイム処理に適しています。
+
+    #### 方法 1:非同期アップロード（ステップ 2 のポーリングが必要）
+
+    <Tabs>
+      <Tab title="Python">
+        ```python
+        batch_number = upload_file(WORKSPACE_ID, os.path.join(FILES_DIR, "sample_contract.docx"))
+        ```
+      </Tab>
+      <Tab title="Java">
+        ```java
+        String batchNumber = uploadFile(WORKSPACE_ID, FILES_DIR + "/sample_contract.docx");
+        ```
+      </Tab>
+    </Tabs>
+
+    #### 方法 2:同期アップロード（抽出結果を直接返す、ステップ 2 を省略）
+
+    <Tabs>
+      <Tab title="Python">
+        ```python
+        def upload_file_sync(workspace_id: str, file_path: str) -> dict:
+            """同期アップロード:抽出結果を直接返す、ポーリング不要。"""
+            url = f"{BASE_URL}/api/app-api/sip/platform/v2/file/upload/sync"
+            with open(file_path, "rb") as f:
+                resp = requests.post(url,
+                    params={"workspace_id": workspace_id},
+                    files={"file": (os.path.basename(file_path), f, _mime(file_path))},
+                    headers=_headers(), timeout=300)
+            data = _check(resp, "ファイルを同期アップロード")
+            return data["result"]["files"][0]   # 戻り値構造は file/fetch と同じ
+
+        # 呼び出し例:同期アップロードして抽出結果を直接取得
+        file_result = upload_file_sync(WORKSPACE_ID, os.path.join(FILES_DIR, "sample_contract.docx"))
+        ```
+      </Tab>
+      <Tab title="Java">
+        ```java
+        public static JsonObject uploadFileSync(String workspaceId, String filePath) throws IOException {
+            File file = new File(filePath);
+            HttpUrl url = HttpUrl.parse(BASE_URL + "/api/app-api/sip/platform/v2/file/upload/sync")
+                    .newBuilder().addQueryParameter("workspace_id", workspaceId).build();
+            MultipartBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                    .addFormDataPart("file", file.getName(),
+                            RequestBody.create(file, MediaType.get(mimeType(file.getName()))))
+                    .build();
+            Request req = new Request.Builder().url(url).headers(authHeaders()).post(body).build();
+            try (Response resp = HTTP.newCall(req).execute()) {
+                return checkResponse(resp.body().string(), "ファイルを同期アップロード")
+                        .getAsJsonObject("result").getAsJsonArray("files")
+                        .get(0).getAsJsonObject();
+            }
+        }
+
+        // 呼び出し例:同期アップロードして抽出結果を直接取得
+        JsonObject fileResult = uploadFileSync(WORKSPACE_ID, FILES_DIR + "/sample_contract.docx");
+        ```
+      </Tab>
+    </Tabs>
+  </Accordion>
+  <Accordion defaultOpen title="ステップ 2:抽出結果を取得（同期アップロード使用時は省略可能）">
+    <Note>ステップ 1 で同期アップロード `file/upload/sync` を使用した場合、抽出結果はすでに取得済みのため、このステップは省略できます。</Note>
+
+    对 `batch_number` 轮询 `file/fetch` 接口、など待認識完了后取得文書的分類和フィールド抽出結果、并从結果中収集 `task_id` 供后续レビュー使用。
+
+    <Tabs>
+      <Tab title="Python">
+        ```python
+        file_result = wait_for_result(WORKSPACE_ID, batch_number)
+        display_result(file_result)
+
+        extract_task_id = file_result.get("task_id")
+        ```
+      </Tab>
+      <Tab title="Java">
+        ```java
+        JsonObject fileResult = waitForResult(WORKSPACE_ID, batchNumber, 180, 3);
+        displayResult(fileResult);
+
+        String extractTaskId = null;
+        if (fileResult.has("task_id") && !fileResult.get("task_id").isJsonNull()) {
+            extractTaskId = fileResult.get("task_id").getAsString();
+        }
+        ```
+      </Tab>
+    </Tabs>
+  </Accordion>
+  <Accordion defaultOpen title="ステップ 3:提交レビュータスク并取得結果">
+    将ファイル的 `task_id` 传入 `review/task/submit` 接口、既存の規則リポジトリを指定します提交レビュー。レビュー完了后轮询取得每条规则的通过/不通过結論及 AI 依据。
+
+    <Tabs>
+      <Tab title="Python">
+        ```python
+        task_name = f"契約書レビュー_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        review_task_id = submit_review_task(WORKSPACE_ID, task_name, REPO_ID, [extract_task_id])
+
+        review_result = wait_for_review(WORKSPACE_ID, review_task_id)
+        display_review_result(review_result)
+        ```
+      </Tab>
+      <Tab title="Java">
+        ```java
+        String taskName = "契約書レビュー_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        List<String> extractTaskIds = new ArrayList<>();
+        if (extractTaskId != null) extractTaskIds.add(extractTaskId);
+        String reviewTaskId = submitReviewTask(WORKSPACE_ID, taskName, REPO_ID, extractTaskIds);
+
+        JsonObject reviewResult = waitForReview(WORKSPACE_ID, reviewTaskId, 300, 5);
+        displayReviewResult(reviewResult);
+        ```
+      </Tab>
+    </Tabs>
+  </Accordion>
+</AccordionGroup>
+
+## 04 完全な例コード
+
+<Tabs>
+  <Tab title="Python">
+    ```python
+    #!/usr/bin/env python3
+    # -*- coding: utf-8 -*-
+    """
+    DocFlow 契約書レビュー场景例（已完了設定版）
+
+    适用于ワークスペース、ファイルカテゴリ、レビュー規則リポジトリ均已設定完毕的场景。
+    フロー:
+      1. アップロード待レビュー契約書ファイル
+      2. 轮询抽出結果を取得、表示フィールド抽出結果
+      3. 提交レビュータスク
+      4. 轮询取得レビュー結果、表示レビュー結論
+
+    依赖:
+      pip install requests
+
+    使用前先に填写下方設定项。
+    """
+
+    import os
+    import time
+    from datetime import datetime
+
+    import requests
+
+    # ============================================================
+    # 設定项 — してください替换为您的实际值
+    # ============================================================
+    APP_ID        = "your-app-id"        # TextIn コンソール中的 x-ti-app-id
+    SECRET_CODE   = "your-secret-code"   # TextIn コンソール中的 x-ti-secret-code
+
+    WORKSPACE_ID = "your-workspace-id"  # 已作成的ワークスペース ID
+    REPO_ID      = "your-repo-id"       # 已設定的レビュー規則リポジトリ ID
+
+    BASE_URL = "https://docflow.textin.com"
+
+    # 処理対象ファイル目录（默认指向内置例ファイル、可替换为您自己的ファイル路径）
+    FILES_DIR = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "..", "sample_files", "contract_review"
+    )
+
+    # ============================================================
+    # 補助関数
+    # ============================================================
+
+    def _headers() -> dict:
+        return {
+            "x-ti-app-id":      APP_ID,
+            "x-ti-secret-code": SECRET_CODE,
+        }
+
+
+    def _check(resp: requests.Response, action: str) -> dict:
+        """チェックレスポンス状态、返す解析后的 JSON。失敗时抛出 RuntimeError。"""
+        data = resp.json()
+        if data.get("code") != 200:
+            raise RuntimeError(f"{action} 失敗（code={data.get('code')}）: {data}")
+        return data
+
+
+    def _mime(file_path: str) -> str:
+        """根据ファイル拡張子返す MIME タイプ。"""
+        ext = os.path.splitext(file_path)[1].lower()
+        return {
+            ".png":  "image/png",
+            ".jpg":  "image/jpeg",
+            ".jpeg": "image/jpeg",
+            ".pdf":  "application/pdf",
+            ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        }.get(ext, "application/octet-stream")
+
+
+    def display_result(file_result: dict):
+        """形式化输出ファイル的分類結果和フィールド抽出結果。"""
+        print("\n" + "=" * 60)
+        print(f"ファイル名   : {file_result.get('name')}")
+        print(f"分類結果 : {file_result.get('category') or '未分類'}")
+        data = file_result.get("data") or {}
+        fields = data.get("fields") or []
+        if fields:
+            print("\n── 基本情報フィールド ────────────────────────")
+            for f in fields:
+                val = f.get('value', '')
+                display_val = (val[:80] + "...") if len(str(val)) > 80 else val
+                print(f"  {f.get('key', ''):<25s}: {display_val}")
+
+
+    def display_review_result(review_result: dict):
+        """形式化输出レビュータスク的結論和各规则レビュー結果。"""
+        STATUS_MAP = {
+            0: "未レビュー", 1: "レビュー通过", 2: "レビュー失敗",
+            3: "レビュー中", 4: "レビュー不通过", 5: "認識中",
+            6: "排队中", 7: "認識失敗",
+        }
+        RISK_MAP = {10: "高リスク", 20: "中リスク", 30: "低リスク"}
+
+        stats = review_result.get("statistics", {})
+        print("\n" + "=" * 60)
+        print(f"レビュータスク状态  : {STATUS_MAP.get(review_result.get('status'), '未知')}")
+        print(f"规则通过数    : {stats.get('pass_count', 0)}")
+        print(f"规则不通过数  : {stats.get('failure_count', 0)}")
+
+        for group in review_result.get("groups", []):
+            print(f"\n── 規則グループ:{group.get('group_name')} ───────────────────")
+            for rt in group.get("review_tasks", []):
+                result_text = STATUS_MAP.get(rt.get("review_result"), "未知")
+                risk_text   = RISK_MAP.get(rt.get("risk_level"), "未知")
+                icon = "✓" if rt.get("review_result") == 1 else "✗"
+                print(f"  {icon} [{risk_text}] {rt.get('rule_name')}: {result_text}")
+                reasoning = rt.get("reasoning", "")
+                if reasoning:
+                    print(f"    依据: {reasoning[:100]}{'...' if len(reasoning) > 100 else ''}")
+
+
+    # ============================================================
+    # ステップ 1:処理対象ファイルをアップロード
+    # REST API: POST /api/app-api/sip/platform/v2/file/upload
+    # ============================================================
+
+    def upload_file(workspace_id: str, file_path: str) -> str:
+        """処理対象ファイルをアップロード至ワークスペース、batch_number を返す。"""
+        url = f"{BASE_URL}/api/app-api/sip/platform/v2/file/upload"
+        with open(file_path, "rb") as f:
+            resp = requests.post(
+                url,
+                params={"workspace_id": workspace_id},
+                files={"file": (os.path.basename(file_path), f, _mime(file_path))},
+                headers=_headers(),
+                timeout=60,
+            )
+        batch_number = _check(resp, "ファイルをアップロード")["result"]["batch_number"]
+        print(f"[步骤1] ファイルアップロード成功  name={os.path.basename(file_path)}"
+              f"  batch_number={batch_number}")
+        return batch_number
+
+
+    # ============================================================
+    # ステップ 2:轮询など待抽出結果
+    # REST API: GET /api/app-api/sip/platform/v2/file/fetch
+    # ============================================================
+
+    def wait_for_result(
+        workspace_id: str,
+        batch_number: str,
+        timeout: int = 180,
+        interval: int = 3,
+    ) -> dict:
+        """
+        轮询直至ファイル認識完了、返すファイル結果对象（含 task_id）。
+
+        recognition_status: 0=待認識, 1=成功, 2=失敗
+        """
+        url = f"{BASE_URL}/api/app-api/sip/platform/v2/file/fetch"
+        params = {"workspace_id": workspace_id, "batch_number": batch_number}
+        deadline = time.time() + timeout
+        print(f"[步骤2] など待処理結果（batch_number={batch_number}）...", end="", flush=True)
+        while time.time() < deadline:
+            resp = requests.get(url, params=params, headers=_headers(), timeout=30)
+            data = _check(resp, "処理結果を取得")
+            files = data.get("result", {}).get("files", [])
+            if files:
+                status = files[0].get("recognition_status")
+                if status == 1:
+                    print(" 完了")
+                    return files[0]
+                elif status == 2:
+                    raise RuntimeError(f"ファイル処理失敗: {files[0].get('failure_causes')}")
+            print(".", end="", flush=True)
+            time.sleep(interval)
+        raise TimeoutError(f"など待処理結果タイムアウト（{timeout}s）")
+
+
+    # ============================================================
+    # ステップ 3:提交レビュータスク
+    # REST API: POST /api/app-api/sip/platform/v2/review/task/submit
+    # ============================================================
+
+    def submit_review_task(
+        workspace_id: str,
+        name: str,
+        repo_id: str,
+        extract_task_ids: list,
+    ) -> str:
+        """提交レビュータスク、返すレビュータスク task_id。"""
+        url = f"{BASE_URL}/api/app-api/sip/platform/v2/review/task/submit"
+        payload = {
+            "workspace_id":     workspace_id,
+            "name":             name,
+            "repo_id":          repo_id,
+            "extract_task_ids": extract_task_ids,
+        }
+        resp = requests.post(url, json=payload, headers=_headers(), timeout=30)
+        task_id = _check(resp, "提交レビュータスク")["result"]["task_id"]
+        print(f"[步骤3] レビュータスク提交成功  task_id={task_id}")
+        return task_id
+
+
+    # ============================================================
+    # ステップ 4:轮询など待レビュー結果
+    # REST API: POST /api/app-api/sip/platform/v2/review/task/result
+    # ============================================================
+
+    def wait_for_review(
+        workspace_id: str,
+        task_id: str,
+        timeout: int = 300,
+        interval: int = 5,
+    ) -> dict:
+        """
+        轮询直至レビュータスク完了、返すレビュー結果对象。
+
+        终态: 1=レビュー通过, 2=レビュー失敗, 4=レビュー不通过, 7=認識失敗
+        """
+        url = f"{BASE_URL}/api/app-api/sip/platform/v2/review/task/result"
+        payload = {"workspace_id": workspace_id, "task_id": task_id}
+        deadline = time.time() + timeout
+        print(f"[步骤4] など待レビュー結果（task_id={task_id}）...", end="", flush=True)
+        while time.time() < deadline:
+            resp = requests.post(url, json=payload, headers=_headers(), timeout=30)
+            data = _check(resp, "取得レビュー結果")
+            result = data.get("result", {})
+            if result.get("status") in (1, 2, 4, 7):
+                print(" 完了")
+                return result
+            print(".", end="", flush=True)
+            time.sleep(interval)
+        raise TimeoutError(f"など待レビュー結果タイムアウト（{timeout}s）")
+
+
+    # ============================================================
+    # 主フロー
+    # ============================================================
+
+    def main():
+        print("=" * 60)
+        print("  DocFlow 契約書レビュー场景例（已完了設定版）")
+        print("=" * 60)
+        print(f"ワークスペース: {WORKSPACE_ID}")
+        print(f"規則リポジトリ:   {REPO_ID}")
+
+        # ----------------------------------------------------------
+        # ステップ 1:処理対象ファイルをアップロード
+        # ----------------------------------------------------------
+        print("\n开始処理対象ファイルをアップロード...")
+        batch_number = upload_file(
+            WORKSPACE_ID,
+            os.path.join(FILES_DIR, "sample_contract.docx"),
+        )
+
+        # ----------------------------------------------------------
+        # ステップ 2:轮询抽出結果を取得并表示
+        # ----------------------------------------------------------
+        print("\n开始処理結果を取得...")
+        file_result = wait_for_result(WORKSPACE_ID, batch_number)
+        display_result(file_result)
+
+        # ----------------------------------------------------------
+        # ステップ 3:提交レビュータスク
+        # ----------------------------------------------------------
+        print("\n开始レビュー...")
+        task_name = f"契約書レビュー_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        extract_task_ids = [file_result.get("task_id")] if file_result.get("task_id") else []
+        review_task_id = submit_review_task(WORKSPACE_ID, task_name, REPO_ID, extract_task_ids)
+
+        # ----------------------------------------------------------
+        # ステップ 4:轮询取得レビュー結果并表示
+        # ----------------------------------------------------------
+        review_result = wait_for_review(WORKSPACE_ID, review_task_id)
+        display_review_result(review_result)
+
+
+    if __name__ == "__main__":
+        main()
+    ```
+  </Tab>
+  <Tab title="Java">
+    ```java
+    package com.docflow;
+
+    import com.google.gson.*;
+    import okhttp3.*;
+
+    import java.io.File;
+    import java.io.IOException;
+    import java.text.SimpleDateFormat;
+    import java.util.*;
+    import java.util.concurrent.TimeUnit;
+
+    /**
+     * DocFlow 契約書レビュー场景例（已完了設定版）
+     *
+     * <p>适用于ワークスペース、ファイルカテゴリ、レビュー規則リポジトリ均已設定完毕的场景。
+     * <ol>
+     *   <li>アップロード待レビュー契約書ファイル</li>
+     *   <li>轮询抽出結果を取得、表示フィールド抽出結果</li>
+     *   <li>提交レビュータスク</li>
+     *   <li>轮询取得レビュー結果、表示レビュー結論</li>
+     * </ol>
+     *
+     * <p>依赖:OkHttp 4.x、Gson（见 pom.xml）
+     */
+    public class ContractReviewConfigured {
+
+        // ============================================================
+        // 設定项 — してください替换为您的实际值
+        // ============================================================
+        private static final String APP_ID        = "your-app-id";        // x-ti-app-id
+        private static final String SECRET_CODE   = "your-secret-code";   // x-ti-secret-code
+
+        private static final String WORKSPACE_ID = "your-workspace-id";  // 已作成的ワークスペース ID
+        private static final String REPO_ID      = "your-repo-id";       // 已設定的レビュー規則リポジトリ ID
+
+        private static final String BASE_URL = "https://docflow.textin.com";
+
+        // 処理対象ファイル目录
+        private static final String FILES_DIR =
+                new File("../sample_files/contract_review").getAbsolutePath();
+
+        // ============================================================
+        // 全局工具对象
+        // ============================================================
+        private static final OkHttpClient HTTP = new OkHttpClient.Builder()
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(90, TimeUnit.SECONDS)
+                .writeTimeout(60, TimeUnit.SECONDS)
+                .build();
+
+        private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
+        private static final MediaType JSON_TYPE = MediaType.get("application/json; charset=utf-8");
+
+        // ============================================================
+        // 補助関数
+        // ============================================================
+
+        private static Headers authHeaders() {
+            return new Headers.Builder()
+                    .add("x-ti-app-id", APP_ID)
+                    .add("x-ti-secret-code", SECRET_CODE)
+                    .build();
+        }
+
+        private static JsonObject checkResponse(String body, String action) {
+            JsonObject obj = JsonParser.parseString(body).getAsJsonObject();
+            if (obj.get("code").getAsInt() != 200) {
+                throw new RuntimeException(action + " 失敗: " + body);
+            }
+            return obj;
+        }
+
+        private static String mimeType(String filename) {
+            String lower = filename.toLowerCase();
+            if (lower.endsWith(".png"))  return "image/png";
+            if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
+            if (lower.endsWith(".pdf"))  return "application/pdf";
+            if (lower.endsWith(".docx")) return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+            if (lower.endsWith(".xlsx")) return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            return "application/octet-stream";
+        }
+
+        public static void displayResult(JsonObject fileResult) {
+            System.out.println("\n" + "=".repeat(60));
+            System.out.println("ファイル名   : " + str(fileResult, "name"));
+            System.out.println("分類結果 : " + str(fileResult, "category", "未分類"));
+
+            if (!fileResult.has("data") || fileResult.get("data").isJsonNull()) return;
+            JsonObject data = fileResult.getAsJsonObject("data");
+
+            JsonArray fields = jsonArray(data, "fields");
+            if (fields != null && fields.size() > 0) {
+                System.out.println("\n── 基本情報フィールド ────────────────────────");
+                for (JsonElement e : fields) {
+                    JsonObject f = e.getAsJsonObject();
+                    String val = str(f, "value");
+                    String display = val.length() > 80 ? val.substring(0, 80) + "..." : val;
+                    System.out.printf("  %-25s: %s%n", str(f, "key"), display);
+                }
+            }
+        }
+
+        public static void displayReviewResult(JsonObject reviewResult) {
+            Map<Integer, String> statusMap = new LinkedHashMap<>();
+            statusMap.put(0, "未レビュー");   statusMap.put(1, "レビュー通过");   statusMap.put(2, "レビュー失敗");
+            statusMap.put(3, "レビュー中");   statusMap.put(4, "レビュー不通过"); statusMap.put(5, "認識中");
+            statusMap.put(6, "排队中");   statusMap.put(7, "認識失敗");
+            Map<Integer, String> riskMap = new LinkedHashMap<>();
+            riskMap.put(10, "高リスク"); riskMap.put(20, "中リスク"); riskMap.put(30, "低リスク");
+
+            int status = reviewResult.get("status").getAsInt();
+            JsonObject stats = reviewResult.has("statistics")
+                    ? reviewResult.getAsJsonObject("statistics") : new JsonObject();
+
+            System.out.println("\n" + "=".repeat(60));
+            System.out.println("レビュータスク状态  : " + statusMap.getOrDefault(status, "未知"));
+            System.out.println("规则通过数    : " + (stats.has("pass_count")    ? stats.get("pass_count").getAsInt()    : 0));
+            System.out.println("规则不通过数  : " + (stats.has("failure_count") ? stats.get("failure_count").getAsInt() : 0));
+
+            JsonArray groups = jsonArray(reviewResult, "groups");
+            if (groups != null) {
+                for (JsonElement ge : groups) {
+                    JsonObject group = ge.getAsJsonObject();
+                    System.out.println("\n── 規則グループ:" + str(group, "group_name") + " ───────────────────");
+                    JsonArray tasks = jsonArray(group, "review_tasks");
+                    if (tasks != null) {
+                        for (JsonElement te : tasks) {
+                            JsonObject rt = te.getAsJsonObject();
+                            int rv        = rt.has("review_result") ? rt.get("review_result").getAsInt() : 0;
+                            int riskLevel = rt.has("risk_level")    ? rt.get("risk_level").getAsInt()    : 0;
+                            String icon   = rv == 1 ? "✓" : "✗";
+                            System.out.printf("  %s [%s] %s: %s%n",
+                                    icon, riskMap.getOrDefault(riskLevel, "未知"),
+                                    str(rt, "rule_name"), statusMap.getOrDefault(rv, "未知"));
+                            String reasoning = str(rt, "reasoning");
+                            if (!reasoning.isEmpty()) {
+                                System.out.println("    依据: " + (reasoning.length() > 100
+                                        ? reasoning.substring(0, 100) + "..." : reasoning));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // ============================================================
+        // ステップ 1:処理対象ファイルをアップロード
+        // REST API: POST /api/app-api/sip/platform/v2/file/upload
+        // ============================================================
+
+        public static String uploadFile(String workspaceId, String filePath) throws IOException {
+            File file = new File(filePath);
+            HttpUrl url = HttpUrl.parse(BASE_URL + "/api/app-api/sip/platform/v2/file/upload")
+                    .newBuilder()
+                    .addQueryParameter("workspace_id", workspaceId)
+                    .build();
+
+            MultipartBody body = new MultipartBody.Builder()
+                    .setType(MultipartBody.FORM)
+                    .addFormDataPart("file", file.getName(),
+                            RequestBody.create(file, MediaType.get(mimeType(file.getName()))))
+                    .build();
+
+            Request req = new Request.Builder()
+                    .url(url).headers(authHeaders())
+                    .post(body)
+                    .build();
+
+            try (Response resp = HTTP.newCall(req).execute()) {
+                JsonObject data = checkResponse(resp.body().string(), "ファイルをアップロード[" + file.getName() + "]");
+                String batchNumber = data.getAsJsonObject("result").get("batch_number").getAsString();
+                System.out.println("[步骤1] ファイルアップロード成功  name=" + file.getName()
+                        + "  batch_number=" + batchNumber);
+                return batchNumber;
+            }
+        }
+
+        // ============================================================
+        // ステップ 2:轮询など待抽出結果
+        // REST API: GET /api/app-api/sip/platform/v2/file/fetch
+        // ============================================================
+
+        public static JsonObject waitForResult(
+                String workspaceId, String batchNumber,
+                int timeoutSec, int intervalSec) throws IOException, InterruptedException {
+
+            HttpUrl url = HttpUrl.parse(BASE_URL + "/api/app-api/sip/platform/v2/file/fetch")
+                    .newBuilder()
+                    .addQueryParameter("workspace_id", workspaceId)
+                    .addQueryParameter("batch_number",  batchNumber)
+                    .build();
+
+            long deadline = System.currentTimeMillis() + (long) timeoutSec * 1000;
+            System.out.print("[步骤2] など待処理結果（batch_number=" + batchNumber + "）...");
+
+            while (System.currentTimeMillis() < deadline) {
+                Request req = new Request.Builder()
+                        .url(url).headers(authHeaders()).get().build();
+
+                try (Response resp = HTTP.newCall(req).execute()) {
+                    JsonObject data = checkResponse(resp.body().string(), "処理結果を取得");
+                    JsonArray files = data.getAsJsonObject("result").getAsJsonArray("files");
+                    if (files != null && files.size() > 0) {
+                        JsonObject file = files.get(0).getAsJsonObject();
+                        int status = file.get("recognition_status").getAsInt();
+                        if (status == 1) { System.out.println(" 完了"); return file; }
+                        if (status == 2) {
+                            String cause = file.has("failure_causes")
+                                    ? file.get("failure_causes").getAsString() : "未知原因";
+                            throw new RuntimeException("ファイル処理失敗: " + cause);
+                        }
+                    }
+                }
+                System.out.print(".");
+                Thread.sleep((long) intervalSec * 1000);
+            }
+            throw new RuntimeException("など待処理結果タイムアウト（" + timeoutSec + "s）");
+        }
+
+        // ============================================================
+        // ステップ 3:提交レビュータスク
+        // REST API: POST /api/app-api/sip/platform/v2/review/task/submit
+        // ============================================================
+
+        public static String submitReviewTask(
+                String workspaceId, String name, String repoId,
+                List<String> extractTaskIds) throws IOException {
+
+            String url = BASE_URL + "/api/app-api/sip/platform/v2/review/task/submit";
+            JsonObject payload = new JsonObject();
+            payload.addProperty("workspace_id", workspaceId);
+            payload.addProperty("name",         name);
+            payload.addProperty("repo_id",      repoId);
+            JsonArray ids = new JsonArray();
+            extractTaskIds.forEach(ids::add);
+            payload.add("extract_task_ids", ids);
+
+            Request req = new Request.Builder()
+                    .url(url).headers(authHeaders())
+                    .post(RequestBody.create(GSON.toJson(payload), JSON_TYPE))
+                    .build();
+
+            try (Response resp = HTTP.newCall(req).execute()) {
+                JsonObject data = checkResponse(resp.body().string(), "提交レビュータスク");
+                String taskId = data.getAsJsonObject("result").get("task_id").getAsString();
+                System.out.println("[步骤3] レビュータスク提交成功  task_id=" + taskId);
+                return taskId;
+            }
+        }
+
+        // ============================================================
+        // ステップ 4:轮询など待レビュー結果
+        // REST API: POST /api/app-api/sip/platform/v2/review/task/result
+        // ============================================================
+
+        public static JsonObject waitForReview(
+                String workspaceId, String taskId,
+                int timeoutSec, int intervalSec) throws IOException, InterruptedException {
+
+            String url = BASE_URL + "/api/app-api/sip/platform/v2/review/task/result";
+            JsonObject payload = new JsonObject();
+            payload.addProperty("workspace_id", workspaceId);
+            payload.addProperty("task_id",      taskId);
+
+            long deadline = System.currentTimeMillis() + (long) timeoutSec * 1000;
+            System.out.print("[步骤4] など待レビュー結果（task_id=" + taskId + "）...");
+
+            while (System.currentTimeMillis() < deadline) {
+                Request req = new Request.Builder()
+                        .url(url).headers(authHeaders())
+                        .post(RequestBody.create(GSON.toJson(payload), JSON_TYPE))
+                        .build();
+
+                try (Response resp = HTTP.newCall(req).execute()) {
+                    JsonObject data = checkResponse(resp.body().string(), "取得レビュー結果");
+                    JsonObject result = data.getAsJsonObject("result");
+                    int status = result.get("status").getAsInt();
+                    if (status == 1 || status == 2 || status == 4 || status == 7) {
+                        System.out.println(" 完了");
+                        return result;
+                    }
+                }
+                System.out.print(".");
+                Thread.sleep((long) intervalSec * 1000);
+            }
+            throw new RuntimeException("など待レビュー結果タイムアウト（" + timeoutSec + "s）");
+        }
+
+        // ============================================================
+        // 主フロー
+        // ============================================================
+        public static void main(String[] args) throws Exception {
+            System.out.println("=".repeat(60));
+            System.out.println("  DocFlow 契約書レビュー场景例（已完了設定版）");
+            System.out.println("=".repeat(60));
+            System.out.println("ワークスペース: " + WORKSPACE_ID);
+            System.out.println("規則リポジトリ:   " + REPO_ID);
+
+            // ステップ 1:処理対象ファイルをアップロード
+            System.out.println("\n开始処理対象ファイルをアップロード...");
+            String batchNumber = uploadFile(WORKSPACE_ID, FILES_DIR + "/sample_contract.docx");
+
+            // ステップ 2:取得并表示抽出結果
+            System.out.println("\n开始処理結果を取得...");
+            JsonObject fileResult = waitForResult(WORKSPACE_ID, batchNumber, 180, 3);
+            displayResult(fileResult);
+
+            // ステップ 3:提交レビュータスク
+            System.out.println("\n开始レビュー...");
+            String taskName = "契約書レビュー_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+            List<String> extractTaskIds = new ArrayList<>();
+            if (fileResult.has("task_id") && !fileResult.get("task_id").isJsonNull()) {
+                extractTaskIds.add(fileResult.get("task_id").getAsString());
+            }
+            String reviewTaskId = submitReviewTask(WORKSPACE_ID, taskName, REPO_ID, extractTaskIds);
+
+            // ステップ 4:轮询取得レビュー結果
+            JsonObject reviewResult = waitForReview(WORKSPACE_ID, reviewTaskId, 300, 5);
+            displayReviewResult(reviewResult);
+        }
+
+        // ============================================================
+        // 私有工具方法
+        // ============================================================
+
+        private static String str(JsonObject obj, String key) { return str(obj, key, ""); }
+
+        private static String str(JsonObject obj, String key, String defaultVal) {
+            if (obj == null || !obj.has(key) || obj.get(key).isJsonNull()) return defaultVal;
+            return obj.get(key).getAsString();
+        }
+
+        private static JsonArray jsonArray(JsonObject obj, String key) {
+            if (obj == null || !obj.has(key) || obj.get(key).isJsonNull()) return null;
+            JsonElement e = obj.get(key);
+            return e.isJsonArray() ? e.getAsJsonArray() : null;
+        }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## 05 完全な例コードダウンロード
+
+完全な可実行コード（含 Python、Java 两个版本）已内置在文書倉庫的 `examples/` 目录下:
+
+```
+examples/
+├── python/
+│   ├── contract_review_configured.py   # Python 完全な例（已完了設定版）
+│   ├── requirements.txt
+│   └── README.md
+├── java/
+│   ├── src/main/java/com/docflow/
+│   │   └── ContractReviewConfigured.java   # Java 完全な例（已完了設定版）
+│   ├── pom.xml
+│   └── README.md
+└── sample_files/
+    └── contract_review/
+        └── sample_contract.docx
+```
+
+<CardGroup cols={2}>
+  <Card title="Python 例" icon="python" href="https://github.com/ichaozai/docflow-docs/tree/master/examples/python">
+    確認 Python 完全な例コード
+  </Card>
+  <Card title="Java 例" icon="java" href="https://github.com/ichaozai/docflow-docs/tree/master/examples/java">
+    確認 Java 完全な例コード
+  </Card>
+</CardGroup>
+
+## 06 実行例
+
+<Tabs>
+  <Tab title="Python">
+    **环境要求**:Python 3.8+
+
+    **1. 安装依赖**
+
+    ```bash
+    cd examples/python
+    pip install -r requirements.txt
+    ```
+
+    **2. 填写設定**
+
+    打开 `contract_review_configured.py`、填写ファイル上部的設定项:
+
+    ```python
+    APP_ID       = "your-app-id"        # x-ti-app-id
+    SECRET_CODE  = "your-secret-code"   # x-ti-secret-code
+    WORKSPACE_ID = "your-workspace-id"  # 已作成的ワークスペース ID
+    REPO_ID      = "your-repo-id"       # 已設定的レビュー規則リポジトリ ID
+    ```
+
+    **3. 実行**
+
+    ```bash
+    python contract_review_configured.py
+    ```
+  </Tab>
+  <Tab title="Java">
+    **环境要求**:JDK 11+、Maven 3.6+
+
+    **1. 填写設定**
+
+    打开 `src/main/java/com/docflow/ContractReviewConfigured.java`、填写ファイル上部的設定项:
+
+    ```java
+    private static final String APP_ID       = "your-app-id";
+    private static final String SECRET_CODE  = "your-secret-code";
+    private static final String WORKSPACE_ID = "your-workspace-id";
+    private static final String REPO_ID      = "your-repo-id";
+    ```
+
+    **2. 编译并実行**
+
+    ```bash
+    cd examples/java
+    mvn compile exec:java -Dexec.mainClass="com.docflow.ContractReviewConfigured"
+    ```
+  </Tab>
+</Tabs>
+
+<Tip>
+  実行成功后、可登录 [DocFlow Web ページ](https://docflow.textin.com/)、在对应ワークスペース下直观確認每份ファイル的分類、フィールド抽出結果和スマートレビュー結果、便于与コード输出对照验证。
+</Tip>
+
+### 想定されるコンソール出力
+
+```
+============================================================
+  DocFlow 契約書レビュー场景例（已完了設定版）
+============================================================
+ワークスペース: <workspace_id>
+規則リポジトリ:   <repo_id>
+
+开始処理対象ファイルをアップロード...
+[步骤1] ファイルアップロード成功  name=sample_contract.docx  batch_number=<batch_number>
+
+开始処理結果を取得...
+[步骤2] など待処理結果（batch_number=<batch_number>）........... 完了
+
+============================================================
+ファイル名   : sample_contract.docx
+分類結果 : 購買契約書
+
+── 基本情報フィールド ────────────────────────
+  契約書番号                  : CG-123456
+  契約書名称                  : 合合情報購買契約書
+  甲方全称                  : 上海合合情報科技股份有限公司
+  甲方地址                  : 上海市静安区万荣路1268号云立方A座11层
+  乙方全称                  : 上海一二三有限公司
+  乙方地址                  : 上海市延安东路1111号
+  签订日付                  : 2025年9月25日
+  含税合計金額（大写）        : 伍万元整
+  税率                      : 13％
+  账期                      : 60日
+  支払方法                  : 转账形式
+  履约期限                  : 2025年10月底-11月初
+  ...
+
+开始レビュー...
+[步骤3] レビュータスク提交成功  task_id=<task_id>
+[步骤4] など待レビュー結果（task_id=<task_id>）.... 完了
+
+============================================================
+レビュータスク状态  : レビュー不通过
+规则通过数    : 3
+规则不通过数  : 1
+
+── 規則グループ:契約書条款コンプライアンス性チェック ───────────────────
+  ✓ [高リスク] 签章完全性チェック: レビュー通过
+  ✓ [中リスク] 必要条款完全性: レビュー通过
+  ✗ [高リスク] 支払条款合理性: レビュー不通过
+    依据: 契約書约定收到請求書后60日内支付全款、账期超出公司规定的30天标准
+  ✓ [低リスク] 争议解决条款: レビュー通过
+    ...
+```
+
+## 07 結果説明
+
+### 抽出結果
+
+処理完了后、契約書ファイル将返す分類結果和フィールド抽出結果。フィールド抽出結果位于 `data.fields[]`、每个フィールド包含 `key`、`value` 及坐标 `position`（可用于原文高亮回显）。契約書场景使用 **Model 2（复杂文書理解）**、对长文書的深度理解和フィールド抽出效果更优。
+
+以下为購買契約書サンプルファイル的实际接口返す（来自 `file/fetch`、省略了部分 `position` 坐标和フィールド）:
+
+<AccordionGroup>
+  <Accordion defaultOpen title="sample_contract.docx">
+    ```json
+    {
+      "name": "sample_contract.docx",
+      "format": "docx",
+      "category": "購買契約書",
+      "recognition_status": 1,
+      "duration_ms": 44945,
+      "total_page_num": 4,
+      "data": {
+        "fields": [
+          { "key": "契約書番号",          "value": "CG-123456" },
+          { "key": "契約書名称",          "value": "合合情報購買契約書" },
+          { "key": "甲方全称",          "value": "上海合合情報科技股份有限公司" },
+          { "key": "甲方地址",          "value": "上海市静安区万荣路1268号云立方A座11层" },
+          { "key": "乙方全称",          "value": "上海一二三有限公司" },
+          { "key": "乙方地址",          "value": "上海市延安东路1111号" },
+          { "key": "签订日付",          "value": "2025年9月25日" },
+          { "key": "含税合計金額（大写）",  "value": "伍万元整" },
+          { "key": "税率",             "value": "13％" },
+          { "key": "账期",             "value": "60日" },
+          { "key": "支払方法",          "value": "转账形式" },
+          { "key": "支払条件",          "value": "甲方收到全部货物且検収合格后、乙方向甲方开具全额增值税专用請求書、甲方收到請求書后60日内支付全款" },
+          { "key": "履约期限",          "value": "2025年10月底-11月初" },
+          { "key": "履约地点",          "value": "以甲方告知为准" },
+          { "key": "标的名称",          "value": "交换机;交换机;光模块;光纤跳线" },
+          { "key": "标的数量/服务范围",   "value": "1;1;40;13" },
+          { "key": "受取口座情報",       "value": "开户名:上海一二三有限公司;开户銀行:上海浦东发展銀行陆家嘴支行;账号:98060154711111111" },
+          { "key": "契約書份数",          "value": "壹式【贰】份、甲乙双方各执【壹】份" },
+          { "key": "生效条件",          "value": "经双方盖章后生效" },
+          { "key": "争议解决方法",       "value": "双方同意将争议提交契約書订立地上海市静安区人民法院诉讼解决" }
+        ],
+        "stamps": [],
+        "handwritings": []
+      }
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### レビュー結果
+
+レビュー完了后、可从 `review/task/result` 接口取得以下情報:
+
+- **`status`**:任务整体状态（`1`=レビュー通过、`4`=レビュー不通过、`2`=レビュー失敗）
+- **`statistics`**:规则通过数、不通过数汇总
+- **`groups[].review_tasks[]`**:每条规则的详细レビュー結果、包含:
+  - `review_result`:この规则的レビュー結論（`1`=通过、`4`=不通过）
+  - `reasoning`:AI 给出的レビュー依据説明
+  - `anchors`:依据在原文中的坐标位置（可用于高亮回显）
+
+```json
+{
+  "task_id": "31415926",
+  "task_name": "契約書レビュー_20250925_143022",
+  "status": 1,
+  "statistics": { "pass_count": 5, "failure_count": 0, "error_count": 0 },
+  "groups": [
+    {
+      "group_name": "基本条款完全性",
+      "review_tasks": [
+        {
+          "rule_name": "必填条款完全性チェック",
+          "risk_level": 10,
+          "review_result": 1,
+          "reasoning": "契約書番号 CG-123456、甲方"上海合合情報科技股份有限公司"、乙方"上海一二三有限公司"、签订日付 2025年9月25日、含税合計金額"伍万元整"など必填条款均已填写、レビュー通过。"
+        },
+        {
+          "rule_name": "契約書金額与税率コンプライアンス",
+          "risk_level": 10,
+          "review_result": 1,
+          "reasoning": "含税合計金額"伍万元整"、税率 13％、符合增值税一般纳税人货物購買税率要求、レビュー通过。"
+        }
+      ]
+    },
+    {
+      "group_name": "财务条款コンプライアンス性",
+      "review_tasks": [
+        {
+          "rule_name": "支払条款明确性",
+          "risk_level": 10,
+          "review_result": 1,
+          "reasoning": "支払条件明确规定"甲方收到全部货物且検収合格后、乙方向甲方开具全额增值税专用請求書、甲方收到請求書后60日内支付全款"、条款清晰、レビュー通过。"
+        },
+        {
+          "rule_name": "受取口座情報完全性",
+          "risk_level": 20,
+          "review_result": 1,
+          "reasoning": "受取口座情報包含开户名、开户銀行、账号三项、情報完全な、レビュー通过。"
+        }
+      ]
+    },
+    {
+      "group_name": "法務条款レビュー",
+      "review_tasks": [
+        {
+          "rule_name": "违约金条款存在性",
+          "risk_level": 10,
+          "review_result": 1,
+          "reasoning": "契約書包含明确的违约金条款、乙方逾期交货按契約書合計金額万分之五/日计算违约金、レビュー通过。"
+        }
+      ]
+    }
+  ]
+}
+```

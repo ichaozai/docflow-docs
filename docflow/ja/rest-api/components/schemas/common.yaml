@@ -1,17 +1,17 @@
 RecognitionStatus:
   type: integer
   description: |
-    File recognition status:
-    - 0: Pending recognition
-    - 1: Recognition successful
-    - 2: Recognition failed
-    - 3: Classifying
-    - 4: Extracting
-    - 5: Preparing
-    - 6: File splitting
-    - 7: Image cropping
-    - 10: Classification completed (only available when upload interface target_process is classify)
-    - 20: Parsing
+    ファイル認識ステータス:
+    - 0: 認識待ち
+    - 1: 認識成功
+    - 2: 認識失敗
+    - 3: 分類中
+    - 4: 抽出中
+    - 5: 準備中
+    - 6: ファイル分割中
+    - 7: 画像クロップ中
+    - 10: 分類完了（アップロードインターフェースの target_process が classify の場合のみ使用可能）
+    - 20: 解析中
   enum:
   - 0
   - 1
@@ -26,7 +26,7 @@ RecognitionStatus:
 
 VerificationStatus:
   type: integer
-  description: "File verification status 0: Pending verification 2: Confirmed 3: Rejected 4: Deleted 5: Deferred processing"
+  description: "ファイル検証ステータス 0: 検証待ち 2: 確認済み 3: 却下 4: 削除済み 5: 処理保留"
   enum:
     - 0
     - 2
@@ -39,11 +39,11 @@ CodeMessage:
   properties:
     code:
       type: integer
-      description: Status code
+      description: ステータスコード
       example: 200
     msg:
       type: string
-      description: Status description
+      description: ステータス説明
   required:
   - code
   - msg

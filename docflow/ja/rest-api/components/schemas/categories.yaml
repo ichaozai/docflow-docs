@@ -4,28 +4,28 @@ Category:
   properties:
     id:
       type: string
-      description: File category ID
+      description: ファイルカテゴリ ID
       example: "1234567890"
     name:
       type: string
-      description: File category name
-      example: "Invoice"
+      description: ファイルカテゴリ名
+      example: "インボイス"
     description:
       type: string
-      description: File category description
-      example: "VAT invoice type"
+      description: ファイルカテゴリの説明
+      example: "VAT インボイスタイプ"
     category_prompt:
       type: string
-      description: Prompt for classification
-      example: "VAT invoice, including fields such as invoice code, invoice number, etc."
+      description: 分類用プロンプト
+      example: "VAT インボイス。インボイスコード、インボイス番号などのフィールドを含みます。"
     extract_model:
       type: string
       description: |
-        Extraction model
-        - Model 1: Fast speed with stable extraction results
-        - Model 2: Suitable for complex document understanding
-        - Model 3: VLM, suitable for simple extraction
-        - mixed: Only in responses, indicates different models are used across fields/tables in this category
+        抽出モデル
+        - Model 1: 高速で安定した抽出結果
+        - Model 2: 複雑な文書理解に適しています
+        - Model 3: VLM。シンプルな抽出に適しています
+        - mixed: レスポンスでのみ使用され、このカテゴリ内のフィールド/テーブルで異なるモデルが使用されていることを示します
       example: "Model 1"
       enum:
         - Model 1
@@ -43,34 +43,34 @@ CategoryFieldConfig:
   properties:
     name:
       type: string
-      description: Field name
-      example: Invoice Code
+      description: フィールド名
+      example: インボイスコード
     description:
       type: string
-      description: Field description
-      example: Invoice code description
+      description: フィールドの説明
+      example: インボイスコードの説明
     prompt:
       type: string
-      description: Semantic extraction prompt
+      description: 意味抽出プロンプト
     use_prompt:
       type: boolean
-      description: Whether to use semantic prompt
+      description: 意味抽出プロンプトを使用するかどうか
     alias:
       type: array
-      description: "Field aliases. On update: omit=no change, empty array []=clear aliases, non-empty array=override"
+      description: "フィールド別名。更新時: 省略=変更なし、空配列 []=別名をクリア、空でない配列=上書き"
       items:
         type: string
-      example: ["Invoice No.", "Bill Number"]
+      example: ["インボイス No.", "請求書番号"]
     identity:
       type: string
-      description: "Export field name. On update: omit=no change, empty string \"\"=clear, non-empty=override"
+      description: "エクスポート時のフィールド名。更新時: 省略=変更なし、空文字列 \"\"=クリア、空でない値=上書き"
       example: invoice_number
     multi_value:
       type: boolean
-      description: Whether to enable multi-value extraction
+      description: 複数値抽出を有効にするかどうか
     duplicate_value_distinct:
       type: boolean
-      description: Whether to deduplicate values, only effective when multi_value is true
+      description: multi_value が true の場合のみ有効な重複値除去を行うかどうか
     transform_settings:
       $ref: '#/TransformSettings'
 
@@ -81,18 +81,18 @@ CategoryField:
       properties:
         id:
           type: string
-          description: Field ID
+          description: フィールド ID
           example: "1234567890"
         enabled:
           $ref: '#/EnabledStatus'
         extract_model:
           type: string
           description: |
-            Field extraction model
-            - Model 1: Fast speed with stable extraction results
-            - Model 2: Suitable for complex document understanding
-            - Model 3: VLM, suitable for simple extraction
-            - For table fields, inherits from the table model; for regular fields, uses field-level config; legacy data inferred from category config
+            フィールド抽出モデル
+            - Model 1: 高速で安定した抽出結果
+            - Model 2: 複雑な文書理解に適しています
+            - Model 3: VLM。シンプルな抽出に適しています
+            - テーブルフィールドではテーブルモデルを継承し、通常フィールドではフィールド単位の設定を使用します。既存データはカテゴリ設定から推定されます
           example: "Model 1"
 
 CategoryTable:
@@ -100,27 +100,27 @@ CategoryTable:
   properties:
     id:
       type: string
-      description: Table ID
+      description: テーブル ID
       example: "1234567890"
     name:
       type: string
-      description: Table name
+      description: テーブル名
       example: "Table 1"
     description:
       type: string
-      description: Table description
-      example: "Table description"
+      description: テーブルの説明
+      example: "テーブルの説明"
     prompt:
       type: string
-      description: Table semantic extraction prompt
-      example: "Extract item name, quantity and amount from each row"
+      description: テーブルの意味抽出プロンプト
+      example: "各行から品目名、数量、金額を抽出します"
     collect_from_multi_table:
       type: boolean
-      description: Merge multiple tables
+      description: 複数テーブルを結合
       example: true
     extract_model:
       type: string
-      description: Table-level extraction model
+      description: テーブルレベルの抽出モデル
       example: "Model 1"
     fields:
       type: array
@@ -129,15 +129,15 @@ CategoryTable:
 
 CategorySample:
   type: object
-  description: File category sample
+  description: ファイルカテゴリサンプル
   properties:
     sample_id:
       type: string
-      description: Sample ID
+      description: サンプル ID
       example: "1234567890"
     file_name:
       type: string
-      description: File name
+      description: ファイル名
       example: "invoice_sample.pdf"
   required:
     - sample_id
@@ -145,93 +145,93 @@ CategorySample:
 
 TransformSettings:
   type: object
-  description: Field output transform configuration. Formats the extraction result before output.
+  description: フィールド出力変換設定。抽出結果を出力前に整形します。
   properties:
     type:
       type: string
       description: |
-        Transform type, determines which transform rule to apply:
-        - `datetime`: Normalize the extraction result to a specified date format
-        - `enumerate`: Restrict the extraction result to one of the preset enumeration values
-        - `regex`: Match and replace the extraction result using regular expressions
+        変換タイプ。適用する変換ルールを決定します:
+        - `datetime`: 抽出結果を指定した日付形式に正規化します
+        - `enumerate`: 抽出結果を事前設定された列挙値のいずれかに制限します
+        - `regex`: 正規表現で抽出結果をマッチングして置換します
       enum:
         - datetime
         - enumerate
         - regex
     datetime_settings:
       type: object
-      description: Datetime formatting configuration. Required when type=datetime.
+      description: 日時フォーマット設定。type=datetime の場合は必須です。
       properties:
         format:
           type: string
-          description: Target date format. The extraction result will be normalized to this format.
+          description: 対象の日付形式。抽出結果はこの形式に正規化されます。
           example: yyyy-MM-dd
     enumerate_settings:
       type: object
-      description: Enumeration constraint configuration. Required when type=enumerate.
+      description: 列挙制約設定。type=enumerate の場合は必須です。
       properties:
         items:
           type: array
-          description: Allowed enumeration values. If the extraction result is not in this list, mismatch_action applies.
+          description: 許可される列挙値。抽出結果がこのリストに含まれない場合は mismatch_action が適用されます。
           items:
             type: string
-          example: ["VAT Special Invoice", "VAT General Invoice", "Electronic Invoice"]
+          example: ["VAT 専用インボイス", "VAT 一般インボイス", "電子インボイス"]
     regex_settings:
       type: object
-      description: Regex transform configuration. Required when type=regex.
+      description: 正規表現変換設定。type=regex の場合は必須です。
       properties:
         match:
           type: string
-          description: Regex pattern for matching or capturing the extraction result
+          description: 抽出結果をマッチングまたはキャプチャする正規表現パターン
           example: ^(\d{4})-(\d{2})-(\d{2})$
         replace:
           type: string
-          description: Replacement expression, supports $1, $2 capture group references
+          description: 置換式。$1、$2 などのキャプチャグループ参照をサポートします
           example: $1/$2/$3
     mismatch_action:
       type: object
-      description: How to handle extraction results that don't match the transform rule (applies to all types, optional).
+      description: 変換ルールに一致しない抽出結果の処理方法（すべてのタイプに適用、任意）。
       properties:
         mode:
           type: string
           description: |
-            Handling mode:
-            - `default`: Output the specified default value (requires default_value)
-            - `warning`: Keep the original extraction result, flag a warning for manual review
+            処理モード:
+            - `default`: 指定したデフォルト値を出力します（default_value が必要）
+            - `warning`: 元の抽出結果を保持し、手動レビュー用の警告を付けます
           enum:
             - default
             - warning
         default_value:
           type: string
-          description: Output value when mode=default
+          description: mode=default の場合の出力値
           example: "N/A"
 
 CategoryTableConfig:
   type: object
-  description: Table configuration for one-stop creation (with nested fields)
+  description: 一括作成用のテーブル設定（ネストされたフィールドを含む）
   properties:
     name:
       type: string
-      description: Table name
-      example: "Detail Table"
+      description: テーブル名
+      example: "明細テーブル"
       maxLength: 50
     prompt:
       type: string
-      description: Table semantic extraction prompt
+      description: テーブルの意味抽出プロンプト
       maxLength: 200
     collect_from_multi_table:
       type: boolean
-      description: Merge multiple tables
+      description: 複数テーブルを結合
     extract_model:
       type: string
-      description: Table-level extraction model
+      description: テーブルレベルの抽出モデル
       enum:
         - Model 1
         - Model 2
         - Model 3
     fields:
       type: array
-      description: Nested field list within the table
+      description: テーブル内のネストされたフィールドリスト
       items:
         $ref: '#/CategoryFieldConfig'
   required:
@@ -239,50 +239,50 @@ CategoryTableConfig:
 
 CategoryFieldUpdateItem:
   type: object
-  description: "Field update item (multi_value/duplicate_value_distinct cannot be modified via this endpoint)"
+  description: "フィールド更新項目（multi_value/duplicate_value_distinct はこのエンドポイントでは変更できません）"
   properties:
     field_id:
       type: string
-      description: Field ID
+      description: フィールド ID
       example: "1234567890"
     name:
       type: string
-      description: Field name
+      description: フィールド名
     description:
       type: string
-      description: Field description
+      description: フィールドの説明
     prompt:
       type: string
-      description: Semantic extraction prompt
+      description: 意味抽出プロンプト
     use_prompt:
       type: boolean
-      description: Whether to use semantic prompt
+      description: 意味抽出プロンプトを使用するかどうか
     alias:
       type: array
-      description: "Field aliases. omit=no change, empty array []=clear, non-empty=override"
+      description: "フィールド別名。省略=変更なし、空配列 []=クリア、空でない配列=上書き"
       items:
         type: string
-      example: ["Invoice No.", "Bill Number"]
+      example: ["インボイス No.", "請求書番号"]
     identity:
       type: string
-      description: "Export field name. omit=no change, empty string \"\"=clear, non-empty=override"
+      description: "エクスポート時のフィールド名。省略=変更なし、空文字列 \"\"=クリア、空でない値=上書き"
       example: invoice_number
     multi_value:
       type: boolean
-      description: "Whether to enable multi-value extraction. Omit=no change"
+      description: "複数値抽出を有効にするかどうか。省略=変更なし"
     duplicate_value_distinct:
       type: boolean
-      description: "Whether to deduplicate values. Only effective when multi_value is true. Omit=no change"
+      description: "値を重複排除するかどうか。multi_value が true の場合のみ有効です。省略=変更なし"
     transform_settings:
       $ref: '#/TransformSettings'
     extract_model:
       type: string
       description: |
-        Field-level extraction model. Only regular fields can be set independently; table fields cannot.
-        Omit to keep existing config.
-        - Model 1: Fast speed with stable extraction results
-        - Model 2: Suitable for complex document understanding
-        - Model 3: VLM, suitable for simple extraction
+        フィールド単位の抽出モデル。通常フィールドのみ個別に設定でき、テーブルフィールドは設定できません。
+        省略すると既存設定を保持します。
+        - Model 1: 高速で安定した抽出結果
+        - Model 2: 複雑な文書理解に適しています
+        - Model 3: VLM。シンプルな抽出に適しています
       example: "Model 1"
       enum:
         - Model 1
@@ -296,36 +296,36 @@ CategoryTableUpdateItem:
   properties:
     table_id:
       type: string
-      description: Table ID
+      description: テーブル ID
       example: "1234567890"
     name:
       type: string
-      description: Table name
+      description: テーブル名
       maxLength: 50
     prompt:
       type: string
-      description: Table semantic extraction prompt
+      description: テーブルの意味抽出プロンプト
       maxLength: 200
     extract_model:
       type: string
-      description: Table-level extraction model
+      description: テーブルレベルの抽出モデル
       enum:
         - Model 1
         - Model 2
         - Model 3
     collect_from_multi_table:
       type: boolean
-      description: Merge multiple tables
+      description: 複数テーブルを結合
   required:
     - table_id
 
 EnabledStatus:
   type: integer
   description: |
-    Enabled status
-    - 0: Disabled
-    - 1: Enabled
-    - 2: Draft
+    有効化ステータス
+    - 0: 無効
+    - 1: 有効
+    - 2: 下書き
   enum:
     - 0
     - 1

@@ -23,7 +23,7 @@
       $ref: '../components/request-bodies.yaml#/FileUploadRequestBody'
     responses:
       '200':
-        description: File upload successful
+        description: ファイルアップロードに成功
         content:
           application/json:
             schema:
@@ -36,7 +36,7 @@
                     properties:
                       batch_number:
                         type: string
-                        description: Batch Number
+                        description: バッチ番号
                         example: 202412190001
                       files:
                         type: array
@@ -45,19 +45,19 @@
                           properties:
                             id:
                               type: string
-                              description: File ID
+                              description: ファイル ID
                               example: 202412190001
                             task_id:
                               type: string
-                              description: Task ID
+                              description: タスク ID
                               example: 1981692246135111680
                             name:
                               type: string
-                              description: File Name
+                              description: ファイル名
                               example: invoice.pdf
                             format:
                               type: string
-                              description: File Format
+                              description: ファイル形式
                               example: pdf
                           required:
                           - id
@@ -70,7 +70,7 @@
 /api/app-api/sip/platform/v2/file/upload/sync:
   post:
     summary: ファイルを同期アップロード
-    description: Upload file and wait for processing to complete, returning processing results directly
+    description: ファイルをアップロードし、処理完了を待ってから処理結果を直接返します
     operationId: uploadFileSync
     parameters:
       - $ref: '../components/parameters.yaml#/WorkspaceId'
@@ -93,7 +93,7 @@
       $ref: '../components/request-bodies.yaml#/FileUploadRequestBody'
     responses:
       '200':
-        description: File uploaded and processed successfully
+        description: ファイルのアップロードと処理に成功
         content:
           application/json:
             schema:
@@ -109,33 +109,33 @@
     parameters:
       - name: page
         in: query
-        description: Page number, default 1
+        description: ページ番号。デフォルトは 1
         required: false
         schema:
           type: integer
           default: 1
       - name: page_size
         in: query
-        description: Number of items per page, default 1000
+        description: 1 ページあたりの件数。デフォルトは 1000
         required: false
         schema:
           type: integer
           default: 1000
       - name: workspace_id
         in: query
-        description: Workspace ID
+        description: ワークスペース ID
         required: true
         schema:
           type: string
       - name: batch_number
         in: query
-        description: Batch Number
+        description: バッチ番号
         required: false
         schema:
           type: string
       - name: file_id
         in: query
-        description: File ID
+        description: ファイル ID
         required: false
         schema:
           type: string
@@ -152,13 +152,13 @@
           $ref: '../components/schemas/common.yaml#/RecognitionStatus'
       - name: verification_status
         in: query
-        description: "File verification status 0: Pending verification 2: Confirmed 3: Rejected 4: Deleted 5: Deferred processing"
+        description: "ファイル検証ステータス 0: 検証待ち 2: 確認済み 3: 却下 4: 削除済み 5: 処理保留"
         required: false
         schema:
           $ref: '../components/schemas/common.yaml#/VerificationStatus'
       - name: start_time
         in: query
-        description: Start time for search by update time, RFC3339 format (YYYY-MM-DDTHH:MM:SSZ)
+        description: "更新時刻で検索する開始時刻。RFC3339 形式（YYYY-MM-DDTHH:MM:SSZ）"
         required: false
         schema:
           type: string
@@ -166,7 +166,7 @@
           example: 2024-01-01T00:00:00Z
       - name: end_time
         in: query
-        description: End time for search by update time, RFC3339 format (YYYY-MM-DDTHH:MM:SSZ)
+        description: "更新時刻で検索する終了時刻。RFC3339 形式（YYYY-MM-DDTHH:MM:SSZ）"
         required: false
         schema:
           type: string
@@ -174,21 +174,21 @@
           example: 2024-01-01T10:00:00Z
       - name: with_document
         in: query
-        description: Whether to return the complete text recognition result of the document
+        description: 文書の完全なテキスト認識結果を返すかどうか
         required: false
         schema:
           type: boolean
           default: false
       - name: with_task_detail_url
         in: query
-        description: Whether to return the task details page URL
+        description: タスク詳細ページ URL を返すかどうか
         required: false
         schema:
           type: boolean
           default: false
     responses:
       '200':
-        description: Successfully retrieved file list
+        description: ファイル一覧の取得に成功
         content:
           application/json:
             schema:
@@ -199,7 +199,7 @@
 /api/app-api/sip/platform/v2/file/delete:
   post:
     summary: タスクを削除
-    description: Delete files by conditions. Files matching any condition will be deleted.
+    description: 条件を指定してファイルを削除します。いずれかの条件に一致するファイルが削除されます。
     operationId: deleteFile
     requestBody:
       required: true
@@ -210,39 +210,39 @@
             properties:
               workspace_id:
                 type: string
-                description: Workspace ID
+                description: ワークスペース ID
                 example: 1234567890
               batch_number:
                 type: array
                 items:
                   type: string
-                description: Batch number list
+                description: バッチ番号リスト
                 example: ["202412190001", "202412190002"]
               task_id:
                 type: array
                 items:
                   type: string
-                description: Task ID list
+                description: タスク ID リスト
                 example: ["1978297791713619968", "1978297791713619969"]
               file_id:
                 type: array
                 items:
                   type: string
-                description: File ID list
+                description: ファイル ID リスト
                 example: ["1978297792124661760", "1978297792124661761"]
               start_time:
                 type: integer
-                description: "Start time (epoch timestamp, unit: seconds)"
+                description: "開始時刻（エポックタイムスタンプ、単位: 秒）"
                 example: 1760523600
               end_time:
                 type: integer
-                description: "End time (epoch timestamp, unit: seconds)"
+                description: "終了時刻（エポックタイムスタンプ、単位: 秒）"
                 example: 1760523600
             required:
               - workspace_id
     responses:
       '200':
-        description: Successfully deleted tasks
+        description: タスクの削除に成功
         content:
           application/json:
             schema:
@@ -255,13 +255,13 @@
                       properties:
                         deleted_count:
                           type: integer
-                          description: Number of deleted files
+                          description: 削除されたファイル数
                           example: 1
 
 /api/app-api/sip/platform/v2/file/update:
   post:
     summary: ファイル処理結果を更新
-    description: Update file processing result. Usually used after manual review and proofreading to upload modified key-value pairs, overriding automatically recognized results.
+    description: ファイル処理結果を更新します。通常は手動確認や校正後に、修正済みのキー値ペアをアップロードして自動認識結果を上書きするために使用します。
     operationId: updateFile
     requestBody:
       required: true
@@ -274,20 +274,20 @@
               properties:
                 workspace_id:
                   type: string
-                  description: Workspace ID
+                  description: ワークスペース ID
                   example: 1234567890
                 file_id:
                   type: string
-                  description: File ID
+                  description: ファイル ID
                   example: 202412190001
                 data:
                   description: |
-                    Full field update.
-                    Note: Even if only updating partial fields, all fields must be included.
-                    If the incoming fields are more than the original fields, the additional fields will be added.
-                    If the incoming fields are fewer than the original fields, the missing fields will be deleted.
-                    If the incoming field values differ from the original field values, the field values will be updated.
-                    If the incoming fields are identical to the original fields, the fields will be preserved.
+                    フィールド全体を更新します。
+                    注意: 一部のフィールドのみを更新する場合でも、すべてのフィールドを含める必要があります。
+                    入力フィールドが元のフィールドより多い場合、追加分のフィールドが追加されます。
+                    入力フィールドが元のフィールドより少ない場合、不足しているフィールドは削除されます。
+                    入力フィールド値が元のフィールド値と異なる場合、フィールド値が更新されます。
+                    入力フィールドが元のフィールドと同一の場合、フィールドは保持されます。
                   type: object
                   properties:
                     fields:
@@ -295,12 +295,12 @@
                       items:
                         $ref: '../components/schemas/files.yaml#/KeyValue'
                       example:
-                      - key: Invoice Code
+                      - key: インボイスコード
                         value: "3100231130"
                         position:
                         - page: 0
                           vertices: [0, 0, 100, 0, 100, 100, 0, 100]
-                      - key: Invoice Number
+                      - key: インボイス番号
                         value: "28737000"
                         position:
                         - page: 0
@@ -312,22 +312,22 @@
                         items:
                           $ref: '../components/schemas/files.yaml#/KeyValue'
                       example:
-                      - - key: Goods and Services Name
+                      - - key: 商品・サービス名
                           value: ＊Electronic Computer＊Microcomputer Host
                           position:
                           - page: 0
                             vertices: [0, 0, 100, 0, 100, 100, 0, 100]
-                        - key: Specification Model
+                        - key: 仕様モデル
                           value: DMS-SC68
                           position:
                           - page: 0
                             vertices: [0, 0, 100, 0, 100, 100, 0, 100]
-                      - - key: Goods and Services Name
+                      - - key: 商品・サービス名
                           value: ＊Mechanical Computer＊Supercomputer Host
                           position:
                           - page: 0
                             vertices: [0, 0, 100, 0, 100, 100, 0, 100]
-                        - key: Specification Model
+                        - key: 仕様モデル
                           value: AN/FSQ-7
                           position:
                           - page: 0
@@ -338,7 +338,7 @@
               - data
     responses:
       '200':
-        description: Successfully updated file processing result
+        description: ファイル処理結果の更新に成功
         content:
           application/json:
             schema:
@@ -350,27 +350,27 @@
                     type: object
                     properties:
                       files:
-                        description: Updated file list
+                        description: 更新後のファイルリスト
                         type: array
                         items:
                           type: object
                           properties:
                             workspace_id:
                               type: string
-                              description: Workspace ID
+                              description: ワークスペース ID
                               example: 1234567890
                             id:
                               type: string
-                              description: File ID
+                              description: ファイル ID
                               example: 202412190001
 
 /api/app-api/sip/platform/v2/file/amend_category:
   post:
     summary: ファイルカテゴリを修正
     description: |
-      - For regular tasks, modify the file category of the regular task
-      - For document splitting tasks, modify the file type and page numbers of the split files
-      - For multi-image cropping tasks, modify the file type of the cropped files
+      - 通常タスクの場合、通常タスクのファイルカテゴリを修正します
+      - 文書分割タスクの場合、分割後ファイルのファイルタイプとページ番号を修正します
+      - 複数画像クロップタスクの場合、クロップ後ファイルのファイルタイプを修正します
     operationId: amendCategory
     requestBody:
       content:
@@ -380,54 +380,54 @@
             properties:
               workspace_id:
                 type: string
-                description: Workspace ID
+                description: ワークスペース ID
                 example: 1234567890
               task_id:
                 type: string
-                description: Task ID
+                description: タスク ID
                 example: 1234567890
               category:
                 type: string
                 description: |
-                  New file category.
-                  Only supported when the task type is a regular task.
-                example: Electronic Invoice (Ordinary Invoice)
+                  新しいファイルカテゴリ。
+                  タスクタイプが通常タスクの場合のみ対応しています。
+                example: 電子インボイス（普通インボイス）
               split_tasks:
-                description: Document splitting task list
+                description: 文書分割タスクリスト
                 type: array
                 items:
                   type: object
                   properties:
                     category:
                       type: string
-                      description: Subtask file category
-                      example: Electronic Invoice (Ordinary Invoice)
+                      description: サブタスクのファイルカテゴリ
+                      example: 電子インボイス（普通インボイス）
                     pages:
                       type: array
                       items:
                         type: integer
-                        description: Subfile page numbers, starting from 0
+                        description: サブファイルのページ番号。0 から開始します
                       example: [0, 1]
               crop_tasks:
-                description: Multi-image cropping task list
+                description: 複数画像クロップタスクリスト
                 type: array
                 items:
                   type: object
                   properties:
                     crop_child_task_id:
                       type: string
-                      description: Multi-image cropping subtask ID
+                      description: 複数画像クロップのサブタスク ID
                       example: 1234567890
                     category:
                       type: string
-                      description: Subtask file category
-                      example: Electronic Invoice (Ordinary Invoice)
+                      description: サブタスクのファイルカテゴリ
+                      example: 電子インボイス（普通インボイス）
             required:
               - workspace_id
               - task_id
     responses:
       '200':
-        description: Successfully updated file category
+        description: ファイルカテゴリの更新に成功
         content:
           application/json:
             schema:
@@ -437,7 +437,7 @@
 /api/app-api/sip/platform/v2/file/retry:
   post:
     summary: ファイル処理を再試行
-    description: Retry processing a file.
+    description: ファイル処理を再試行します。
     operationId: retryFile
     requestBody:
       required: true
@@ -448,11 +448,11 @@
             properties:
               workspace_id:
                 type: string
-                description: Workspace ID
+                description: ワークスペース ID
                 example: 1234567890
               task_id:
                 type: string
-                description: Task ID
+                description: タスク ID
                 example: 1234567890
               parser_params:
                 $ref: '../components/schemas/files.yaml#/DocumentParserParam'
@@ -461,7 +461,7 @@
               - task_id
     responses:
       '200':
-        description: Successfully retried file processing
+        description: ファイル処理の再試行に成功
         content:
           application/json:
             schema:
@@ -472,8 +472,8 @@
   post:
     summary: 特定フィールドを抽出
     description: |
-      For tasks that have completed extraction, extract additional fields for the task, or re-extract individual existing fields.
-      Returns the complete extraction result of all fields. The return structure is the same as `/api/app-api/sip/platform/v2/file/fetch`.
+      抽出が完了したタスクに対して、追加フィールドを抽出するか、既存フィールドを個別に再抽出します。
+      すべてのフィールドの完全な抽出結果を返します。戻り構造は `/api/app-api/sip/platform/v2/file/fetch` と同じです。
     operationId: extractFields
     requestBody:
       required: true
@@ -484,11 +484,11 @@
             properties:
               workspace_id:
                 type: string
-                description: Workspace ID
+                description: ワークスペース ID
                 example: 1234567890
               task_id:
                 type: string
-                description: Task ID
+                description: タスク ID
                 example: 1234567890
               fields:
                 type: array
@@ -501,15 +501,15 @@
                   properties:
                     name:
                       type: string
-                      description: Table name
+                      description: テーブル名
                       example: Table1
                     extract_model:
                       type: string
                       description: |
-                        Table-level extraction model, defaults to Model 1 if not specified. All fields within the table use this model
-                        - Model 1: Fast speed with stable extraction results
-                        - Model 2: Suitable for complex document understanding
-                        - Model 3: VLM, suitable for simple extraction
+                        テーブルレベルの抽出モデル, defaults to Model 1 if not specified. All fields within the table use this model
+                        - Model 1: 高速で安定した抽出結果
+                        - Model 2: 複雑な文書理解に適しています
+                        - Model 3: VLM。シンプルな抽出に適しています
                       example: "Model 1"
                       enum:
                         - Model 1
@@ -524,7 +524,7 @@
               - task_id
     responses:
       '200':
-        description: Successfully extracted fields
+        description: フィールド抽出に成功
         content:
           application/json:
             schema:

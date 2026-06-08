@@ -1,7 +1,7 @@
 /api/app-api/sip/platform/v2/workspace/create:
   post:
     summary: ワークスペースを作成
-    description: Create a new workspace
+    description: 新しいワークスペースを作成します
     operationId: createWorkspace
     tags:
       - ワークスペース管理
@@ -14,22 +14,22 @@
             properties:
               name:
                 type: string
-                description: Workspace name
-                example: "My Workspace"
+                description: ワークスペース名
+                example: "My ワークスペース"
                 maxLength: 50
               description:
                 type: string
-                description: Workspace description
-                example: "This is a workspace for invoice processing"
+                description: ワークスペースの説明
+                example: "請求書処理用のワークスペースです"
                 maxLength: 200
               enterprise_id:
                 type: integer
                 format: int64
-                description: Enterprise organization ID
+                description: エンタープライズ組織 ID
                 example: 12345
               auth_scope:
                 type: integer
-                description: "Collaboration scope 0: Visible only to self 1: Visible to enterprise members"
+                description: "共同利用範囲 0: 自分のみ表示 1: エンタープライズメンバーに表示"
                 example: 1
                 enum:
                   - 0
@@ -40,7 +40,7 @@
               - auth_scope
     responses:
       '200':
-        description: Successfully created workspace
+        description: ワークスペースの作成に成功
         content:
           application/json:
             schema:
@@ -53,27 +53,27 @@
                       properties:
                         workspace_id:
                           type: string
-                          description: Workspace ID
+                          description: ワークスペース ID
                           example: "1234567890"
 
 /api/app-api/sip/platform/v2/workspace/list:
   get:
     summary: ワークスペース一覧を取得
-    description: Get list of all workspaces for the current user
+    description: 現在のユーザーのワークスペース一覧を取得します
     operationId: listWorkspaces
     tags:
       - ワークスペース管理
     parameters:
       - name: enterprise_id
         in: query
-        description: Enterprise ID
+        description: エンタープライズ ID
         required: true
         schema:
           type: integer
           format: int64
       - name: page
         in: query
-        description: Page number
+        description: ページ番号
         required: false
         schema:
           type: integer
@@ -81,7 +81,7 @@
           example: 1
       - name: page_size
         in: query
-        description: Page size
+        description: ページサイズ
         required: false
         schema:
           type: integer
@@ -89,7 +89,7 @@
           example: 20
     responses:
       '200':
-        description: Successfully retrieved workspace list
+        description: ワークスペース一覧の取得に成功
         content:
           application/json:
             schema:
@@ -102,15 +102,15 @@
                       properties:
                         total:
                           type: integer
-                          description: Total number of workspaces
+                          description: ワークスペース総数
                           example: 100
                         page:
                           type: integer
-                          description: Current page number
+                          description: 現在のページ番号
                           example: 1
                         page_size:
                           type: integer
-                          description: Page size
+                          description: ページサイズ
                           example: 20
                         workspaces:
                           type: array
@@ -120,21 +120,21 @@
 /api/app-api/sip/platform/v2/workspace/get:
   get:
     summary: ワークスペース詳細を取得
-    description: Get detailed information of a workspace by workspace ID
+    description: ワークスペース ID を指定してワークスペースの詳細情報を取得します
     operationId: getWorkspace
     tags:
       - ワークスペース管理
     parameters:
       - name: workspace_id
         in: query
-        description: Workspace ID
+        description: ワークスペース ID
         required: true
         schema:
           type: string
           example: "1234567890"
     responses:
       '200':
-        description: Successfully retrieved workspace details
+        description: ワークスペース詳細の取得に成功
         content:
           application/json:
             schema:
@@ -148,7 +148,7 @@
 /api/app-api/sip/platform/v2/workspace/update:
   post:
     summary: ワークスペースを更新
-    description: Update information of a specified workspace
+    description: 指定したワークスペースの情報を更新します
     operationId: updateWorkspace
     tags:
       - ワークスペース管理
@@ -161,32 +161,32 @@
             properties:
               workspace_id:
                 type: string
-                description: Workspace ID
+                description: ワークスペース ID
                 example: "1234567890"
               name:
                 type: string
-                description: Workspace name
-                example: "My Workspace"
+                description: ワークスペース名
+                example: "My ワークスペース"
                 maxLength: 50
               description:
                 type: string
-                description: Workspace description
-                example: "This is a workspace for invoice processing"
+                description: ワークスペースの説明
+                example: "請求書処理用のワークスペースです"
                 maxLength: 500
               auth_scope:
                 type: integer
-                description: "Collaboration scope 0: Visible only to self 1: Visible to enterprise members"
+                description: "共同利用範囲 0: 自分のみ表示 1: エンタープライズメンバーに表示"
                 example: 1
                 enum:
                   - 0
                   - 1
               callback_url:
                 type: string
-                description: Callback URL
+                description: コールバック URL
                 example: "https://example.com/callback"
               callback_retry_time:
                 type: integer
-                description: Callback retry count
+                description: コールバック再試行回数
                 example: 3
                 minimum: 1
                 maximum: 3
@@ -196,7 +196,7 @@
               - auth_scope
     responses:
       '200':
-        description: Successfully updated workspace
+        description: ワークスペースの更新に成功
         content:
           application/json:
             schema:
@@ -205,7 +205,7 @@
 /api/app-api/sip/platform/v2/workspace/delete:
   post:
     summary: ワークスペースを削除
-    description: Delete specified workspace(s)
+    description: 指定したワークスペースを削除します
     operationId: deleteWorkspace
     tags:
       - ワークスペース管理
@@ -220,14 +220,14 @@
                 type: array
                 items:
                   type: string
-                  description: Workspace ID
+                  description: ワークスペース ID
                   example: "1234567890"
-                description: List of workspace IDs to delete
+                description: 削除するワークスペース ID のリスト
             required:
               - workspace_ids
     responses:
       '200':
-        description: Successfully deleted workspace
+        description: ワークスペースの削除に成功
         content:
           application/json:
             schema:

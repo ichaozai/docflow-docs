@@ -3,20 +3,20 @@ ExtractFieldReqVO:
   properties:
     key:
       type: string
-      description: Field name
-      example: Invoice Code
+      description: フィールド名
+      example: インボイスコード
     prompt:
       type: string
-      description: Field prompt
-      example: Only keep the year part
+      description: フィールドプロンプト
+      example: 年の部分のみを保持します
     extract_model:
       type: string
       description: |
-        Field-level extraction model, defaults to Model 1 if not specified
-        - Model 1: Fast speed with stable extraction results
-        - Model 2: Suitable for complex document understanding
-        - Model 3: VLM, suitable for simple extraction
-        Note: For table fields, the extraction model is determined by the table-level extract_model, this field is ignored
+        フィールド単位の抽出モデル。未指定の場合は Model 1 がデフォルトです
+        - Model 1: 高速で安定した抽出結果
+        - Model 2: 複雑な文書理解に適しています
+        - Model 3: VLM。シンプルな抽出に適しています
+        注: テーブルフィールドでは抽出モデルはテーブル単位の extract_model によって決まり、このフィールドは無視されます
       example: "Model 1"
       enum:
         - Model 1
@@ -31,15 +31,15 @@ TaskProcessResult:
       properties:
         total:
           type: integer
-          description: Total number of files
+          description: ファイル総数
           example: 100
         page:
           type: integer
-          description: Current page number
+          description: 現在のページ番号
           example: 1
         page_size:
           type: integer
-          description: Number of items per page
+          description: 1 ページあたりの件数
           example: 20
         files:
           type: array
@@ -48,35 +48,35 @@ TaskProcessResult:
             properties:
               id:
                 type: string
-                description: File ID
+                description: ファイル ID
                 example: 202412190001
               task_id:
                 type: string
-                description: Task ID
+                description: タスク ID
                 example: 202412190001
               task_detail_url:
                 type: string
-                description: Task Details Page URL
+                description: タスク詳細ページ URL
               task_type:
                 $ref: '#/TaskType'
               batch_number:
                 type: string
-                description: Batch Number
+                description: バッチ番号
                 example: 202412190001
               name:
                 type: string
-                description: File Name
+                description: ファイル名
                 example: invoice.pdf
               format:
                 type: string
-                description: File Format
+                description: ファイル形式
               recognition_status:
                 $ref: './common.yaml#/RecognitionStatus'
               failure_causes:
                 type: string
                 description: |
-                  Task failure reason.
-                  When recognition_status is 2, this field is present.
+                  タスク失敗理由。
+                  recognition_status が 2 の場合、このフィールドが返されます。
               verification_status:
                 $ref: './common.yaml#/VerificationStatus'
               category:
@@ -87,71 +87,71 @@ TaskProcessResult:
                 $ref: '#/PagesInfo'
               data:
                 type: object
-                description: Processing result
+                description: 処理結果
                 properties:
                   fields:
-                    description: Field list
+                    description: フィールドリスト
                     type: array
                     items:
                       $ref: '#/FieldRespKeyValue'
                     example:
-                    - key: Invoice Code
-                      identifier: Invoice Code Identifier
+                    - key: インボイスコード
+                      identifier: インボイスコード識別子
                       value: "3100231130"
                       position:
                       - page: 0
                         vertices: [0, 0, 100, 0, 100, 100, 0, 100]
-                    - key: Invoice Number
+                    - key: インボイス番号
                       value: "28737000"
-                      identifier: Invoice Number Identifier
+                      identifier: インボイス番号識別子
                       position:
                       - page: 0
                         vertices: [0, 0, 100, 0, 100, 100, 0, 100]
                   items:
-                    description: Table data list
+                    description: テーブルデータリスト
                     type: array
                     items:
                       type: array
                       items:
                         $ref: '#/KeyValue'
                     example:
-                    - - key: Goods and Services Name
+                    - - key: 商品・サービス名
                         value: ＊Electronic Computer＊Microcomputer Host
                         position:
                         - page: 0
                           vertices: [0, 0, 100, 0, 100, 100, 0, 100]
-                      - key: Specification Model
+                      - key: 仕様モデル
                         value: DMS-SC68
                         position:
                         - page: 0
                           vertices: [0, 0, 100, 0, 100, 100, 0, 100]
-                    - - key: Goods and Services Name
+                    - - key: 商品・サービス名
                         value: ＊Mechanical Computer＊Supercomputer Host
                         position:
                         - page: 0
                           vertices: [0, 0, 100, 0, 100, 100, 0, 100]
-                      - key: Specification Model
+                      - key: 仕様モデル
                         value: AN/FSQ-7
                         position:
                         - page: 0
                           vertices: [0, 0, 100, 0, 100, 100, 0, 100]
                   tables:
-                    description: Complete table data list (including system tables and manually configured tables)
+                    description: 完全なテーブルデータリスト（システムテーブルと手動設定テーブルを含む）
                     type: array
                     items:
                       type: object
                       properties:
                         tableName:
-                          description: Table name
+                          description: テーブル名
                           type: string
                           example: table1
                         tableType:
                           description: |
-                            Table type, 0: system configured, 1: manually added.
+                            テーブルタイプ。0: システム設定、1: 手動追加。
                           type: string
                           example: 0
                         extractModel:
-                          description: Table-level extraction model
+                          description: テーブルレベルの抽出モデル
                           type: string
                         items:
                           type: array
@@ -160,84 +160,84 @@ TaskProcessResult:
                             items:
                               $ref: '#/CommonFieldDetailRespVO'
                   stamps:
-                    description: Stamp information
+                    description: 印影情報
                     type: array
                     items:
                       $ref: '#/StampValue'
                     example:
                       - angel: 0
                         page: 0
-                        text: National Unified Invoice Supervision Seal
+                        text: 全国統一インボイス監督印
                         type: Other
                         color: Red
                         shape: Oval Seal
                         position: [ 0, 0, 100, 0, 100, 100, 0, 100 ]
                       - angel: 0
                         page: 0
-                        text: Tax Bureau Seal
+                        text: 税務局印
                         type: Other
                         color: Red
                         shape: Oval Seal
                         position: [ 0, 0, 100, 0, 100, 100, 0, 100 ]
                   handwritings:
-                    description: Handwriting information
+                    description: 手書き情報
                     type: array
                     items:
                       $ref: '#/HandWritingValue'
                     example:
                       - angel: 0
                         page: 0
-                        text: March 1st
+                        text: 3月1日
                         position:
                           - page: 0
                             vertices: [ 0, 0, 100, 0, 100, 100, 0, 100 ]
                       - angel: 0
                         page: 0
-                        text: Zhang San
+                        text: 山田太郎
                         position:
                           - page: 0
                             vertices: [ 0, 0, 100, 0, 100, 100, 0, 100 ]
                   invoiceVerifyResult:
-                    description: Invoice verification result
+                    description: インボイス検証結果
                     type: object
                     properties:
                       invoiceVerifyStatus:
                         type: integer
                         description: |
-                          Whether invoice verification is successful (0: No, 1: Yes, null: Not verified)
+                          インボイス検証に成功したかどうか（0: いいえ、1: はい、null: 未検証）
                         example: 0
                       invoiceVerifyErrorCode:
                         type: integer
-                        description: Invoice verification error code
+                        description: インボイス検証エラーコード
                         example: 0
                       invoiceVerifyCanRetry:
                         type: integer
                         description: |
-                          Whether invoice verification can be retried/initiated (0: No, 1: Yes)
+                          インボイス検証を再試行/開始できるかどうか（0: いいえ、1: はい）
                         example: 0
                       invoiceVerifyFailMsg:
                         type: string
-                        description: Invoice verification failure reason
-                        example: Exceeded daily limit
+                        description: インボイス検証失敗理由
+                        example: 1日の上限を超過しました
               document:
                 $ref: '#/Document'
               child_files:
-                description: Sub-task information
+                description: サブタスク情報
                 type: array
                 items:
                   $ref: '#/SubFileDetailInfo'
               duration_ms:
                 type: integer
                 description: |
-                  Task processing time, unit: milliseconds
-                  Calculated from the start of the task to completion (success or failure), excluding queue waiting time.
+                  タスク処理時間。単位: ミリ秒
+                  タスク開始から完了（成功または失敗）までの時間です。キュー待ち時間は含みません。
                 example: 10000
               total_page_num:
                 type: integer
-                description: Total number of pages in the current file
+                description: 現在のファイルの総ページ数
                 example: 10
               parser_params:
-                description: File parsing parameter configuration
+                description: ファイル解析パラメータ設定
                 allOf:
                   - $ref: '#/DocumentParserParam'
             required:
@@ -253,10 +253,10 @@ KeyValue:
   properties:
     key:
       type: string
-      description: Field name
+      description: フィールド名
     value:
       type: string
-      description: Field value
+      description: フィールド値
     position:
       $ref: "#/KeyValuePosition"
 
@@ -265,48 +265,48 @@ FieldRespKeyValue:
   properties:
     key:
       type: string
-      description: Field name
+      description: フィールド名
     identifier:
       type: string
-      description: Identifier(from export field name)
+      description: 識別子（エクスポート時のフィールド名由来）
     value:
       type: string
-      description: Field value
+      description: フィールド値
     position:
       $ref: "#/KeyValuePosition"
     confidence:
       type: number
       format: float
-      description: Confidence score, range 0~1
+      description: 信頼度スコア。範囲は 0〜1
       example: 0.95
     extract_model:
       type: string
-      description: Actual extraction model used
+      description: 実際に使用された抽出モデル
 
 StampValue:
   type: object
   properties:
     angel:
       type: integer
-      description: Angle
+      description: 角度
     page:
       type: integer
-      description: Page number
+      description: ページ番号
     text:
       type: string
-      description: Stamp text content
+      description: 印影テキスト内容
     type:
       type: string
-      description: Stamp type
+      description: 印影タイプ
     color:
       type: string
-      description: Stamp color
+      description: 印影色
     shape:
       type: string
-      description: Stamp shape
+      description: 印影形状
     position:
       type: array
-      description: Position information
+      description: 位置情報
       items:
         type: integer
         example: 1
@@ -316,28 +316,28 @@ HandWritingValue:
   properties:
     angel:
       type: integer
-      description: Angle
+      description: 角度
     page:
       type: integer
-      description: Page number
+      description: ページ番号
     text:
       type: string
-      description: Handwriting text content
+      description: 手書きテキスト内容
     position:
       $ref: "#/KeyValuePosition"
 
 KeyValuePosition:
-  description: Position of the field value. Field values may span pages or rows, so they are displayed as arrays.
+  description: フィールド値の位置。フィールド値はページや行をまたぐ場合があるため、配列として表示されます。
   type: array
   items:
     type: object
     properties:
       page:
         type: integer
-        description: Page where the field is located. It is the index of the pages array
+        description: フィールドが存在するページ。pages 配列のインデックスです
       vertices:
         type: array
-        description: Bounding quadrilateral coordinates of the field value. The image uses the top-left as origin, array values are [top-left x, top-left y, top-right x, top-right y, bottom-right x, bottom-right y, bottom-left x, bottom-left y]
+        description: フィールド値の外接四角形座標。画像の左上を原点とし、配列値は [左上 x, 左上 y, 右上 x, 右上 y, 右下 x, 右下 y, 左下 x, 左下 y] です
         items:
           type: integer
         minItems: 8
@@ -353,22 +353,22 @@ Document:
         properties:
           angle:
             type: integer
-            description: Page rotation angle
+            description: ページ回転角度
           width:
             type: integer
-            description: Page width
+            description: ページ幅
           height:
             type: integer
-            description: Page height
+            description: ページ高さ
           lines:
-            description: Page text line array
+            description: ページテキスト行配列
             type: array
             items:
               type: object
               properties:
                 text:
                   type: string
-                  description: Line text
+                  description: 行テキスト
                 position:
                   type: array
                   items:
@@ -389,40 +389,40 @@ TaskCropResult:
   properties:
     page:
       type: integer
-      description: Page index of the original file, 0 represents the first page of the source file
-    imageAngle:
+      description: 元ファイルのページインデックス。0 は元ファイルの最初のページを表します
+    image角度:
       type: string
-      description: Angle information of the cropped image
+      description: クロップ画像の角度情報
 
 CommonFieldDetailRespVO:
   type: object
   properties:
     key:
       type: string
-      description: Field key
+      description: フィールドキー
     identifier:
       type: string
-      description: Identifier(from export field name)
+      description: 識別子（エクスポート時のフィールド名由来）
     value:
       type: string
-      description: Field value
+      description: フィールド値
     textInLines:
       deprecated: true
       type: array
       description: |
-        **Deprecated**, please use position field instead
-        Field coordinates
+        **非推奨**。代わりに position フィールドを使用してください
+        フィールド座標
       items:
         $ref: '#/TextInLines'
     position:
       $ref: "#/KeyValuePosition"
     index:
       type: integer
-      description: Index
+      description: インデックス
     confidence:
       type: number
       format: float
-      description: Confidence score, range 0~1
+      description: 信頼度スコア。範囲は 0〜1
       example: 0.95
 
 SubFileDetailInfo:
@@ -430,32 +430,32 @@ SubFileDetailInfo:
   properties:
     id:
       type: string
-      description: File ID
+      description: ファイル ID
       example: 202412190001
     task_id:
       type: string
-      description: Task ID
+      description: タスク ID
       example: 202412190001
     task_detail_url:
       type: string
-      description: File subtask details page URL
+      description: ファイルサブタスク詳細ページ URL
     task_type:
       $ref: '#/TaskType'
     parent_task_id:
       type: string
-      description: Parent task ID (meaningful when not 0)
+      description: 親タスク ID（0 でない場合に有効）
       example: 202412190001
     batch_number:
       type: string
-      description: Batch Number
+      description: バッチ番号
       example: 202412190001
     name:
       type: string
-      description: File Name
+      description: ファイル名
       example: invoice.pdf
     format:
       type: string
-      description: File Format
+      description: ファイル形式
     recognition_status:
       $ref: './common.yaml#/RecognitionStatus'
     verification_status:
@@ -468,71 +468,71 @@ SubFileDetailInfo:
       $ref: '#/PagesInfo'
     data:
       type: object
-      description: Processing result
+      description: 処理結果
       properties:
         fields:
-          description: Field list
+          description: フィールドリスト
           type: array
           items:
             $ref: '#/FieldRespKeyValue'
           example:
-            - key: Invoice Code
-              identifier: Invoice Code Identifier
+            - key: インボイスコード
+              identifier: インボイスコード識別子
               value: "3100231130"
               position:
                 - page: 0
                   vertices: [ 0, 0, 100, 0, 100, 100, 0, 100 ]
-            - key: Invoice Number
-              identifier: Invoice Number Identifier
+            - key: インボイス番号
+              identifier: インボイス番号識別子
               value: "28737000"
               position:
                 - page: 0
                   vertices: [ 0, 0, 100, 0, 100, 100, 0, 100 ]
         items:
-          description: Table data list
+          description: テーブルデータリスト
           type: array
           items:
             type: array
             items:
               $ref: '#/KeyValue'
           example:
-            - - key: Goods and Services Name
+            - - key: 商品・サービス名
                 value: ＊Electronic Computer＊Microcomputer Host
                 position:
                   - page: 0
                     vertices: [ 0, 0, 100, 0, 100, 100, 0, 100 ]
-              - key: Specification Model
+              - key: 仕様モデル
                 value: DMS-SC68
                 position:
                   - page: 0
                     vertices: [ 0, 0, 100, 0, 100, 100, 0, 100 ]
-            - - key: Goods and Services Name
+            - - key: 商品・サービス名
                 value: ＊Mechanical Computer＊Supercomputer Host
                 position:
                   - page: 0
                     vertices: [ 0, 0, 100, 0, 100, 100, 0, 100 ]
-              - key: Specification Model
+              - key: 仕様モデル
                 value: AN/FSQ-7
                 position:
                   - page: 0
                     vertices: [ 0, 0, 100, 0, 100, 100, 0, 100 ]
         tables:
-          description: Complete table data list (including system tables and manually configured tables)
+          description: 完全なテーブルデータリスト（システムテーブルと手動設定テーブルを含む）
           type: array
           items:
             type: object
             properties:
               tableName:
-                description: Table name
+                description: テーブル名
                 type: string
                 example: table1
               tableType:
                 description: |
-                  Table type, 0: system configured, 1: manually added.
+                  テーブルタイプ。0: システム設定、1: 手動追加。
                 type: string
                 example: 0
               extractModel:
-                description: Table-level extraction model
+                description: テーブルレベルの抽出モデル
                 type: string
               items:
                 type: array
@@ -541,73 +541,73 @@ SubFileDetailInfo:
                   items:
                     $ref: '#/CommonFieldDetailRespVO'
         stamps:
-          description: Stamp information
+          description: 印影情報
           type: array
           items:
             $ref: '#/StampValue'
           example:
             - angel: 0
               page: 0
-              text: National Unified Invoice Supervision Seal
+              text: 全国統一インボイス監督印
               type: Other
               color: Red
               shape: Oval Seal
               position: [ 0, 0, 100, 0, 100, 100, 0, 100 ]
             - angel: 0
               page: 0
-              text: Tax Bureau Seal
+              text: 税務局印
               type: Other
               color: Red
               shape: Oval Seal
               position: [ 0, 0, 100, 0, 100, 100, 0, 100 ]
         handwritings:
-          description: Handwriting information
+          description: 手書き情報
           type: array
           items:
             $ref: '#/HandWritingValue'
           example:
             - angel: 0
               page: 0
-              text: March 1st
+              text: 3月1日
               position:
                 - page: 0
                   vertices: [ 0, 0, 100, 0, 100, 100, 0, 100 ]
             - angel: 0
               page: 0
-              text: Zhang San
+              text: 山田太郎
               position:
                 - page: 0
                   vertices: [ 0, 0, 100, 0, 100, 100, 0, 100 ]
         invoiceVerifyResult:
-          description: Invoice verification result
+          description: インボイス検証結果
           type: object
           properties:
             invoiceVerifyStatus:
               type: integer
               description: |
-                Whether invoice verification is successful (0: No, 1: Yes, null: Not verified)
+                インボイス検証に成功したかどうか（0: いいえ、1: はい、null: 未検証）
               example: 0
             invoiceVerifyErrorCode:
               type: integer
-              description: Invoice verification error code
+              description: インボイス検証エラーコード
               example: 0
             invoiceVerifyCanRetry:
               type: integer
               description: |
-                Whether invoice verification can be retried/initiated (0: No, 1: Yes)
+                インボイス検証を再試行/開始できるかどうか（0: いいえ、1: はい）
               example: 0
             invoiceVerifyFailMsg:
               type: string
-              description: Invoice verification failure reason
-              example: Exceeded daily limit
+              description: インボイス検証失敗理由
+              example: 1日の上限を超過しました
     document:
       $ref: '#/Document'
     from_parent_position_list:
       type: array
-      description: Coordinate position of cropping result in the original file
+      description: 元ファイル内のクロップ結果の座標位置
       items:
         type: integer
-        description: Position information
+        description: 位置情報
         example: 1
     crop_info:
       $ref: '#/TaskCropResult'
@@ -617,59 +617,59 @@ TextInLines:
   properties:
     angle:
       type: string
-      description: Angle
+      description: 角度
       example: 0
     pos:
       type: array
-      description: Coordinates
+      description: 座標
       items:
         type: integer
-        description: Coordinates
+        description: 座標
         example: 1
     page:
       type: integer
-      description: Page number
+      description: ページ番号
       example: 1
     text:
       type: string
-      description: Text
-      example: Text content
+      description: テキスト
+      example: テキスト内容
     char_pos:
       type: array
-      description: Character coordinates
+      description: 文字座標
       items:
         type: array
-        description: Character coordinates
+        description: 文字座標
         items:
           type: integer
-          description: Character coordinates
+          description: 文字座標
           example: 1
-  description: Field coordinates
+  description: フィールド座標
 
 TaskType:
   type: integer
   description: |
-    Task type
-    - 0: **File split subtask**: When a file task with "File split" switch enabled executes successfully, the subtasks generated by file split operations in that file batch task are split subtasks, divided according to the actual number of file sets under the file category
-    - 1: **Regular task**: File tasks without "File split" and "Multi-image crop" switches enabled
-    - 2: **Parent task**: After file tasks with "File split" or "Multi-image crop" switches enabled execute, each file in that file batch task becomes a parent task
-    - 3: **Crop subtask**: When a file task with "Multi-image crop" switch enabled executes successfully, the subtasks generated by multi-image crop operations in that file batch task are crop subtasks, divided according to the actual number of crop results under the file category
+    タスクタイプ
+    - 0: **ファイル分割サブタスク**: 「ファイル分割」スイッチを有効にしたファイルタスクが正常に実行されると、そのファイルバッチタスク内のファイル分割操作で生成されたサブタスクは分割サブタスクとなり、ファイルカテゴリ配下の実際のファイルセット数に応じて分割されます
+    - 1: **通常タスク**: 「ファイル分割」および「複数画像クロップ」スイッチが有効でないファイルタスク
+    - 2: **親タスク**: 「ファイル分割」または「複数画像クロップ」スイッチを有効にしたファイルタスクの実行後、そのファイルバッチタスク内の各ファイルは親タスクになります
+    - 3: **クロップサブタスク**: 「複数画像クロップ」スイッチを有効にしたファイルタスクが正常に実行されると、そのファイルバッチタスク内の複数画像クロップ操作で生成されたサブタスクはクロップサブタスクとなり、ファイルカテゴリ配下の実際のクロップ結果数に応じて分割されます
   example: 1
 
 PagesInfo:
   type: array
   description: |
-    Data for rendering each page of the file.            Combined with the page and position fields in data.fields, you can accurately draw the position of fields on the page.
+    ファイルの各ページをレンダリングするためのデータ。data.fields の page および position フィールドと組み合わせることで、ページ上のフィールド位置を正確に描画できます。
   items:
     type: object
     properties:
       page:
         type: integer
-        description: Page number, starting from 0
+        description: ページ番号。0 から開始
         example: 1
       angle:
         type: integer
-        description: Rotation angle
+        description: 回転角度
         enum:
           - 0
           - 90
@@ -677,15 +677,15 @@ PagesInfo:
           - 270
       width:
         type: integer
-        description: Page width after correction
+        description: 補正後のページ幅
         example: 1024
       height:
         type: integer
-        description: Page height after correction
+        description: 補正後のページ高さ
         example: 1024
       dpi:
         type: integer
-        description: Resolution when converting PDF to image. For non-PDF files, this value is 0.
+        description: PDF を画像に変換する際の解像度。PDF 以外のファイルでは、この値は 0 です。
         example: 144
 
 DocumentParserParam:
@@ -693,27 +693,27 @@ DocumentParserParam:
   properties:
     formula_level:
       type: integer
-      description: Formula recognition level (0 recognizes both display and inline formulas, 1 recognizes display formulas only, 2 recognizes no formulas)
+      description: "数式認識レベル（0: 表示数式とインライン数式を認識、1: 表示数式のみ認識、2: 数式を認識しない）"
       example: 0
     apply_merge:
       type: integer
-      description: Merge cross-page paragraphs and tables (0 no, 1 yes)
+      description: "ページをまたぐ段落とテーブルを結合（0: いいえ、1: はい）"
       example: 1
     table_text_split_mode:
       type: integer
-      description: Split text blocks crossed by table lines (0 no, 1 yes)
+      description: "テーブル罫線と交差するテキストブロックを分割（0: いいえ、1: はい）"
       example: 0
     crop_dewarp:
       type: integer
-      description: Crop and dewarp (0 no, 1 yes)
+      description: "クロップと歪み補正（0: いいえ、1: はい）"
       example: 0
     remove_watermark:
       type: integer
-      description: Remove watermark (0 no, 1 yes)
+      description: "透かし除去（0: いいえ、1: はい）"
       example: 0
     dpi:
       type: integer
-      description: File resolution (144 default, 216 high precision)
+      description: "ファイル解像度（144: デフォルト、216: 高精度）"
       example: 144
       enum:
         - 144
@@ -721,10 +721,10 @@ DocumentParserParam:
     parse_mode:
       type: string
       description: |
-        Parse mode
-        - `auto`: Automatic (default)
-        - `scan`: Scanned document mode
-        - `vlm`: VLM mode
+        解析モード
+        - `auto`: 自動（デフォルト）
+        - `scan`: スキャン文書モード
+        - `vlm`: VLM モード
       example: auto
       enum:
         - auto
@@ -732,7 +732,7 @@ DocumentParserParam:
         - vlm
     pdf_pwd:
       type: string
-      description: PDF file password for decrypting encrypted PDF files
+      description: 暗号化 PDF ファイルを復号するための PDF パスワード
 
 TokenResult:
   type: object
@@ -742,9 +742,9 @@ TokenResult:
       properties:
         token:
           type: string
-          description: Valid token for iframe scenarios
+          description: iframe シナリオで使用する有効なトークン
           example: abcd
         expiry:
           type: integer
-          description: Expiration time (in epoch timestamp format, unit is seconds)
+          description: "有効期限（エポックタイムスタンプ形式、単位: 秒）"
           example: 1700000000

@@ -89,7 +89,7 @@ import json
 def extract_specific_fields(workspace_id, task_id, app_id, secret_code):
     """Extract specific fields"""
 
-    host = "https://docflow.textin.com"
+    host = "https://docflow.textin.ai"
     url = "/api/app-api/sip/platform/v2/file/extract_fields"
 
     # Request body
@@ -231,7 +231,7 @@ curl -X POST \
       }
     ]
   }' \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/extract_fields"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/file/extract_fields"
 ```
 
 </CodeGroup>

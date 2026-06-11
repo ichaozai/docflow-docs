@@ -17,7 +17,7 @@ curl -X POST \
   -H "x-ti-app-id: <your-app-id>" \
   -H "x-ti-secret-code: <your-secret-code>" \
   -F "file=@/path/to/invoice.pdf" \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&batch_number=<your-batch-number>"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&batch_number=<your-batch-number>"
 ```
 
 </CodeGroup>
@@ -31,7 +31,7 @@ curl -X POST \
   -H "x-ti-app-id: <your-app-id>" \
   -H "x-ti-secret-code: <your-secret-code>" \
   -F "file=@/path/to/invoice.pdf" \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&category=invoice"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&category=invoice"
 ```
 
 </CodeGroup>
@@ -44,7 +44,7 @@ curl -X POST \
 curl \
   -H "x-ti-app-id: <your-app-id>" \
   -H "x-ti-secret-code: <your-secret-code>" \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/fetch?workspace_id=<your-workspace-id>&batch_number=<your-batch-number>"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/file/fetch?workspace_id=<your-workspace-id>&batch_number=<your-batch-number>"
 ```
 
 </CodeGroup>
@@ -69,7 +69,7 @@ curl \
 ```python Python icon=python lines
 import requests, json
 
-host = "https://docflow.textin.com"
+host = "https://docflow.textin.ai"
 url = "/api/app-api/sip/platform/v2/file/fetch"
 
 resp = requests.get(

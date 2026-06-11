@@ -36,7 +36,7 @@ API は JSON 構造を返し、ファイル分類情報は `result.files[].categ
 curl \
   -H "x-ti-app-id: <your-app-id>" \
   -H "x-ti-secret-code: <your-secret-code>" \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/fetch?workspace_id=<your-workspace-id>&file_id=<your-file-id>"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/file/fetch?workspace_id=<your-workspace-id>&file_id=<your-file-id>"
 ```
 
 
@@ -44,7 +44,7 @@ curl \
 import requests
 
 resp = requests.get(
-    "https://docflow.textin.com/api/app-api/sip/platform/v2/file/fetch",
+    "https://docflow.textin.ai/api/app-api/sip/platform/v2/file/fetch",
     params={
         "workspace_id": "<your-workspace-id>",
         "file_id": "<your-file_id>",

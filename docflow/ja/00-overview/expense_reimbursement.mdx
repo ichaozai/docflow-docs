@@ -5,7 +5,7 @@ description: "財務部門の経費精算業務で、DocFlow API を利用して
 
 <Tip>
   このページでは**経費精算**を業務シナリオとして、ワークスペース作成、カテゴリ設定、ファイルアップロード、抽出結果取得、スマートレビューまでの一連の流れを API で実行する方法を説明します。
-  DocFlow を初めて利用する場合は、このページを読む前に [Web ページ](https://docflow.textin.com/) で基本機能を確認することをおすすめします。
+  DocFlow を初めて利用する場合は、このページを読む前に [Web ページ](https://docflow.textin.ai/) で基本機能を確認することをおすすめします。
 </Tip>
 
 ## 01 シナリオ概要
@@ -20,7 +20,7 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
 
 ## 02 業務フロー
 
-![経費精算業務フロー](../images/expense_reimbursement_flow.png)
+![経費精算業務フロー](../images/expense_reimbursement_flow_ja.png)
 
 <Note>
   **ワークスペース、ファイルカテゴリ、レビュー規則リポジトリは一度だけ設定すれば継続利用できます**。以降は新しい処理対象ファイルをアップロードし、新しいレビュータスクを作成するだけです。このサンプルでは全体の流れを示すため、設定手順と処理手順を同じコード内で実行します。
@@ -28,7 +28,7 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
 
 ## 03 前提条件
 
-1. [TextIn コンソール](https://www.textin.com/console/dashboard/setting) にログインし、`x-ti-app-id` と `x-ti-secret-code` を取得します
+1. [TextIn コンソール](https://www.textin.ai/console/dashboard/setting) にログインし、`x-ti-app-id` と `x-ti-secret-code` を取得します
 2. [サンプルファイル](https://github.com/ichaozai/docflow-docs/tree/master/examples/sample_files)、または自社の精算書類を使用します
 
 ## 04 カテゴリとフィールド設定
@@ -710,7 +710,7 @@ examples/
 </Tabs>
 
 <Tip>
-  実行成功后、可登录 [DocFlow Web ページ](https://docflow.textin.com/)、在对应ワークスペース下直观確認每份ファイル的分類、フィールド抽出結果和スマートレビュー結果、便于与コード输出对照验证。
+  実行成功后、可登录 [DocFlow Web ページ](https://docflow.textin.ai/)、在对应ワークスペース下直观確認每份ファイル的分類、フィールド抽出結果和スマートレビュー結果、便于与コード输出对照验证。
 </Tip>
 
 ### 想定されるコンソール出力

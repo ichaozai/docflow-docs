@@ -78,7 +78,7 @@ curl -X POST \
   -F "extract_model=llm" \
   -F "sample_files=@/path/to/invoice_sample.pdf" \
   -F 'fields=[{"name":"Invoice Code","description":"Invoice code description","prompt":"Please extract the invoice code"}]' \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/category/create"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/category/create"
 ```
 
 ```python Python icon=python expandable lines
@@ -88,7 +88,7 @@ ti_app_id = "<your-app-id>"
 ti_secret_code = "<your-secret-code>"
 workspace_id = "<your-workspace-id>"
 
-host = "https://docflow.textin.com"
+host = "https://docflow.textin.ai"
 url = "/api/app-api/sip/platform/v2/category/create"
 
 # Prepare sample file
@@ -156,7 +156,7 @@ else:
 curl \
   -H "x-ti-app-id: <your-app-id>" \
   -H "x-ti-secret-code: <your-secret-code>" \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/category/list?workspace_id=<your-workspace-id>&page=1&page_size=20&enabled=1"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/category/list?workspace_id=<your-workspace-id>&page=1&page_size=20&enabled=1"
 ```
 
 ```python Python icon=python expandable lines
@@ -166,7 +166,7 @@ ti_app_id = "<your-app-id>"
 ti_secret_code = "<your-secret-code>"
 workspace_id = "<your-workspace-id>"
 
-host = "https://docflow.textin.com"
+host = "https://docflow.textin.ai"
 url = "/api/app-api/sip/platform/v2/category/list"
 
 resp = requests.get(
@@ -244,7 +244,7 @@ curl -X POST \
     "category_prompt": "Updated prompt",
     "enabled": 1
   }' \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/category/update"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/category/update"
 ```
 
 ```python Python icon=python expandable lines
@@ -255,7 +255,7 @@ ti_secret_code = "<your-secret-code>"
 workspace_id = "<your-workspace-id>"
 category_id = "1234567890"
 
-host = "https://docflow.textin.com"
+host = "https://docflow.textin.ai"
 url = "/api/app-api/sip/platform/v2/category/update"
 
 payload = {
@@ -307,7 +307,7 @@ curl -X POST \
     "workspace_id": "<your-workspace-id>",
     "category_ids": ["1234567890", "0987654321"]
   }' \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/category/delete"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/category/delete"
 ```
 
 ```python Python icon=python expandable lines
@@ -317,7 +317,7 @@ ti_app_id = "<your-app-id>"
 ti_secret_code = "<your-secret-code>"
 workspace_id = "<your-workspace-id>"
 
-host = "https://docflow.textin.com"
+host = "https://docflow.textin.ai"
 url = "/api/app-api/sip/platform/v2/category/delete"
 
 payload = {

@@ -28,7 +28,7 @@ curl -X POST \
   -d '{
     "urls": ["https://example.com/document.pdf"]
   }' \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>"
 ```
 
 ```python Python expandable icon=python lines
@@ -40,7 +40,7 @@ ti_secret_code = "<your-secret-code>"
 workspace_id = "<your-workspace-id>"
 file_url = "https://example.com/document.pdf"
 
-host = "https://docflow.textin.com"
+host = "https://docflow.textin.ai"
 url = "/api/app-api/sip/platform/v2/file/upload"
 
 payload = {
@@ -81,7 +81,7 @@ curl -X POST \
       "https://example.com/contract.docx"
     ]
   }' \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&batch_number=202412190001"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&batch_number=202412190001"
 ```
 
 ```python Python expandable icon=python lines
@@ -92,7 +92,7 @@ ti_app_id = "<your-app-id>"
 ti_secret_code = "<your-secret-code>"
 workspace_id = "<your-workspace-id>"
 
-host = "https://docflow.textin.com"
+host = "https://docflow.textin.ai"
 url = "/api/app-api/sip/platform/v2/file/upload"
 
 # Batch upload multiple file URLs
@@ -219,7 +219,7 @@ URL アップロード成功後のレスポンス形式は、通常のファイ�
 curl \
   -H "x-ti-app-id: <your-app-id>" \
   -H "x-ti-secret-code: <your-secret-code>" \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/fetch?workspace_id=<your-workspace-id>&batch_number=<your-batch-number>"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/file/fetch?workspace_id=<your-workspace-id>&batch_number=<your-batch-number>"
 ```
 
 ```python Python expandable icon=python lines
@@ -231,7 +231,7 @@ ti_secret_code = "<your-secret-code>"
 workspace_id = "<your-workspace-id>"
 batch_number = "<your-batch-number>"
 
-host = "https://docflow.textin.com"
+host = "https://docflow.textin.ai"
 url = "/api/app-api/sip/platform/v2/file/fetch"
 
 resp = requests.get(

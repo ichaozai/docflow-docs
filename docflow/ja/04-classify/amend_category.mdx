@@ -50,7 +50,7 @@ curl -X POST \
     "task_id": "1234567890",
     "category": "Electronic Invoice (Regular)"
   }' \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/amend_category"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/file/amend_category"
 ```
 
 ```python Python icon=python expandable
@@ -61,7 +61,7 @@ def amend_category(workspace_id, task_id, category, app_id, secret_code):
     """
     Amend file category for normal tasks
     """
-    url = "https://docflow.textin.com/api/app-api/sip/platform/v2/file/amend_category"
+    url = "https://docflow.textin.ai/api/app-api/sip/platform/v2/file/amend_category"
 
     headers = {
         "x-ti-app-id": app_id,
@@ -102,7 +102,7 @@ Before modifying the file category, you need to obtain the task's `task_id`. You
 curl \
   -H "x-ti-app-id: <your-app-id>" \
   -H "x-ti-secret-code: <your-secret-code>" \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/fetch?workspace_id=<your-workspace-id>&file_id=<your-file-id>"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/file/fetch?workspace_id=<your-workspace-id>&file_id=<your-file-id>"
 ```
 
 ```python Python icon=python expandable
@@ -112,7 +112,7 @@ def get_task_id(workspace_id, file_id, app_id, secret_code):
     """
     Get the task ID for a file
     """
-    url = "https://docflow.textin.com/api/app-api/sip/platform/v2/file/fetch"
+    url = "https://docflow.textin.ai/api/app-api/sip/platform/v2/file/fetch"
 
     headers = {
         "x-ti-app-id": app_id,
@@ -166,7 +166,7 @@ import json
 
 def get_file_info(workspace_id, file_id, app_id, secret_code):
     """Get file information"""
-    url = "https://docflow.textin.com/api/app-api/sip/platform/v2/file/fetch"
+    url = "https://docflow.textin.ai/api/app-api/sip/platform/v2/file/fetch"
     headers = {
         "x-ti-app-id": app_id,
         "x-ti-secret-code": secret_code
@@ -177,7 +177,7 @@ def get_file_info(workspace_id, file_id, app_id, secret_code):
 
 def amend_category(workspace_id, task_id, category, app_id, secret_code):
     """Amend file category"""
-    url = "https://docflow.textin.com/api/app-api/sip/platform/v2/file/amend_category"
+    url = "https://docflow.textin.ai/api/app-api/sip/platform/v2/file/amend_category"
     headers = {
         "x-ti-app-id": app_id,
         "x-ti-secret-code": secret_code,

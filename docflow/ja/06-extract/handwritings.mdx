@@ -60,7 +60,7 @@ import json
 def extract_handwritings(workspace_id, batch_number, app_id, secret_code):
     """Extract handwriting information from documents"""
 
-    host = "https://docflow.textin.com"
+    host = "https://docflow.textin.ai"
     url = "/api/app-api/sip/platform/v2/file/fetch"
 
     resp = requests.get(

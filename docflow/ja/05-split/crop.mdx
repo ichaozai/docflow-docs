@@ -35,7 +35,7 @@ curl -X POST \
   -H "x-ti-app-id: <your-app-id>" \
   -H "x-ti-secret-code: <your-secret-code>" \
   -F "file=@/path/to/multi-image-document.pdf" \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&crop_flag=true"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&crop_flag=true"
 ```
 
 </CodeGroup>
@@ -58,7 +58,7 @@ def upload_with_crop(file_path, workspace_id, app_id, secret_code):
     """
     Upload file and enable multi-image cropping function
     """
-    url = "https://docflow.textin.com/api/app-api/sip/platform/v2/file/upload"
+    url = "https://docflow.textin.ai/api/app-api/sip/platform/v2/file/upload"
 
     headers = {
         "x-ti-app-id": app_id,
@@ -80,7 +80,7 @@ def fetch_crop_results(workspace_id, batch_number, app_id, secret_code):
     """
     Query multi-image cropping results
     """
-    url = "https://docflow.textin.com/api/app-api/sip/platform/v2/file/fetch"
+    url = "https://docflow.textin.ai/api/app-api/sip/platform/v2/file/fetch"
 
     headers = {
         "x-ti-app-id": app_id,

@@ -28,7 +28,7 @@ curl -X POST \
     "workspace_id": "<your-workspace-id>",
     "name": "Review Rule Repository 1"
   }' \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/review/rule_repo/create"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/review/rule_repo/create"
 ```
 
 ```python Python expandable icon=python lines
@@ -39,7 +39,7 @@ ti_app_id = "<your-app-id>"
 ti_secret_code = "<your-secret-code>"
 workspace_id = "<your-workspace-id>"
 
-host = "https://docflow.textin.com"
+host = "https://docflow.textin.ai"
 url = "/api/app-api/sip/platform/v2/review/rule_repo/create"
 
 payload = {
@@ -93,7 +93,7 @@ else:
 curl \
   -H "x-ti-app-id: <your-app-id>" \
   -H "x-ti-secret-code: <your-secret-code>" \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/review/rule_repo/list?workspace_id=<your-workspace-id>&page=1&page_size=10"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/review/rule_repo/list?workspace_id=<your-workspace-id>&page=1&page_size=10"
 ```
 
 ```python Python expandable icon=python lines
@@ -103,7 +103,7 @@ ti_app_id = "<your-app-id>"
 ti_secret_code = "<your-secret-code>"
 workspace_id = "<your-workspace-id>"
 
-host = "https://docflow.textin.com"
+host = "https://docflow.textin.ai"
 url = "/api/app-api/sip/platform/v2/review/rule_repo/list"
 
 resp = requests.get(
@@ -198,7 +198,7 @@ else:
 curl \
   -H "x-ti-app-id: <your-app-id>" \
   -H "x-ti-secret-code: <your-secret-code>" \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/review/rule_repo/get?workspace_id=<your-workspace-id>&repo_id=31415926"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/review/rule_repo/get?workspace_id=<your-workspace-id>&repo_id=31415926"
 ```
 
 ```python Python expandable icon=python lines
@@ -209,7 +209,7 @@ ti_secret_code = "<your-secret-code>"
 workspace_id = "<your-workspace-id>"
 repo_id = "31415926"
 
-host = "https://docflow.textin.com"
+host = "https://docflow.textin.ai"
 url = "/api/app-api/sip/platform/v2/review/rule_repo/get"
 
 resp = requests.get(
@@ -304,7 +304,7 @@ curl -X POST \
     "repo_id": "31415926",
     "name": "Updated Repository Name"
   }' \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/review/rule_repo/update"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/review/rule_repo/update"
 ```
 
 ```python Python expandable icon=python lines
@@ -315,7 +315,7 @@ ti_secret_code = "<your-secret-code>"
 workspace_id = "<your-workspace-id>"
 repo_id = "31415926"
 
-host = "https://docflow.textin.com"
+host = "https://docflow.textin.ai"
 url = "/api/app-api/sip/platform/v2/review/rule_repo/update"
 
 payload = {
@@ -360,7 +360,7 @@ curl -X POST \
     "workspace_id": "<your-workspace-id>",
     "repo_ids": ["31415926", "31415927"]
   }' \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/review/rule_repo/delete"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/review/rule_repo/delete"
 ```
 
 ```python Python expandable icon=python lines
@@ -370,7 +370,7 @@ ti_app_id = "<your-app-id>"
 ti_secret_code = "<your-secret-code>"
 workspace_id = "<your-workspace-id>"
 
-host = "https://docflow.textin.com"
+host = "https://docflow.textin.ai"
 url = "/api/app-api/sip/platform/v2/review/rule_repo/delete"
 
 payload = {
@@ -422,7 +422,7 @@ curl -X POST \
     "repo_id": "31415926",
     "name": "Review Rule Group 1"
   }' \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/review/rule_group/create"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/review/rule_group/create"
 ```
 
 ```python Python expandable icon=python lines
@@ -433,7 +433,7 @@ ti_secret_code = "<your-secret-code>"
 workspace_id = "<your-workspace-id>"
 repo_id = "31415926"
 
-host = "https://docflow.textin.com"
+host = "https://docflow.textin.ai"
 url = "/api/app-api/sip/platform/v2/review/rule_group/create"
 
 payload = {
@@ -495,7 +495,7 @@ curl -X POST \
     "group_id": "31415926",
     "name": "Updated Rule Group Name"
   }' \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/review/rule_group/update"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/review/rule_group/update"
 ```
 
 ```python Python expandable icon=python lines
@@ -506,7 +506,7 @@ ti_secret_code = "<your-secret-code>"
 workspace_id = "<your-workspace-id>"
 group_id = "31415926"
 
-host = "https://docflow.textin.com"
+host = "https://docflow.textin.ai"
 url = "/api/app-api/sip/platform/v2/review/rule_group/update"
 
 payload = {
@@ -551,7 +551,7 @@ curl -X POST \
     "workspace_id": "<your-workspace-id>",
     "group_id": "31415926"
   }' \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/review/rule_group/delete"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/review/rule_group/delete"
 ```
 
 ```python Python expandable icon=python lines
@@ -562,7 +562,7 @@ ti_secret_code = "<your-secret-code>"
 workspace_id = "<your-workspace-id>"
 group_id = "31415926"
 
-host = "https://docflow.textin.com"
+host = "https://docflow.textin.ai"
 url = "/api/app-api/sip/platform/v2/review/rule_group/delete"
 
 payload = {
@@ -630,7 +630,7 @@ curl -X POST \
       }
     ]
   }' \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/review/rule/create"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/review/rule/create"
 ```
 
 ```python Python expandable icon=python lines
@@ -642,7 +642,7 @@ workspace_id = "<your-workspace-id>"
 repo_id = "31415926"
 group_id = "31415926"
 
-host = "https://docflow.textin.com"
+host = "https://docflow.textin.ai"
 url = "/api/app-api/sip/platform/v2/review/rule/create"
 
 payload = {
@@ -701,7 +701,7 @@ else:
 curl \
   -H "x-ti-app-id: <your-app-id>" \
   -H "x-ti-secret-code: <your-secret-code>" \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/category/list?workspace_id=<your-workspace-id>"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/category/list?workspace_id=<your-workspace-id>"
 ```
 
 ```python Python expandable icon=python lines
@@ -711,7 +711,7 @@ ti_app_id = "<your-app-id>"
 ti_secret_code = "<your-secret-code>"
 workspace_id = "<your-workspace-id>"
 
-host = "https://docflow.textin.com"
+host = "https://docflow.textin.ai"
 url = "/api/app-api/sip/platform/v2/category/list"
 
 resp = requests.get(
@@ -773,7 +773,7 @@ if result.get("code") == 200:
 curl \
   -H "x-ti-app-id: <your-app-id>" \
   -H "x-ti-secret-code: <your-secret-code>" \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/category/fields/list?workspace_id=<your-workspace-id>&category_id=<category-id>"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/category/fields/list?workspace_id=<your-workspace-id>&category_id=<category-id>"
 ```
 
 ```python Python expandable icon=python lines
@@ -784,7 +784,7 @@ ti_secret_code = "<your-secret-code>"
 workspace_id = "<your-workspace-id>"
 category_id = "<category-id>"  # Get from category list interface
 
-host = "https://docflow.textin.com"
+host = "https://docflow.textin.ai"
 url = "/api/app-api/sip/platform/v2/category/fields/list"
 
 resp = requests.get(
@@ -948,7 +948,7 @@ curl -X POST \
       }
     ]
   }' \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/review/rule/update"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/review/rule/update"
 ```
 
 ```python Python expandable icon=python lines
@@ -959,7 +959,7 @@ ti_secret_code = "<your-secret-code>"
 workspace_id = "<your-workspace-id>"
 rule_id = "31415926"
 
-host = "https://docflow.textin.com"
+host = "https://docflow.textin.ai"
 url = "/api/app-api/sip/platform/v2/review/rule/update"
 
 payload = {
@@ -1020,7 +1020,7 @@ curl -X POST \
     "workspace_id": "<your-workspace-id>",
     "rule_id": "31415926"
   }' \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/review/rule/delete"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/review/rule/delete"
 ```
 
 ```python Python expandable icon=python lines
@@ -1031,7 +1031,7 @@ ti_secret_code = "<your-secret-code>"
 workspace_id = "<your-workspace-id>"
 rule_id = "31415926"
 
-host = "https://docflow.textin.com"
+host = "https://docflow.textin.ai"
 url = "/api/app-api/sip/platform/v2/review/rule/delete"
 
 payload = {
@@ -1069,7 +1069,7 @@ import requests
 ti_app_id = "<your-app-id>"
 ti_secret_code = "<your-secret-code>"
 workspace_id = "<your-workspace-id>"
-host = "https://docflow.textin.com"
+host = "https://docflow.textin.ai"
 
 # 1. Get category list to obtain category ID
 categories_resp = requests.get(

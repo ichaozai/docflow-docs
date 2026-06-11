@@ -27,7 +27,7 @@ curl -X POST \
     "repo_id": "31415926",
     "extract_task_ids": ["1234567890", "1234567891"]
   }' \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/review/task/submit"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/review/task/submit"
 
 # Using batch_number
 # curl -X POST \
@@ -40,7 +40,7 @@ curl -X POST \
 #     "repo_id": "31415926",
 #     "batch_number": "202412190001"
 #   }' \
-#   "https://docflow.textin.com/api/app-api/sip/platform/v2/review/task/submit"
+#   "https://docflow.textin.ai/api/app-api/sip/platform/v2/review/task/submit"
 ```
 
 ```python Python expandable icon=python lines
@@ -50,7 +50,7 @@ ti_app_id = "<your-app-id>"
 ti_secret_code = "<your-secret-code>"
 workspace_id = "<your-workspace-id>"
 
-host = "https://docflow.textin.com"
+host = "https://docflow.textin.ai"
 url = "/api/app-api/sip/platform/v2/review/task/submit"
 
 # Method 1: Using extract_task_ids
@@ -157,7 +157,7 @@ ti_secret_code = "<your-secret-code>"
 workspace_id = "<your-workspace-id>"
 batch_number = "<your-batch-number>"
 
-host = "https://docflow.textin.com"
+host = "https://docflow.textin.ai"
 url = "/api/app-api/sip/platform/v2/file/fetch"
 
 resp = requests.get(
@@ -212,7 +212,7 @@ import time
 ti_app_id = "<your-app-id>"
 ti_secret_code = "<your-secret-code>"
 workspace_id = "<your-workspace-id>"
-host = "https://docflow.textin.com"
+host = "https://docflow.textin.ai"
 
 # 1. Get extraction task IDs
 fetch_url = "/api/app-api/sip/platform/v2/file/fetch"
@@ -291,7 +291,7 @@ curl -X POST \
     "workspace_id": "<your-workspace-id>",
     "task_ids": ["31415926", "31415927"]
   }' \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/review/task/delete"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/review/task/delete"
 ```
 
 ```python Python expandable icon=python lines
@@ -301,7 +301,7 @@ ti_app_id = "<your-app-id>"
 ti_secret_code = "<your-secret-code>"
 workspace_id = "<your-workspace-id>"
 
-host = "https://docflow.textin.com"
+host = "https://docflow.textin.ai"
 url = "/api/app-api/sip/platform/v2/review/task/delete"
 
 payload = {

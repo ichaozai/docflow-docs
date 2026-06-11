@@ -14,7 +14,7 @@ curl -X POST \
   -H "x-ti-app-id: <your-app-id>" \
   -H "x-ti-secret-code: <your-secret-code>" \
   -F "file=@/path/to/your/file.pdf" \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&target_process=classify"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&target_process=classify"
 ```
 
 
@@ -28,7 +28,7 @@ ti_secret_code = "<your-secret-code>"
 workspace_id = "<your-workspace-id>"
 filepath = "/path/to/your/file.pdf"
 
-host = "https://docflow.textin.com"
+host = "https://docflow.textin.ai"
 url = "/api/app-api/sip/platform/v2/file/upload"
 
 mime_type = "application/pdf"
@@ -69,7 +69,7 @@ Use the `file/fetch` interface to query classification results:
 curl \
   -H "x-ti-app-id: <your-app-id>" \
   -H "x-ti-secret-code: <your-secret-code>" \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/fetch?workspace_id=<your-workspace-id>&file_id=<your-file-id>"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/file/fetch?workspace_id=<your-workspace-id>&file_id=<your-file-id>"
 ```
 
 
@@ -77,7 +77,7 @@ curl \
 import requests
 
 resp = requests.get(
-    "https://docflow.textin.com/api/app-api/sip/platform/v2/file/fetch",
+    "https://docflow.textin.ai/api/app-api/sip/platform/v2/file/fetch",
     params={
         "workspace_id": "<your-workspace-id>",
         "file_id": "<your-file-id>",

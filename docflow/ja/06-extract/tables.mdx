@@ -48,7 +48,7 @@ import pandas as pd
 def extract_tables(workspace_id, batch_number, app_id, secret_code):
     """Extract table information from documents"""
 
-    host = "https://docflow.textin.com"
+    host = "https://docflow.textin.ai"
     url = "/api/app-api/sip/platform/v2/file/fetch"
 
     resp = requests.get(

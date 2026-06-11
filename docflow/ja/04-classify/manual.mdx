@@ -30,7 +30,7 @@ curl -X POST \
   -H "x-ti-app-id: <your-app-id>" \
   -H "x-ti-secret-code: <your-secret-code>" \
   -F "file=@/path/to/invoice.pdf" \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&category=invoice"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&category=invoice"
 ```
 
 
@@ -45,7 +45,7 @@ workspace_id = "<your-workspace-id>"
 filepath = "/path/to/invoice.pdf"
 category = "invoice"  # Specify file category
 
-host = "https://docflow.textin.com"
+host = "https://docflow.textin.ai"
 url = "/api/app-api/sip/platform/v2/file/upload"
 
 mime_type = "application/pdf"
@@ -89,7 +89,7 @@ curl -X POST \
   -F "file=@/path/to/invoice1.pdf" \
   -F "file=@/path/to/invoice2.pdf" \
   -F "file=@/path/to/invoice3.pdf" \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&category=invoice&batch_number=INV-2024-001"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&category=invoice&batch_number=INV-2024-001"
 ```
 
 
@@ -123,7 +123,7 @@ for i, filepath in enumerate(files):
 payload = MultipartEncoder(fields=fields)
 
 resp = requests.post(
-    url="https://docflow.textin.com/api/app-api/sip/platform/v2/file/upload",
+    url="https://docflow.textin.ai/api/app-api/sip/platform/v2/file/upload",
     params={
         "workspace_id": workspace_id,
         "category": category,
@@ -174,7 +174,7 @@ After files with manual classification are processed, you can query results thro
 curl \
   -H "x-ti-app-id: <your-app-id>" \
   -H "x-ti-secret-code: <your-secret-code>" \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/fetch?workspace_id=<your-workspace-id>&file_id=<your-file-id>"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/file/fetch?workspace_id=<your-workspace-id>&file_id=<your-file-id>"
 ```
 
 
@@ -182,7 +182,7 @@ curl \
 import requests
 
 resp = requests.get(
-    "https://docflow.textin.com/api/app-api/sip/platform/v2/file/fetch",
+    "https://docflow.textin.ai/api/app-api/sip/platform/v2/file/fetch",
     params={
         "workspace_id": "<your-workspace-id>",
         "file_id": "<your-file_id>",
@@ -240,7 +240,7 @@ curl -X POST \
   -H "x-ti-app-id: <your-app-id>" \
   -H "x-ti-secret-code: <your-secret-code>" \
   -F "file=@/path/to/invoice.pdf" \
-  "https://docflow.textin.com/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&category=%E5%8F%91%E7%A5%A8"
+  "https://docflow.textin.ai/api/app-api/sip/platform/v2/file/upload?workspace_id=<your-workspace-id>&category=%E5%8F%91%E7%A5%A8"
 ```
 
 

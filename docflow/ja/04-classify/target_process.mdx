@@ -2,10 +2,10 @@
 title: "分類のみ"
 ---
 
-Docflow performs the complete parsing-\>classification-\>extraction workflow by default.\
-If business requirements only need classification results, you can add the `target_process=classify` parameter to the upload interface, and the workflow will terminate after completing classification, skipping the extraction process.
+Docflow はデフォルトで「解析→分類→抽出」の完全なワークフローを実行します。\
+業務要件が分類結果のみを必要とする場合、アップロードインターフェースに `target_process=classify` パラメータを追加することで、分類完了後にワークフローを終了し、抽出処理をスキップできます。
 
-## ファイルをアップロードs for 分類のみ
+## 分類のみのファイルアップロード
 
 <CodeGroup>
 
@@ -59,9 +59,9 @@ print(resp.status_code, resp.text)
 
 </CodeGroup>
 
-## Query Classification Results
+## 分類結果の照会
 
-Use the `file/fetch` interface to query classification results:
+`file/fetch` インターフェースを使用して分類結果を照会します：
 
 <CodeGroup>
 
@@ -96,28 +96,28 @@ for f in data.get("result", {}).get("files", []):
 
 </CodeGroup>
 
-## Recognition_status Status Description for 分類のみ
+## 分類のみの recognition_status ステータス説明
 
-When using `target_process=classify` for classification only, the `recognition_status` field will have the following status changes:
+`target_process=classify` を使用して分類のみを行う場合、`recognition_status` フィールドは以下のようにステータスが遷移します：
 
-### Status Value Description
+### ステータス値の説明
 
-- `0` - Pending recognition: File just uploaded, waiting for processing
-- `3` - Classifying: Classification processing in progress
-- `10` - Classification complete: **Final state for classification-only workflow**, indicating classification is complete and extraction will not be performed
-- `2` - Classification failed: Error occurred during classification process
+- `0` - 認識待ち：ファイルがアップロードされたばかりで、処理を待機中
+- `3` - 分類中：分類処理を実行中
+- `10` - 分類完了：**分類のみワークフローの最終状態**。分類が完了し、抽出は実行されないことを示します
+- `2` - 分類失敗：分類処理中にエラーが発生
 
-### Difference from Complete Workflow
+### 完全ワークフローとの違い
 
-**Complete workflow (default)** status changes:
+**完全ワークフロー（デフォルト）** のステータス遷移：
 
-- `0` → `3` → `4` → `1` (Pending recognition → Classifying → Extracting → Recognition successful)
+- `0` → `3` → `4` → `1`（認識待ち → 分類中 → 抽出中 → 認識成功）
 
-**Classification-only workflow** status changes:
+**分類のみワークフロー** のステータス遷移：
 
-- `0` → `3` → `10` (Pending recognition → Classifying → Classification complete)
+- `0` → `3` → `10`（認識待ち → 分類中 → 分類完了）
 
-### Return Example
+### 返却例
 
 ```json expandable
 {

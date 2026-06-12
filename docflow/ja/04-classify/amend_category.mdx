@@ -1,42 +1,42 @@
 ---
 title: "ファイルカテゴリの修正"
-description: "For normal tasks, use the amend category API to modify file categories"
+description: "通常タスクに対してカテゴリ修正 API を使用してファイルカテゴリを変更する"
 ---
 
 ## 概要
 
-For completed normal tasks, if the file category is incorrect, you can use the **amend category** API to modify the file category. After modification, the system will reprocess the data using the new category.
+処理が完了した通常タスクにおいて、ファイルカテゴリが不正確な場合、**カテゴリ修正** API を使用してファイルカテゴリを変更できます。変更後、システムは新しいカテゴリを使用してデータを再処理します。
 
 <Tip>
-Only normal tasks support category modification. File split tasks and multi-image crop tasks require using corresponding parameters for modification.
+通常タスクのみカテゴリ修正に対応しています。ファイル分割タスクおよび複数画像クロップタスクは、それぞれ対応するパラメータを使用して修正する必要があります。
 </Tip>
 <Tip>
-After modifying the file category, the system will automatically re-extract using the fields configured for the new category, and the extraction results will change.
+ファイルカテゴリを変更すると、システムは新しいカテゴリに設定されたフィールドを使用して自動的に再抽出を行い、抽出結果が変更されます。
 </Tip>
 
 ## 利用シーン
 
-1. **Category Error Correction**: Automatic classification results are incorrect and need manual correction
-2. **Category Adjustment**: Business requirements change and files need to be reclassified
+1. **カテゴリのエラー修正**：自動分類の結果が不正確で、手動で修正が必要な場合
+2. **カテゴリの調整**：業務要件が変更され、ファイルの再分類が必要な場合
 
-## API Endpoint
+## API エンドポイント
 
-**Endpoint**: `POST /api/app-api/sip/platform/v2/file/amend_category`
+**エンドポイント**: `POST /api/app-api/sip/platform/v2/file/amend_category`
 
 ## リクエストパラメータ
 
-| Parameter | Type | Required | Description |
+| パラメータ | 型 | 必須 | 説明 |
 |-----------|------|----------|-------------|
-| `workspace_id` | string | Yes | Workspace ID |
-| `task_id` | string | Yes | Task ID |
-| `category` | string | Yes | New file category |
+| `workspace_id` | string | はい | ワークスペース ID |
+| `task_id` | string | はい | タスク ID |
+| `category` | string | はい | 新しいファイルカテゴリ |
 
 ### パラメータ説明
 
-- `task_id`: Can be obtained through the `file/fetch` API
-- `category`: New file category name, must be a file category already configured in the DocFlow workspace
+- `task_id`：`file/fetch` API を通じて取得できます
+- `category`：新しいファイルカテゴリ名。DocFlow ワークスペースで設定済みのファイルカテゴリである必要があります
 
-## Example Code
+## サンプルコード
 
 <CodeGroup>
 
@@ -92,9 +92,9 @@ if __name__ == "__main__":
 
 </CodeGroup>
 
-## Get Task ID
+## タスク ID の取得
 
-Before modifying the file category, you need to obtain the task's `task_id`. You can query it through the `file/fetch` API:
+ファイルカテゴリを変更する前に、タスクの `task_id` を取得する必要があります。`file/fetch` API を通じて照会できます：
 
 <CodeGroup>
 
@@ -145,9 +145,9 @@ print(f"Task ID: {task_id}")
 
 </CodeGroup>
 
-## Response
+## レスポンス
 
-After successfully modifying the file category, the API returns a success response:
+ファイルカテゴリの変更が成功すると、API は成功レスポンスを返します：
 
 ```json expandable
 {
@@ -156,9 +156,9 @@ After successfully modifying the file category, the API returns a success respon
 }
 ```
 
-## Complete Example
+## 完全な例
 
-The following is a complete example showing how to query file information, get the task ID, and then modify the file category:
+以下は、ファイル情報を照会し、タスク ID を取得してからファイルカテゴリを変更する完全な例です：
 
 ```python Python icon=python expandable
 import requests
@@ -216,9 +216,9 @@ if files:
 
 ## 注意事項
 
-1. **Task Type Restriction**: Only normal tasks (non-split tasks, non-multi-image crop tasks) support category modification through the `category` parameter
-2. **Category Must Exist**: The specified `category` must already be configured in the DocFlow workspace, otherwise an error will be returned
-3. **Category Name Matching**: Category names must exactly match the configuration (case-sensitive)
-4. **Chinese Category Handling**: If using Chinese category names, ensure the request body uses UTF-8 encoding
-5. **Reprocessing After Modification**: After modifying the file category, the system will reprocess the data according to the new category
+1. **タスクタイプの制限**：通常タスク（分割タスク、複数画像クロップタスク以外）のみ `category` パラメータによるカテゴリ修正に対応しています
+2. **カテゴリが存在すること**：指定する `category` は DocFlow ワークスペースで設定済みである必要があります。そうでない場合、エラーが返されます
+3. **カテゴリ名の一致**：カテゴリ名は設定された内容と完全に一致する必要があります（大文字・小文字を区別）
+4. **中国語カテゴリの処理**：中国語のカテゴリ名を使用する場合、リクエストボディが UTF-8 エンコーディングを使用していることを確認してください
+5. **変更後の再処理**：ファイルカテゴリを変更すると、システムは新しいカテゴリに従ってデータを再処理します
 

@@ -3,11 +3,11 @@ title: "レスポンス JSON 構造の説明"
 ---
 
 <Tip>
-  Docflow file upload is an asynchronous interface.\
-  When the interface call is successful, it returns result identifiers (`batch_number` and `file ID`) for subsequent result retrieval.
+  Docflow のファイルアップロードは非同期インターフェースです。\
+  インターフェース呼び出しが成功すると、後続の結果取得に使用する結果識別子（`batch_number` と `ファイル ID`）が返されます。
 </Tip>
 
-After a successful upload interface request, the response will be returned in JSON format according to the following structure:
+アップロードインターフェースのリクエストが成功すると、以下の構造に従って JSON 形式でレスポンスが返されます：
 
 ```json expandable
 {
@@ -27,10 +27,10 @@ After a successful upload interface request, the response will be returned in JS
 }
 ```
 
-## Important Field Description
+## 主要フィールドの説明
 
-- `batch_number`: File batch number. Can be associated with multiple files within the same batch.
-- `files[].id`: File ID for this upload.
-- `files[].task_id`: Task ID for identifying file processing tasks.
+- `batch_number`：ファイルバッチ番号。同一バッチ内の複数ファイルに関連付けることができます。
+- `files[].id`：今回アップロードしたファイルの ID。
+- `files[].task_id`：ファイル処理タスクを識別するためのタスク ID。
 
-Both `batch_number`, `files[].id` and `files[].task_id` can be used as query conditions for subsequent result retrieval.
+`batch_number`、`files[].id`、`files[].task_id` はいずれも後続の結果取得時の照会条件として使用できます。

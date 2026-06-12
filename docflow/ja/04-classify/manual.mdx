@@ -1,27 +1,27 @@
 ---
 title: "分類指定アップロード"
-description: "Specify the file category during upload to skip the automatic classification process and proceed directly to extraction."
+description: "アップロード時にファイルカテゴリを指定して、自動分類プロセスをスキップし直接抽出に進む"
 ---
 
-When you already know the document category, you can specify the file category through the `category` parameter during file upload, so DocFlow will skip the automatic classification process and go directly to the extraction stage.
+文書カテゴリが事前に分かっている場合、ファイルアップロード時に `category` パラメータでファイルカテゴリを指定することで、DocFlow は自動分類プロセスをスキップして直接抽出ステージに進みます。
 
 <Tip>
-  The specified `category` must be a file category that has been configured in the DocFlow workspace, otherwise processing will fail.
+  指定する `category` は、DocFlow ワークスペースで設定済みのファイルカテゴリでなければなりません。そうでない場合、処理が失敗します。
 </Tip>
 
 <Tip>
-  Manual classification can save processing time and is particularly suitable for batch processing scenarios with the same type of documents.
+  手動分類は処理時間を節約でき、同じ種類の文書を一括処理するシーンに特に適しています。
 </Tip>
 
 ## 利用シーン
 
-1. **Batch processing of same type documents**: Such as batch processing invoices, contracts, etc.
-2. **Known document types**: Document category is determined before uploading files
-3. **Improve processing efficiency**: Skip classification step and go directly to extraction stage
+1. **同一種類の文書の一括処理**：請求書、契約書などの一括処理
+2. **文書タイプが既知の場合**：ファイルアップロード前に文書カテゴリが確定している場合
+3. **処理効率の向上**：分類ステップをスキップして直接抽出ステージに進む
 
-## Specify Category During Upload
+## アップロード時にカテゴリを指定
 
-Add the `category` parameter to the file upload interface to achieve manual classification:
+ファイルアップロードインターフェースに `category` パラメータを追加して手動分類を実現します：
 
 <CodeGroup>
 
@@ -76,9 +76,9 @@ print(resp.status_code, resp.text)
 
 </CodeGroup>
 
-## Specify Category for Batch Upload
+## 一括アップロード時にカテゴリを指定
 
-For batch upload, you can specify the same category for all files:
+一括アップロードの場合、すべてのファイルに同じカテゴリを指定できます：
 
 <CodeGroup>
 
@@ -143,30 +143,30 @@ print(resp.status_code, resp.text)
 
 </CodeGroup>
 
-## Processing Workflow Comparison
+## 処理ワークフローの比較
 
-### Automatic Classification Workflow
-
-```
-Upload → Parse → Automatic Classification → Extract → Complete
-```
-
-### 手動分類 Workflow
+### 自動分類ワークフロー
 
 ```
-Upload (specify category) → Parse → Extract → Complete
+アップロード → 解析 → 自動分類 → 抽出 → 完了
+```
+
+### 手動分類ワークフロー
+
+```
+アップロード（カテゴリ指定） → 解析 → 抽出 → 完了
 ```
 
 ## 注意事項
 
-1. **Category must be configured**: The specified `category` must have been configured in the DocFlow workspace, otherwise an error will be returned
-2. **Category name matching**: Category name must exactly match what was configured (case-sensitive)
-3. **Processing status**: Files with manual classification will skip classification status directly in query results
-4. **Error handling**: If the specified category does not exist, file processing will fail. It is recommended to first ensure the category is correctly configured through [Configure ファイルカテゴリ](../100-faq/setup_category)
+1. **カテゴリが設定済みであること**：指定する `category` は DocFlow ワークスペースで設定済みである必要があります。そうでない場合、エラーが返されます
+2. **カテゴリ名の一致**：カテゴリ名は設定された内容と完全に一致する必要があります（大文字・小文字を区別）
+3. **処理ステータス**：手動分類されたファイルは、照会結果で分類ステータスを直接スキップします
+4. **エラーハンドリング**：指定されたカテゴリが存在しない場合、ファイル処理が失敗します。事前に[ファイルカテゴリの設定](../100-faq/setup_category)でカテゴリが正しく設定されていることを確認してください
 
-## Query Processing Results
+## 処理結果の照会
 
-After files with manual classification are processed, you can query results through the `file/fetch` interface:
+手動分類されたファイルの処理が完了した後、`file/fetch` インターフェースで結果を照会できます：
 
 <CodeGroup>
 
@@ -201,7 +201,7 @@ for f in data.get("result", {}).get("files", []):
 
 </CodeGroup>
 
-## Return Result Example
+## 返却結果例
 
 ```json expandable
 {
@@ -222,14 +222,14 @@ for f in data.get("result", {}).get("files", []):
 }
 ```
 
-## Chinese ファイルカテゴリ Parameter Passing
+## 中国語ファイルカテゴリのパラメータ指定
 
-When you need to specify Chinese or other non-English file categories, you need to perform UTF-8 URL encoding on the `category` parameter.
+中国語やその他の非英語ファイルカテゴリを指定する場合、`category` パラメータに対して UTF-8 URL エンコーディングを行う必要があります。
 
-### Encoding Example
+### エンコーディング例
 
 <Tip>
-  Use the `urllib.parse.quote()` function to URL encode Chinese category names.
+  `urllib.parse.quote()` 関数を使用して中国語のカテゴリ名を URL エンコードします。
 </Tip>
 
 <CodeGroup>

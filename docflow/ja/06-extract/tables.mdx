@@ -1,17 +1,17 @@
 ---
 title: "テーブルフィールド情報"
-description: "Detailed explanation of table field information structure and processing methods in document extraction"
+description: "文書抽出におけるテーブルフィールド情報の構造と処理方法の詳細説明"
 ---
 
-The document extraction function can recognize table structures in documents and convert table content into structured data format. Table information includes table headers, row data, position coordinates, and other detailed information.
+文書抽出機能は、文書内のテーブル構造を認識し、テーブルの内容を構造化されたデータ形式に変換します。テーブル情報には、テーブルヘッダー、行データ、位置座標などの詳細情報が含まれます。
 
-## Table Structure
+## テーブル構造
 
-Table information is located in `result.files[].data.items[][]`, using a two-dimensional array structure:
+テーブル情報は `result.files[].data.items[][]` に格納されており、二次元配列構造を使用しています：
 
-- `items[][]`: Table data, where the outer array represents rows and the inner array represents cells in rows
+- `items[][]`：テーブルデータ。外側の配列は行を表し、内側の配列は行内のセルを表します
 
-### Table Data Structure
+### テーブルデータ構造
 
 ```json
 {
@@ -36,7 +36,7 @@ Table information is located in `result.files[].data.items[][]`, using a two-dim
 }
 ```
 
-## Example Code
+## サンプルコード
 
 <CodeGroup>
 
@@ -104,7 +104,7 @@ if __name__ == "__main__":
 
 </CodeGroup>
 
-## Return Data Example
+## 返却データ例
 
 ```json expandable
 {

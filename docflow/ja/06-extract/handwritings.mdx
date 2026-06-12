@@ -1,55 +1,55 @@
 ---
 title: "手書き情報"
-description: "Detailed explanation of handwriting information structure and processing methods in document extraction"
+description: "文書抽出における手書き情報の構造と処理方法の詳細説明"
 ---
 
-The document extraction function can recognize handwriting information in documents, including handwritten text content, position coordinates, and other detailed information. Handwriting recognition is significant for processing documents containing handwritten content (such as handwritten signatures, handwritten notes, etc.).
+文書抽出機能は、文書内の手書き情報を認識できます。手書きテキストの内容、位置座標などの詳細情報が含まれます。手書き認識は、手書き署名や手書きメモなど、手書きコンテンツを含む文書の処理において重要な意味を持ちます。
 
-## 手書き情報 Structure
+## 手書き情報の構造
 
-Handwriting information is located in `result.files[].data.handwritings[]`, with each handwriting item containing the following attributes:
+手書き情報は `result.files[].data.handwritings[]` に格納されており、各手書き項目には以下の属性が含まれます：
 
-- `page`: Page number where handwriting content is located (starting from 0)
-- `text`: Recognized handwritten text content
-- `position[]`: Position coordinate information of handwriting content in the document
+- `page`：手書きコンテンツが位置するページ番号（0 から開始）
+- `text`：認識された手書きテキスト内容
+- `position[]`：文書内における手書きコンテンツの位置座標情報
 
-### 手書き情報 Data Structure
+### 手書き情報のデータ構造
 
 ```json
 {
-  "page": 0,           // Page number
-  "text": "March 1st",    // Handwritten text content
+  "page": 0,           // ページ番号
+  "text": "3月1日",    // 手書きテキスト内容
   "position": [
     {
-      "page": 0,       // Page number
-      "vertices": [    // Coordinates of four vertices [x1,y1,x2,y2,x3,y3,x4,y4]
-        100, 200,      // Top-left corner
-        200, 200,      // Top-right corner
-        200, 250,      // Bottom-right corner
-        100, 250       // Bottom-left corner
+      "page": 0,       // ページ番号
+      "vertices": [    // 四隅の座標 [x1,y1,x2,y2,x3,y3,x4,y4]
+        100, 200,      // 左上
+        200, 200,      // 右上
+        200, 250,      // 右下
+        100, 250       // 左下
       ]
     }
   ]
 }
 ```
 
-### Position Coordinate Structure
+### 位置座標の構造
 
 ```json
 {
-  "page": 0,           // Page number (starting from 0)
-  "vertices": [        // Coordinates of four vertices [x1,y1,x2,y2,x3,y3,x4,y4]
-    100, 200,          // Top-left corner
-    200, 200,          // Top-right corner
-    200, 250,          // Bottom-right corner
-    100, 250           // Bottom-left corner
+  "page": 0,           // ページ番号（0 から開始）
+  "vertices": [        // 四隅の座標 [x1,y1,x2,y2,x3,y3,x4,y4]
+    100, 200,          // 左上
+    200, 200,          // 右上
+    200, 250,          // 右下
+    100, 250           // 左下
   ]
 }
 ```
 
-For detailed coordinate descriptions, please refer to the [座標系](../03-parse/coordinate.mdx) documentation.
+座標の詳細については、[座標系](../03-parse/coordinate.mdx) のドキュメントを参照してください。
 
-## Example Code
+## サンプルコード
 
 <CodeGroup>
 
@@ -123,7 +123,7 @@ if __name__ == "__main__":
 
 </CodeGroup>
 
-## Return Data Example
+## 返却データ例
 
 ```json expandable
 {

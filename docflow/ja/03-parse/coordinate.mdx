@@ -2,27 +2,27 @@
 title: "座標系"
 ---
 
-Coordinates are an array containing 8 integers, in the format `[x1, y1, x2, y2, x3, y3, x4, y4]`
+座標は 8 つの整数を含む配列で、形式は `[x1, y1, x2, y2, x3, y3, x4, y4]` です。
 
-Representing the coordinates of four vertices of a quadrilateral, arranged clockwise.
-Namely:
+四角形の 4 つの頂点の座標を表し、時計回りに配置されています。
+すなわち：
 
-- Top-left: (x1, y1)
-- Top-right: (x2, y2)
-- Bottom-right: (x3, y3)
-- Bottom-left: (x4, y4)
+- 左上：(x1, y1)
+- 右上：(x2, y2)
+- 右下：(x3, y3)
+- 左下：(x4, y4)
 
-Coordinate values are absolute pixel values. The coordinate system is as follows:
+座標値は絶対ピクセル値です。座標系は以下のとおりです：
 
 ```
-Image coordinate system (origin at top-left corner)
+画像座標系（原点は左上隅）
 ┌────────────width───────────> x
 │(0,0)
 │
 │
 │      (x1,y1) ────────── (x2,y2)
 │         │                     │
-height             Text area
+height           テキスト領域
 │         │                     │
 │      (x4,y4) ────────── (x3,y3)
 │

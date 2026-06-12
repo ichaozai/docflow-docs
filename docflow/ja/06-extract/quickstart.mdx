@@ -96,10 +96,6 @@ for file in data.get("result", {}).get("files", []):
 
 `files[].pages[]` のプロパティ（`width`、`height`、`angle`、`dpi`）と `fields[].position[].vertices` を組み合わせると、フロントエンドでフィールドの境界ボックスを正確に描画できます。詳細は [解析結果の可視化](../03-parse/visualization) を参照してください。
 
-### 可視化用のページ座標を関連付ける
-
-`files[].pages[]` の `width/height/angle/dpi` と `fields[].position[].vertices` を組み合わせると、フロントエンドでフィールド枠を正確に描画できます。詳細は [解析結果の可視化](../03-parse/visualization) を参照してください。
-
 ## 主要な返却フィールド例（抜粋）
 
 ```json expandable
@@ -169,8 +165,8 @@ for file in data.get("result", {}).get("files", []):
 
 ## 関連ページ
 
-- [基本フィールド情報](./fields) - Detailed explanation of basic field information structure and processing methods
-- [テーブルフィールド情報](./tables) - Detailed explanation of table field information structure and processing methods
-- [印影情報](./stamps) - Detailed explanation of stamp information structure and processing methods
-- [手書き情報](./handwritings) - Detailed explanation of handwriting information structure and processing methods
-- [特定フィールドを抽出](./extract_specific_fields) - Extract additional fields or re-extract existing fields for tasks that have completed extraction
+- [基本フィールド情報](./fields) - 基本フィールド情報の構造と処理方法の詳細説明
+- [テーブルフィールド情報](./tables) - テーブルフィールド情報の構造と処理方法の詳細説明
+- [印影情報](./stamps) - 印影情報の構造と処理方法の詳細説明
+- [手書き情報](./handwritings) - 手書き情報の構造と処理方法の詳細説明
+- [特定フィールドを抽出](./extract_specific_fields) - 抽出済みタスクに対して追加フィールドの抽出や既存フィールドの再抽出を行う

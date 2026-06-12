@@ -121,23 +121,23 @@ print("Annotated images output:", annotated)
 
 </CodeGroup>
 
-In the output directory, you can see the rendering effect of text boxes:
+出力ディレクトリで、テキストボックスの描画効果を確認できます：
 
 ![visualization](../images/page_1_boxed.png)
 
-## Example Code Logic
+## サンプルコードのロジック
 
-- **Get parsing results**: Call the result retrieval interface with `with_document=true` enabled to get `result.files[].document`.
-- **Extract pages and coordinates**: Read `width/height/angle` and `lines[]` from `document.pages[]`; each `line.position` is `[x1,y1,x2,y2,x3,y3,x4,y4]` clockwise four-point coordinates.
-- **Prepare base image**: Use the same file as parsing to generate page images. If converting images yourself, remember to record the rendered `img_width/img_height`.
-- **Coordinate scaling**: Calculate `scale_x = img_width / page.width`, `scale_y = img_height / page.height`, and scale the returned coordinates proportionally to the base image pixel coordinate system.
-- **Draw visualization**: Draw the scaled four points as closed polylines (or filled polygons) on the corresponding page image line by line, with configurable line width, color, and transparency.
-- **Output and display**: Save annotated images, or overlay rendering in frontend canvas/SVG/Canvas; ensure page-by-page correspondence.
-- **Optional enhancements**:
-  - Handle `angle` rotation: If the base image is not rotated correctly, coordinate rotation correction based on `page.angle` is needed.
-  - Multi-type coloring: Different element types can use different colors/legends; if there are table, image, and other types, they can be differentiated as needed.
-  - Character-level highlighting: If `charPositions` is returned, scale each character coordinate proportionally and draw for more refined echo effects.
-  - Performance optimization: Batch drawing, resolution trade-offs, on-demand page rendering to avoid processing too many pages at once causing lag.
-  - Robustness: Null value checking, coordinate boundary clipping, fault tolerance for network/parsing exceptions.
+- **解析結果を取得**：結果取得インターフェースを `with_document=true` を有効にして呼び出し、`result.files[].document` を取得します。
+- **ページと座標を抽出**：`document.pages[]` から `width/height/angle` と `lines[]` を読み取ります。各 `line.position` は `[x1,y1,x2,y2,x3,y3,x4,y4]` の時計回り 4 点座標です。
+- **ベース画像を準備**：解析と同じファイルを使用してページ画像を生成します。自分で画像変換を行う場合は、レンダリングした `img_width/img_height` を記録してください。
+- **座標スケーリング**：`scale_x = img_width / page.width`、`scale_y = img_height / page.height` を計算し、返された座標をベース画像のピクセル座標系に比例してスケーリングします。
+- **可視化を描画**：スケーリングされた 4 点を対応するページ画像上に閉じた折れ線（または塗りつぶしポリゴン）として行ごとに描画します。線幅、色、透明度は設定可能です。
+- **出力と表示**：注釈付き画像を保存するか、フロントエンドの canvas/SVG/Canvas でオーバーレイ描画します。ページごとの対応を確保してください。
+- **オプションの拡張**：
+  - `angle` 回転の処理：ベース画像が正しく回転されていない場合、`page.angle` に基づく座標回転補正が必要です。
+  - タイプ別の色分け：異なる要素タイプに異なる色/凡例を使用できます。テーブル、画像などのタイプがある場合、必要に応じて区別できます。
+  - 文字レベルのハイライト：`charPositions` が返された場合、各文字座標を比例スケーリングして描画することで、より精密なエコー効果が得られます。
+  - パフォーマンス最適化：一括描画、解像度のトレードオフ、オンデマンドページレンダリングにより、一度に多くのページを処理してラグが発生するのを回避します。
+  - 堅牢性：null 値のチェック、座標境界のクリッピング、ネットワーク/解析例外のフォールトトレランス。
 
-The above process is language-agnostic. When implementing in other languages, you only need to replace the libraries and APIs for: HTTP requests, JSON parsing, image drawing, and coordinate scaling.
+上記のプロセスは言語に依存しません。他の言語で実装する場合は、HTTP リクエスト、JSON 解析、画像描画、座標スケーリングに使用するライブラリと API を置き換えるだけで済みます。

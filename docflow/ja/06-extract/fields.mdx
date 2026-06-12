@@ -1,35 +1,35 @@
 ---
 title: "基本フィールド情報"
-description: "Detailed explanation of field information structure and processing methods in document extraction"
+description: "文書抽出におけるフィールド情報の構造と処理方法の詳細説明"
 ---
 
-The document extraction feature identifies key field information in a document based on the fields configured for its file category.Each field includes a key-value pair and position coordinate information.
+文書抽出機能は、ファイルカテゴリに設定されたフィールドに基づいて、文書内の主要なフィールド情報を認識します。各フィールドにはキーと値のペアおよび位置座標情報が含まれます。
 
-## Field Structure
+## フィールド構造
 
-Field information is located in `result.files[].data.fields[]`, with each field containing the following attributes:
+フィールド情報は `result.files[].data.fields[]` に格納されており、各フィールドには以下の属性が含まれます：
 
-- `key`: Field name (such as "Invoice Code", "Invoice Date", etc.)
-- `value`: Field value (recognized text content)
-- `position[]`: Position coordinate information of the field in the document; fields may span pages or lines, so an array is used
+- `key`：フィールド名（「請求書番号」「請求書日付」など）
+- `value`：フィールド値（認識されたテキスト内容）
+- `position[]`：文書内におけるフィールドの位置座標情報。フィールドがページや行をまたぐ場合があるため、配列形式を採用しています
 
-### Position Coordinate Structure
+### 位置座標の構造
 
 ```json
 {
-  "page": 0,           // Page number where the field is located
-  "vertices": [        // Coordinates of four vertices [x1,y1,x2,y2,x3,y3,x4,y4]
-    100, 200,          // Top-left corner
-    300, 200,          // Top-right corner
-    300, 250,          // Bottom-right corner
-    100, 250           // Bottom-left corner
+  "page": 0,           // フィールドが位置するページ番号
+  "vertices": [        // 四隅の座標 [x1,y1,x2,y2,x3,y3,x4,y4]
+    100, 200,          // 左上
+    300, 200,          // 右上
+    300, 250,          // 右下
+    100, 250           // 左下
   ]
 }
 ```
 
-For detailed coordinate descriptions, please refer to the [座標系](../03-parse/coordinate.mdx) documentation.
+座標の詳細については、[座標系](../03-parse/coordinate.mdx) のドキュメントを参照してください。
 
-## Example Code
+## サンプルコード
 
 <CodeGroup>
 
@@ -101,7 +101,7 @@ if __name__ == "__main__":
 
 </CodeGroup>
 
-## Return Data Example
+## 返却データ例
 
 ```json expandable
 {

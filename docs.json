@@ -416,6 +416,33 @@
                 ]
               },
               {
+                "group": "MCP&Skill",
+                "pages": [
+                  {
+                    "group": "はじめに",
+                    "pages": [
+                      "docflow/ja/20-coding-guide/intro",
+                      "docflow/ja/20-coding-guide/quickstart"
+                    ]
+                  },
+                  {
+                    "group": "導入ガイド",
+                    "pages": [
+                      "docflow/ja/20-coding-guide/install-coding-agent",
+                      "docflow/ja/20-coding-guide/install-docflow-mcp",
+                      "docflow/ja/20-coding-guide/install-docflow-skill"
+                    ]
+                  },
+                  {
+                    "group": "サンプル",
+                    "pages": [
+                      "docflow/ja/20-coding-guide/example-search-docs",
+                      "docflow/ja/20-coding-guide/example-generate-code"
+                    ]
+                  }
+                ]
+              },
+              {
                 "group": "シナリオ別サンプル",
                 "pages": [
                   {
@@ -449,33 +476,6 @@
                     "group": "基盤機能 - エンティティ抽出",
                     "pages": [
                       "docflow/ja/00-overview/atomic_capabilities_extract"
-                    ]
-                  }
-                ]
-              },
-              {
-                "group": "MCP&Skill",
-                "pages": [
-                  {
-                    "group": "はじめに",
-                    "pages": [
-                      "docflow/ja/20-coding-guide/intro",
-                      "docflow/ja/20-coding-guide/quickstart"
-                    ]
-                  },
-                  {
-                    "group": "導入ガイド",
-                    "pages": [
-                      "docflow/ja/20-coding-guide/install-coding-agent",
-                      "docflow/ja/20-coding-guide/install-docflow-mcp",
-                      "docflow/ja/20-coding-guide/install-docflow-skill"
-                    ]
-                  },
-                  {
-                    "group": "サンプル",
-                    "pages": [
-                      "docflow/ja/20-coding-guide/example-search-docs",
-                      "docflow/ja/20-coding-guide/example-generate-code"
                     ]
                   }
                 ]
@@ -564,6 +564,12 @@
                 "group": "文書再試行",
                 "pages": [
                   "docflow/ja/09-retry/quickstart"
+                ]
+              },
+              {
+                "group": "Web ページ連携",
+                "pages": [
+                  "docflow/ja/10-web/iframe"
                 ]
               },
               {

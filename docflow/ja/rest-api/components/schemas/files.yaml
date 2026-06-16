@@ -410,7 +410,7 @@ CommonFieldDetailRespVO:
       deprecated: true
       type: array
       description: |
-        **非推奨**。代わりに position フィールドを使用してください
+        **廃止済み**。代わりに position フィールドを使用してください
         フィールド座標
       items:
         $ref: '#/TextInLines'

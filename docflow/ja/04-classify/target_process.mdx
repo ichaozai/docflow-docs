@@ -3,7 +3,7 @@ title: "分類のみ"
 ---
 
 Docflow はデフォルトで「解析→分類→抽出」の完全なワークフローを実行します。\
-業務要件が分類結果のみを必要とする場合、アップロードインターフェースに `target_process=classify` パラメータを追加することで、分類完了後にワークフローを終了し、抽出処理をスキップできます。
+分類結果だけが必要な場合は、アップロード API に `target_process=classify` パラメータを追加します。分類完了後にワークフローを終了し、抽出処理をスキップできます。
 
 ## 分類のみのファイルアップロード
 
@@ -59,9 +59,9 @@ print(resp.status_code, resp.text)
 
 </CodeGroup>
 
-## 分類結果の照会
+## 分類結果の確認
 
-`file/fetch` インターフェースを使用して分類結果を照会します：
+`file/fetch` API を使用して分類結果を確認します。
 
 <CodeGroup>
 
@@ -98,7 +98,7 @@ for f in data.get("result", {}).get("files", []):
 
 ## 分類のみの recognition_status ステータス説明
 
-`target_process=classify` を使用して分類のみを行う場合、`recognition_status` フィールドは以下のようにステータスが遷移します：
+`target_process=classify` を使用して分類のみを行う場合、`recognition_status` フィールドは次のようにステータスが遷移します。
 
 ### ステータス値の説明
 

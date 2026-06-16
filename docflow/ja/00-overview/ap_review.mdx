@@ -4,7 +4,7 @@ description: "財務部門の AP（買掛金）照合業務で、DocFlow API を
 ---
 
 <Tip>
-  このページでは **AP 审单**（应付账款レビュー）を業務シナリオとして、ワークスペース作成、カテゴリ設定、ファイルアップロード、抽出結果取得、スマートレビューまでの一連の流れを API で実行する方法を説明します。
+  このページでは **AP 照合**（買掛金照合）を業務シナリオとして、ワークスペース作成、カテゴリ設定、ファイルアップロード、抽出結果取得、スマートレビューまでの一連の流れを API で実行する方法を説明します。
   DocFlow を初めて利用する場合は、このページを読む前に [Web ページ](https://docflow.textin.ai/) で基本機能を確認することをおすすめします。
 </Tip>
 
@@ -12,15 +12,15 @@ description: "財務部門の AP（買掛金）照合業務で、DocFlow API を
 
 AP（買掛金）照合業務では、支払前に一連の購買書類をクロスチェックする必要があります。典型的な書類構成は次のとおりです。
 
-- 請求書（含数电票、纸质增值税专用請求書/普通請求書など）:记录販売者/購入者情報、発行金額和税率 
-- 発注書（PDF/Word）:约定サプライヤー情報、契約書金額、税率和プロダクト明细
-- 入荷伝票（PDF）:记录实际受領数量、物料情報及关联的発注書号
+- 請求書（含電子インボイス、紙の増値税専用インボイス/普通インボイスなど）:記録します販売者/購入者情報、発行金額和税率 
+- 発注書（PDF/Word）:取り決めますサプライヤー情報、契約書金額、税率和プロダクト明细
+- 入荷伝票（PDF）:記録します実際受領数量、品目情報及関連的発注書号
 
-DocFlow では、分類とフィールドを一度設定するだけで、その後アップロードされる書類の**分類認識**と**構造化情報抽出**を自動化できます。レビュー規則リポジトリを設定すると、複数文書をまたいだ**スマートレビュー**により、サプライヤー不一致、金額超過、数量異常などを自動検出できます。
+DocFlow では、分類とフィールドを一度設定するだけで、その後アップロードされる書類の**分類認識**と**構造化情報抽出**を自動化できます。レビュー規則リポジトリを設定すると、複数文書をまたいだ**スマートレビュー**により、サプライヤー一致しません、金額超過、数量異常などを自動検出できます。
 
 ## 02 業務フロー
 
-![AP 审单業務フロー](../images/expense_reimbursement_flow.png)
+![AP 照合業務フロー](../images/expense_reimbursement_flow.png)
 
 <Note>
   **ワークスペース、ファイルカテゴリ、レビュー規則リポジトリは一度だけ設定すれば継続利用できます**。以降は新しい処理対象ファイルをアップロードし、新しいレビュータスクを作成するだけです。このサンプルでは全体の流れを示すため、設定手順と処理手順を同じコード内で実行します。
@@ -36,8 +36,8 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
 この例では 4 つのファイルカテゴリを設定します。いずれも `category/create` API で作成し、フィールドを設定します。
 
 <AccordionGroup>
-  <Accordion defaultOpen title="国内票-数电票（サンプル:sample_invoice.pdf）">
-    增值税电子請求書（数电票）、包含請求書番号、発行日付、購入者/販売者名称及税番号、价税合計など基本情報フィールド、以及商品明细テーブルフィールド:
+  <Accordion defaultOpen title="国内票-電子インボイス（サンプル:sample_invoice.pdf）">
+    電子インボイス、含む請求書番号、発行日付、購入者/販売者名称及税番号、税込合計など基本情報フィールド、以及商品明细テーブルフィールド:
 
     <Tip>
       例サンプルファイル、可クリック確認或ダウンロード:[sample\_invoice.pdf](https://dllf.intsig.net/download/2026/CustomService/sample_invoice.pdf)
@@ -49,13 +49,13 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
     |---|---|
     | <span style={{color: "#3b82f6"}}>請求書番号</span> | 基本情報フィールド |
     | <span style={{color: "#3b82f6"}}>発行日付</span> | 基本情報フィールド |
-    | <span style={{color: "#3b82f6"}}>价税合計</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>税込合計</span> | 基本情報フィールド |
     | <span style={{color: "#3b82f6"}}>税抜金額</span> | 基本情報フィールド |
     | <span style={{color: "#3b82f6"}}>税額</span> | 基本情報フィールド |
     | <span style={{color: "#3b82f6"}}>販売者名称</span> | 基本情報フィールド |
-    | <span style={{color: "#3b82f6"}}>販売者纳税人認識号</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>販売者納税者識別番号</span> | 基本情報フィールド |
     | <span style={{color: "#3b82f6"}}>購入者名称</span> | 基本情報フィールド |
-    | <span style={{color: "#3b82f6"}}>購入者纳税人認識号</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>購入者納税者識別番号</span> | 基本情報フィールド |
     | <span style={{color: "#3b82f6"}}>請求書備考</span> | 基本情報フィールド |
     | <span style={{color: "#3b82f6"}}>商品名称</span> | テーブルフィールド |
     | <span style={{color: "#3b82f6"}}>規格型番</span> | テーブルフィールド |
@@ -67,7 +67,7 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
     | <span style={{color: "#3b82f6"}}>税額</span> | テーブルフィールド |
   </Accordion>
   <Accordion defaultOpen title="購買契約書（サンプル:sample_contract.pdf）">
-    購買契約書是约定取引条款的核心ファイル、包含契約書番号、甲乙方情報、金額、税率和プロダクト明细。フィールド設定同时使用**基本情報フィールド**和**テーブルフィールド**:
+    購買契約書是取り決めます取引条項的核心ファイル、含む契約書番号、甲乙情報、金額、税率和プロダクト明细。フィールド設定同时使用**基本情報フィールド**和**テーブルフィールド**:
 
     <Tip>
       例サンプルファイル、可クリック確認或ダウンロード:[sample\_contract.pdf](https://dllf.intsig.net/download/2026/CustomService/sample_contract.pdf)
@@ -78,29 +78,29 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
     | フィールド名 | タイプ |
     |---|---|
     | <span style={{color: "#3b82f6"}}>番号</span> | 基本情報フィールド |
-    | <span style={{color: "#3b82f6"}}>甲方</span> | 基本情報フィールド |
-    | <span style={{color: "#3b82f6"}}>乙方</span> | 基本情報フィールド |
-    | <span style={{color: "#3b82f6"}}>签订日付</span> | 基本情報フィールド |
-    | <span style={{color: "#3b82f6"}}>合作期间</span> | 基本情報フィールド |
-    | <span style={{color: "#3b82f6"}}>支付条款</span> | 基本情報フィールド |
-    | <span style={{color: "#3b82f6"}}>乙方銀行口座情報</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>甲</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>乙</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>締結日</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>契約期間</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>支払条項</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>乙銀行口座情報</span> | 基本情報フィールド |
     | <span style={{color: "#3b82f6"}}>発行情報</span> | 基本情報フィールド |
-    | <span style={{color: "#3b82f6"}}>违约金条款</span> | 基本情報フィールド |
-    | <span style={{color: "#3b82f6"}}>購買物料/服务数量</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>違約金条項</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>購買品目/サービス数量</span> | 基本情報フィールド |
     | <span style={{color: "#3b82f6"}}>契約書タイプ</span> | 基本情報フィールド |
     | <span style={{color: "#3b82f6"}}>購買金額</span> | 基本情報フィールド |
     | <span style={{color: "#3b82f6"}}>購買単価</span> | 基本情報フィールド |
     | <span style={{color: "#3b82f6"}}>税率</span> | 基本情報フィールド |
-    | <span style={{color: "#3b82f6"}}>乙方税番号</span> | 基本情報フィールド |
-    | <span style={{color: "#3b82f6"}}>購買物料/服务</span> | 基本情報フィールド |
-    | <span style={{color: "#3b82f6"}}>プロダクト型号</span> | テーブルフィールド |
+    | <span style={{color: "#3b82f6"}}>乙税番号</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>購買品目/サービス</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>プロダクト型番</span> | テーブルフィールド |
     | <span style={{color: "#3b82f6"}}>プロダクト説明</span> | テーブルフィールド |
     | <span style={{color: "#3b82f6"}}>単価</span> | テーブルフィールド |
     | <span style={{color: "#3b82f6"}}>数量</span> | テーブルフィールド |
     | <span style={{color: "#3b82f6"}}>金額</span> | テーブルフィールド |
   </Accordion>
   <Accordion defaultOpen title="入荷伝票（サンプル:sample_inbound.pdf）">
-    入荷伝票是倉庫受領的凭证、记录实收数量、物料情報和サプライヤー情報。フィールド設定同时使用**基本情報フィールド**和**テーブルフィールド**:
+    入荷伝票是倉庫受領的凭证、記録します实收数量、品目情報和サプライヤー情報。フィールド設定同时使用**基本情報フィールド**和**テーブルフィールド**:
 
     <Tip>
       例サンプルファイル、可クリック確認或ダウンロード:[sample\_inbound.pdf](https://dllf.intsig.net/download/2026/CustomService/sample_inbound.pdf)
@@ -121,13 +121,13 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
     | <span style={{color: "#3b82f6"}}>備考</span> | 基本情報フィールド |
     | <span style={{color: "#3b82f6"}}>倉庫受領人</span> | 基本情報フィールド |
     | <span style={{color: "#3b82f6"}}>倉庫受領人日付</span> | 基本情報フィールド |
-    | <span style={{color: "#3b82f6"}}>质检确认</span> | 基本情報フィールド |
-    | <span style={{color: "#3b82f6"}}>质检确认日付</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>质检確認</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>质检確認日付</span> | 基本情報フィールド |
     | <span style={{color: "#3b82f6"}}>サプライヤー送货人</span> | 基本情報フィールド |
     | <span style={{color: "#3b82f6"}}>サプライヤー送货人日付</span> | 基本情報フィールド |
     | <span style={{color: "#3b82f6"}}>サプライヤー税番号</span> | 基本情報フィールド |
-    | <span style={{color: "#3b82f6"}}>受領入荷明细-物料编码</span> | テーブルフィールド |
-    | <span style={{color: "#3b82f6"}}>受領入荷明细-物料描述</span> | テーブルフィールド |
+    | <span style={{color: "#3b82f6"}}>受領入荷明细-品目编码</span> | テーブルフィールド |
+    | <span style={{color: "#3b82f6"}}>受領入荷明细-品目描述</span> | テーブルフィールド |
     | <span style={{color: "#3b82f6"}}>受領入荷明细-単位</span> | テーブルフィールド |
     | <span style={{color: "#3b82f6"}}>受領入荷明细-应收</span> | テーブルフィールド |
     | <span style={{color: "#3b82f6"}}>受領入荷明细-实收</span> | テーブルフィールド |
@@ -136,7 +136,7 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
     | <span style={{color: "#3b82f6"}}>受領入荷明细-签收人</span> | テーブルフィールド |
   </Accordion>
   <Accordion defaultOpen title="検収書（サンプル:sample_acceptance.pdf）">
-    検収書是确认货物/服务交付质量的凭证、仅包含基本情報フィールド:
+    検収書是確認货物/サービス交付品質的凭证、仅含む基本情報フィールド:
 
     <Tip>
       例サンプルファイル、可クリック確認或ダウンロード:[sample\_acceptance.pdf](https://dllf.intsig.net/download/2026/CustomService/sample_acceptance.pdf)
@@ -148,16 +148,16 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
     |---|---|
     | <span style={{color: "#3b82f6"}}>プロジェクト名</span> | 基本情報フィールド |
     | <span style={{color: "#3b82f6"}}>契約書番号</span> | 基本情報フィールド |
-    | <span style={{color: "#3b82f6"}}>甲方単位名称</span> | 基本情報フィールド |
-    | <span style={{color: "#3b82f6"}}>乙方単位名称</span> | 基本情報フィールド |
-    | <span style={{color: "#3b82f6"}}>甲方検収人</span> | 基本情報フィールド |
-    | <span style={{color: "#3b82f6"}}>乙方施工人</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>甲単位名称</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>乙単位名称</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>甲検収人</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>乙施工人</span> | 基本情報フィールド |
     | <span style={{color: "#3b82f6"}}>納品内容</span> | 基本情報フィールド |
     | <span style={{color: "#3b82f6"}}>検収説明</span> | 基本情報フィールド |
     | <span style={{color: "#3b82f6"}}>検収結論</span> | 基本情報フィールド |
     | <span style={{color: "#3b82f6"}}>検収数量</span> | 基本情報フィールド |
     | <span style={{color: "#3b82f6"}}>検収日付</span> | 基本情報フィールド |
-    | <span style={{color: "#3b82f6"}}>乙方税番号</span> | 基本情報フィールド |
+    | <span style={{color: "#3b82f6"}}>乙税番号</span> | 基本情報フィールド |
   </Accordion>
 </AccordionGroup>
 
@@ -169,52 +169,52 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
   <Accordion defaultOpen title="規則グループ 1:業務整合性レビュー（跨書類クロス照合）">
     | 規則名 | リスクレベル | レビュー条件 |
     |---|---|---|
-    | <span style={{color: "#3b82f6"}}>サプライヤー整合性</span> | <span style={{color: "#ef4444"}}>●</span> 高リスク | 若均存在税番号、则請求書販売者税番号 = 契約書乙方税番号 = 入荷伝票サプライヤー税番号。否则比对名称 |
-    | <span style={{color: "#3b82f6"}}>金額照合</span> | <span style={{color: "#ef4444"}}>●</span> 高リスク | 請求書价税合計金額 ≤ 購買契約書合計金額。框架协议（金額空或 0）时不チェック |
+    | <span style={{color: "#3b82f6"}}>サプライヤー整合性</span> | <span style={{color: "#ef4444"}}>●</span> 高リスク | 若均存在税番号、则請求書販売者税番号 = 契約書乙税番号 = 入荷伝票サプライヤー税番号。否则比对名称 |
+    | <span style={{color: "#3b82f6"}}>金額照合</span> | <span style={{color: "#ef4444"}}>●</span> 高リスク | 請求書税込合計金額 ≤ 購買契約書合計金額。框架协议（金額空或 0）时不チェック |
     | <span style={{color: "#3b82f6"}}>数量整合性（入荷伝票维度）</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | 若請求書含商品明细、则請求書数量合計 ≤ 入荷伝票实收数量合計 |
-    | <span style={{color: "#3b82f6"}}>标的整合性</span> | <span style={{color: "#22c55e"}}>●</span> 低リスク | 契約書约定的規格型番须与入荷伝票、請求書中的規格型番一致。未约定規格型番时チェック标的物描述是否指向同一商品 |
-    | <span style={{color: "#3b82f6"}}>税率整合性</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | 請求書各行税率须与契約書约定税率一致。契約書未约定税率时跳过 |
-    | <span style={{color: "#3b82f6"}}>検収結論チェック</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | 検収書的検収結論须为合格/通过/検収通过/同意検収或类似认可状态 |
+    | <span style={{color: "#3b82f6"}}>対象整合性</span> | <span style={{color: "#22c55e"}}>●</span> 低リスク | 契約書取り決めます的規格型番须と入荷伝票、請求書中的規格型番一致。未取り決めます規格型番时チェック対象物描述是否指向同一商品 |
+    | <span style={{color: "#3b82f6"}}>税率整合性</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | 請求書各行税率须と契約書取り決めます税率一致。契約書未取り決めます税率时スキップ |
+    | <span style={{color: "#3b82f6"}}>検収結論チェック</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | 検収書的検収結論须为合格/合格/検収合格/同意検収或类似认可ステータス |
     | <span style={{color: "#3b82f6"}}>数量整合性（検収書维度）</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | 若請求書含商品明细且検収書有合格数量、则請求書数量合計 ≤ 検収書合格数量 |
-    | <span style={{color: "#3b82f6"}}>契約書关联性</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | 入荷伝票契約書番号 = 購買契約書番号。検収書契約書番号 = 購買契約書番号 |
+    | <span style={{color: "#3b82f6"}}>契約書関連性</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | 入荷伝票契約書番号 = 購買契約書番号。検収書契約書番号 = 購買契約書番号 |
 
     <Tip>
-      複数文書规则的 `category_ids` 包含多个分類 ID、只有当レビュータスク覆盖所有关联分類时、この规则才会被触发执行。
+      複数文書規則的 `category_ids` 含む複数の分類 ID、只有当レビュータスク覆盖所有関連分類时、この規則才会被触发执行。
     </Tip>
   </Accordion>
-  <Accordion defaultOpen title="規則グループ 2:文書采集与预処理レビュー">
+  <Accordion defaultOpen title="規則グループ 2:文書采集と预処理レビュー">
     | 規則名 | リスクレベル | レビュー条件 |
     |---|---|---|
-    | <span style={{color: "#3b82f6"}}>情報完全性チェック</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | チェック四类文書齐全性并照合各文書必填フィールド非空（详见レビュー点説明） |
-    | <span style={{color: "#3b82f6"}}>請求書日付コンプライアンス性</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | 請求書発行日付 ≥ 契約書签订日付 |
+    | <span style={{color: "#3b82f6"}}>情報完全性チェック</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | チェック四类文書齐全性并照合各文書必須フィールド非空（详见レビュー点説明） |
+    | <span style={{color: "#3b82f6"}}>請求書日付コンプライアンス性</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | 請求書発行日付 ≥ 契約書締結日 |
     | <span style={{color: "#3b82f6"}}>購入者情報照合</span> | <span style={{color: "#ef4444"}}>●</span> 高リスク | 請求書購入者名称 = 上海合合情報科技股份有限公司。購入者税番号 = 91310110791485269J |
-    | <span style={{color: "#3b82f6"}}>税率コンプライアンス性チェック</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | 货物类税率应为 13%、服务类应为 6%、小规模纳税人应为 1% 或 3% |
+    | <span style={{color: "#3b82f6"}}>税率コンプライアンス性チェック</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | 货物类税率应为 13%、サービス类应为 6%、小规模纳税人应为 1% 或 3% |
   </Accordion>
 </AccordionGroup>
 
 ## 06 コード構成
 
-例コード将完全な的七步フロー放在一起実行、便于理解端到端的调用链路。在实际生产中、**ステップ 1、2、5（作成ワークスペース、設定ファイルカテゴリ、設定レビュー規則リポジトリ）只需执行一次**。后续処理新書類时、只需重复**ステップ 3、4、6、7（ファイルをアップロード → 抽出結果を取得 → 提交レビュータスク → 取得レビュー結果）**、直接复用已有的設定即可。参见 [AP 审单场景（已完了設定）](./ap_review_already_configured)。
+例コード将完全な七步フローまとめて実行、便于理解端到端的调用链路。在実際本番中、**ステップ 1、2、5（ワークスペースを作成、設定ファイルカテゴリ、設定レビュー規則リポジトリ）必要なのは一度だけ実行**。以降処理新書類时、必要なのは繰り返す**ステップ 3、4、6、7（ファイルをアップロード → 抽出結果を取得 → 送信レビュータスク → 取得レビュー結果）**、直接再利用既存の的設定即可。参照: [AP 照合シナリオ（完了済み設定）](./ap_review_already_configured)。
 
-例コード中的函数分为两类、理解この一点有助于对照 API 文書进行调试和扩展。
+例コード中的関数分为两类、理解この一点有助于照合 API 文書进行デバッグ和拡張。
 
 ### 2 種類の関数
 
-**REST API 呼び出し関数** — 各関数は API エンドポイントを直接ラップします、函数パラメータ与接口文書一一对应:
+**REST API 呼び出し関数** — 各関数は API エンドポイントを直接ラップします、関数パラメータとAPI文書対応:
 
 | 関数（Python） | メソッド（Java） | 対応する API エンドポイント | 説明 |
 |---|---|---|---|
-| `create_workspace` | `createWorkspace` | `POST /workspace/create` | 作成ワークスペース、workspace_id を返す |
-| `create_category` | `createCategory` | `POST /category/create` | 作成ファイルカテゴリ并アップロードサンプル、category_id を返す |
-| `batch_add_category_fields` | `batchAddCategoryFields` | `POST /category/fields/batch_add` | 为已有カテゴリ追加フィールド（用于添加テーブルフィールド） |
+| `create_workspace` | `createWorkspace` | `POST /workspace/create` | ワークスペースを作成、workspace_id を返す |
+| `create_category` | `createCategory` | `POST /category/create` | ファイルカテゴリを作成し、サンプルをアップロード、category_id を返す |
+| `batch_add_category_fields` | `batchAddCategoryFields` | `POST /category/fields/batch_add` | 为既存のカテゴリ追加フィールド（用于添加テーブルフィールド） |
 | `upload_file` | `uploadFile` | `POST /file/upload` | 非同期でファイルをアップロードし、batch_number を返します。結果取得にはポーリングが必要です |
 | `upload_file_sync` | `uploadFileSync` | `POST /file/upload/sync` | 同期でファイルをアップロードし、抽出結果を直接返します。ポーリングは不要です |
-| `create_rule_repo` | `createRuleRepo` | `POST /review/rule_repo/create` | 作成レビュー規則リポジトリ、repo_id を返す |
-| `create_rule_group` | `createRuleGroup` | `POST /review/rule_group/create` | 在規則リポジトリ内作成規則グループ、group_id を返す |
-| `create_rule` | `createRule` | `POST /review/rule/create` | 在規則グループ内作成レビュー規則、绑定適用カテゴリ |
+| `create_rule_repo` | `createRuleRepo` | `POST /review/rule_repo/create` | レビュー規則リポジトリを作成、repo_id を返す |
+| `create_rule_group` | `createRuleGroup` | `POST /review/rule_group/create` | 在規則リポジトリ内規則グループを作成、group_id を返す |
+| `create_rule` | `createRule` | `POST /review/rule/create` | 在規則グループ内レビュー規則を作成、適用カテゴリを紐付け |
 | `submit_review_task` | `submitReviewTask` | `POST /review/task/submit` | レビュータスクを送信し、レビュー task_id を返します |
 
-**補助関数** — 不直接対応する API エンドポイント、提供共通基礎能力或封装轮询/表示ロジック:
+**補助関数** — 直接対応しない API エンドポイント、共通処理やポーリング/表示ロジック:
 
 | 関数（Python） | メソッド（Java） | 役割 |
 |---|---|---|
@@ -230,18 +230,18 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
 
 <AccordionGroup>
   <Accordion defaultOpen title="ステップ 2:作成含テーブルフィールド的ファイルカテゴリ">
-    国内票-数电票、購買契約書和入荷伝票均包含テーブルフィールド、需先作成カテゴリ（設定基本情報フィールド）、再通过 `batch_add_category_fields` 追加テーブルフィールド。`table_id=-1` 表示挂载到默认テーブル。
+    国内票-電子インボイス、購買契約書和入荷伝票均含むテーブルフィールド、需先作成カテゴリ（設定基本情報フィールド）、再合格 `batch_add_category_fields` 追加テーブルフィールド。`table_id=-1` 表示挂载到デフォルトテーブル。
 
     <Tabs>
       <Tab title="Python">
         ```python
-        # 国内票-数电票（基本情報フィールド + 明细テーブルフィールド）
+        # 国内票-電子インボイス（基本情報フィールド + 明细テーブルフィールド）
         invoice_id = create_category(
             workspace_id=workspace_id,
-            name="国内票-数电票",
+            name="国内票-電子インボイス",
             sample_file_path="sample_invoice.pdf",
             fields=[
-                {"name": "請求書番号"}, {"name": "発行日付"}, {"name": "价税合計"},
+                {"name": "請求書番号"}, {"name": "発行日付"}, {"name": "税込合計"},
                 # ... 其余基本情報フィールド
             ],
         )
@@ -255,36 +255,36 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
             workspace_id=workspace_id,
             name="購買契約書",
             sample_file_path="sample_contract.pdf",
-            fields=[{"name": "番号"}, {"name": "甲方"}, {"name": "乙方"}, ...],
+            fields=[{"name": "番号"}, {"name": "甲"}, {"name": "乙"}, ...],
         )
         batch_add_category_fields(workspace_id, contract_id, table_id=-1, fields=[
-            {"name": "プロダクト型号"}, {"name": "プロダクト説明"}, {"name": "単価"}, {"name": "数量"}, {"name": "金額"}
+            {"name": "プロダクト型番"}, {"name": "プロダクト説明"}, {"name": "単価"}, {"name": "数量"}, {"name": "金額"}
         ])
         ```
       </Tab>
       <Tab title="Java">
         ```java
-        // 国内票-数电票
-        String invoiceId = createCategory(workspaceId, "国内票-数电票",
-                SAMPLE_DIR + "/sample_invoice.pdf", invoiceFields, "增值税电子請求書（数电票）...");
+        // 国内票-電子インボイス
+        String invoiceId = createCategory(workspaceId, "国内票-電子インボイス",
+                SAMPLE_DIR + "/sample_invoice.pdf", invoiceFields, "電子インボイス...");
         batchAddCategoryFields(workspaceId, invoiceId, "-1",
                 List.of("商品名称", "規格型番", "単位", "数量", "単価", "金額", "税率", "税額"));
         // 購買契約書
         String contractId = createCategory(workspaceId, "購買契約書",
                 SAMPLE_DIR + "/sample_contract.pdf", contractFields, "");
         batchAddCategoryFields(workspaceId, contractId, "-1",
-                List.of("プロダクト型号", "プロダクト説明", "単価", "数量", "金額"));
+                List.of("プロダクト型番", "プロダクト説明", "単価", "数量", "金額"));
         ```
       </Tab>
     </Tabs>
   </Accordion>
   <Accordion defaultOpen title="ステップ 3:処理対象ファイルをアップロード">
-    ファイルアップロード対応两种モード、可根据業務场景选择:
+    ファイルアップロード対応两种モード、可根据業務シナリオ选择:
 
-    - **非同期アップロード**（`file/upload`）:アップロード后立即返す `batch_number`、需配合ステップ 4 轮询 `file/fetch` 抽出結果を取得。適しています大批量ファイル并发処理。
-    - **同期アップロード**（`file/upload/sync`）:アップロード后など待処理完了、抽出結果を直接返す、ポーリング不要。適しています单ファイル或少量ファイル的リアルタイム场景。
+    - **非同期アップロード**（`file/upload`）:アップロード后立即返す `batch_number`、需配合ステップ 4 ポーリング `file/fetch` 抽出結果を取得。適しています大一括ファイル并发処理。
+    - **同期アップロード**（`file/upload/sync`）:アップロード后待機処理完了、抽出結果を直接返す、ポーリング不要。適しています单ファイル或少量ファイル的リアルタイムシナリオ。
 
-    **方法 1:非同期アップロード（需配合ステップ 4 轮询）**
+    **方法 1:非同期アップロード（需配合ステップ 4 ポーリング）**
 
     <Tabs>
       <Tab title="Python">
@@ -314,7 +314,7 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
       </Tab>
     </Tabs>
 
-    **方法 2:同期アップロード（抽出結果を直接返す、跳过ステップ 4）**
+    **方法 2:同期アップロード（抽出結果を直接返す、スキップステップ 4）**
 
     <Tabs>
       <Tab title="Python">
@@ -371,9 +371,9 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
     </Tabs>
   </Accordion>
   <Accordion defaultOpen title="ステップ 4:抽出結果を取得（同期アップロード使用時は省略可能）">
-    <Note>若ステップ 3 使用了同期アップロード `file/upload/sync`、则已直接获得抽出結果、可跳过本步骤。</Note>
+    <Note>若ステップ 3 使用了同期アップロード `file/upload/sync`、则已直接获得抽出結果、可スキップ本ステップ。</Note>
 
-    非同期アップロード后、需轮询 `file/fetch` 接口など待処理完了:
+    非同期アップロード后、需ポーリング `file/fetch` API待機処理完了:
 
     <Tabs>
       <Tab title="Python">
@@ -398,15 +398,15 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
     </Tabs>
   </Accordion>
   <Accordion defaultOpen title="ステップ 5:設定複数文書レビュー規則">
-    複数文書规则在 `category_ids` 中传入多个分類 ID。DocFlow 会从各分類已抽出的結果中提取规则关联フィールド、交由 AI 统一判断。
+    複数文書規則在 `category_ids` 中传入複数の分類 ID。DocFlow 会从各分類已抽出的結果中提取規則関連フィールド、交由 AI 统一判断。
 
     <Tabs>
       <Tab title="Python">
         ```python
-        # サプライヤー整合性——关联請求書、契約書、入荷伝票三个分類
+        # サプライヤー整合性——関連請求書、契約書、入荷伝票三个分類
         create_rule(workspace_id, repo_id, group1_id,
             "サプライヤー整合性",
-            "若均存在税番号フィールド、则請求書【販売者纳税人認識号】= 契約書【乙方纳税人認識号】"
+            "若均存在税番号フィールド、则請求書【販売者納税者識別番号】= 契約書【乙納税者識別番号】"
             "= 入荷伝票【サプライヤー税番号】。否则比对名称",
             [invoice_id, contract_id, inbound_id], 10)
         ```
@@ -414,7 +414,7 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
       <Tab title="Java">
         ```java
         createRule(workspaceId, repoId, group1Id, "サプライヤー整合性",
-                "若均存在税番号フィールド、则請求書【販売者纳税人認識号】= 契約書【乙方纳税人認識号】"
+                "若均存在税番号フィールド、则請求書【販売者納税者識別番号】= 契約書【乙納税者識別番号】"
                 + "= 入荷伝票【サプライヤー税番号】。否则比对名称",
                 Arrays.asList(invoiceId, contractId, inboundId), 10);
         ```
@@ -433,7 +433,7 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
 
 ## 07 完全なサンプルコードのダウンロード
 
-完全な可実行コード（含 Python、Java 两个版本）已内置在文書倉庫的 `examples/` 目录下:
+完全な実行可能コード（Python 版、Java 版）は、ドキュメントリポジトリの `examples/` ディレクトリに同梱されています:
 
 ```
 examples/
@@ -466,18 +466,18 @@ examples/
 
 <Tabs>
   <Tab title="Python">
-    **环境要求**:Python 3.8+
+    **環境要件**:Python 3.8+
 
-    **1. 安装依赖**
+    **1. 依存関係をインストール**
 
     ```bash
     cd examples/python
     pip install -r requirements.txt
     ```
 
-    **2. 填写設定**
+    **2. 入力設定**
 
-    打开 `ap_review.py`、填写ファイル上部的設定项:
+    開き `ap_review.py`、入力ファイル上部的設定項目:
 
     ```python
     APP_ID        = "your-app-id"      # x-ti-app-id
@@ -491,18 +491,18 @@ examples/
     ```
   </Tab>
   <Tab title="Java">
-    **环境要求**:JDK 11+、Maven 3.6+
+    **環境要件**:JDK 11+、Maven 3.6+
 
-    **1. 填写設定**
+    **1. 入力設定**
 
-    打开 `src/main/java/com/docflow/ApReview.java`、填写ファイル上部的設定项:
+    開き `src/main/java/com/docflow/ApReview.java`、入力ファイル上部的設定項目:
 
     ```java
     private static final String APP_ID        = "your-app-id";
     private static final String SECRET_CODE   = "your-secret-code";
     ```
 
-    **2. 编译并実行**
+    **2. ビルドして実行**
 
     ```bash
     cd examples/java
@@ -513,19 +513,19 @@ examples/
 </Tabs>
 
 <Tip>
-  実行成功后、可登录 [DocFlow Web ページ](https://docflow.textin.ai/)、在对应ワークスペース下直观確認每份ファイル的分類、フィールド抽出結果和スマートレビュー結果、便于与コード输出对照验证。
+  実行に成功したら、[DocFlow Web ページ](https://docflow.textin.ai/) にログインし、対象ワークスペースで各ファイルの分類結果、フィールド抽出結果、スマートレビュー結果を確認できます。コードの出力結果との照合にも役立ちます。
 </Tip>
 
 ### 想定されるコンソール出力
 
-成功実行后、コンソール将输出如下内容（workspace_id、category_id など ID 因実行环境不同而变化）:
+成功実行后、コンソール将出力如下内容（workspace_id、category_id など ID 因実行环境不同而变化）:
 
 ```
 ============================================================
-  DocFlow AP 审单场景例
+  DocFlow AP 照合シナリオ例
 ============================================================
-[步骤1] ワークスペース作成成功  workspace_id=<workspace_id>
-[步骤2] ファイルカテゴリ作成成功  name=国内票-数电票  category_id=<category_id>
+[ステップ1] ワークスペース作成成功  workspace_id=<workspace_id>
+[ステップ2] ファイルカテゴリ作成成功  name=国内票-電子インボイス  category_id=<category_id>
   追加フィールド成功  name=商品名称  field_id=<field_id>
   追加フィールド成功  name=規格型番  field_id=<field_id>
   追加フィールド成功  name=単位  field_id=<field_id>
@@ -534,57 +534,57 @@ examples/
   追加フィールド成功  name=金額  field_id=<field_id>
   追加フィールド成功  name=税率  field_id=<field_id>
   追加フィールド成功  name=税額  field_id=<field_id>
-[步骤2] ファイルカテゴリ作成成功  name=購買契約書  category_id=<category_id>
-  追加フィールド成功  name=プロダクト型号  field_id=<field_id>
+[ステップ2] ファイルカテゴリ作成成功  name=購買契約書  category_id=<category_id>
+  追加フィールド成功  name=プロダクト型番  field_id=<field_id>
   追加フィールド成功  name=プロダクト説明  field_id=<field_id>
   追加フィールド成功  name=単価  field_id=<field_id>
   追加フィールド成功  name=数量  field_id=<field_id>
   追加フィールド成功  name=金額  field_id=<field_id>
-[步骤2] ファイルカテゴリ作成成功  name=入荷伝票  category_id=<category_id>
-  追加フィールド成功  name=受領入荷明细-物料编码  field_id=<field_id>
-  追加フィールド成功  name=受領入荷明细-物料描述  field_id=<field_id>
+[ステップ2] ファイルカテゴリ作成成功  name=入荷伝票  category_id=<category_id>
+  追加フィールド成功  name=受領入荷明细-品目编码  field_id=<field_id>
+  追加フィールド成功  name=受領入荷明细-品目描述  field_id=<field_id>
   追加フィールド成功  name=受領入荷明细-単位  field_id=<field_id>
   追加フィールド成功  name=受領入荷明细-应收  field_id=<field_id>
   追加フィールド成功  name=受領入荷明细-实收  field_id=<field_id>
   追加フィールド成功  name=受領入荷明细-差异  field_id=<field_id>
   追加フィールド成功  name=受領入荷明细-质检  field_id=<field_id>
   追加フィールド成功  name=受領入荷明细-签收人  field_id=<field_id>
-[步骤2] ファイルカテゴリ作成成功  name=検収書  category_id=<category_id>
+[ステップ2] ファイルカテゴリ作成成功  name=検収書  category_id=<category_id>
 
 設定完了  workspace_id=<workspace_id>
-  国内票-数电票: category_id=<category_id>
+  国内票-電子インボイス: category_id=<category_id>
   購買契約書:      category_id=<category_id>
   入荷伝票:        category_id=<category_id>
   検収書:        category_id=<category_id>
 
-开始処理対象ファイルをアップロード...
-[步骤3] ファイルアップロード成功  name=sample_invoice.pdf  batch_number=<batch_number>
-[步骤3] ファイルアップロード成功  name=sample_contract.pdf  batch_number=<batch_number>
-[步骤3] ファイルアップロード成功  name=sample_inbound.pdf  batch_number=<batch_number>
-[步骤3] ファイルアップロード成功  name=sample_acceptance.pdf  batch_number=<batch_number>
+開始処理対象ファイルをアップロード...
+[ステップ3] ファイルアップロード成功  name=sample_invoice.pdf  batch_number=<batch_number>
+[ステップ3] ファイルアップロード成功  name=sample_contract.pdf  batch_number=<batch_number>
+[ステップ3] ファイルアップロード成功  name=sample_inbound.pdf  batch_number=<batch_number>
+[ステップ3] ファイルアップロード成功  name=sample_acceptance.pdf  batch_number=<batch_number>
 
-开始処理結果を取得...
-[步骤4] など待処理結果（batch_number=<batch_number>）..... 完了
+開始処理結果を取得...
+[ステップ4] 待機処理結果（batch_number=<batch_number>）..... 完了
 
 ============================================================
 ファイル名   : sample_invoice.pdf
-分類結果 : 国内票-数电票
+分類結果 : 国内票-電子インボイス
 
 ── 普通フィールド ──────────────────────────
   請求書番号                : 25442000000012345678
   発行日付                : 2025-01-15
-  价税合計                : 50,900.00
+  税込合計                : 50,900.00
   税抜金額                : 48,000.00
   税額                   : 2,900.00
   販売者名称               : 上海某某科技有限公司
-  販売者纳税人認識号         : 91310000XXXXXXXXXX
+  販売者納税者識別番号         : 91310000XXXXXXXXXX
   購入者名称               : 合合情報科技（上海）有限公司
-  購入者纳税人認識号         : 91310000YYYYYYYYYY
+  購入者納税者識別番号         : 91310000YYYYYYYYYY
 
 ── テーブル行データ ────────────────────────
-  第1行: 商品名称=智能硬件设备  |  規格型番=XH-2000  |  単位=台  |  数量=10  |  単価=4,800.00  |  金額=48,000.00  |  税率=6%  |  税額=2,880.00
+  第1行: 商品名称=スマート硬件设备  |  規格型番=XH-2000  |  単位=台  |  数量=10  |  単価=4,800.00  |  金額=48,000.00  |  税率=6%  |  税額=2,880.00
 
-[步骤4] など待処理結果（batch_number=<batch_number>）......... 完了
+[ステップ4] 待機処理結果（batch_number=<batch_number>）......... 完了
 
 ============================================================
 ファイル名   : sample_contract.pdf
@@ -592,14 +592,14 @@ examples/
 
 ── 普通フィールド ──────────────────────────
   番号                   : HT-2025-001
-  甲方                   : 合合情報科技（上海）有限公司
-  乙方                   : 上海某某科技有限公司
-  签订日付                : 2025-01-10
+  甲                   : 合合情報科技（上海）有限公司
+  乙                   : 上海某某科技有限公司
+  締結日                : 2025-01-10
   購買金額                : 50,900.00
   税率                   : 6%
-  乙方税番号                : 91310000XXXXXXXXXX
+  乙税番号                : 91310000XXXXXXXXXX
 
-[步骤4] など待処理結果（batch_number=<batch_number>）...... 完了
+[ステップ4] 待機処理結果（batch_number=<batch_number>）...... 完了
 
 ============================================================
 ファイル名   : sample_inbound.pdf
@@ -613,7 +613,7 @@ examples/
   入荷合計金額               : 50,900.00
   サプライヤー税番号               : 91310000XXXXXXXXXX
 
-[步骤4] など待処理結果（batch_number=<batch_number>）.... 完了
+[ステップ4] 待機処理結果（batch_number=<batch_number>）.... 完了
 
 ============================================================
 ファイル名   : sample_acceptance.pdf
@@ -621,46 +621,46 @@ examples/
 
 ── 普通フィールド ──────────────────────────
   契約書番号                : HT-2025-001
-  甲方単位名称              : 合合情報科技（上海）有限公司
-  乙方単位名称              : 上海某某科技有限公司
+  甲単位名称              : 合合情報科技（上海）有限公司
+  乙単位名称              : 上海某某科技有限公司
   検収結論                : 検収合格
 
-开始設定レビュー規則リポジトリ...
-[步骤5] 規則リポジトリ作成成功  name=AP审单场景レビュー規則リポジトリ  repo_id=<repo_id>
+開始設定レビュー規則リポジトリ...
+[ステップ5] 規則リポジトリ作成成功  name=AP照合シナリオレビュー規則リポジトリ  repo_id=<repo_id>
   規則グループ作成成功  name=サプライヤー整合性チェック  group_id=<group_id>
-    规则作成成功  name=サプライヤー整合性  rule_id=<rule_id>
-    规则作成成功  name=請求書与契約書金額照合  rule_id=<rule_id>
-    规则作成成功  name=請求書購入者与契約書甲方一致  rule_id=<rule_id>
-  規則グループ作成成功  name=入荷与契約書整合性  group_id=<group_id>
-    规则作成成功  name=入荷数量与契約書数量照合  rule_id=<rule_id>
-    规则作成成功  name=入荷伝票号关联契約書号  rule_id=<rule_id>
+    規則作成成功  name=サプライヤー整合性  rule_id=<rule_id>
+    規則作成成功  name=請求書と契約書金額照合  rule_id=<rule_id>
+    規則作成成功  name=請求書購入者と契約書甲一致  rule_id=<rule_id>
+  規則グループ作成成功  name=入荷と契約書整合性  group_id=<group_id>
+    規則作成成功  name=入荷数量と契約書数量照合  rule_id=<rule_id>
+    規則作成成功  name=入荷伝票号関連契約書号  rule_id=<rule_id>
   規則グループ作成成功  name=検収コンプライアンス性  group_id=<group_id>
-    规则作成成功  name=検収書与入荷伝票物料一致  rule_id=<rule_id>
-[步骤6] レビュータスク提交成功  task_id=<task_id>
-[步骤7] など待レビュー結果（task_id=<task_id>）................. 完了
+    規則作成成功  name=検収書と入荷伝票品目一致  rule_id=<rule_id>
+[ステップ6] レビュータスク送信成功  task_id=<task_id>
+[ステップ7] 待機レビュー結果（task_id=<task_id>）................. 完了
 
 ============================================================
-レビュータスク状态  : レビュー通过
-规则通过数    : 6
-规则不通过数  : 0
+レビュータスクステータス  : レビュー合格
+規則合格数    : 6
+規則不合格数  : 0
 
 ── 規則グループ:サプライヤー整合性チェック ───────────────────
-  ✓ [高リスク] サプライヤー整合性: レビュー通过
-    依据: 請求書販売者纳税人認識号与購買契約書乙方税番号均为 91310000XXXXXXXXXX、一致。
-  ✓ [高リスク] 請求書与契約書金額照合: レビュー通过
-    依据: 請求書价税合計 50,900.00 与購買契約書購買金額 50,900.00 完全一致。
-  ✓ [中リスク] 請求書購入者与契約書甲方一致: レビュー通过
-    依据: 請求書購入者"合合情報科技（上海）有限公司"与契約書甲方一致。
+  ✓ [高リスク] サプライヤー整合性: レビュー合格
+    根拠: 請求書販売者納税者識別番号と購買契約書乙税番号均为 91310000XXXXXXXXXX、一致。
+  ✓ [高リスク] 請求書と契約書金額照合: レビュー合格
+    根拠: 請求書税込合計 50,900.00 と購買契約書購買金額 50,900.00 完全一致。
+  ✓ [中リスク] 請求書購入者と契約書甲一致: レビュー合格
+    根拠: 請求書購入者"合合情報科技（上海）有限公司"と契約書甲一致。
 
-── 規則グループ:入荷与契約書整合性 ───────────────────
-  ✓ [高リスク] 入荷数量与契約書数量照合: レビュー通过
-    依据: 入荷伝票实收数量 10 台与購買契約書约定数量 10 台一致。
-  ✓ [中リスク] 入荷伝票号关联契約書号: レビュー通过
-    依据: 入荷伝票对应契約書号 HT-2025-001 与購買契約書番号一致。
+── 規則グループ:入荷と契約書整合性 ───────────────────
+  ✓ [高リスク] 入荷数量と契約書数量照合: レビュー合格
+    根拠: 入荷伝票实收数量 10 台と購買契約書取り決めます数量 10 台一致。
+  ✓ [中リスク] 入荷伝票号関連契約書号: レビュー合格
+    根拠: 入荷伝票对应契約書号 HT-2025-001 と購買契約書番号一致。
 
 ── 規則グループ:検収コンプライアンス性 ───────────────────
-  ✓ [中リスク] 検収書与入荷伝票物料一致: レビュー通过
-    依据: 検収書契約書番号与入荷伝票对应契約書号均为 HT-2025-001、物料关联一致。
+  ✓ [中リスク] 検収書と入荷伝票品目一致: レビュー合格
+    根拠: 検収書契約書番号と入荷伝票对应契約書号均为 HT-2025-001、品目関連一致。
 
 ============================================================
   例実行完了
@@ -671,9 +671,9 @@ examples/
 
 ### 抽出結果
 
-処理完了后、每份ファイル将返す分類結果和フィールド抽出結果。フィールド抽出結果位于 `data.fields[]`、テーブルフィールド位于 `data.items[][]`、每个フィールド包含 `key`、`value` 及坐标 `position`（可用于原文高亮回显）。
+処理完了後、各ファイルの分類結果とフィールド抽出結果が返されます。フィールド抽出結果は `data.fields[]`、テーブルフィールドは `data.items[][]` に格納され、各フィールドには `key`、`value`、座標情報 `position` が含まれます（原文のハイライト表示に利用できます）。
 
-以下为請求書サンプルファイル的实际接口返す（来自 `file/fetch`、省略了部分 `position` 坐标）:
+以下は、請求書サンプルファイルに対する実際の API レスポンス例です（`file/fetch` から取得。一部の `position` 座標は省略しています）。
 
 <AccordionGroup>
   <Accordion defaultOpen title="sample_invoice.pdf">
@@ -682,25 +682,25 @@ examples/
       "id": "2029124607672344576",
       "name": "sample_invoice.pdf",
       "format": "pdf",
-      "category": "国内票-数电票",
+      "category": "国内票-電子インボイス",
       "recognition_status": 1,
       "duration_ms": 4832,
       "data": {
         "fields": [
           { "key": "請求書番号",           "value": "25442000000012345678" },
           { "key": "発行日付",           "value": "2025-01-15" },
-          { "key": "价税合計",           "value": "50900.00" },
+          { "key": "税込合計",           "value": "50900.00" },
           { "key": "税抜金額",           "value": "48000.00" },
           { "key": "税額",              "value": "2900.00" },
           { "key": "販売者名称",          "value": "上海某某科技有限公司" },
-          { "key": "販売者纳税人認識号",   "value": "91310000XXXXXXXXXX" },
+          { "key": "販売者納税者識別番号",   "value": "91310000XXXXXXXXXX" },
           { "key": "購入者名称",          "value": "合合情報科技（上海）有限公司" },
-          { "key": "購入者纳税人認識号",   "value": "91310000YYYYYYYYYY" },
+          { "key": "購入者納税者識別番号",   "value": "91310000YYYYYYYYYY" },
           { "key": "請求書備考",           "value": "" }
         ],
         "items": [
           [
-            { "key": "商品名称", "value": "智能硬件设备" },
+            { "key": "商品名称", "value": "スマート硬件设备" },
             { "key": "規格型番", "value": "XH-2000" },
             { "key": "単位",    "value": "台" },
             { "key": "数量",    "value": "10" },
@@ -720,14 +720,14 @@ examples/
 
 ### レビュー結果
 
-レビュー完了后、可从 `review/task/result` 接口取得以下情報:
+レビュー完了後、`review/task/result` API から次の情報を取得できます:
 
-- **`status`**:任务整体状态（`1`=レビュー通过、`4`=レビュー不通过、`2`=レビュー失敗）
-- **`statistics`**:规则通过数、不通过数汇总
-- **`groups[].review_tasks[]`**:每条规则的详细レビュー結果、包含:
-  - `review_result`:この规则的レビュー結論（`1`=通过、`4`=不通过）
-  - `reasoning`:AI 给出的レビュー依据説明
-  - `anchors`:依据在原文中的坐标位置（可用于高亮回显）
+- **`status`**:タスク全体のステータス（`1`=レビュー合格、`4`=レビュー不合格、`2`=レビュー失敗）
+- **`statistics`**:規則合格数、不合格数汇总
+- **`groups[].review_tasks[]`**:各規則的詳細レビュー結果、含む:
+  - `review_result`:この規則的レビュー結論（`1`=合格、`4`=不合格）
+  - `reasoning`:AI によるレビュー根拠の説明
+  - `anchors`:原文内で根拠となる座標位置（ハイライト表示に利用できます）
 
 ```json
 {
@@ -743,36 +743,36 @@ examples/
           "rule_name": "サプライヤー整合性",
           "risk_level": 10,
           "review_result": 1,
-          "reasoning": "請求書販売者纳税人認識号与購買契約書乙方税番号均为 91310000XXXXXXXXXX、一致、レビュー通过。"
+          "reasoning": "請求書販売者納税者識別番号と購買契約書乙税番号均为 91310000XXXXXXXXXX、一致、レビュー合格。"
         },
         {
-          "rule_name": "請求書与契約書金額照合",
+          "rule_name": "請求書と契約書金額照合",
           "risk_level": 10,
           "review_result": 1,
-          "reasoning": "請求書价税合計 50900.00 与購買契約書購買金額 50900.00 完全一致、レビュー通过。"
+          "reasoning": "請求書税込合計 50900.00 と購買契約書購買金額 50900.00 完全一致、レビュー合格。"
         },
         {
-          "rule_name": "請求書購入者与契約書甲方一致",
+          "rule_name": "請求書購入者と契約書甲一致",
           "risk_level": 20,
           "review_result": 1,
-          "reasoning": "請求書購入者"合合情報科技（上海）有限公司"与購買契約書甲方一致、レビュー通过。"
+          "reasoning": "請求書購入者"合合情報科技（上海）有限公司"と購買契約書甲一致、レビュー合格。"
         }
       ]
     },
     {
-      "group_name": "入荷与契約書整合性",
+      "group_name": "入荷と契約書整合性",
       "review_tasks": [
         {
-          "rule_name": "入荷数量与契約書数量照合",
+          "rule_name": "入荷数量と契約書数量照合",
           "risk_level": 10,
           "review_result": 1,
-          "reasoning": "入荷伝票实收数量 10 台与購買契約書约定数量 10 台一致、レビュー通过。"
+          "reasoning": "入荷伝票实收数量 10 台と購買契約書取り決めます数量 10 台一致、レビュー合格。"
         },
         {
-          "rule_name": "入荷伝票号关联契約書号",
+          "rule_name": "入荷伝票号関連契約書号",
           "risk_level": 20,
           "review_result": 1,
-          "reasoning": "入荷伝票对应契約書号 HT-2025-001 与購買契約書番号一致、レビュー通过。"
+          "reasoning": "入荷伝票对应契約書号 HT-2025-001 と購買契約書番号一致、レビュー合格。"
         }
       ]
     },
@@ -780,10 +780,10 @@ examples/
       "group_name": "検収コンプライアンス性",
       "review_tasks": [
         {
-          "rule_name": "検収書与入荷伝票物料一致",
+          "rule_name": "検収書と入荷伝票品目一致",
           "risk_level": 20,
           "review_result": 1,
-          "reasoning": "検収書契約書番号与入荷伝票对应契約書号均为 HT-2025-001、物料关联一致、レビュー通过。"
+          "reasoning": "検収書契約書番号と入荷伝票对应契約書号均为 HT-2025-001、品目関連一致、レビュー合格。"
         }
       ]
     }

@@ -12,11 +12,11 @@ description: "財務部門の経費精算業務で、DocFlow API を利用して
 
 経費精算業務では、財務担当者が毎日さまざまな種類の精算書類を処理します。例:
 
-- **経費申請書**（XLS 形式）:记录申請者、出張目的、費用明細など情報
+- **経費申請書**（XLS 形式）:記録します申請者、出張目的、費用明細など情報
 - **ホテル明細**（画像）:チェックイン日、チェックアウト日、利用明細を記録します
 - **支払記録**（PDF）:取引番号、取引金額、支払元/受取先情報を記録します
 
-DocFlow では、分類とフィールドを一度設定するだけで、その後アップロードされる書類の**分類認識**と**構造化情報抽出**を自動化できます。レビュー規則リポジトリを設定すると、抽出結果に対して**スマートレビュー**を実行し、金額不一致やフィールド欠落などの問題を自動検出できます。
+DocFlow では、分類とフィールドを一度設定するだけで、その後アップロードされる書類の**分類認識**と**構造化情報抽出**を自動化できます。レビュー規則リポジトリを設定すると、抽出結果に対して**スマートレビュー**を実行し、金額一致しませんやフィールド欠落などの問題を自動検出できます。
 
 ## 02 業務フロー
 
@@ -101,52 +101,52 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
   <Accordion defaultOpen title="規則グループ 1:経費申請書コンプライアンス性チェック（適用カテゴリ:経費申請書）">
     | 規則名 | リスクレベル | レビュー条件 |
     |---|---|---|
-    | <span style={{color: "#3b82f6"}}>行报销金額チェック</span> | <span style={{color: "#ef4444"}}>●</span> 高リスク | 行支払申請額 ≤ 行出張費金額（含税）- 行仮払金精算額、仮払金精算額空时视为 0 |
-    | <span style={{color: "#3b82f6"}}>报销合計金額チェック</span> | <span style={{color: "#ef4444"}}>●</span> 高リスク | 申してください支払合計金額 ≤ Σ 行支払申請額 |
-    | <span style={{color: "#3b82f6"}}>精算期間与费用日付照合</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | "費用発生日"应在"精算期間"所覆盖的日付范围内 |
-    | <span style={{color: "#3b82f6"}}>必填フィールド完全性チェック</span> | <span style={{color: "#ef4444"}}>●</span> 高リスク | "申請者"、"費用発生日"、"費用項目"、"支払申請額"均不空 |
+    | <span style={{color: "#3b82f6"}}>行精算金額チェック</span> | <span style={{color: "#ef4444"}}>●</span> 高リスク | 行支払申請額 ≤ 行出張費金額（税込）- 行仮払金精算額、仮払金精算額空时视为 0 |
+    | <span style={{color: "#3b82f6"}}>精算合計金額チェック</span> | <span style={{color: "#ef4444"}}>●</span> 高リスク | 申してください支払合計金額 ≤ Σ 行支払申請額 |
+    | <span style={{color: "#3b82f6"}}>精算期間と費用日付照合</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | "費用発生日"应在"精算期間"所覆盖的日付范围内 |
+    | <span style={{color: "#3b82f6"}}>必須フィールド完全性チェック</span> | <span style={{color: "#ef4444"}}>●</span> 高リスク | "申請者"、"費用発生日"、"費用項目"、"支払申請額"均不空 |
   </Accordion>
-  <Accordion defaultOpen title="規則グループ 2:出張费用政策照合レビュー（適用カテゴリ:ホテル明細）">
+  <Accordion defaultOpen title="規則グループ 2:出張費用政策照合レビュー（適用カテゴリ:ホテル明細）">
     | 規則名 | リスクレベル | レビュー条件 |
     |---|---|---|
-    | <span style={{color: "#3b82f6"}}>城市差标照合</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | 酒店住宿単価 ≤ 目的地城市出張标准:一线城市（北京/上海/广州/深圳）≤ 800 元/晚、省会及计划单列市 ≤ 500 元/晚、其他城市 ≤ 300 元/晚 |
+    | <span style={{color: "#3b82f6"}}>城市差标照合</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | 酒店住宿単価 ≤ 目的地城市出張基準:一线城市（北京/上海/广州/深圳）≤ 800 元/晚、省会及计划单列市 ≤ 500 元/晚、其他城市 ≤ 300 元/晚 |
     | <span style={{color: "#3b82f6"}}>酒店明细合計金額チェック</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | すべての明細行"金額"合計 = "合計金額" |
   </Accordion>
   <Accordion defaultOpen title="規則グループ 3:複数文書クロスレビュー（適用カテゴリ:経費申請書 + ホテル明細 + 支払記録）">
     | 規則名 | リスクレベル | レビュー条件 |
     |---|---|---|
     | <span style={{color: "#3b82f6"}}>複数文書金額照合</span> | <span style={{color: "#ef4444"}}>●</span> 高リスク | 経費申請書出張費金額 = ホテル明細合計金額 = 支払記録取引金額、許容 ±0.1 元誤差 |
-    | <span style={{color: "#3b82f6"}}>支払人身份与申請者整合性</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | 支払記録"支払人名義"与経費申請書"申請者"为同一人物 |
+    | <span style={{color: "#3b82f6"}}>支払人身份と申請者整合性</span> | <span style={{color: "#eab308"}}>●</span> 中リスク | 支払記録"支払人名義"と経費申請書"申請者"为同一人物 |
 
     <Tip>
-      複数文書规则的 `category_ids` 包含多个分類 ID、只有当レビュータスク覆盖所有关联分類时、この规则才会被触发执行。
+      複数文書規則的 `category_ids` 含む複数の分類 ID、只有当レビュータスク覆盖所有関連分類时、この規則才会被触发执行。
     </Tip>
   </Accordion>
 </AccordionGroup>
 
 ## 06 コード構成
 
-例コード将完全な的七步フロー放在一起実行、便于理解端到端的调用链路。在实际生产中、**ステップ 1、2、5（作成ワークスペース、設定ファイルカテゴリ、設定レビュー規則リポジトリ）只需执行一次**。后续処理新書類时、只需重复**ステップ 3、4、6、7（ファイルをアップロード → 抽出結果を取得 → 提交レビュータスク → 取得レビュー結果）**、直接复用已有的ワークスペース、カテゴリ和規則リポジトリ即可。
+例コード将完全な七步フローまとめて実行、便于理解端到端的调用链路。在実際本番中、**ステップ 1、2、5（ワークスペースを作成、設定ファイルカテゴリ、設定レビュー規則リポジトリ）必要なのは一度だけ実行**。以降処理新書類时、必要なのは繰り返す**ステップ 3、4、6、7（ファイルをアップロード → 抽出結果を取得 → 送信レビュータスク → 取得レビュー結果）**、直接再利用既存の的ワークスペース、カテゴリ和規則リポジトリ即可。
 
-例コード中的函数分为两类、理解この一点有助于对照 API 文書进行调试和扩展。
+例コード中的関数分为两类、理解この一点有助于照合 API 文書进行デバッグ和拡張。
 
 ### 2 種類の関数
 
-**REST API 呼び出し関数** — 各関数は API エンドポイントを直接ラップします、函数パラメータ与接口文書一一对应:
+**REST API 呼び出し関数** — 各関数は API エンドポイントを直接ラップします、関数パラメータとAPI文書対応:
 
 | 関数（Python） | メソッド（Java） | 対応する API エンドポイント | 説明 |
 |---|---|---|---|
-| `create_workspace` | `createWorkspace` | `POST /workspace/create` | 作成ワークスペース、workspace_id を返す |
-| `create_category` | `createCategory` | `POST /category/create` | 作成ファイルカテゴリ并アップロードサンプルファイル、category_id を返す |
-| `batch_add_category_fields` | `batchAddCategoryFields` | `POST /category/fields/batch_add` | 为已有カテゴリ追加フィールド（用于添加テーブルフィールド） |
+| `create_workspace` | `createWorkspace` | `POST /workspace/create` | ワークスペースを作成、workspace_id を返す |
+| `create_category` | `createCategory` | `POST /category/create` | ファイルカテゴリを作成し、サンプルをアップロードファイル、category_id を返す |
+| `batch_add_category_fields` | `batchAddCategoryFields` | `POST /category/fields/batch_add` | 为既存のカテゴリ追加フィールド（用于添加テーブルフィールド） |
 | `upload_file` | `uploadFile` | `POST /file/upload` | 非同期でファイルをアップロードし、batch_number を返します。結果取得にはポーリングが必要です |
 | `upload_file_sync` | `uploadFileSync` | `POST /file/upload/sync` | 同期でファイルをアップロードし、抽出結果を直接返します。ポーリングは不要です |
-| `create_rule_repo` | `createRuleRepo` | `POST /review/rule_repo/create` | 作成レビュー規則リポジトリ、repo_id を返す |
-| `create_rule_group` | `createRuleGroup` | `POST /review/rule_group/create` | 在規則リポジトリ内作成規則グループ、group_id を返す |
-| `create_rule` | `createRule` | `POST /review/rule/create` | 在規則グループ内作成レビュー規則、绑定適用カテゴリ |
+| `create_rule_repo` | `createRuleRepo` | `POST /review/rule_repo/create` | レビュー規則リポジトリを作成、repo_id を返す |
+| `create_rule_group` | `createRuleGroup` | `POST /review/rule_group/create` | 在規則リポジトリ内規則グループを作成、group_id を返す |
+| `create_rule` | `createRule` | `POST /review/rule/create` | 在規則グループ内レビュー規則を作成、適用カテゴリを紐付け |
 | `submit_review_task` | `submitReviewTask` | `POST /review/task/submit` | レビュータスクを送信し、レビュー task_id を返します |
 
-**補助関数** — 不直接対応する API エンドポイント、提供共通基礎能力或封装轮询/表示ロジック:
+**補助関数** — 直接対応しない API エンドポイント、共通処理やポーリング/表示ロジック:
 
 | 関数（Python） | メソッド（Java） | 役割 |
 |---|---|---|
@@ -161,14 +161,14 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
 ### ステップ別コード説明
 
 <AccordionGroup>
-  <Accordion defaultOpen title="ステップ 1:作成ワークスペース">
+  <Accordion defaultOpen title="ステップ 1:ワークスペースを作成">
     ワークスペース名称中加入时间戳、确保每次実行都会作成独立的新スペース、避免重名错误。
 
     <Tabs>
       <Tab title="Python">
         ```python
         def create_workspace(name: str, description: str = "") -> str:
-            """作成ワークスペース、workspace_id を返す。"""
+            """ワークスペースを作成、workspace_id を返す。"""
             url = f"{BASE_URL}/api/app-api/sip/platform/v2/workspace/create"
             payload = {
                 "name":          name,
@@ -176,7 +176,7 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
                 "auth_scope":    0,
             }
             resp = requests.post(url, json=payload, headers=_headers(), timeout=30)
-            data = _check(resp, "作成ワークスペース")
+            data = _check(resp, "ワークスペースを作成")
             return data["result"]["workspace_id"]
 
         # 呼び出し例（名称含时间戳、避免重名）
@@ -196,7 +196,7 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
             Request req = new Request.Builder().url(url).headers(authHeaders())
                     .post(RequestBody.create(GSON.toJson(payload), JSON_TYPE)).build();
             try (Response resp = HTTP.newCall(req).execute()) {
-                JsonObject data = checkResponse(resp.body().string(), "作成ワークスペース");
+                JsonObject data = checkResponse(resp.body().string(), "ワークスペースを作成");
                 return data.getAsJsonObject("result").get("workspace_id").getAsString();
             }
         }
@@ -211,7 +211,7 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
   </Accordion>
 
   <Accordion defaultOpen title="ステップ 2:設定ファイルカテゴリ">
-    `create_category` 通过 multipart 表单一度だけの完了カテゴリ作成、サンプルアップロード和フィールド設定。对于必要テーブルフィールド的カテゴリ（如ホテル明細）、在作成后再调用 `batch_add_category_fields` 追加。
+    `create_category` 合格 multipart 表单一度だけの完了カテゴリ作成、サンプルアップロード和フィールド設定。对于必要テーブルフィールド的カテゴリ（如ホテル明細）、在作成后再调用 `batch_add_category_fields` 追加。
 
     <Tabs>
       <Tab title="Python">
@@ -236,7 +236,7 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
             if table_id:
                 payload["table_id"] = str(table_id)
             resp = requests.post(url, json=payload, headers=_headers(), timeout=30)
-            return _check(resp, "批量追加フィールド")["result"]
+            return _check(resp, "一括追加フィールド")["result"]
 
         # 呼び出し例:ホテル明細（含テーブルフィールド）
         hotel_id = create_category(workspace_id, "ホテル明細",
@@ -284,12 +284,12 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
   <Accordion defaultOpen title="ステップ 3:処理対象ファイルをアップロード">
     DocFlow 提供两种アップロード方法:
 
-    - **非同期アップロード** `file/upload`:立即返す `batch_number`、需配合ステップ 4 轮询 `file/fetch` 取得結果、適しています批量并行アップロード
-    - **同期アップロード** `file/upload/sync`:など待処理完了后抽出結果を直接返す（構造与 `file/fetch` 一致）、ポーリング不要、適しています对接简单或ファイル量少的场景
+    - **非同期アップロード** `file/upload`:立即返す `batch_number`、需配合ステップ 4 ポーリング `file/fetch` 取得結果、適しています一括并行アップロード
+    - **同期アップロード** `file/upload/sync`: 処理完了まで待機し、抽出結果を直接返します（構造は `file/fetch` と同じ）。ポーリングは不要で、シンプルな連携や少数ファイルのリアルタイム処理に適しています。
 
     两者的リクエストパラメータ完全一致、仅 URL 路径不同。
 
-    **方法 1:非同期アップロード（需配合ステップ 4 轮询）**
+    **方法 1:非同期アップロード（需配合ステップ 4 ポーリング）**
 
     <Tabs>
       <Tab title="Python">
@@ -340,7 +340,7 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
       </Tab>
     </Tabs>
 
-    **方法 2:同期アップロード（抽出結果を直接返す、跳过ステップ 4）**
+    **方法 2:同期アップロード（抽出結果を直接返す、スキップステップ 4）**
 
     <Tabs>
       <Tab title="Python">
@@ -396,9 +396,9 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
   </Accordion>
 
   <Accordion defaultOpen title="ステップ 4:抽出結果を取得（同期アップロード使用時は省略可能）">
-    <Note>若ステップ 3 使用了同期アップロード `file/upload/sync`、则已直接获得抽出結果、可跳过本步骤。</Note>
+    <Note>若ステップ 3 使用了同期アップロード `file/upload/sync`、则已直接获得抽出結果、可スキップ本ステップ。</Note>
 
-    `wait_for_result` ポーリングロジックをラップし、3 秒ごとに照会します `file/fetch`、まで `recognition_status` が `1`（成功）。返す的ファイル对象中包含 `task_id`、後続のレビューステップで使用します。
+    `wait_for_result` ポーリングロジックをラップし、3 秒ごとに照会します `file/fetch`、まで `recognition_status` が `1`（成功）。返す的ファイル对象中含む `task_id`、後続のレビューステップで使用します。
 
     <Tabs>
       <Tab title="Python">
@@ -414,11 +414,11 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
                 if files:
                     status = files[0].get("recognition_status")
                     if status == 1:
-                        return files[0]   # 含 task_id、供后续レビュー使用
+                        return files[0]   # 含 task_id、供以降レビュー使用
                     elif status == 2:
                         raise RuntimeError(f"ファイル処理失敗: {files[0].get('failure_causes')}")
                 time.sleep(interval)
-            raise TimeoutError("など待タイムアウト")
+            raise TimeoutError("待機タイムアウト")
 
         # 呼び出し例（後続レビュー用に task_id を収集）
         raw_results = []
@@ -449,7 +449,7 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
                 }
                 Thread.sleep((long) intervalSec * 1000);
             }
-            throw new RuntimeException("など待タイムアウト");
+            throw new RuntimeException("待機タイムアウト");
         }
 
         // 呼び出し例
@@ -463,7 +463,7 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
   </Accordion>
 
   <Accordion defaultOpen title="ステップ 5:設定レビュー規則リポジトリ">
-    規則リポジトリ采用**三层構造**:規則リポジトリ → 規則グループ → 规则。`create_rule` 的 `category_ids` パラメータ指定规则适用的分類、使用ステップ 2 中获得的 `category_id`。
+    規則リポジトリ采用**三层構造**:規則リポジトリ → 規則グループ → 規則。`create_rule` 的 `category_ids` パラメータ指定規則适用的分類、使用ステップ 2 中获得的 `category_id`。
 
     <Tabs>
       <Tab title="Python">
@@ -474,17 +474,17 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
         # 規則グループ1:経費申請書コンプライアンス性チェック
         group1_id = create_rule_group(workspace_id, repo_id, "経費申請書コンプライアンス性チェック")
         create_rule(workspace_id, repo_id, group1_id,
-            "必填フィールド完全性チェック",
+            "必須フィールド完全性チェック",
             "\"申請者\"、\"費用発生日\"、\"費用項目\"、\"支払申請額\"均不空、"
-            "任一フィールド空则レビュー不通过",
-            [baoxiao_id], 10)   # category_ids 传入步骤2获得的 category_id
+            "任一フィールド空则レビュー不合格",
+            [baoxiao_id], 10)   # category_ids 传入ステップ2获得的 category_id
 
-        # 規則グループ3:複数文書クロスレビュー（关联多个分類）
+        # 規則グループ3:複数文書クロスレビュー（関連複数の分類）
         group3_id = create_rule_group(workspace_id, repo_id, "複数文書クロスレビュー")
         create_rule(workspace_id, repo_id, group3_id,
             "複数文書金額照合",
             "経費申請書出張費金額 = ホテル明細合計金額 = 支払記録取引金額、許容±0.1元誤差",
-            [baoxiao_id, hotel_id, payment_id], 10)   # 关联三个分類
+            [baoxiao_id, hotel_id, payment_id], 10)   # 関連三个分類
         ```
       </Tab>
       <Tab title="Java">
@@ -495,24 +495,24 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
         // 規則グループ1:経費申請書コンプライアンス性チェック
         String group1Id = createRuleGroup(workspaceId, repoId, "経費申請書コンプライアンス性チェック");
         createRule(workspaceId, repoId, group1Id,
-                "必填フィールド完全性チェック",
+                "必須フィールド完全性チェック",
                 "\"申請者\"、\"費用発生日\"、\"費用項目\"、\"支払申請額\"均不空、" +
-                "任一フィールド空则レビュー不通过",
-                Arrays.asList(baoxiaoId), 10);   // category_ids 传入步骤2获得的 category_id
+                "任一フィールド空则レビュー不合格",
+                Arrays.asList(baoxiaoId), 10);   // category_ids 传入ステップ2获得的 category_id
 
-        // 規則グループ3:複数文書クロスレビュー（关联多个分類）
+        // 規則グループ3:複数文書クロスレビュー（関連複数の分類）
         String group3Id = createRuleGroup(workspaceId, repoId, "複数文書クロスレビュー");
         createRule(workspaceId, repoId, group3Id,
                 "複数文書金額照合",
                 "経費申請書出張費金額 = ホテル明細合計金額 = 支払記録取引金額、許容±0.1元誤差",
-                Arrays.asList(baoxiaoId, hotelId, paymentId), 10);   // 关联三个分類
+                Arrays.asList(baoxiaoId, hotelId, paymentId), 10);   // 関連三个分類
         ```
       </Tab>
     </Tabs>
   </Accordion>
 
-  <Accordion defaultOpen title="ステップ 6:提交レビュータスク">
-    从ステップ 4 的抽出結果中提取 `task_id`、传入レビュー接口。レビュータスク是**异步执行**的、提交后必要轮询結果。
+  <Accordion defaultOpen title="ステップ 6:送信レビュータスク">
+    从ステップ 4 的抽出結果中提取 `task_id`、传入レビューAPI。レビュータスク是**异步执行**的、送信后必要ポーリング結果。
 
     <Tabs>
       <Tab title="Python">
@@ -526,7 +526,7 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
                 "extract_task_ids": extract_task_ids,
             }
             resp = requests.post(url, json=payload, headers=_headers(), timeout=30)
-            return _check(resp, "提交レビュータスク")["result"]["task_id"]
+            return _check(resp, "送信レビュータスク")["result"]["task_id"]
 
         # 呼び出し例（从抽出結果中収集 task_id）
         extract_task_ids = [r.get("task_id") for r in raw_results if r.get("task_id")]
@@ -548,7 +548,7 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
                     .url(BASE_URL + "/api/app-api/sip/platform/v2/review/task/submit")
                     .headers(authHeaders()).post(RequestBody.create(GSON.toJson(payload), JSON_TYPE)).build();
             try (Response resp = HTTP.newCall(req).execute()) {
-                return checkResponse(resp.body().string(), "提交レビュータスク")
+                return checkResponse(resp.body().string(), "送信レビュータスク")
                         .getAsJsonObject("result").get("task_id").getAsString();
             }
         }
@@ -565,7 +565,7 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
   </Accordion>
 
   <Accordion defaultOpen title="ステップ 7:取得レビュー結果">
-    `wait_for_review` 轮询 `review/task/result` 接口、まで任务状态が终态（1=レビュー通过、2=レビュー失敗、4=レビュー不通过、7=認識失敗）。
+    `wait_for_review` ポーリング `review/task/result` API、まで任务ステータスが终态（1=レビュー合格、2=レビュー失敗、4=レビュー不合格、7=認識失敗）。
 
     <Tabs>
       <Tab title="Python">
@@ -580,13 +580,13 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
                 if result.get("status") in (1, 2, 4, 7):
                     return result
                 time.sleep(interval)
-            raise TimeoutError("など待レビュー結果タイムアウト")
+            raise TimeoutError("待機レビュー結果タイムアウト")
 
         # 呼び出し例
         review_result = wait_for_review(workspace_id, review_task_id)
-        # review_result["status"]      → 任务整体状态
-        # review_result["statistics"]  → 通过/不通过规则数统计
-        # review_result["groups"]      → 各規則グループ的详细レビュー結果
+        # review_result["status"]      → タスク全体のステータス
+        # review_result["statistics"]  → 合格/不合格規則数集計
+        # review_result["groups"]      → 各規則グループ的詳細レビュー結果
         ```
       </Tab>
       <Tab title="Java">
@@ -609,7 +609,7 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
                 }
                 Thread.sleep((long) intervalSec * 1000);
             }
-            throw new RuntimeException("など待レビュー結果タイムアウト");
+            throw new RuntimeException("待機レビュー結果タイムアウト");
         }
 
         // 呼び出し例
@@ -630,7 +630,7 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
 
 ## 07 完全なサンプルコードのダウンロード
 
-完全な可実行コード（含 Python、Java 两个版本）已内置在文書倉庫的 `examples/` 目录下:
+完全な実行可能コード（Python 版、Java 版）は、ドキュメントリポジトリの `examples/` ディレクトリに同梱されています:
 
 ```
 examples/
@@ -663,18 +663,18 @@ examples/
 
 <Tabs>
   <Tab title="Python">
-    **环境要求**:Python 3.8+
+    **環境要件**:Python 3.8+
 
-    **1. 安装依赖**
+    **1. 依存関係をインストール**
 
     ```bash
     cd examples/python
     pip install -r requirements.txt
     ```
 
-    **2. 填写設定**
+    **2. 入力設定**
 
-    打开 `expense_reimbursement.py`、填写ファイル上部的設定项:
+    開き `expense_reimbursement.py`、入力ファイル上部的設定項目:
 
     ```python
     APP_ID        = "your-app-id"      # x-ti-app-id
@@ -688,18 +688,18 @@ examples/
     ```
   </Tab>
   <Tab title="Java">
-    **环境要求**:JDK 11+、Maven 3.6+
+    **環境要件**:JDK 11+、Maven 3.6+
 
-    **1. 填写設定**
+    **1. 入力設定**
 
-    打开 `src/main/java/com/docflow/ExpenseReimbursement.java`、填写ファイル上部的設定项:
+    開き `src/main/java/com/docflow/ExpenseReimbursement.java`、入力ファイル上部的設定項目:
 
     ```java
     private static final String APP_ID        = "your-app-id";
     private static final String SECRET_CODE   = "your-secret-code";
     ```
 
-    **2. 编译并実行**
+    **2. ビルドして実行**
 
     ```bash
     cd examples/java
@@ -710,38 +710,38 @@ examples/
 </Tabs>
 
 <Tip>
-  実行成功后、可登录 [DocFlow Web ページ](https://docflow.textin.ai/)、在对应ワークスペース下直观確認每份ファイル的分類、フィールド抽出結果和スマートレビュー結果、便于与コード输出对照验证。
+  実行に成功したら、[DocFlow Web ページ](https://docflow.textin.ai/) にログインし、対象ワークスペースで各ファイルの分類結果、フィールド抽出結果、スマートレビュー結果を確認できます。コードの出力結果との照合にも役立ちます。
 </Tip>
 
 ### 想定されるコンソール出力
 
-成功実行后、コンソール将输出如下内容（workspace_id、category_id など ID 因実行环境不同而变化）:
+成功実行后、コンソール将出力如下内容（workspace_id、category_id など ID 因実行环境不同而变化）:
 
 ```
 ============================================================
-  DocFlow 経費精算场景例
+  DocFlow 経費精算シナリオ例
 ============================================================
-[步骤1] ワークスペース作成成功  workspace_id=<workspace_id>
-[步骤2] ファイルカテゴリ作成成功  name=経費申請書  category_id=<category_id>
-[步骤2] ファイルカテゴリ作成成功  name=ホテル明細  category_id=<category_id>
+[ステップ1] ワークスペース作成成功  workspace_id=<workspace_id>
+[ステップ2] ファイルカテゴリ作成成功  name=経費申請書  category_id=<category_id>
+[ステップ2] ファイルカテゴリ作成成功  name=ホテル明細  category_id=<category_id>
   追加フィールド成功  name=日付  field_id=<field_id>
   追加フィールド成功  name=費用タイプ  field_id=<field_id>
   追加フィールド成功  name=金額  field_id=<field_id>
   追加フィールド成功  name=備考  field_id=<field_id>
-[步骤2] ファイルカテゴリ作成成功  name=支払記録  category_id=<category_id>
+[ステップ2] ファイルカテゴリ作成成功  name=支払記録  category_id=<category_id>
 
 設定完了  workspace_id=<workspace_id>
   経費申請書: category_id=<category_id>
   ホテル明細:   category_id=<category_id>
   支払記録:   category_id=<category_id>
 
-开始処理対象ファイルをアップロード...
-[步骤3] ファイルアップロード成功  name=sample_expense_form.xls  batch_number=<batch_number>
-[步骤3] ファイルアップロード成功  name=sample_hotel_receipt.png  batch_number=<batch_number>
-[步骤3] ファイルアップロード成功  name=sample_payment_record.pdf  batch_number=<batch_number>
+開始処理対象ファイルをアップロード...
+[ステップ3] ファイルアップロード成功  name=sample_expense_form.xls  batch_number=<batch_number>
+[ステップ3] ファイルアップロード成功  name=sample_hotel_receipt.png  batch_number=<batch_number>
+[ステップ3] ファイルアップロード成功  name=sample_payment_record.pdf  batch_number=<batch_number>
 
-开始処理結果を取得...
-[步骤4] など待処理結果（batch_number=<batch_number>）..... 完了
+開始処理結果を取得...
+[ステップ4] 待機処理結果（batch_number=<batch_number>）..... 完了
 
 ============================================================
 ファイル名   : sample_expense_form.xls
@@ -753,13 +753,13 @@ examples/
   精算期間                : 2024-12-18 至 2024-12-20
   目的地                 : 北京
   費用発生日              : 2024/12/20
-  費用項目                : 管理费用_出差住宿费
+  費用項目                : 管理費用_出差住宿费
   出張費金額               : 1,215.09
   税率                  : 0.06
   税額                  : 72.91
   仮払金精算額               : 0
   支払申請額              : 1288.00
-[步骤4] など待処理結果（batch_number=<batch_number>）... 完了
+[ステップ4] 待機処理結果（batch_number=<batch_number>）... 完了
 
 ============================================================
 ファイル名   : sample_hotel_receipt.png
@@ -773,7 +773,7 @@ examples/
 ── テーブル行データ ────────────────────────
   第1行: 日付=2024-12-18  |  費用タイプ=房费*Room Charge  |  金額=644.00  |  備考=*Room Charge
   第2行: 日付=2024-12-19  |  費用タイプ=房费*Room Charge  |  金額=644.00  |  備考=*Room Charge
-[步骤4] など待処理結果（batch_number=<batch_number>）.... 完了
+[ステップ4] 待機処理結果（batch_number=<batch_number>）.... 完了
 
 ============================================================
 ファイル名   : sample_payment_record.pdf
@@ -792,48 +792,48 @@ examples/
 
 原始抽出結果已保存至: .../examples/python/results.json
 
-开始設定レビュー規則リポジトリ...
-[步骤5] 規則リポジトリ作成成功  name=経費精算レビュー規則リポジトリ  repo_id=<repo_id>
+開始設定レビュー規則リポジトリ...
+[ステップ5] 規則リポジトリ作成成功  name=経費精算レビュー規則リポジトリ  repo_id=<repo_id>
   規則グループ作成成功  name=経費申請書コンプライアンス性チェック  group_id=<group_id>
-    规则作成成功  name=行报销金額チェック  rule_id=<rule_id>
-    规则作成成功  name=报销合計金額チェック  rule_id=<rule_id>
-    规则作成成功  name=精算期間与费用日付照合  rule_id=<rule_id>
-    规则作成成功  name=必填フィールド完全性チェック  rule_id=<rule_id>
-  規則グループ作成成功  name=出張费用政策照合レビュー  group_id=<group_id>
-    规则作成成功  name=城市差标照合  rule_id=<rule_id>
-    规则作成成功  name=酒店明细合計金額チェック  rule_id=<rule_id>
+    規則作成成功  name=行精算金額チェック  rule_id=<rule_id>
+    規則作成成功  name=精算合計金額チェック  rule_id=<rule_id>
+    規則作成成功  name=精算期間と費用日付照合  rule_id=<rule_id>
+    規則作成成功  name=必須フィールド完全性チェック  rule_id=<rule_id>
+  規則グループ作成成功  name=出張費用政策照合レビュー  group_id=<group_id>
+    規則作成成功  name=城市差标照合  rule_id=<rule_id>
+    規則作成成功  name=酒店明细合計金額チェック  rule_id=<rule_id>
   規則グループ作成成功  name=複数文書クロスレビュー  group_id=<group_id>
-    规则作成成功  name=複数文書金額照合  rule_id=<rule_id>
-    规则作成成功  name=支払人身份与申請者整合性  rule_id=<rule_id>
-[步骤6] レビュータスク提交成功  task_id=<task_id>
-[步骤7] など待レビュー結果（task_id=<task_id>）................... 完了
+    規則作成成功  name=複数文書金額照合  rule_id=<rule_id>
+    規則作成成功  name=支払人身份と申請者整合性  rule_id=<rule_id>
+[ステップ6] レビュータスク送信成功  task_id=<task_id>
+[ステップ7] 待機レビュー結果（task_id=<task_id>）................... 完了
 
 ============================================================
-レビュータスク状态  : レビュー不通过
-规则通过数    : 5
-规则不通过数  : 3
+レビュータスクステータス  : レビュー不合格
+規則合格数    : 5
+規則不合格数  : 3
 
 ── 規則グループ:複数文書クロスレビュー ───────────────────
-  ✗ [中リスク] 支払人身份与申請者整合性: レビュー不通过
-    依据: 支払記録支払人名義"吕昊宇"与経費申請書申請者签名"徐汉波"不一致。
-  ✓ [高リスク] 複数文書金額照合: レビュー通过
-    依据: 経費申請書出張費金額 1288.00 = ホテル明細合計金額 1288.00 = 支払記録取引金額 1288.00、在許容誤差范围内。
+  ✗ [中リスク] 支払人身份と申請者整合性: レビュー不合格
+    根拠: 支払記録支払人名義"吕昊宇"と経費申請書申請者签名"徐汉波"一致しません。
+  ✓ [高リスク] 複数文書金額照合: レビュー合格
+    根拠: 経費申請書出張費金額 1288.00 = ホテル明細合計金額 1288.00 = 支払記録取引金額 1288.00、在許容誤差范围内。
 
-── 規則グループ:出張费用政策照合レビュー ───────────────────
-  ✓ [中リスク] 酒店明细合計金額チェック: レビュー通过
-    依据: 明细行金額 644.00 + 644.00 = 1288.00、与合計金額一致。
-  ✓ [中リスク] 城市差标照合: レビュー通过
-    依据: 酒店位于北京（一线城市）、住宿単価 644.00 元/晚未超过 800 元/晚的标准。
+── 規則グループ:出張費用政策照合レビュー ───────────────────
+  ✓ [中リスク] 酒店明细合計金額チェック: レビュー合格
+    根拠: 明细行金額 644.00 + 644.00 = 1288.00、と合計金額一致。
+  ✓ [中リスク] 城市差标照合: レビュー合格
+    根拠: 酒店あります北京（一线城市）、住宿単価 644.00 元/晚未超過 800 元/晚的基準。
 
 ── 規則グループ:経費申請書コンプライアンス性チェック ───────────────────
-  ✓ [高リスク] 必填フィールド完全性チェック: レビュー通过
-    依据: 申請者、費用発生日、費用項目、支払申請額均已填写。
-  ✗ [中リスク] 精算期間与费用日付照合: レビュー不通过
-    依据: 費用発生日 2024/12/20 在精算期間范围内、但申請者签名与申請者フィールド不一致。
-  ✓ [高リスク] 报销合計金額チェック: レビュー通过
-    依据: 申してください支払合計金額 1288.00 など于行支払申請額合計 1288.00。
-  ✗ [高リスク] 行报销金額チェック: レビュー不通过
-    依据: 行支払申請額 1288.00 大于行出張費金額（含税）1215.09 + 税額 72.91 - 仮払金精算額 0 = 1288.00、など于上限、レビュー不通过。
+  ✓ [高リスク] 必須フィールド完全性チェック: レビュー合格
+    根拠: 申請者、費用発生日、費用項目、支払申請額はいずれも入力済み。
+  ✗ [中リスク] 精算期間と費用日付照合: レビュー不合格
+    根拠: 費用発生日 2024/12/20 在精算期間范围内、但申請者签名と申請者フィールド一致しません。
+  ✓ [高リスク] 精算合計金額チェック: レビュー合格
+    根拠: 申してください支払合計金額 1288.00 など于行支払申請額合計 1288.00。
+  ✗ [高リスク] 行精算金額チェック: レビュー不合格
+    根拠: 行支払申請額 1288.00 大于行出張費金額（税込）1215.09 + 税額 72.91 - 仮払金精算額 0 = 1288.00、など于上限、レビュー不合格。
 
 ============================================================
   例実行完了
@@ -844,9 +844,9 @@ examples/
 
 ### 抽出結果
 
-処理完了后、每份ファイル将返す分類結果和フィールド抽出結果。フィールド抽出結果位于 `data.fields[]`、每个フィールド包含 `key`、`value` 及坐标 `position`（可用于原文高亮回显）。
+処理完了後、各ファイルの分類結果とフィールド抽出結果が返されます。フィールド抽出結果は `data.fields[]` に格納され、各フィールドには `key`、`value`、座標情報 `position` が含まれます（原文のハイライト表示に利用できます）。
 
-以下为三份サンプルファイル的实际接口返す（来自 `file/fetch`、省略了部分 `position` 坐标）:
+以下は、3 つのサンプルファイルに対する実際の API レスポンス例です（`file/fetch` から取得。一部の `position` 座標は省略しています）。
 
 <AccordionGroup>
   <Accordion defaultOpen title="sample_expense_form.xls">
@@ -866,7 +866,7 @@ examples/
             "position": [{ "page": 0, "vertices": [902, 158, 925, 158, 925, 170, 902, 170] }]
           },
           { "key": "費用発生日", "value": "2025/4/22" },
-          { "key": "費用項目",    "value": "管理费用_出差住宿费(含洗衣费)" },
+          { "key": "費用項目",    "value": "管理費用_出差住宿费(含洗衣费)" },
           { "key": "支払申請額", "value": "531.00" },
           { "key": "申請者",      "value": "合合情報" },
           { "key": "出張目的",    "value": "商务沟通" },
@@ -978,14 +978,14 @@ examples/
 
 ### レビュー結果
 
-レビュー完了后、可从 `review/task/result` 接口取得以下情報:
+レビュー完了後、`review/task/result` API から次の情報を取得できます:
 
-- **`status`**:任务整体状态（`1`=レビュー通过、`4`=レビュー不通过、`2`=レビュー失敗）
-- **`statistics`**:规则通过数、不通过数汇总
-- **`groups[].review_tasks[]`**:每条规则的详细レビュー結果、包含:
-  - `review_result`:この规则的レビュー結論
-  - `reasoning`:AI 给出的レビュー依据説明
-  - `anchors`:依据在原文中的坐标位置（可用于高亮回显）
+- **`status`**:タスク全体のステータス（`1`=レビュー合格、`4`=レビュー不合格、`2`=レビュー失敗）
+- **`statistics`**:規則合格数、不合格数汇总
+- **`groups[].review_tasks[]`**:各規則的詳細レビュー結果、含む:
+  - `review_result`:この規則的レビュー結論
+  - `reasoning`:AI によるレビュー根拠の説明
+  - `anchors`:原文内で根拠となる座標位置（ハイライト表示に利用できます）
 
 ```json
 {
@@ -998,45 +998,45 @@ examples/
       "group_name": "経費申請書コンプライアンス性チェック",
       "review_tasks": [
         {
-          "rule_name": "必填フィールド完全性チェック",
+          "rule_name": "必須フィールド完全性チェック",
           "risk_level": 10,
           "review_result": 1,
-          "reasoning": "申請者、費用発生日、費用項目、支払申請額均已填写、レビュー通过。"
+          "reasoning": "申請者、費用発生日、費用項目、支払申請額はいずれも入力済み、レビュー合格。"
         },
         {
-          "rule_name": "行报销金額チェック",
+          "rule_name": "行精算金額チェック",
           "risk_level": 10,
           "review_result": 4,
-          "reasoning": "行支払申請額 1288.00 大于行出張費金額（含税）1215.09 + 税額 72.91 = 1288.00、など于上限、レビュー不通过。"
+          "reasoning": "行支払申請額 1288.00 大于行出張費金額（税込）1215.09 + 税額 72.91 = 1288.00、など于上限、レビュー不合格。"
         },
         {
-          "rule_name": "报销合計金額チェック",
+          "rule_name": "精算合計金額チェック",
           "risk_level": 10,
           "review_result": 1,
-          "reasoning": "申してください支払合計金額 1288.00 など于行支払申請額合計 1288.00、レビュー通过。"
+          "reasoning": "申してください支払合計金額 1288.00 など于行支払申請額合計 1288.00、レビュー合格。"
         },
         {
-          "rule_name": "精算期間与费用日付照合",
+          "rule_name": "精算期間と費用日付照合",
           "risk_level": 20,
           "review_result": 4,
-          "reasoning": "費用発生日 2024/12/20 在精算期間 2024-12-18 至 2024-12-20 范围内、但申請者签名与申請者フィールド不一致、レビュー不通过。"
+          "reasoning": "費用発生日 2024/12/20 在精算期間 2024-12-18 至 2024-12-20 范围内、但申請者签名と申請者フィールド一致しません、レビュー不合格。"
         }
       ]
     },
     {
-      "group_name": "出張费用政策照合レビュー",
+      "group_name": "出張費用政策照合レビュー",
       "review_tasks": [
         {
           "rule_name": "城市差标照合",
           "risk_level": 20,
           "review_result": 1,
-          "reasoning": "酒店位于北京（一线城市）、住宿単価 644.00 元/晚未超过 800 元/晚的标准、レビュー通过。"
+          "reasoning": "酒店あります北京（一线城市）、住宿単価 644.00 元/晚未超過 800 元/晚的基準、レビュー合格。"
         },
         {
           "rule_name": "酒店明细合計金額チェック",
           "risk_level": 20,
           "review_result": 1,
-          "reasoning": "明细行金額 644.00 + 644.00 = 1288.00、与合計金額 1288.00 一致、レビュー通过。"
+          "reasoning": "明细行金額 644.00 + 644.00 = 1288.00、と合計金額 1288.00 一致、レビュー合格。"
         }
       ]
     },
@@ -1047,13 +1047,13 @@ examples/
           "rule_name": "複数文書金額照合",
           "risk_level": 10,
           "review_result": 1,
-          "reasoning": "経費申請書出張費金額 1288.00 = ホテル明細合計金額 1288.00 = 支払記録取引金額 1288.00、在許容誤差范围内、レビュー通过。"
+          "reasoning": "経費申請書出張費金額 1288.00 = ホテル明細合計金額 1288.00 = 支払記録取引金額 1288.00、在許容誤差范围内、レビュー合格。"
         },
         {
-          "rule_name": "支払人身份与申請者整合性",
+          "rule_name": "支払人身份と申請者整合性",
           "risk_level": 20,
           "review_result": 4,
-          "reasoning": "支払記録支払人名義"吕昊宇"与経費申請書申請者签名"徐汉波"不一致、レビュー不通过。"
+          "reasoning": "支払記録支払人名義"吕昊宇"と経費申請書申請者签名"徐汉波"一致しません、レビュー不合格。"
         }
       ]
     }

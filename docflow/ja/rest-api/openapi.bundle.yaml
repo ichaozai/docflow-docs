@@ -18,8 +18,8 @@ tags:
     description: ファイルカテゴリサンプル関連 API
   - name: スマートレビュー
     description: スマートレビュー関連 API
-  - name: 非推奨
-    description: 非推奨 API
+  - name: 廃止済み
+    description: 廃止済み API
 paths:
   /api/app-api/sip/platform/v2/file/upload:
     post:
@@ -2688,7 +2688,7 @@ paths:
         を使用してください。
       operationId: addCategoryField
       tags:
-        - 非推奨
+        - 廃止済み
       requestBody:
         required: true
         content:
@@ -2806,7 +2806,7 @@ paths:
         を使用してください。
       operationId: updateCategoryField
       tags:
-        - 非推奨
+        - 廃止済み
       requestBody:
         required: true
         content:
@@ -2859,7 +2859,7 @@ paths:
         を使用してください。
       operationId: addCategoryTable
       tags:
-        - 非推奨
+        - 廃止済み
       requestBody:
         required: true
         content:
@@ -2961,7 +2961,7 @@ paths:
         を使用してください。
       operationId: updateCategoryTable
       tags:
-        - 非推奨
+        - 廃止済み
       requestBody:
         required: true
         content:
@@ -3034,7 +3034,7 @@ paths:
         を使用してください。
       operationId: uploadCategorySample
       tags:
-        - 非推奨
+        - 廃止済み
       requestBody:
         required: true
         content:
@@ -3099,7 +3099,7 @@ paths:
         を使用してください。
       operationId: downloadCategorySample
       tags:
-        - 非推奨
+        - 廃止済み
       parameters:
         - name: workspace_id
           in: query
@@ -3509,7 +3509,7 @@ components:
           deprecated: true
           type: array
           description: |
-            **非推奨**。代わりに position フィールドを使用してください
+            **廃止済み**。代わりに position フィールドを使用してください
             フィールド座標
           items:
             $ref: '#/components/schemas/TextInLines'

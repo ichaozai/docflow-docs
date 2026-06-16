@@ -20,8 +20,8 @@ tags:
     description: ファイルカテゴリサンプル関連 API
   - name: スマートレビュー
     description: スマートレビュー関連 API
-  - name: 非推奨
-    description: 非推奨 API
+  - name: 廃止済み
+    description: 廃止済み API
 
 paths:
   # File Operations

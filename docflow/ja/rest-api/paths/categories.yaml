@@ -586,7 +586,7 @@
             schema:
               $ref: '../components/schemas/common.yaml#/CodeMessage'
 
-# 非推奨 - 上記のバッチエンドポイントを使用してください
+# 廃止済み - 上記のバッチエンドポイントを使用してください
 /api/app-api/sip/platform/v2/category/fields/add:
   post:
     summary: 単一ファイルカテゴリフィールドを追加
@@ -596,7 +596,7 @@
       > ⚠️ このエンドポイントは現在も利用できますが、今後メンテナンスされません。代わりに [ファイルカテゴリのフィールドを追加](/api-reference/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA%E3%81%AE%E3%83%95%E3%82%A3%E3%83%BC%E3%83%AB%E3%83%89%E3%82%92%E8%BF%BD%E5%8A%A0) を使用してください。
     operationId: addCategoryField
     tags:
-      - 非推奨
+      - 廃止済み
     requestBody:
       required: true
       content:
@@ -705,7 +705,7 @@
       > ⚠️ このエンドポイントは現在も利用できますが、今後メンテナンスされません。代わりに [ファイルカテゴリのフィールドを更新](/api-reference/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA%E3%81%AE%E3%83%95%E3%82%A3%E3%83%BC%E3%83%AB%E3%83%89%E3%82%92%E6%9B%B4%E6%96%B0) を使用してください。
     operationId: updateCategoryField
     tags:
-      - 非推奨
+      - 廃止済み
     requestBody:
       required: true
       content:
@@ -963,7 +963,7 @@
             schema:
               $ref: '../components/schemas/common.yaml#/CodeMessage'
 
-# 非推奨 - 上記のバッチエンドポイントを使用してください
+# 廃止済み - 上記のバッチエンドポイントを使用してください
 /api/app-api/sip/platform/v2/category/tables/add:
   post:
     summary: 単一ファイルカテゴリテーブルを追加
@@ -973,7 +973,7 @@
       > ⚠️ このエンドポイントは現在も利用できますが、今後メンテナンスされません。代わりに [ファイルカテゴリのテーブルを追加](/api-reference/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA%E3%81%AE%E3%83%86%E3%83%BC%E3%83%96%E3%83%AB%E3%82%92%E8%BF%BD%E5%8A%A0) を使用してください。
     operationId: addCategoryTable
     tags:
-      - 非推奨
+      - 廃止済み
     requestBody:
       required: true
       content:
@@ -1073,7 +1073,7 @@
       > ⚠️ このエンドポイントは現在も利用できますが、今後メンテナンスされません。代わりに [ファイルカテゴリのテーブルを更新](/api-reference/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA%E3%81%AE%E3%83%86%E3%83%BC%E3%83%96%E3%83%AB%E3%82%92%E6%9B%B4%E6%96%B0) を使用してください。
     operationId: updateCategoryTable
     tags:
-      - 非推奨
+      - 廃止済み
     requestBody:
       required: true
       content:
@@ -1145,7 +1145,7 @@
       > ⚠️ このエンドポイントは現在も利用できますが、今後メンテナンスされません。代わりに [カテゴリサンプルをアップロード](/api-reference/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA%E3%82%B5%E3%83%B3%E3%83%97%E3%83%AB/%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA%E3%82%B5%E3%83%B3%E3%83%97%E3%83%AB%E3%82%92%E3%82%A2%E3%83%83%E3%83%97%E3%83%AD%E3%83%BC%E3%83%89) を使用してください。
     operationId: uploadCategorySample
     tags:
-      - 非推奨
+      - 廃止済み
     requestBody:
       required: true
       content:
@@ -1330,7 +1330,7 @@
       > ⚠️ このエンドポイントは現在も利用できますが、今後メンテナンスされません。代わりに [カテゴリサンプルをダウンロード（ZIP）](/api-reference/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA%E3%82%B5%E3%83%B3%E3%83%97%E3%83%AB/%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA%E3%82%B5%E3%83%B3%E3%83%97%E3%83%AB%E3%82%92%E3%83%80%E3%82%A6%E3%83%B3%E3%83%AD%E3%83%BC%E3%83%89%EF%BC%88ZIP%EF%BC%89) を使用してください。
     operationId: downloadCategorySample
     tags:
-      - 非推奨
+      - 廃止済み
     parameters:
       - name: workspace_id
         in: query

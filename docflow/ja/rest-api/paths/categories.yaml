@@ -36,14 +36,16 @@
                 type: string
                 description: |
                   抽出モデル
-                  - Model 1: 高速で安定した抽出結果
-                  - Model 2: 複雑な文書理解に適しています
-                  - Model 3: VLM。シンプルな抽出に適しています
-                example: "Model 1"
+                  - Auto: 抽出モデルを自動でマッチング
+                  - Acgpt: 高速で安定した抽出結果
+                  - Acgpt-VL: VLM。シンプルな抽出に適しています（≤10 ページ）
+                  - DF-M1: 複雑な文書理解に適しています
+                example: "Acgpt"
                 enum:
-                  - Model 1
-                  - Model 2
-                  - Model 3
+                  - Auto
+                  - Acgpt
+                  - Acgpt-VL
+                  - DF-M1
               sample_files:
                 type: array
                 description: サンプルファイルリスト。少なくとも 1 つのサンプルファイルをアップロードする必要があります。1 つのカテゴリには最大 20 個のサンプルファイルを設定できます
@@ -243,14 +245,16 @@
                 type: string
                 description: |
                   抽出モデル, cascades to all fields and tables when set
-                  - Model 1: 高速で安定した抽出結果
-                  - Model 2: 複雑な文書理解に適しています
-                  - Model 3: VLM。シンプルな抽出に適しています
-                example: "Model 1"
+                  - Auto: 抽出モデルを自動でマッチング
+                  - Acgpt: 高速で安定した抽出結果
+                  - Acgpt-VL: VLM。シンプルな抽出に適しています（≤10 ページ）
+                  - DF-M1: 複雑な文書理解に適しています
+                example: "Acgpt"
                 enum:
-                  - Model 1
-                  - Model 2
-                  - Model 3
+                  - Auto
+                  - Acgpt
+                  - Acgpt-VL
+                  - DF-M1
               with_detail:
                 type: boolean
                 description: |
@@ -624,15 +628,17 @@
               extract_model:
                 type: string
                 description: |
-                  任意。フィールドレベルの抽出モデル。通常フィールド（テーブルフィールド以外）のみ対応し、デフォルトは Model 1 です
-                  - Model 1: 高速で安定した抽出結果
-                  - Model 2: 複雑な文書理解に適しています
-                  - Model 3: VLM。シンプルな抽出に適しています
-                example: "Model 1"
+                  任意。フィールドレベルの抽出モデル。通常フィールド（テーブルフィールド以外）のみ対応し、未指定の場合は分類レベルの設定に従います（分類レベルが mixed または null の場合は Auto がデフォルト）
+                  - Auto: 抽出モデルを自動でマッチング
+                  - Acgpt: 高速で安定した抽出結果
+                  - Acgpt-VL: VLM。シンプルな抽出に適しています（≤10 ページ）
+                  - DF-M1: 複雑な文書理解に適しています
+                example: "Acgpt"
                 enum:
-                  - Model 1
-                  - Model 2
-                  - Model 3
+                  - Auto
+                  - Acgpt
+                  - Acgpt-VL
+                  - DF-M1
               with_detail:
                 type: boolean
                 description: |
@@ -807,8 +813,8 @@
                                 example: true
                               extract_model:
                                 type: string
-                                description: テーブルレベルの抽出モデル
-                                example: "Model 1"
+                                description: テーブルレベルの抽出モデル（Auto/Acgpt/Acgpt-VL/DF-M1）
+                                example: "Acgpt"
 
 /api/app-api/sip/platform/v2/category/tables/batch_add:
   post:
@@ -1007,14 +1013,16 @@
                 type: string
                 description: |
                   テーブルレベルの抽出モデル
-                  - Model 1: 高速で安定した抽出結果
-                  - Model 2: 複雑な文書理解に適しています
-                  - Model 3: VLM。シンプルな抽出に適しています
-                example: "Model 1"
+                  - Auto: 抽出モデルを自動でマッチング
+                  - Acgpt: 高速で安定した抽出結果
+                  - Acgpt-VL: VLM。シンプルな抽出に適しています（≤10 ページ）
+                  - DF-M1: 複雑な文書理解に適しています
+                example: "Acgpt"
                 enum:
-                  - Model 1
-                  - Model 2
-                  - Model 3
+                  - Auto
+                  - Acgpt
+                  - Acgpt-VL
+                  - DF-M1
               with_detail:
                 type: boolean
                 description: |
@@ -1105,20 +1113,22 @@
                 maxLength: 200
               collect_from_multi_table:
                 type: boolean
-                description: 複数テーブルを結合。Model 3 は複数テーブルの結合に対応していません
+                description: 複数テーブルを結合。Acgpt-VL は複数テーブルの結合に対応していません
                 example: true
               extract_model:
                 type: string
                 description: |
                   テーブルレベルの抽出モデル
-                  - Model 1: 高速で安定した抽出結果
-                  - Model 2: 複雑な文書理解に適しています
-                  - Model 3: VLM。シンプルな抽出に適しています
-                example: "Model 1"
+                  - Auto: 抽出モデルを自動でマッチング
+                  - Acgpt: 高速で安定した抽出結果
+                  - Acgpt-VL: VLM。シンプルな抽出に適しています（≤10 ページ）
+                  - DF-M1: 複雑な文書理解に適しています
+                example: "Acgpt"
                 enum:
-                  - Model 1
-                  - Model 2
-                  - Model 3
+                  - Auto
+                  - Acgpt
+                  - Acgpt-VL
+                  - DF-M1
               with_detail:
                 type: boolean
                 description: 完全な詳細を返すかどうか

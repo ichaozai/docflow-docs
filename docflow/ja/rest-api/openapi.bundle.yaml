@@ -5,9 +5,9 @@ info:
   version: 2.8.4
   contact:
     name: TextIn
-    url: 'https://www.textin.com/contact?type=27&sub_type=1'
+    url: https://www.textin.com/contact?type=27&sub_type=1
 servers:
-  - url: 'https://docflow.textin.com'
+  - url: https://docflow.textin.com
 x-codeSamples: custom
 tags:
   - name: ワークスペース管理
@@ -27,23 +27,23 @@ paths:
       description: ''
       operationId: uploadFile
       parameters:
-        - $ref: '#/components/parameters/WorkspaceId'
-        - $ref: '#/components/parameters/Category'
-        - $ref: '#/components/parameters/BatchNumber'
-        - $ref: '#/components/parameters/AutoVerifyVat'
-        - $ref: '#/components/parameters/SplitFlag'
-        - $ref: '#/components/parameters/CropFlag'
-        - $ref: '#/components/parameters/TargetProcess'
-        - $ref: '#/components/parameters/ParserRemoveWatermark'
-        - $ref: '#/components/parameters/ParserCropDewarp'
-        - $ref: '#/components/parameters/ParserApplyMerge'
-        - $ref: '#/components/parameters/ParserFormulaLevel'
-        - $ref: '#/components/parameters/ParserTableTextSplitMode'
+        - $ref: '#/components/parameters/parameters_WorkspaceId'
+        - $ref: '#/components/parameters/parameters_Category'
+        - $ref: '#/components/parameters/parameters_BatchNumber'
+        - $ref: '#/components/parameters/parameters_AutoVerifyVat'
+        - $ref: '#/components/parameters/parameters_SplitFlag'
+        - $ref: '#/components/parameters/parameters_CropFlag'
+        - $ref: '#/components/parameters/parameters_TargetProcess'
+        - $ref: '#/components/parameters/parameters_ParserRemoveWatermark'
+        - $ref: '#/components/parameters/parameters_ParserCropDewarp'
+        - $ref: '#/components/parameters/parameters_ParserApplyMerge'
+        - $ref: '#/components/parameters/parameters_ParserFormulaLevel'
+        - $ref: '#/components/parameters/parameters_ParserTableTextSplitMode'
         - $ref: '#/components/parameters/ParserDpi'
         - $ref: '#/components/parameters/ParserParseMode'
         - $ref: '#/components/parameters/ParserPdfPwd'
       requestBody:
-        $ref: '#/components/requestBodies/FileUploadRequestBody'
+        $ref: '#/components/requestBodies/request-bodies_FileUploadRequestBody'
       responses:
         '200':
           description: ファイルアップロードに成功
@@ -95,24 +95,24 @@ paths:
       description: ファイルをアップロードし、処理完了を待ってから処理結果を直接返します
       operationId: uploadFileSync
       parameters:
-        - $ref: '#/components/parameters/WorkspaceId'
-        - $ref: '#/components/parameters/Category'
-        - $ref: '#/components/parameters/BatchNumber'
-        - $ref: '#/components/parameters/AutoVerifyVat'
-        - $ref: '#/components/parameters/SplitFlag'
-        - $ref: '#/components/parameters/CropFlag'
-        - $ref: '#/components/parameters/TargetProcess'
-        - $ref: '#/components/parameters/ParserRemoveWatermark'
-        - $ref: '#/components/parameters/ParserCropDewarp'
-        - $ref: '#/components/parameters/ParserApplyMerge'
-        - $ref: '#/components/parameters/ParserFormulaLevel'
-        - $ref: '#/components/parameters/ParserTableTextSplitMode'
+        - $ref: '#/components/parameters/parameters_WorkspaceId'
+        - $ref: '#/components/parameters/parameters_Category'
+        - $ref: '#/components/parameters/parameters_BatchNumber'
+        - $ref: '#/components/parameters/parameters_AutoVerifyVat'
+        - $ref: '#/components/parameters/parameters_SplitFlag'
+        - $ref: '#/components/parameters/parameters_CropFlag'
+        - $ref: '#/components/parameters/parameters_TargetProcess'
+        - $ref: '#/components/parameters/parameters_ParserRemoveWatermark'
+        - $ref: '#/components/parameters/parameters_ParserCropDewarp'
+        - $ref: '#/components/parameters/parameters_ParserApplyMerge'
+        - $ref: '#/components/parameters/parameters_ParserFormulaLevel'
+        - $ref: '#/components/parameters/parameters_ParserTableTextSplitMode'
         - $ref: '#/components/parameters/ParserDpi'
         - $ref: '#/components/parameters/ParserParseMode'
         - $ref: '#/components/parameters/ParserPdfPwd'
-        - $ref: '#/components/parameters/WithTaskDetailUrl'
+        - $ref: '#/components/parameters/parameters_WithTaskDetailUrl'
       requestBody:
-        $ref: '#/components/requestBodies/FileUploadRequestBody'
+        $ref: '#/components/requestBodies/request-bodies_FileUploadRequestBody'
       responses:
         '200':
           description: ファイルのアップロードと処理に成功
@@ -179,20 +179,20 @@ paths:
             $ref: '#/components/schemas/VerificationStatus'
         - name: start_time
           in: query
-          description: '更新時刻で検索する開始時刻。RFC3339 形式（YYYY-MM-DDTHH:MM:SSZ）'
+          description: 更新時刻で検索する開始時刻。RFC3339 形式（YYYY-MM-DDTHH:MM:SSZ）
           required: false
           schema:
             type: string
             format: date-time
-            example: 2024-01-01T00:00:00.000Z
+            example: '2024-01-01T00:00:00Z'
         - name: end_time
           in: query
-          description: '更新時刻で検索する終了時刻。RFC3339 形式（YYYY-MM-DDTHH:MM:SSZ）'
+          description: 更新時刻で検索する終了時刻。RFC3339 形式（YYYY-MM-DDTHH:MM:SSZ）
           required: false
           schema:
             type: string
             format: date-time
-            example: 2024-01-01T10:00:00.000Z
+            example: '2024-01-01T10:00:00Z'
         - name: with_document
           in: query
           description: 文書の完全なテキスト認識結果を返すかどうか
@@ -476,19 +476,22 @@ paths:
                       extract_model:
                         type: string
                         description: >
-                          テーブルレベルの抽出モデル, defaults to Model 1 if not specified.
-                          All fields within the table use this model
+                          テーブルレベルの抽出モデル。未指定の場合は Acgpt
+                          がデフォルトです。テーブル内のすべてのフィールドがこのモデルを使用します
 
-                          - Model 1: 高速で安定した抽出結果
+                          - Auto: 抽出モデルを自動でマッチング
 
-                          - Model 2: 複雑な文書理解に適しています
+                          - Acgpt: 高速で安定した抽出結果
 
-                          - Model 3: VLM。シンプルな抽出に適しています
-                        example: Model 1
+                          - Acgpt-VL: VLM。シンプルな抽出に適しています（≤10 ページ）
+
+                          - DF-M1: 複雑な文書理解に適しています
+                        example: Acgpt
                         enum:
-                          - Model 1
-                          - Model 2
-                          - Model 3
+                          - Auto
+                          - Acgpt
+                          - Acgpt-VL
+                          - DF-M1
                       fields:
                         type: array
                         items:
@@ -805,7 +808,7 @@ paths:
                 callback_url:
                   type: string
                   description: コールバック URL
-                  example: 'https://example.com/callback'
+                  example: https://example.com/callback
                 callback_retry_time:
                   type: integer
                   description: コールバック再試行回数
@@ -891,14 +894,16 @@ paths:
                   type: string
                   description: |
                     抽出モデル
-                    - Model 1: 高速で安定した抽出結果
-                    - Model 2: 複雑な文書理解に適しています
-                    - Model 3: VLM。シンプルな抽出に適しています
-                  example: Model 1
+                    - Auto: 抽出モデルを自動でマッチング
+                    - Acgpt: 高速で安定した抽出結果
+                    - Acgpt-VL: VLM。シンプルな抽出に適しています（≤10 ページ）
+                    - DF-M1: 複雑な文書理解に適しています
+                  example: Acgpt
                   enum:
-                    - Model 1
-                    - Model 2
-                    - Model 3
+                    - Auto
+                    - Acgpt
+                    - Acgpt-VL
+                    - DF-M1
                 sample_files:
                   type: array
                   description: >-
@@ -1100,14 +1105,16 @@ paths:
                   type: string
                   description: |
                     抽出モデル, cascades to all fields and tables when set
-                    - Model 1: 高速で安定した抽出結果
-                    - Model 2: 複雑な文書理解に適しています
-                    - Model 3: VLM。シンプルな抽出に適しています
-                  example: Model 1
+                    - Auto: 抽出モデルを自動でマッチング
+                    - Acgpt: 高速で安定した抽出結果
+                    - Acgpt-VL: VLM。シンプルな抽出に適しています（≤10 ページ）
+                    - DF-M1: 複雑な文書理解に適しています
+                  example: Acgpt
                   enum:
-                    - Model 1
-                    - Model 2
-                    - Model 3
+                    - Auto
+                    - Acgpt
+                    - Acgpt-VL
+                    - DF-M1
                 with_detail:
                   type: boolean
                   description: |
@@ -1173,7 +1180,7 @@ paths:
                   description: 削除するファイルカテゴリ ID のリスト
                   example:
                     - '1234567890'
-                    - 0987654321
+                    - '0987654321'
               required:
                 - workspace_id
                 - category_ids
@@ -1423,7 +1430,7 @@ paths:
                     type: string
                   example:
                     - '1234567890'
-                    - 0987654321
+                    - '0987654321'
                 table_id:
                   type: string
                   description: >
@@ -1504,8 +1511,8 @@ paths:
                                   example: true
                                 extract_model:
                                   type: string
-                                  description: テーブルレベルの抽出モデル
-                                  example: Model 1
+                                  description: テーブルレベルの抽出モデル（Auto/Acgpt/Acgpt-VL/DF-M1）
+                                  example: Acgpt
   /api/app-api/sip/platform/v2/category/tables/batch_add:
     post:
       summary: ファイルカテゴリのテーブルを追加
@@ -1647,7 +1654,7 @@ paths:
                     type: string
                   example:
                     - '1234567890'
-                    - 0987654321
+                    - '0987654321'
               required:
                 - workspace_id
                 - category_id
@@ -1810,7 +1817,7 @@ paths:
                     type: string
                   example:
                     - '1234567890'
-                    - 0987654321
+                    - '0987654321'
               required:
                 - workspace_id
                 - category_id
@@ -1851,7 +1858,7 @@ paths:
                   description: 削除するサンプル ID のリスト
                   example:
                     - '1234567890'
-                    - 0987654321
+                    - '0987654321'
               required:
                 - workspace_id
                 - category_id
@@ -2719,19 +2726,22 @@ paths:
                 extract_model:
                   type: string
                   description: >
-                    任意。フィールドレベルの抽出モデル。通常フィールド（テーブルフィールド以外）のみ対応し、デフォルトは Model 1
-                    です
+                    任意。フィールドレベルの抽出モデル。通常フィールド（テーブルフィールド以外）のみ対応し、未指定の場合は分類レベルの設定に従います（分類レベルが
+                    mixed または null の場合は Auto がデフォルト）
 
-                    - Model 1: 高速で安定した抽出結果
+                    - Auto: 抽出モデルを自動でマッチング
 
-                    - Model 2: 複雑な文書理解に適しています
+                    - Acgpt: 高速で安定した抽出結果
 
-                    - Model 3: VLM。シンプルな抽出に適しています
-                  example: Model 1
+                    - Acgpt-VL: VLM。シンプルな抽出に適しています（≤10 ページ）
+
+                    - DF-M1: 複雑な文書理解に適しています
+                  example: Acgpt
                   enum:
-                    - Model 1
-                    - Model 2
-                    - Model 3
+                    - Auto
+                    - Acgpt
+                    - Acgpt-VL
+                    - DF-M1
                 with_detail:
                   type: boolean
                   description: |
@@ -2893,14 +2903,16 @@ paths:
                   type: string
                   description: |
                     テーブルレベルの抽出モデル
-                    - Model 1: 高速で安定した抽出結果
-                    - Model 2: 複雑な文書理解に適しています
-                    - Model 3: VLM。シンプルな抽出に適しています
-                  example: Model 1
+                    - Auto: 抽出モデルを自動でマッチング
+                    - Acgpt: 高速で安定した抽出結果
+                    - Acgpt-VL: VLM。シンプルな抽出に適しています（≤10 ページ）
+                    - DF-M1: 複雑な文書理解に適しています
+                  example: Acgpt
                   enum:
-                    - Model 1
-                    - Model 2
-                    - Model 3
+                    - Auto
+                    - Acgpt
+                    - Acgpt-VL
+                    - DF-M1
                 with_detail:
                   type: boolean
                   description: |
@@ -2993,20 +3005,22 @@ paths:
                   maxLength: 200
                 collect_from_multi_table:
                   type: boolean
-                  description: 複数テーブルを結合。Model 3 は複数テーブルの結合に対応していません
+                  description: 複数テーブルを結合。Acgpt-VL は複数テーブルの結合に対応していません
                   example: true
                 extract_model:
                   type: string
                   description: |
                     テーブルレベルの抽出モデル
-                    - Model 1: 高速で安定した抽出結果
-                    - Model 2: 複雑な文書理解に適しています
-                    - Model 3: VLM。シンプルな抽出に適しています
-                  example: Model 1
+                    - Auto: 抽出モデルを自動でマッチング
+                    - Acgpt: 高速で安定した抽出結果
+                    - Acgpt-VL: VLM。シンプルな抽出に適しています（≤10 ページ）
+                    - DF-M1: 複雑な文書理解に適しています
+                  example: Acgpt
                   enum:
-                    - Model 1
-                    - Model 2
-                    - Model 3
+                    - Auto
+                    - Acgpt
+                    - Acgpt-VL
+                    - DF-M1
                 with_detail:
                   type: boolean
                   description: 完全な詳細を返すかどうか
@@ -3242,6 +3256,108 @@ components:
       schema:
         type: boolean
         default: false
+    parameters_WorkspaceId:
+      name: workspace_id
+      in: query
+      description: ワークスペース ID
+      required: true
+      schema:
+        type: string
+        example: 1234567890
+    parameters_Category:
+      name: category
+      in: query
+      description: ファイルカテゴリ
+      required: false
+      schema:
+        type: string
+        example: invoice
+    parameters_BatchNumber:
+      name: batch_number
+      in: query
+      description: >
+        バッチ番号。同じバッチ番号で複数回アップロードできます。後からそのバッチ番号を使って、同一バッチ内の複数ファイルの処理結果を取得できます。値が空の場合、システムが最大
+        20 文字の文字列を自動生成します。
+      required: false
+      schema:
+        type: string
+        example: 202412190001
+    parameters_AutoVerifyVat:
+      name: auto_verify_vat
+      in: query
+      description: VAT インボイスを自動検証するかどうか
+      required: false
+      schema:
+        type: boolean
+        default: false
+    parameters_SplitFlag:
+      name: split_flag
+      in: query
+      description: ファイル分割を実行するかどうか
+      required: false
+      schema:
+        type: boolean
+        default: false
+    parameters_CropFlag:
+      name: crop_flag
+      in: query
+      description: 複数画像クロップを実行するかどうか
+      required: false
+      schema:
+        type: boolean
+        default: false
+    parameters_TargetProcess:
+      name: target_process
+      in: query
+      description: |
+        対象処理タイプ。指定可能な値: - classify: 分類 - extract: 抽出
+      required: false
+      schema:
+        type: string
+        enum:
+          - classify
+          - extract
+        example: classify
+    parameters_ParserRemoveWatermark:
+      name: parser_remove_watermark
+      in: query
+      description: '透かし除去（0: いいえ、1: はい）'
+      required: false
+      schema:
+        type: integer
+        default: 0
+    parameters_ParserCropDewarp:
+      name: parser_crop_dewarp
+      in: query
+      description: 'クロップと歪み補正（0: いいえ、1: はい）'
+      required: false
+      schema:
+        type: integer
+        default: 0
+    parameters_ParserApplyMerge:
+      name: parser_apply_merge
+      in: query
+      description: 'ページをまたぐ段落とテーブルを結合（0: いいえ、1: はい）'
+      required: false
+      schema:
+        type: integer
+        default: 1
+    parameters_ParserFormulaLevel:
+      name: parser_formula_level
+      in: query
+      description: '数式認識レベル（0: 表示数式とインライン数式を認識、1: 表示数式のみ認識、2: 数式を認識しない）'
+      required: false
+      schema:
+        type: integer
+        default: 0
+    parameters_ParserTableTextSplitMode:
+      name: parser_table_text_split_mode
+      in: query
+      description: 'テーブル罫線と交差するテキストブロックを分割（0: いいえ、1: はい）'
+      required: false
+      schema:
+        type: integer
+        default: 0
     ParserDpi:
       name: parser_dpi
       in: query
@@ -3275,6 +3391,14 @@ components:
       required: false
       schema:
         type: string
+    parameters_WithTaskDetailUrl:
+      name: with_task_detail_url
+      in: query
+      description: タスク詳細ページ URL を返すかどうか
+      required: false
+      schema:
+        type: boolean
+        default: false
   requestBodies:
     FileUploadRequestBody:
       description: ファイルアップロードのリクエストボディ
@@ -3299,8 +3423,36 @@ components:
                 items:
                   type: string
                   description: ファイル URL
-                  example: 'https://example.com/file.pdf'
-                  pattern: '^https?://.*$'
+                  example: https://example.com/file.pdf
+                  pattern: ^https?://.*$
+                maxItems: 10
+            required:
+              - urls
+    request-bodies_FileUploadRequestBody:
+      description: ファイルアップロードのリクエストボディ
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              file:
+                type: string
+                format: binary
+        application/json:
+          schema:
+            type: object
+            properties:
+              urls:
+                description: |
+                  ファイル URL リスト
+                  1 回のアップロードで最大 10 個のファイル URL に対応し、各ファイルは最大 100MB です
+                type: array
+                items:
+                  type: string
+                  description: ファイル URL
+                  example: https://example.com/file.pdf
+                  pattern: ^https?://.*$
                 maxItems: 10
             required:
               - urls
@@ -3446,9 +3598,12 @@ components:
           format: float
           description: 信頼度スコア。範囲は 0〜1
           example: 0.95
-        extract_model:
+        extractModel:
           type: string
-          description: 実際に使用された抽出モデル
+          description: 実際にヒットしたモデル（Acgpt / Acgpt-VL / DF-M1）
+        configModel:
+          type: string
+          description: 設定モデル（Auto / Acgpt / Acgpt-VL / DF-M1）；既存データで未設定の場合は null
     KeyValue:
       type: object
       properties:
@@ -3768,7 +3923,12 @@ components:
                     type: string
                     example: 0
                   extractModel:
-                    description: テーブルレベルの抽出モデル
+                    description: テーブル単位の実際にヒットしたモデル（Acgpt / Acgpt-VL / DF-M1）
+                    type: string
+                  configModel:
+                    description: >-
+                      テーブル単位の設定モデル（Auto / Acgpt / Acgpt-VL /
+                      DF-M1）；既存データで未設定の場合は null
                     type: string
                   items:
                     type: array
@@ -4100,7 +4260,12 @@ components:
                               type: string
                               example: 0
                             extractModel:
-                              description: テーブルレベルの抽出モデル
+                              description: テーブル単位の実際にヒットしたモデル（Acgpt / Acgpt-VL / DF-M1）
+                              type: string
+                            configModel:
+                              description: >-
+                                テーブル単位の設定モデル（Auto / Acgpt / Acgpt-VL /
+                                DF-M1）；既存データで未設定の場合は null
                               type: string
                             items:
                               type: array
@@ -4242,16 +4407,18 @@ components:
         extract_model:
           type: string
           description: |
-            フィールド単位の抽出モデル。未指定の場合は Model 1 がデフォルトです
-            - Model 1: 高速で安定した抽出結果
-            - Model 2: 複雑な文書理解に適しています
-            - Model 3: VLM。シンプルな抽出に適しています
+            フィールド単位の抽出モデル。未指定の場合は Acgpt がデフォルトです
+            - Auto: 抽出モデルを自動でマッチング
+            - Acgpt: 高速で安定した抽出結果
+            - Acgpt-VL: VLM。シンプルな抽出に適しています（≤10 ページ）
+            - DF-M1: 複雑な文書理解に適しています
             注: テーブルフィールドでは抽出モデルはテーブル単位の extract_model によって決まり、このフィールドは無視されます
-          example: Model 1
+          example: Acgpt
           enum:
-            - Model 1
-            - Model 2
-            - Model 3
+            - Auto
+            - Acgpt
+            - Acgpt-VL
+            - DF-M1
     TokenResult:
       type: object
       properties:
@@ -4300,7 +4467,7 @@ components:
         callback_url:
           type: string
           description: コールバック URL
-          example: 'https://example.com/callback'
+          example: https://example.com/callback
         callback_retry_time:
           type: integer
           description: コールバック再試行回数
@@ -4351,7 +4518,7 @@ components:
             match:
               type: string
               description: 抽出結果をマッチングまたはキャプチャする正規表現パターン
-              example: '^(\d{4})-(\d{2})-(\d{2})$'
+              example: ^(\d{4})-(\d{2})-(\d{2})$
             replace:
               type: string
               description: 置換式。$1、$2 などのキャプチャグループ参照をサポートします
@@ -4430,9 +4597,10 @@ components:
           type: string
           description: テーブルレベルの抽出モデル
           enum:
-            - Model 1
-            - Model 2
-            - Model 3
+            - Auto
+            - Acgpt
+            - Acgpt-VL
+            - DF-M1
         fields:
           type: array
           description: テーブル内のネストされたフィールドリスト
@@ -4467,15 +4635,17 @@ components:
               description: >
                 フィールド抽出モデル
 
-                - Model 1: 高速で安定した抽出結果
+                - Auto: 抽出モデルを自動でマッチング
 
-                - Model 2: 複雑な文書理解に適しています
+                - Acgpt: 高速で安定した抽出結果
 
-                - Model 3: VLM。シンプルな抽出に適しています
+                - Acgpt-VL: VLM。シンプルな抽出に適しています（≤10 ページ）
+
+                - DF-M1: 複雑な文書理解に適しています
 
                 -
                 テーブルフィールドではテーブルモデルを継承し、通常フィールドではフィールド単位の設定を使用します。既存データはカテゴリ設定から推定されます
-              example: Model 1
+              example: Acgpt
     CategoryTable:
       type: object
       properties:
@@ -4501,8 +4671,8 @@ components:
           example: true
         extract_model:
           type: string
-          description: テーブルレベルの抽出モデル
-          example: Model 1
+          description: テーブルレベルの抽出モデル（Auto/Acgpt/Acgpt-VL/DF-M1）
+          example: Acgpt
         fields:
           type: array
           items:
@@ -4546,15 +4716,17 @@ components:
           type: string
           description: |
             抽出モデル
-            - Model 1: 高速で安定した抽出結果
-            - Model 2: 複雑な文書理解に適しています
-            - Model 3: VLM。シンプルな抽出に適しています
+            - Auto: 抽出モデルを自動でマッチング
+            - Acgpt: 高速で安定した抽出結果
+            - Acgpt-VL: VLM。シンプルな抽出に適しています（≤10 ページ）
+            - DF-M1: 複雑な文書理解に適しています
             - mixed: レスポンスでのみ使用され、このカテゴリ内のフィールド/テーブルで異なるモデルが使用されていることを示します
-          example: Model 1
+          example: Acgpt
           enum:
-            - Model 1
-            - Model 2
-            - Model 3
+            - Auto
+            - Acgpt
+            - Acgpt-VL
+            - DF-M1
             - mixed
         enabled:
           $ref: '#/components/schemas/EnabledStatus'
@@ -4583,7 +4755,7 @@ components:
           description: 意味抽出プロンプトを使用するかどうか
         alias:
           type: array
-          description: 'フィールド別名。省略=変更なし、空配列 []=クリア、空でない配列=上書き'
+          description: フィールド別名。省略=変更なし、空配列 []=クリア、空でない配列=上書き
           items:
             type: string
           example:
@@ -4606,14 +4778,16 @@ components:
           description: |
             フィールド単位の抽出モデル。通常フィールドのみ個別に設定でき、テーブルフィールドは設定できません。
             省略すると既存設定を保持します。
-            - Model 1: 高速で安定した抽出結果
-            - Model 2: 複雑な文書理解に適しています
-            - Model 3: VLM。シンプルな抽出に適しています
-          example: Model 1
+            - Auto: 抽出モデルを自動でマッチング
+            - Acgpt: 高速で安定した抽出結果
+            - Acgpt-VL: VLM。シンプルな抽出に適しています（≤10 ページ）
+            - DF-M1: 複雑な文書理解に適しています
+          example: Acgpt
           enum:
-            - Model 1
-            - Model 2
-            - Model 3
+            - Auto
+            - Acgpt
+            - Acgpt-VL
+            - DF-M1
       required:
         - field_id
     CategoryTableUpdateItem:
@@ -4635,9 +4809,10 @@ components:
           type: string
           description: テーブルレベルの抽出モデル
           enum:
-            - Model 1
-            - Model 2
-            - Model 3
+            - Auto
+            - Acgpt
+            - Acgpt-VL
+            - DF-M1
         collect_from_multi_table:
           type: boolean
           description: 複数テーブルを結合

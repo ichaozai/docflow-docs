@@ -75,7 +75,7 @@ curl -X POST \
   -F "workspace_id=<your-workspace-id>" \
   -F "name=Invoice" \
   -F "category_prompt=VAT invoice with fields such as invoice code, invoice number, etc." \
-  -F "extract_model=llm" \
+  -F "extract_model=Acgpt" \
   -F "sample_files=@/path/to/invoice_sample.pdf" \
   -F 'fields=[{"name":"Invoice Code","description":"Invoice code description","prompt":"Please extract the invoice code"}]' \
   "https://docflow.textin.ai/api/app-api/sip/platform/v2/category/create"
@@ -101,7 +101,7 @@ data = {
     'workspace_id': workspace_id,
     'name': 'Invoice',
     'category_prompt': 'VAT invoice with fields such as invoice code, invoice number, etc.',
-    'extract_model': 'llm',
+    'extract_model': 'Acgpt',
     'fields': '[{"name":"Invoice Code","description":"Invoice code description","prompt":"Please extract the invoice code"}]'
 }
 
@@ -130,7 +130,7 @@ else:
 - `workspace_id`（必須）: ワークスペース ID
 - `name`（必須）: ファイルカテゴリ名。最大 50 文字
 - `category_prompt`（任意）: 分類用プロンプト。最大 500 文字
-- `extract_model`（必須）: 抽出モデル。指定可能な値は `llm`、`vlm`
+- `extract_model`（必須）: 抽出モデル。指定可能な値は `Auto`、`Acgpt`、`Acgpt-VL`、`DF-M1`
 - `sample_files`（必須）: サンプルファイル一覧。少なくとも 1 件のサンプルファイルが必要です。1 カテゴリあたり最大 20 件まで登録できます
 - `fields`（必須）: フィールド設定一覧（JSON 文字列）。少なくとも 1 つのフィールドが必要です。表フィールドはデフォルト表（table_id=-1）にのみ設定できます
 
@@ -218,7 +218,7 @@ else:
         "id": "1234567890",
         "name": "Invoice",
         "category_prompt": "VAT invoice with fields such as invoice code, invoice number, etc.",
-        "extract_model": "llm",
+        "extract_model": "Acgpt",
         "enabled": 1
       }
     ]

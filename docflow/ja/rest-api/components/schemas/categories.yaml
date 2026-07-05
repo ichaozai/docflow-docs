@@ -22,15 +22,17 @@ Category:
       type: string
       description: |
         抽出モデル
-        - Model 1: 高速で安定した抽出結果
-        - Model 2: 複雑な文書理解に適しています
-        - Model 3: VLM。シンプルな抽出に適しています
+        - Auto: 抽出モデルを自動でマッチング
+        - Acgpt: 高速で安定した抽出結果
+        - Acgpt-VL: VLM。シンプルな抽出に適しています（≤10 ページ）
+        - DF-M1: 複雑な文書理解に適しています
         - mixed: レスポンスでのみ使用され、このカテゴリ内のフィールド/テーブルで異なるモデルが使用されていることを示します
-      example: "Model 1"
+      example: "Acgpt"
       enum:
-        - Model 1
-        - Model 2
-        - Model 3
+        - Auto
+        - Acgpt
+        - Acgpt-VL
+        - DF-M1
         - mixed
     enabled:
       $ref: '#/EnabledStatus'
@@ -89,11 +91,12 @@ CategoryField:
           type: string
           description: |
             フィールド抽出モデル
-            - Model 1: 高速で安定した抽出結果
-            - Model 2: 複雑な文書理解に適しています
-            - Model 3: VLM。シンプルな抽出に適しています
+            - Auto: 抽出モデルを自動でマッチング
+            - Acgpt: 高速で安定した抽出結果
+            - Acgpt-VL: VLM。シンプルな抽出に適しています（≤10 ページ）
+            - DF-M1: 複雑な文書理解に適しています
             - テーブルフィールドではテーブルモデルを継承し、通常フィールドではフィールド単位の設定を使用します。既存データはカテゴリ設定から推定されます
-          example: "Model 1"
+          example: "Acgpt"
 
 CategoryTable:
   type: object
@@ -120,8 +123,8 @@ CategoryTable:
       example: true
     extract_model:
       type: string
-      description: テーブルレベルの抽出モデル
-      example: "Model 1"
+      description: テーブルレベルの抽出モデル（Auto/Acgpt/Acgpt-VL/DF-M1）
+      example: "Acgpt"
     fields:
       type: array
       items:
@@ -226,9 +229,10 @@ CategoryTableConfig:
       type: string
       description: テーブルレベルの抽出モデル
       enum:
-        - Model 1
-        - Model 2
-        - Model 3
+        - Auto
+        - Acgpt
+        - Acgpt-VL
+        - DF-M1
     fields:
       type: array
       description: テーブル内のネストされたフィールドリスト
@@ -280,14 +284,16 @@ CategoryFieldUpdateItem:
       description: |
         フィールド単位の抽出モデル。通常フィールドのみ個別に設定でき、テーブルフィールドは設定できません。
         省略すると既存設定を保持します。
-        - Model 1: 高速で安定した抽出結果
-        - Model 2: 複雑な文書理解に適しています
-        - Model 3: VLM。シンプルな抽出に適しています
-      example: "Model 1"
+        - Auto: 抽出モデルを自動でマッチング
+        - Acgpt: 高速で安定した抽出結果
+        - Acgpt-VL: VLM。シンプルな抽出に適しています（≤10 ページ）
+        - DF-M1: 複雑な文書理解に適しています
+      example: "Acgpt"
       enum:
-        - Model 1
-        - Model 2
-        - Model 3
+        - Auto
+        - Acgpt
+        - Acgpt-VL
+        - DF-M1
   required:
     - field_id
 
@@ -310,9 +316,10 @@ CategoryTableUpdateItem:
       type: string
       description: テーブルレベルの抽出モデル
       enum:
-        - Model 1
-        - Model 2
-        - Model 3
+        - Auto
+        - Acgpt
+        - Acgpt-VL
+        - DF-M1
     collect_from_multi_table:
       type: boolean
       description: 複数テーブルを結合

@@ -36,14 +36,16 @@
                 type: string
                 description: |
                   Extraction model
-                  - Model 1: Fast speed with stable extraction results
-                  - Model 2: Suitable for complex document understanding
-                  - Model 3: VLM, suitable for simple extraction
-                example: "Model 1"
+                  - Auto: Automatically matches the extraction model
+                  - Acgpt: Fast speed with stable extraction results
+                  - Acgpt-VL: VLM, suitable for simple extraction (≤10 pages)
+                  - DF-M1: Suitable for complex document understanding
+                example: "Acgpt"
                 enum:
-                  - Model 1
-                  - Model 2
-                  - Model 3
+                  - Auto
+                  - Acgpt
+                  - Acgpt-VL
+                  - DF-M1
               sample_files:
                 type: array
                 description: Sample file list, at least one sample file must be uploaded, a category can have at most 20 sample files
@@ -243,14 +245,16 @@
                 type: string
                 description: |
                   Extraction model, cascades to all fields and tables when set
-                  - Model 1: Fast speed with stable extraction results
-                  - Model 2: Suitable for complex document understanding
-                  - Model 3: VLM, suitable for simple extraction
-                example: "Model 1"
+                  - Auto: Automatically matches the extraction model
+                  - Acgpt: Fast speed with stable extraction results
+                  - Acgpt-VL: VLM, suitable for simple extraction (≤10 pages)
+                  - DF-M1: Suitable for complex document understanding
+                example: "Acgpt"
                 enum:
-                  - Model 1
-                  - Model 2
-                  - Model 3
+                  - Auto
+                  - Acgpt
+                  - Acgpt-VL
+                  - DF-M1
               with_detail:
                 type: boolean
                 description: |
@@ -624,15 +628,17 @@
               extract_model:
                 type: string
                 description: |
-                  Optional, field-level extraction model, only supported for regular fields (not table fields), defaults to Model 1
-                  - Model 1: Fast speed with stable extraction results
-                  - Model 2: Suitable for complex document understanding
-                  - Model 3: VLM, suitable for simple extraction
-                example: "Model 1"
+                  Optional, field-level extraction model, only supported for regular fields (not table fields); if omitted, follows the category-level config (defaults to Auto when the category level is mixed or null)
+                  - Auto: Automatically matches the extraction model
+                  - Acgpt: Fast speed with stable extraction results
+                  - Acgpt-VL: VLM, suitable for simple extraction (≤10 pages)
+                  - DF-M1: Suitable for complex document understanding
+                example: "Acgpt"
                 enum:
-                  - Model 1
-                  - Model 2
-                  - Model 3
+                  - Auto
+                  - Acgpt
+                  - Acgpt-VL
+                  - DF-M1
               with_detail:
                 type: boolean
                 description: |
@@ -807,8 +813,8 @@
                                 example: true
                               extract_model:
                                 type: string
-                                description: Table-level extraction model
-                                example: "Model 1"
+                                description: Table-level extraction model (Auto/Acgpt/Acgpt-VL/DF-M1)
+                                example: "Acgpt"
 
 /api/app-api/sip/platform/v2/category/tables/batch_add:
   post:
@@ -1007,14 +1013,16 @@
                 type: string
                 description: |
                   Table-level extraction model
-                  - Model 1: Fast speed with stable extraction results
-                  - Model 2: Suitable for complex document understanding
-                  - Model 3: VLM, suitable for simple extraction
-                example: "Model 1"
+                  - Auto: Automatically matches the extraction model
+                  - Acgpt: Fast speed with stable extraction results
+                  - Acgpt-VL: VLM, suitable for simple extraction (≤10 pages)
+                  - DF-M1: Suitable for complex document understanding
+                example: "Acgpt"
                 enum:
-                  - Model 1
-                  - Model 2
-                  - Model 3
+                  - Auto
+                  - Acgpt
+                  - Acgpt-VL
+                  - DF-M1
               with_detail:
                 type: boolean
                 description: |
@@ -1105,20 +1113,22 @@
                 maxLength: 200
               collect_from_multi_table:
                 type: boolean
-                description: Merge multiple tables, Model 3 does not support multi-table merge
+                description: Merge multiple tables, Acgpt-VL does not support multi-table merge
                 example: true
               extract_model:
                 type: string
                 description: |
                   Table-level extraction model
-                  - Model 1: Fast speed with stable extraction results
-                  - Model 2: Suitable for complex document understanding
-                  - Model 3: VLM, suitable for simple extraction
-                example: "Model 1"
+                  - Auto: Automatically matches the extraction model
+                  - Acgpt: Fast speed with stable extraction results
+                  - Acgpt-VL: VLM, suitable for simple extraction (≤10 pages)
+                  - DF-M1: Suitable for complex document understanding
+                example: "Acgpt"
                 enum:
-                  - Model 1
-                  - Model 2
-                  - Model 3
+                  - Auto
+                  - Acgpt
+                  - Acgpt-VL
+                  - DF-M1
               with_detail:
                 type: boolean
                 description: Whether to return full details

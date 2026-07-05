@@ -515,15 +515,17 @@
                     extract_model:
                       type: string
                       description: |
-                        整表抽取模型，不填默认使用 Model 1。表格内所有字段统一使用此模型
-                        - Model 1: 速度快，抽取结果稳定
-                        - Model 2: 适用复杂文档理解
-                        - Model 3: 多模态，适用简单抽取
-                      example: "Model 1"
+                        整表抽取模型，不填默认使用 Acgpt。表格内所有字段统一使用此模型
+                        - Auto: 智能匹配抽取模型
+                        - Acgpt: 速度快，抽取结果稳定
+                        - Acgpt-VL: 多模态，适用简单抽取（≤10 页）
+                        - DF-M1: 适用复杂文档理解
+                      example: "Acgpt"
                       enum:
-                        - Model 1
-                        - Model 2
-                        - Model 3
+                        - Auto
+                        - Acgpt
+                        - Acgpt-VL
+                        - DF-M1
                     fields:
                       type: array
                       items:

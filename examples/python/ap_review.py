@@ -122,7 +122,7 @@ def create_category(
         form_data = [
             ("workspace_id",    (None, workspace_id)),
             ("name",            (None, name)),
-            ("extract_model",   (None, "Model 1")),
+            ("extract_model",   (None, "Acgpt")),
             ("category_prompt", (None, category_prompt)),
             ("fields",          (None, json.dumps(fields, ensure_ascii=False))),
             ("sample_files",    (os.path.basename(sample_file_path), f, mime)),

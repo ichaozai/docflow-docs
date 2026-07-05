@@ -222,7 +222,7 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
                 form_data = [
                     ("workspace_id",    (None, workspace_id)),
                     ("name",            (None, name)),
-                    ("extract_model",   (None, "llm")),
+                    ("extract_model",   (None, "Acgpt")),
                     ("category_prompt", (None, category_prompt)),
                     ("fields",          (None, json.dumps(fields, ensure_ascii=False))),
                     ("sample_files",    (os.path.basename(sample_file_path), f, _mime(sample_file_path))),
@@ -256,7 +256,7 @@ DocFlow では、分類とフィールドを一度設定するだけで、その
             MultipartBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
                     .addFormDataPart("workspace_id",  workspaceId)
                     .addFormDataPart("name",          name)
-                    .addFormDataPart("extract_model", "llm")
+                    .addFormDataPart("extract_model", "Acgpt")
                     .addFormDataPart("category_prompt", categoryPrompt)
                     .addFormDataPart("fields", GSON.toJson(fields))
                     .addFormDataPart("sample_files", sampleFile.getName(),

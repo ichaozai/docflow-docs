@@ -506,15 +506,17 @@
                     extract_model:
                       type: string
                       description: |
-                        テーブルレベルの抽出モデル, defaults to Model 1 if not specified. All fields within the table use this model
-                        - Model 1: 高速で安定した抽出結果
-                        - Model 2: 複雑な文書理解に適しています
-                        - Model 3: VLM。シンプルな抽出に適しています
-                      example: "Model 1"
+                        テーブルレベルの抽出モデル。未指定の場合は Acgpt がデフォルトです。テーブル内のすべてのフィールドがこのモデルを使用します
+                        - Auto: 抽出モデルを自動でマッチング
+                        - Acgpt: 高速で安定した抽出結果
+                        - Acgpt-VL: VLM。シンプルな抽出に適しています（≤10 ページ）
+                        - DF-M1: 複雑な文書理解に適しています
+                      example: "Acgpt"
                       enum:
-                        - Model 1
-                        - Model 2
-                        - Model 3
+                        - Auto
+                        - Acgpt
+                        - Acgpt-VL
+                        - DF-M1
                     fields:
                       type: array
                       items:

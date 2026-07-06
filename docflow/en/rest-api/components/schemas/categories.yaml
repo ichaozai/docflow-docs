@@ -22,15 +22,17 @@ Category:
       type: string
       description: |
         Extraction model
-        - Model 1: Fast speed with stable extraction results
-        - Model 2: Suitable for complex document understanding
-        - Model 3: VLM, suitable for simple extraction
+        - Auto: Automatically matches the extraction model
+        - Acgpt: Fast speed with stable extraction results
+        - Acgpt-VL: VLM, suitable for simple extraction (≤10 pages)
+        - DF-M1: Suitable for complex document understanding
         - mixed: Only in responses, indicates different models are used across fields/tables in this category
-      example: "Model 1"
+      example: "Acgpt"
       enum:
-        - Model 1
-        - Model 2
-        - Model 3
+        - Auto
+        - Acgpt
+        - Acgpt-VL
+        - DF-M1
         - mixed
     enabled:
       $ref: '#/EnabledStatus'
@@ -89,11 +91,12 @@ CategoryField:
           type: string
           description: |
             Field extraction model
-            - Model 1: Fast speed with stable extraction results
-            - Model 2: Suitable for complex document understanding
-            - Model 3: VLM, suitable for simple extraction
+            - Auto: Automatically matches the extraction model
+            - Acgpt: Fast speed with stable extraction results
+            - Acgpt-VL: VLM, suitable for simple extraction (≤10 pages)
+            - DF-M1: Suitable for complex document understanding
             - For table fields, inherits from the table model; for regular fields, uses field-level config; legacy data inferred from category config
-          example: "Model 1"
+          example: "Acgpt"
 
 CategoryTable:
   type: object
@@ -120,8 +123,8 @@ CategoryTable:
       example: true
     extract_model:
       type: string
-      description: Table-level extraction model
-      example: "Model 1"
+      description: Table-level extraction model (Auto/Acgpt/Acgpt-VL/DF-M1)
+      example: "Acgpt"
     fields:
       type: array
       items:
@@ -226,9 +229,10 @@ CategoryTableConfig:
       type: string
       description: Table-level extraction model
       enum:
-        - Model 1
-        - Model 2
-        - Model 3
+        - Auto
+        - Acgpt
+        - Acgpt-VL
+        - DF-M1
     fields:
       type: array
       description: Nested field list within the table
@@ -280,14 +284,16 @@ CategoryFieldUpdateItem:
       description: |
         Field-level extraction model. Only regular fields can be set independently; table fields cannot.
         Omit to keep existing config.
-        - Model 1: Fast speed with stable extraction results
-        - Model 2: Suitable for complex document understanding
-        - Model 3: VLM, suitable for simple extraction
-      example: "Model 1"
+        - Auto: Automatically matches the extraction model
+        - Acgpt: Fast speed with stable extraction results
+        - Acgpt-VL: VLM, suitable for simple extraction (≤10 pages)
+        - DF-M1: Suitable for complex document understanding
+      example: "Acgpt"
       enum:
-        - Model 1
-        - Model 2
-        - Model 3
+        - Auto
+        - Acgpt
+        - Acgpt-VL
+        - DF-M1
   required:
     - field_id
 
@@ -310,9 +316,10 @@ CategoryTableUpdateItem:
       type: string
       description: Table-level extraction model
       enum:
-        - Model 1
-        - Model 2
-        - Model 3
+        - Auto
+        - Acgpt
+        - Acgpt-VL
+        - DF-M1
     collect_from_multi_table:
       type: boolean
       description: Merge multiple tables

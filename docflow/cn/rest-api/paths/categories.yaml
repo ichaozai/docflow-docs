@@ -36,14 +36,16 @@
                 type: string
                 description: |
                   抽取模型
-                  - Model 1: 速度快，抽取结果稳定
-                  - Model 2: 适用复杂文档理解
-                  - Model 3: 多模态，适用简单抽取
-                example: "Model 1"
+                  - Auto: 智能匹配抽取模型
+                  - Acgpt: 速度快，抽取结果稳定
+                  - Acgpt-VL: 多模态，适用简单抽取（≤10 页）
+                  - DF-M1: 适用复杂文档理解
+                example: "Acgpt"
                 enum:
-                  - Model 1
-                  - Model 2
-                  - Model 3
+                  - Auto
+                  - Acgpt
+                  - Acgpt-VL
+                  - DF-M1
               sample_files:
                 type: array
                 description: 样本文件列表，至少上传一个样本文件，一个类别最多有20个样本文件
@@ -243,14 +245,16 @@
                 type: string
                 description: |
                   抽取模型，设置后级联覆盖所有字段和表格
-                  - Model 1: 速度快，抽取结果稳定
-                  - Model 2: 适用复杂文档理解
-                  - Model 3: 多模态，适用简单抽取
-                example: "Model 1"
+                  - Auto: 智能匹配抽取模型
+                  - Acgpt: 速度快，抽取结果稳定
+                  - Acgpt-VL: 多模态，适用简单抽取（≤10 页）
+                  - DF-M1: 适用复杂文档理解
+                example: "Acgpt"
                 enum:
-                  - Model 1
-                  - Model 2
-                  - Model 3
+                  - Auto
+                  - Acgpt
+                  - Acgpt-VL
+                  - DF-M1
               with_detail:
                 type: boolean
                 description: |
@@ -624,15 +628,17 @@
               extract_model:
                 type: string
                 description: |
-                  选填，字段级抽取模型，仅普通字段（非表格字段）支持，不填默认 Model 1
-                  - Model 1: 速度快，抽取结果稳定
-                  - Model 2: 适用复杂文档理解
-                  - Model 3: 多模态，适用简单抽取
-                example: "Model 1"
+                  选填，字段级抽取模型，仅普通字段（非表格字段）支持，不填则跟随分类级配置（分类级为 mixed 或 null 时默认 Auto）
+                  - Auto: 智能匹配抽取模型
+                  - Acgpt: 速度快，抽取结果稳定
+                  - Acgpt-VL: 多模态，适用简单抽取（≤10 页）
+                  - DF-M1: 适用复杂文档理解
+                example: "Acgpt"
                 enum:
-                  - Model 1
-                  - Model 2
-                  - Model 3
+                  - Auto
+                  - Acgpt
+                  - Acgpt-VL
+                  - DF-M1
               with_detail:
                 type: boolean
                 description: |
@@ -813,8 +819,8 @@
                                 example: true
                               extract_model:
                                 type: string
-                                description: 表格级抽取模型
-                                example: "Model 1"
+                                description: 表格级抽取模型（Auto/Acgpt/Acgpt-VL/DF-M1）
+                                example: "Acgpt"
 
 /api/app-api/sip/platform/v2/category/tables/batch_add:
   post:
@@ -1026,14 +1032,16 @@
                 type: string
                 description: |
                   表格级抽取模型
-                  - Model 1: 速度快，抽取结果稳定
-                  - Model 2: 适用复杂文档理解
-                  - Model 3: 多模态，适用简单抽取
-                example: "Model 1"
+                  - Auto: 智能匹配抽取模型
+                  - Acgpt: 速度快，抽取结果稳定
+                  - Acgpt-VL: 多模态，适用简单抽取（≤10 页）
+                  - DF-M1: 适用复杂文档理解
+                example: "Acgpt"
                 enum:
-                  - Model 1
-                  - Model 2
-                  - Model 3
+                  - Auto
+                  - Acgpt
+                  - Acgpt-VL
+                  - DF-M1
               with_detail:
                 type: boolean
                 description: |
@@ -1124,20 +1132,22 @@
                 maxLength: 200
               collect_from_multi_table:
                 type: boolean
-                description: 多表合并，抽取模型 Model 3 暂不支持多表合并
+                description: 多表合并，抽取模型 Acgpt-VL 暂不支持多表合并
                 example: true
               extract_model:
                 type: string
                 description: |
                   表格级抽取模型
-                  - Model 1: 速度快，抽取结果稳定
-                  - Model 2: 适用复杂文档理解
-                  - Model 3: 多模态，适用简单抽取
-                example: "Model 1"
+                  - Auto: 智能匹配抽取模型
+                  - Acgpt: 速度快，抽取结果稳定
+                  - Acgpt-VL: 多模态，适用简单抽取（≤10 页）
+                  - DF-M1: 适用复杂文档理解
+                example: "Acgpt"
                 enum:
-                  - Model 1
-                  - Model 2
-                  - Model 3
+                  - Auto
+                  - Acgpt
+                  - Acgpt-VL
+                  - DF-M1
               with_detail:
                 type: boolean
                 description: 是否返回完整详情

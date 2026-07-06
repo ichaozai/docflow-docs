@@ -119,7 +119,7 @@ public class ContractReview {
     /**
      * 创建文件类别，同时上传样本文件并配置字段。
      *
-     * <p>合同审核场景使用 Model 2（复杂文档理解），适合合同这类长文档的深度理解和字段抽取。
+     * <p>合同审核场景使用 DF-M1（复杂文档理解），适合合同这类长文档的深度理解和字段抽取。
      */
     public static String createCategory(
             String workspaceId,
@@ -135,7 +135,7 @@ public class ContractReview {
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("workspace_id",    workspaceId)
                 .addFormDataPart("name",            name)
-                .addFormDataPart("extract_model",   "Model 2")
+                .addFormDataPart("extract_model",   "DF-M1")
                 .addFormDataPart("category_prompt", categoryPrompt)
                 .addFormDataPart("fields",          GSON.toJson(fields))
                 .addFormDataPart("sample_files",    sampleFile.getName(),

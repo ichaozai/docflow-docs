@@ -156,7 +156,7 @@ public class ExpenseReimbursement {
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("workspace_id",    workspaceId)
                 .addFormDataPart("name",            name)
-                .addFormDataPart("extract_model",   "Model 1")
+                .addFormDataPart("extract_model",   "Acgpt")
                 .addFormDataPart("category_prompt", categoryPrompt)
                 .addFormDataPart("fields",          GSON.toJson(fields))
                 .addFormDataPart("sample_files",    sampleFile.getName(),

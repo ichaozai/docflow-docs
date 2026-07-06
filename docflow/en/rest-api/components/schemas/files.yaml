@@ -12,16 +12,18 @@ ExtractFieldReqVO:
     extract_model:
       type: string
       description: |
-        Field-level extraction model, defaults to Model 1 if not specified
-        - Model 1: Fast speed with stable extraction results
-        - Model 2: Suitable for complex document understanding
-        - Model 3: VLM, suitable for simple extraction
+        Field-level extraction model, defaults to Acgpt if not specified
+        - Auto: Automatically matches the extraction model
+        - Acgpt: Fast speed with stable extraction results
+        - Acgpt-VL: VLM, suitable for simple extraction (≤10 pages)
+        - DF-M1: Suitable for complex document understanding
         Note: For table fields, the extraction model is determined by the table-level extract_model, this field is ignored
-      example: "Model 1"
+      example: "Acgpt"
       enum:
-        - Model 1
-        - Model 2
-        - Model 3
+        - Auto
+        - Acgpt
+        - Acgpt-VL
+        - DF-M1
 
 TaskProcessResult:
   type: object
@@ -151,7 +153,10 @@ TaskProcessResult:
                           type: string
                           example: 0
                         extractModel:
-                          description: Table-level extraction model
+                          description: Table-level actual hit model (Acgpt / Acgpt-VL / DF-M1)
+                          type: string
+                        configModel:
+                          description: Table-level configured model (Auto / Acgpt / Acgpt-VL / DF-M1); null for legacy data that was not configured
                           type: string
                         items:
                           type: array
@@ -279,9 +284,12 @@ FieldRespKeyValue:
       format: float
       description: Confidence score, range 0~1
       example: 0.95
-    extract_model:
+    extractModel:
       type: string
-      description: Actual extraction model used
+      description: Actual hit model (Acgpt / Acgpt-VL / DF-M1)
+    configModel:
+      type: string
+      description: Configured model (Auto / Acgpt / Acgpt-VL / DF-M1); null for legacy data that was not configured
 
 StampValue:
   type: object
@@ -532,7 +540,10 @@ SubFileDetailInfo:
                 type: string
                 example: 0
               extractModel:
-                description: Table-level extraction model
+                description: Table-level actual hit model (Acgpt / Acgpt-VL / DF-M1)
+                type: string
+              configModel:
+                description: Table-level configured model (Auto / Acgpt / Acgpt-VL / DF-M1); null for legacy data that was not configured
                 type: string
               items:
                 type: array

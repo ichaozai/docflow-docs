@@ -4,6 +4,26 @@ sidebarTitle: "更新日志"
 description: "DocFlow API 文档更新记录"
 ---
 
+## 2026-07-05
+
+### API
+
+#### 抽取模型升级
+
+抽取模型统一改名，并新增 **Auto** 智能路由。涉及所有含 `extract_model` 的接口（**创建文件类别**、**更新文件类别**、文件类别字段/表格的新增与更新、**提取字段**、**获取文件结果**）。
+
+| 原模型名 | 新模型名 | 说明 |
+|---------|---------|------|
+| Model 1 | `Acgpt` | 速度快，抽取结果稳定 |
+| Model 2 | `DF-M1` | 适用复杂文档理解 |
+| Model 3 | `Acgpt-VL` | 多模态，适用简单抽取（≤10 页） |
+| — | `Auto` | 智能匹配抽取模型（新增，交由算法按字段自动路由实际模型） |
+
+- 请求参数 `extract_model` 仅接受新模型名（`Auto`/`Acgpt`/`Acgpt-VL`/`DF-M1`）；旧值 `Model 1`/`Model 2`/`Model 3` 及历史 code 值 `llm`/`vlm` 不再受支持。
+- **获取文件结果**、**提取字段** 响应中，字段与表格新增 `configModel`（配置模型，可为 `Auto`；存量未配置为 `null`）；原 `extractModel` 语义调整为「实际命中模型」（取值 `Acgpt`/`Acgpt-VL`/`DF-M1`）。
+- 抽取失败原因新增「超出 Acgpt-VL 处理限制」（`Acgpt-VL` 存在文档级处理上限，如页数超限时透出）。
+- 抽取模型 `Acgpt-VL` 暂不支持表格多表合并（`collect_from_multi_table`）。
+
 ## 2026-06-02
 
 ### API

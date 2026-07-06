@@ -75,7 +75,7 @@ curl -X POST \
   -F "workspace_id=<your-workspace-id>" \
   -F "name=发票" \
   -F "category_prompt=增值税发票，包含发票代码、发票号码等字段" \
-  -F "extract_model=llm" \
+  -F "extract_model=Acgpt" \
   -F "sample_files=@/path/to/invoice_sample.pdf" \
   -F 'fields=[{"name":"发票代码","description":"发票代码描述","prompt":"请抽取发票代码"}]' \
   "https://docflow.textin.com/api/app-api/sip/platform/v2/category/create"
@@ -101,7 +101,7 @@ data = {
     'workspace_id': workspace_id,
     'name': '发票',
     'category_prompt': '增值税发票，包含发票代码、发票号码等字段',
-    'extract_model': 'llm',
+    'extract_model': 'Acgpt',
     'fields': '[{"name":"发票代码","description":"发票代码描述","prompt":"请抽取发票代码"}]'
 }
 
@@ -130,7 +130,7 @@ else:
 - `workspace_id` (必填): 工作空间 ID
 - `name` (必填): 文件类别名称，最大长度 50
 - `category_prompt` (选填): 用于分类的提示词，最大长度 500
-- `extract_model` (必填): 抽取模型，可选值：`llm`、`vlm`
+- `extract_model` (必填): 抽取模型，可选值：`Auto`、`Acgpt`、`Acgpt-VL`、`DF-M1`
 - `sample_files` (必填): 样本文件列表，至少上传一个样本文件；每个类别最多拥有20个样本文件
 - `fields` (必填): 字段配置列表（JSON 字符串），至少配置一个字段，表格字段仅允许配置默认表格中的字段（table_id=-1）
 
@@ -218,7 +218,7 @@ else:
         "id": "1234567890",
         "name": "发票",
         "category_prompt": "增值税发票，包含发票代码、发票号码等字段",
-        "extract_model": "llm",
+        "extract_model": "Acgpt",
         "enabled": 1
       }
     ]

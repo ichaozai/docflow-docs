@@ -4,6 +4,26 @@ sidebarTitle: "Changelog"
 description: "DocFlow API documentation changelog"
 ---
 
+## 2026-07-05
+
+### API
+
+#### Extraction Model Upgrade
+
+The extraction models have been uniformly renamed, and a new **Auto** intelligent routing option has been added. This affects all endpoints that contain `extract_model` (**Create File Category**, **Update File Category**, adding and updating file category fields/tables, **Extract Fields**, **Get File Results**).
+
+| Old Model Name | New Model Name | Description |
+|---------|---------|------|
+| Model 1 | `Acgpt` | Fast speed with stable extraction results |
+| Model 2 | `DF-M1` | Suitable for complex document understanding |
+| Model 3 | `Acgpt-VL` | VLM, suitable for simple extraction (≤10 pages) |
+| — | `Auto` | Automatically matches the extraction model (new; the algorithm automatically routes to the actual model per field) |
+
+- The request parameter `extract_model` only accepts the new model names (`Auto`/`Acgpt`/`Acgpt-VL`/`DF-M1`); the old values `Model 1`/`Model 2`/`Model 3` and the legacy code values `llm`/`vlm` are no longer supported.
+- In the **Get File Results** and **Extract Fields** responses, fields and tables now include `configModel` (the configured model, which may be `Auto`; `null` for legacy data that was not configured); the original `extractModel` semantics have been adjusted to "actual hit model" (values `Acgpt`/`Acgpt-VL`/`DF-M1`).
+- A new extraction failure reason "Exceeded Acgpt-VL processing limit" has been added (`Acgpt-VL` has a document-level processing cap, surfaced when e.g. the page count exceeds the limit).
+- The extraction model `Acgpt-VL` does not currently support table multi-table merging (`collect_from_multi_table`).
+
 ## 2026-06-02
 
 ### API

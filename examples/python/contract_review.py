@@ -106,7 +106,7 @@ def create_category(
     """
     创建文件类别，同时上传样本文件并配置字段。
 
-    合同审核场景使用 Model 2（复杂文档理解），适合合同这类长文档的深度理解和字段抽取。
+    合同审核场景使用 DF-M1（复杂文档理解），适合合同这类长文档的深度理解和字段抽取。
 
     Returns:
         category_id
@@ -117,7 +117,7 @@ def create_category(
         form_data = [
             ("workspace_id",    (None, workspace_id)),
             ("name",            (None, name)),
-            ("extract_model",   (None, "Model 2")),
+            ("extract_model",   (None, "DF-M1")),
             ("category_prompt", (None, category_prompt)),
             ("fields",          (None, json.dumps(fields, ensure_ascii=False))),
             ("sample_files",    (os.path.basename(sample_file_path), f, mime)),
@@ -625,7 +625,7 @@ def main():
 
     # ----------------------------------------------------------
     # 步骤 2：创建文件类别（采购合同）
-    # 合同审核场景只有一个文件类别，字段较多，使用 Model 2 进行复杂文档理解。
+    # 合同审核场景只有一个文件类别，字段较多，使用 DF-M1 进行复杂文档理解。
     # ----------------------------------------------------------
     contract_id = create_category(
         workspace_id=workspace_id,

@@ -37,8 +37,17 @@
                 example: "1234567890"
               model:
                 type: string
-                description: "レビュータスクモデル。対応モデル: deepseek-r1、qwq-32b、qwen3-max、ORM-O1"
-                example: "deepseek-r1"
+                description: |
+                  レビュータスクモデル（任意）。指定可能な値：`deepseek-v4-pro`、`qwen3.6-plus`、`qwen3.7-max`、`ORM-O1`。省略した場合は、ルールリポジトリのデフォルトレビューモデルが使用されます。
+
+                  2026-07-08 以降、以下の旧モデルは廃止されました。対応する代替モデルを使用してください：
+
+                  | 旧モデル | 代替モデル |
+                  | --- | --- |
+                  | `deepseek-r1` | `deepseek-v4-pro` |
+                  | `qwq-32b` | `qwen3.6-plus` |
+                  | `qwen3-max` | `qwen3.7-max` |
+                example: "deepseek-v4-pro"
             required:
               - workspace_id
               - name
@@ -60,6 +69,10 @@
                           type: string
                           description: レビュータスク ID
                           example: "31415926"
+                        model:
+                          type: string
+                          description: このタスクで実際に使用されたレビューモデルの表示名。廃止済みのデフォルトモデルがプラットフォームルールにより代替された場合は、代替後のモデル表示名を返します。
+                          example: "deepseek-v4-pro"
 
 /api/app-api/sip/platform/v2/review/task/result:
   post:
@@ -147,6 +160,10 @@
                             error_count:
                               type: integer
                               description: タスク実行エラー件数
+                              example: 100
+                            not_triggered_count:
+                              type: integer
+                              description: 未トリガー件数
                               example: 100
                         groups:
                           type: array
@@ -257,8 +274,8 @@
                                       example: "手動レビューコメント"
                         model:
                           type: string
-                          description: レビュータスクモデル
-                          example: "deepseek-r1"
+                          description: レビュータスクモデルの表示名。履歴タスクでは `deepseek-r1（廃止済み）` のように、元のモデルと廃止済みマークが返る場合があります。
+                          example: "deepseek-v4-pro"
 
 /api/app-api/sip/platform/v2/review/task/delete:
   post:

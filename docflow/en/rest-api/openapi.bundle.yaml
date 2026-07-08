@@ -6,7 +6,7 @@ info:
     capabilities
   version: 2.8.4
 servers:
-  - url: https://docflow.textin.com
+  - url: 'https://docflow.textin.com'
 x-codeSamples: custom
 paths:
   /api/app-api/sip/platform/v2/file/upload:
@@ -15,23 +15,23 @@ paths:
       description: ''
       operationId: uploadFile
       parameters:
-        - $ref: '#/components/parameters/parameters_WorkspaceId'
-        - $ref: '#/components/parameters/parameters_Category'
-        - $ref: '#/components/parameters/parameters_BatchNumber'
-        - $ref: '#/components/parameters/parameters_AutoVerifyVat'
-        - $ref: '#/components/parameters/parameters_SplitFlag'
-        - $ref: '#/components/parameters/parameters_CropFlag'
-        - $ref: '#/components/parameters/parameters_TargetProcess'
-        - $ref: '#/components/parameters/parameters_ParserRemoveWatermark'
-        - $ref: '#/components/parameters/parameters_ParserCropDewarp'
-        - $ref: '#/components/parameters/parameters_ParserApplyMerge'
-        - $ref: '#/components/parameters/parameters_ParserFormulaLevel'
-        - $ref: '#/components/parameters/parameters_ParserTableTextSplitMode'
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/Category'
+        - $ref: '#/components/parameters/BatchNumber'
+        - $ref: '#/components/parameters/AutoVerifyVat'
+        - $ref: '#/components/parameters/SplitFlag'
+        - $ref: '#/components/parameters/CropFlag'
+        - $ref: '#/components/parameters/TargetProcess'
+        - $ref: '#/components/parameters/ParserRemoveWatermark'
+        - $ref: '#/components/parameters/ParserCropDewarp'
+        - $ref: '#/components/parameters/ParserApplyMerge'
+        - $ref: '#/components/parameters/ParserFormulaLevel'
+        - $ref: '#/components/parameters/ParserTableTextSplitMode'
         - $ref: '#/components/parameters/ParserDpi'
         - $ref: '#/components/parameters/ParserParseMode'
         - $ref: '#/components/parameters/ParserPdfPwd'
       requestBody:
-        $ref: '#/components/requestBodies/request-bodies_FileUploadRequestBody'
+        $ref: '#/components/requestBodies/FileUploadRequestBody'
       responses:
         '200':
           description: File upload successful
@@ -85,24 +85,24 @@ paths:
         results directly
       operationId: uploadFileSync
       parameters:
-        - $ref: '#/components/parameters/parameters_WorkspaceId'
-        - $ref: '#/components/parameters/parameters_Category'
-        - $ref: '#/components/parameters/parameters_BatchNumber'
-        - $ref: '#/components/parameters/parameters_AutoVerifyVat'
-        - $ref: '#/components/parameters/parameters_SplitFlag'
-        - $ref: '#/components/parameters/parameters_CropFlag'
-        - $ref: '#/components/parameters/parameters_TargetProcess'
-        - $ref: '#/components/parameters/parameters_ParserRemoveWatermark'
-        - $ref: '#/components/parameters/parameters_ParserCropDewarp'
-        - $ref: '#/components/parameters/parameters_ParserApplyMerge'
-        - $ref: '#/components/parameters/parameters_ParserFormulaLevel'
-        - $ref: '#/components/parameters/parameters_ParserTableTextSplitMode'
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/Category'
+        - $ref: '#/components/parameters/BatchNumber'
+        - $ref: '#/components/parameters/AutoVerifyVat'
+        - $ref: '#/components/parameters/SplitFlag'
+        - $ref: '#/components/parameters/CropFlag'
+        - $ref: '#/components/parameters/TargetProcess'
+        - $ref: '#/components/parameters/ParserRemoveWatermark'
+        - $ref: '#/components/parameters/ParserCropDewarp'
+        - $ref: '#/components/parameters/ParserApplyMerge'
+        - $ref: '#/components/parameters/ParserFormulaLevel'
+        - $ref: '#/components/parameters/ParserTableTextSplitMode'
         - $ref: '#/components/parameters/ParserDpi'
         - $ref: '#/components/parameters/ParserParseMode'
         - $ref: '#/components/parameters/ParserPdfPwd'
-        - $ref: '#/components/parameters/parameters_WithTaskDetailUrl'
+        - $ref: '#/components/parameters/WithTaskDetailUrl'
       requestBody:
-        $ref: '#/components/requestBodies/request-bodies_FileUploadRequestBody'
+        $ref: '#/components/requestBodies/FileUploadRequestBody'
       responses:
         '200':
           description: File uploaded and processed successfully
@@ -120,14 +120,14 @@ paths:
       parameters:
         - name: page
           in: query
-          description: Page number, default 1
+          description: 'Page number, default 1'
           required: false
           schema:
             type: integer
             default: 1
         - name: page_size
           in: query
-          description: Number of items per page, default 1000
+          description: 'Number of items per page, default 1000'
           required: false
           schema:
             type: integer
@@ -178,7 +178,7 @@ paths:
           schema:
             type: string
             format: date-time
-            example: '2024-01-01T00:00:00Z'
+            example: 2024-01-01T00:00:00.000Z
         - name: end_time
           in: query
           description: >-
@@ -188,7 +188,7 @@ paths:
           schema:
             type: string
             format: date-time
-            example: '2024-01-01T10:00:00Z'
+            example: 2024-01-01T10:00:00.000Z
         - name: with_document
           in: query
           description: >-
@@ -602,7 +602,7 @@ paths:
                         type: array
                         items:
                           type: integer
-                          description: Subfile page numbers, starting from 0
+                          description: 'Subfile page numbers, starting from 0'
                         example:
                           - 0
                           - 1
@@ -831,7 +831,7 @@ paths:
                 callback_url:
                   type: string
                   description: Callback URL
-                  example: https://example.com/callback
+                  example: 'https://example.com/callback'
                 callback_retry_time:
                   type: integer
                   description: Callback retry count
@@ -1228,7 +1228,7 @@ paths:
                   description: List of file category IDs to delete
                   example:
                     - '1234567890'
-                    - '0987654321'
+                    - 0987654321
               required:
                 - workspace_id
                 - category_ids
@@ -1344,7 +1344,7 @@ paths:
                     properties:
                       result:
                         type: array
-                        description: Creation result list, in same order as request
+                        description: 'Creation result list, in same order as request'
                         items:
                           type: object
                           properties:
@@ -1490,7 +1490,7 @@ paths:
                     type: string
                   example:
                     - '1234567890'
-                    - '0987654321'
+                    - 0987654321
                 table_id:
                   type: string
                   description: >
@@ -1629,7 +1629,7 @@ paths:
                     properties:
                       result:
                         type: array
-                        description: Creation result list, in same order as request
+                        description: 'Creation result list, in same order as request'
                         items:
                           type: object
                           properties:
@@ -1700,7 +1700,7 @@ paths:
   /api/app-api/sip/platform/v2/category/tables/delete:
     post:
       summary: Delete File Category Tables
-      description: Delete the specified file category tables, supports batch deletion
+      description: 'Delete the specified file category tables, supports batch deletion'
       operationId: deleteCategoryTables
       tags:
         - File Category
@@ -1726,7 +1726,7 @@ paths:
                     type: string
                   example:
                     - '1234567890'
-                    - '0987654321'
+                    - 0987654321
               required:
                 - workspace_id
                 - category_id
@@ -1764,7 +1764,7 @@ paths:
                   example: '1234567890'
                 files:
                   type: array
-                  description: Sample file list, maximum 20 files
+                  description: 'Sample file list, maximum 20 files'
                   items:
                     type: string
                     format: binary
@@ -1897,7 +1897,7 @@ paths:
                     type: string
                   example:
                     - '1234567890'
-                    - '0987654321'
+                    - 0987654321
               required:
                 - workspace_id
                 - category_id
@@ -1938,7 +1938,7 @@ paths:
                   description: List of sample IDs to delete
                   example:
                     - '1234567890'
-                    - '0987654321'
+                    - 0987654321
               required:
                 - workspace_id
                 - category_id
@@ -2429,10 +2429,27 @@ paths:
                   example: '1234567890'
                 model:
                   type: string
-                  description: >-
-                    Review task model. Supported models: deepseek-r1, qwq-32b,
-                    qwen3-max, ORM-O1
-                  example: deepseek-r1
+                  description: >
+                    Review task model (optional). Available values:
+                    `deepseek-v4-pro`, `qwen3.6-plus`, `qwen3.7-max`, `ORM-O1`.
+                    If omitted, the rule repository's default review model is
+                    used.
+
+
+                    Starting July 8, 2026, the following legacy models were
+                    deprecated. Use the corresponding replacement model:
+
+
+                    | Legacy model | Replacement model |
+
+                    | --- | --- |
+
+                    | `deepseek-r1` | `deepseek-v4-pro` |
+
+                    | `qwq-32b` | `qwen3.6-plus` |
+
+                    | `qwen3-max` | `qwen3.7-max` |
+                  example: deepseek-v4-pro
               required:
                 - workspace_id
                 - name
@@ -2454,6 +2471,14 @@ paths:
                             type: string
                             description: Review task ID
                             example: '31415926'
+                          model:
+                            type: string
+                            description: >-
+                              Display name of the review model actually used for
+                              this task. If a deprecated default model was
+                              replaced by platform rules, this field returns the
+                              replacement model display name.
+                            example: deepseek-v4-pro
   /api/app-api/sip/platform/v2/review/task/delete:
     post:
       summary: Delete Review Task
@@ -2575,6 +2600,10 @@ paths:
                               error_count:
                                 type: integer
                                 description: Task execution error count
+                                example: 100
+                              not_triggered_count:
+                                type: integer
+                                description: Not-triggered count
                                 example: 100
                           groups:
                             type: array
@@ -2700,8 +2729,12 @@ paths:
                                         example: Manual review comments
                           model:
                             type: string
-                            description: Review task model
-                            example: deepseek-r1
+                            description: >-
+                              Review task model display name. Historical tasks
+                              may continue to return the original model with a
+                              deprecated marker, such as `deepseek-r1
+                              (deprecated)`.
+                            example: deepseek-v4-pro
   /api/app-api/sip/platform/v2/review/task/retry:
     post:
       summary: Retry Review Task
@@ -3006,7 +3039,7 @@ paths:
                 prompt:
                   type: string
                   description: Table semantic extraction prompt
-                  example: Extract item name, quantity and amount from each row
+                  example: 'Extract item name, quantity and amount from each row'
                   maxLength: 200
                 collect_from_multi_table:
                   type: boolean
@@ -3123,7 +3156,7 @@ paths:
                 prompt:
                   type: string
                   description: Table semantic extraction prompt
-                  example: Extract item name, quantity and amount from each row
+                  example: 'Extract item name, quantity and amount from each row'
                   maxLength: 200
                 collect_from_multi_table:
                   type: boolean
@@ -3344,7 +3377,7 @@ components:
     ParserRemoveWatermark:
       name: parser_remove_watermark
       in: query
-      description: Remove watermark (0 no, 1 yes)
+      description: 'Remove watermark (0 no, 1 yes)'
       required: false
       schema:
         type: integer
@@ -3352,7 +3385,7 @@ components:
     ParserCropDewarp:
       name: parser_crop_dewarp
       in: query
-      description: Crop and dewarp (0 no, 1 yes)
+      description: 'Crop and dewarp (0 no, 1 yes)'
       required: false
       schema:
         type: integer
@@ -3360,7 +3393,7 @@ components:
     ParserApplyMerge:
       name: parser_apply_merge
       in: query
-      description: Merge cross-page paragraphs and tables (0 no, 1 yes)
+      description: 'Merge cross-page paragraphs and tables (0 no, 1 yes)'
       required: false
       schema:
         type: integer
@@ -3378,7 +3411,7 @@ components:
     ParserTableTextSplitMode:
       name: parser_table_text_split_mode
       in: query
-      description: Split text blocks crossed by table lines (0 no, 1 yes)
+      description: 'Split text blocks crossed by table lines (0 no, 1 yes)'
       required: false
       schema:
         type: integer
@@ -3391,117 +3424,10 @@ components:
       schema:
         type: boolean
         default: false
-    parameters_WorkspaceId:
-      name: workspace_id
-      in: query
-      description: Workspace ID
-      required: true
-      schema:
-        type: string
-        example: 1234567890
-    parameters_Category:
-      name: category
-      in: query
-      description: File Category
-      required: false
-      schema:
-        type: string
-        example: invoice
-    parameters_BatchNumber:
-      name: batch_number
-      in: query
-      description: >
-        Batch Number.            You can upload multiple times with the same
-        batch number, and later retrieve processing results for multiple files
-        in that batch using the batch number.            If the value is empty,
-        the system automatically generates a string up to 20 characters long.
-      required: false
-      schema:
-        type: string
-        example: 202412190001
-    parameters_AutoVerifyVat:
-      name: auto_verify_vat
-      in: query
-      description: Whether to automatically verify VAT invoice
-      required: false
-      schema:
-        type: boolean
-        default: false
-    parameters_SplitFlag:
-      name: split_flag
-      in: query
-      description: Whether to perform file splitting
-      required: false
-      schema:
-        type: boolean
-        default: false
-    parameters_CropFlag:
-      name: crop_flag
-      in: query
-      description: Whether to perform multi-image cropping
-      required: false
-      schema:
-        type: boolean
-        default: false
-    parameters_TargetProcess:
-      name: target_process
-      in: query
-      description: >
-        Target processing type.            Optional values:            -
-        classify: Classification            - extract: Extraction
-      required: false
-      schema:
-        type: string
-        enum:
-          - classify
-          - extract
-        example: classify
-    parameters_ParserRemoveWatermark:
-      name: parser_remove_watermark
-      in: query
-      description: Remove watermark (0 no, 1 yes)
-      required: false
-      schema:
-        type: integer
-        default: 0
-    parameters_ParserCropDewarp:
-      name: parser_crop_dewarp
-      in: query
-      description: Crop and dewarp (0 no, 1 yes)
-      required: false
-      schema:
-        type: integer
-        default: 0
-    parameters_ParserApplyMerge:
-      name: parser_apply_merge
-      in: query
-      description: Merge cross-page paragraphs and tables (0 no, 1 yes)
-      required: false
-      schema:
-        type: integer
-        default: 1
-    parameters_ParserFormulaLevel:
-      name: parser_formula_level
-      in: query
-      description: >-
-        Formula recognition level (0 recognizes both display and inline
-        formulas, 1 recognizes display formulas only, 2 recognizes no formulas)
-      required: false
-      schema:
-        type: integer
-        default: 0
-    parameters_ParserTableTextSplitMode:
-      name: parser_table_text_split_mode
-      in: query
-      description: Split text blocks crossed by table lines (0 no, 1 yes)
-      required: false
-      schema:
-        type: integer
-        default: 0
     ParserDpi:
       name: parser_dpi
       in: query
-      description: File resolution (144 default, 216 high precision)
+      description: 'File resolution (144 default, 216 high precision)'
       required: false
       schema:
         type: integer
@@ -3531,14 +3457,6 @@ components:
       required: false
       schema:
         type: string
-    parameters_WithTaskDetailUrl:
-      name: with_task_detail_url
-      in: query
-      description: Whether to return the task details page URL
-      required: false
-      schema:
-        type: boolean
-        default: false
   requestBodies:
     FileUploadRequestBody:
       description: File upload request body
@@ -3565,38 +3483,8 @@ components:
                 items:
                   type: string
                   description: File URL
-                  example: https://example.com/file.pdf
-                  pattern: ^https?://.*$
-                maxItems: 10
-            required:
-              - urls
-    request-bodies_FileUploadRequestBody:
-      description: File upload request body
-      required: true
-      content:
-        multipart/form-data:
-          schema:
-            type: object
-            properties:
-              file:
-                type: string
-                format: binary
-        application/json:
-          schema:
-            type: object
-            properties:
-              urls:
-                description: >
-                  File URL list
-
-                  Supports up to 10 file URLs per upload, each file maximum
-                  100MB
-                type: array
-                items:
-                  type: string
-                  description: File URL
-                  example: https://example.com/file.pdf
-                  pattern: ^https?://.*$
+                  example: 'https://example.com/file.pdf'
+                  pattern: '^https?://.*$'
                 maxItems: 10
             required:
               - urls
@@ -3703,7 +3591,7 @@ components:
         properties:
           page:
             type: integer
-            description: Page number, starting from 0
+            description: 'Page number, starting from 0'
             example: 1
           angle:
             type: integer
@@ -3768,7 +3656,7 @@ components:
         confidence:
           type: number
           format: float
-          description: Confidence score, range 0~1
+          description: 'Confidence score, range 0~1'
           example: 0.95
         extractModel:
           type: string
@@ -3850,7 +3738,7 @@ components:
         confidence:
           type: number
           format: float
-          description: Confidence score, range 0~1
+          description: 'Confidence score, range 0~1'
           example: 0.95
     StampValue:
       type: object
@@ -4231,23 +4119,23 @@ components:
           example: 0
         apply_merge:
           type: integer
-          description: Merge cross-page paragraphs and tables (0 no, 1 yes)
+          description: 'Merge cross-page paragraphs and tables (0 no, 1 yes)'
           example: 1
         table_text_split_mode:
           type: integer
-          description: Split text blocks crossed by table lines (0 no, 1 yes)
+          description: 'Split text blocks crossed by table lines (0 no, 1 yes)'
           example: 0
         crop_dewarp:
           type: integer
-          description: Crop and dewarp (0 no, 1 yes)
+          description: 'Crop and dewarp (0 no, 1 yes)'
           example: 0
         remove_watermark:
           type: integer
-          description: Remove watermark (0 no, 1 yes)
+          description: 'Remove watermark (0 no, 1 yes)'
           example: 0
         dpi:
           type: integer
-          description: File resolution (144 default, 216 high precision)
+          description: 'File resolution (144 default, 216 high precision)'
           example: 144
           enum:
             - 144
@@ -4630,7 +4518,7 @@ components:
               example: abcd
             expiry:
               type: integer
-              description: Expiration time (in epoch timestamp format, unit is seconds)
+              description: 'Expiration time (in epoch timestamp format, unit is seconds)'
               example: 1700000000
     Workspace:
       type: object
@@ -4668,7 +4556,7 @@ components:
         callback_url:
           type: string
           description: Callback URL
-          example: https://example.com/callback
+          example: 'https://example.com/callback'
         callback_retry_time:
           type: integer
           description: Callback retry count
@@ -4731,10 +4619,10 @@ components:
             match:
               type: string
               description: Regex pattern for matching or capturing the extraction result
-              example: ^(\d{4})-(\d{2})-(\d{2})$
+              example: '^(\d{4})-(\d{2})-(\d{2})$'
             replace:
               type: string
-              description: Replacement expression, supports $1, $2 capture group references
+              description: 'Replacement expression, supports $1, $2 capture group references'
               example: $1/$2/$3
         mismatch_action:
           type: object
@@ -4890,7 +4778,7 @@ components:
         prompt:
           type: string
           description: Table semantic extraction prompt
-          example: Extract item name, quantity and amount from each row
+          example: 'Extract item name, quantity and amount from each row'
         collect_from_multi_table:
           type: boolean
           description: Merge multiple tables

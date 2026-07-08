@@ -37,8 +37,17 @@
                 example: "1234567890"
               model:
                 type: string
-                description: 审核任务模型，支持的模型：deepseek-r1, qwq-32b, qwen3-max, ORM-O1
-                example: "deepseek-r1"
+                description: |
+                  审核任务模型（选填）。可选值：`deepseek-v4-pro`、`qwen3.6-plus`、`qwen3.7-max`、`ORM-O1`。不传时使用规则库默认审核模型。
+
+                  2026-07-08 起，以下旧模型已下架，请改用对应替代模型：
+
+                  | 旧模型 | 替代模型 |
+                  | --- | --- |
+                  | `deepseek-r1` | `deepseek-v4-pro` |
+                  | `qwq-32b` | `qwen3.6-plus` |
+                  | `qwen3-max` | `qwen3.7-max` |
+                example: "deepseek-v4-pro"
             required:
               - workspace_id
               - name
@@ -60,6 +69,10 @@
                           type: string
                           description: 审核任务ID
                           example: "31415926"
+                        model:
+                          type: string
+                          description: 本次实际使用的审核模型展示名称；若按平台规则替代了已下架默认模型，则返回替代后的模型展示名称
+                          example: "deepseek-v4-pro"
 
 /api/app-api/sip/platform/v2/review/task/result:
   post:
@@ -147,6 +160,10 @@
                             error_count:
                               type: integer
                               description: 任务执行异常数
+                              example: 100
+                            not_triggered_count:
+                              type: integer
+                              description: 未触发数
                               example: 100
                         groups:
                           type: array
@@ -257,8 +274,8 @@
                                       example: "人工复核批注"
                         model:
                           type: string
-                          description: 审核任务模型
-                          example: "deepseek-r1"
+                          description: 审核任务模型展示名称。历史任务可能继续返回原模型及已下架标记（如 `deepseek-r1（已下架）`）。
+                          example: "deepseek-v4-pro"
 
 /api/app-api/sip/platform/v2/review/task/delete:
   post:

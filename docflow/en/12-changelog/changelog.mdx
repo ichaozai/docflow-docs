@@ -4,6 +4,26 @@ sidebarTitle: "Changelog"
 description: "DocFlow API documentation changelog"
 ---
 
+## 2026-07-08
+
+### API
+
+#### Intelligent Review Model Update
+
+- [Submit Review Task](/api-reference/intelligent-review/submit-review-task)
+
+  - **Body**: The available values of the `model` parameter are updated to `deepseek-v4-pro`, `qwen3.6-plus`, `qwen3.7-max`, and `ORM-O1`.
+  Starting July 8, 2026, the following legacy models were deprecated. Use the corresponding replacement model:
+
+    | Legacy model | Replacement model |
+    | --- | --- |
+    | `deepseek-r1` | `deepseek-v4-pro` |
+    | `qwq-32b` | `qwen3.6-plus` |
+    | `qwen3-max` | `qwen3.7-max` |
+
+  - **Response**: Added the `model` field, which returns the model actually used for the review task.
+- [Get Review Task Result](/api-reference/intelligent-review/get-review-task-result) statistics now include `not_triggered_count`, which returns the number of review rules that were not triggered.
+
 ## 2026-07-05
 
 ### API

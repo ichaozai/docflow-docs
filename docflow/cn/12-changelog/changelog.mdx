@@ -4,6 +4,26 @@ sidebarTitle: "更新日志"
 description: "DocFlow API 文档更新记录"
 ---
 
+## 2026-07-08
+
+### API
+
+#### 智能审核模型调整
+
+- [新建审核任务](/api-reference/智能审核/新建审核任务)
+
+  - **Body**： `model` 参数可选值更新为 `deepseek-v4-pro`、`qwen3.6-plus`、`qwen3.7-max`、`ORM-O1`。
+  2026-07-08 起，以下旧模型已下架，请改用对应替代模型：
+
+    | 旧模型 | 替代模型 |
+    | --- | --- |
+    | `deepseek-r1` | `deepseek-v4-pro` |
+    | `qwq-32b` | `qwen3.6-plus` |
+    | `qwen3-max` | `qwen3.7-max` |
+
+  - **Response**：新增 `model` 字段，用于返回本次审核任务实际使用的模型。
+- [获取审核结果](/api-reference/智能审核/获取审核结果) 的统计信息新增 `not_triggered_count` 字段，用于返回未触发审核规则的数量。
+
 ## 2026-07-05
 
 ### API

@@ -5,9 +5,9 @@ info:
   version: 2.8.4
   contact:
     name: TextIn
-    url: https://www.textin.com/contact?type=27&sub_type=1
+    url: 'https://www.textin.com/contact?type=27&sub_type=1'
 servers:
-  - url: https://docflow.textin.com
+  - url: 'https://docflow.textin.com'
 x-codeSamples: custom
 tags:
   - name: ワークスペース管理
@@ -27,23 +27,23 @@ paths:
       description: ''
       operationId: uploadFile
       parameters:
-        - $ref: '#/components/parameters/parameters_WorkspaceId'
-        - $ref: '#/components/parameters/parameters_Category'
-        - $ref: '#/components/parameters/parameters_BatchNumber'
-        - $ref: '#/components/parameters/parameters_AutoVerifyVat'
-        - $ref: '#/components/parameters/parameters_SplitFlag'
-        - $ref: '#/components/parameters/parameters_CropFlag'
-        - $ref: '#/components/parameters/parameters_TargetProcess'
-        - $ref: '#/components/parameters/parameters_ParserRemoveWatermark'
-        - $ref: '#/components/parameters/parameters_ParserCropDewarp'
-        - $ref: '#/components/parameters/parameters_ParserApplyMerge'
-        - $ref: '#/components/parameters/parameters_ParserFormulaLevel'
-        - $ref: '#/components/parameters/parameters_ParserTableTextSplitMode'
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/Category'
+        - $ref: '#/components/parameters/BatchNumber'
+        - $ref: '#/components/parameters/AutoVerifyVat'
+        - $ref: '#/components/parameters/SplitFlag'
+        - $ref: '#/components/parameters/CropFlag'
+        - $ref: '#/components/parameters/TargetProcess'
+        - $ref: '#/components/parameters/ParserRemoveWatermark'
+        - $ref: '#/components/parameters/ParserCropDewarp'
+        - $ref: '#/components/parameters/ParserApplyMerge'
+        - $ref: '#/components/parameters/ParserFormulaLevel'
+        - $ref: '#/components/parameters/ParserTableTextSplitMode'
         - $ref: '#/components/parameters/ParserDpi'
         - $ref: '#/components/parameters/ParserParseMode'
         - $ref: '#/components/parameters/ParserPdfPwd'
       requestBody:
-        $ref: '#/components/requestBodies/request-bodies_FileUploadRequestBody'
+        $ref: '#/components/requestBodies/FileUploadRequestBody'
       responses:
         '200':
           description: ファイルアップロードに成功
@@ -95,24 +95,24 @@ paths:
       description: ファイルをアップロードし、処理完了を待ってから処理結果を直接返します
       operationId: uploadFileSync
       parameters:
-        - $ref: '#/components/parameters/parameters_WorkspaceId'
-        - $ref: '#/components/parameters/parameters_Category'
-        - $ref: '#/components/parameters/parameters_BatchNumber'
-        - $ref: '#/components/parameters/parameters_AutoVerifyVat'
-        - $ref: '#/components/parameters/parameters_SplitFlag'
-        - $ref: '#/components/parameters/parameters_CropFlag'
-        - $ref: '#/components/parameters/parameters_TargetProcess'
-        - $ref: '#/components/parameters/parameters_ParserRemoveWatermark'
-        - $ref: '#/components/parameters/parameters_ParserCropDewarp'
-        - $ref: '#/components/parameters/parameters_ParserApplyMerge'
-        - $ref: '#/components/parameters/parameters_ParserFormulaLevel'
-        - $ref: '#/components/parameters/parameters_ParserTableTextSplitMode'
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/Category'
+        - $ref: '#/components/parameters/BatchNumber'
+        - $ref: '#/components/parameters/AutoVerifyVat'
+        - $ref: '#/components/parameters/SplitFlag'
+        - $ref: '#/components/parameters/CropFlag'
+        - $ref: '#/components/parameters/TargetProcess'
+        - $ref: '#/components/parameters/ParserRemoveWatermark'
+        - $ref: '#/components/parameters/ParserCropDewarp'
+        - $ref: '#/components/parameters/ParserApplyMerge'
+        - $ref: '#/components/parameters/ParserFormulaLevel'
+        - $ref: '#/components/parameters/ParserTableTextSplitMode'
         - $ref: '#/components/parameters/ParserDpi'
         - $ref: '#/components/parameters/ParserParseMode'
         - $ref: '#/components/parameters/ParserPdfPwd'
-        - $ref: '#/components/parameters/parameters_WithTaskDetailUrl'
+        - $ref: '#/components/parameters/WithTaskDetailUrl'
       requestBody:
-        $ref: '#/components/requestBodies/request-bodies_FileUploadRequestBody'
+        $ref: '#/components/requestBodies/FileUploadRequestBody'
       responses:
         '200':
           description: ファイルのアップロードと処理に成功
@@ -179,20 +179,20 @@ paths:
             $ref: '#/components/schemas/VerificationStatus'
         - name: start_time
           in: query
-          description: 更新時刻で検索する開始時刻。RFC3339 形式（YYYY-MM-DDTHH:MM:SSZ）
+          description: '更新時刻で検索する開始時刻。RFC3339 形式（YYYY-MM-DDTHH:MM:SSZ）'
           required: false
           schema:
             type: string
             format: date-time
-            example: '2024-01-01T00:00:00Z'
+            example: 2024-01-01T00:00:00.000Z
         - name: end_time
           in: query
-          description: 更新時刻で検索する終了時刻。RFC3339 形式（YYYY-MM-DDTHH:MM:SSZ）
+          description: '更新時刻で検索する終了時刻。RFC3339 形式（YYYY-MM-DDTHH:MM:SSZ）'
           required: false
           schema:
             type: string
             format: date-time
-            example: '2024-01-01T10:00:00Z'
+            example: 2024-01-01T10:00:00.000Z
         - name: with_document
           in: query
           description: 文書の完全なテキスト認識結果を返すかどうか
@@ -808,7 +808,7 @@ paths:
                 callback_url:
                   type: string
                   description: コールバック URL
-                  example: https://example.com/callback
+                  example: 'https://example.com/callback'
                 callback_retry_time:
                   type: integer
                   description: コールバック再試行回数
@@ -1180,7 +1180,7 @@ paths:
                   description: 削除するファイルカテゴリ ID のリスト
                   example:
                     - '1234567890'
-                    - '0987654321'
+                    - 0987654321
               required:
                 - workspace_id
                 - category_ids
@@ -1430,7 +1430,7 @@ paths:
                     type: string
                   example:
                     - '1234567890'
-                    - '0987654321'
+                    - 0987654321
                 table_id:
                   type: string
                   description: >
@@ -1654,7 +1654,7 @@ paths:
                     type: string
                   example:
                     - '1234567890'
-                    - '0987654321'
+                    - 0987654321
               required:
                 - workspace_id
                 - category_id
@@ -1817,7 +1817,7 @@ paths:
                     type: string
                   example:
                     - '1234567890'
-                    - '0987654321'
+                    - 0987654321
               required:
                 - workspace_id
                 - category_id
@@ -1858,7 +1858,7 @@ paths:
                   description: 削除するサンプル ID のリスト
                   example:
                     - '1234567890'
-                    - '0987654321'
+                    - 0987654321
               required:
                 - workspace_id
                 - category_id
@@ -2347,8 +2347,23 @@ paths:
                   example: '1234567890'
                 model:
                   type: string
-                  description: 'レビュータスクモデル。対応モデル: deepseek-r1、qwq-32b、qwen3-max、ORM-O1'
-                  example: deepseek-r1
+                  description: >
+                    レビュータスクモデル（任意）。指定可能な値：`deepseek-v4-pro`、`qwen3.6-plus`、`qwen3.7-max`、`ORM-O1`。省略した場合は、ルールリポジトリのデフォルトレビューモデルが使用されます。
+
+
+                    2026-07-08 以降、以下の旧モデルは廃止されました。対応する代替モデルを使用してください：
+
+
+                    | 旧モデル | 代替モデル |
+
+                    | --- | --- |
+
+                    | `deepseek-r1` | `deepseek-v4-pro` |
+
+                    | `qwq-32b` | `qwen3.6-plus` |
+
+                    | `qwen3-max` | `qwen3.7-max` |
+                  example: deepseek-v4-pro
               required:
                 - workspace_id
                 - name
@@ -2370,6 +2385,11 @@ paths:
                             type: string
                             description: レビュータスク ID
                             example: '31415926'
+                          model:
+                            type: string
+                            description: >-
+                              このタスクで実際に使用されたレビューモデルの表示名。廃止済みのデフォルトモデルがプラットフォームルールにより代替された場合は、代替後のモデル表示名を返します。
+                            example: deepseek-v4-pro
   /api/app-api/sip/platform/v2/review/task/delete:
     post:
       summary: レビュータスクを削除
@@ -2492,6 +2512,10 @@ paths:
                                 type: integer
                                 description: タスク実行エラー件数
                                 example: 100
+                              not_triggered_count:
+                                type: integer
+                                description: 未トリガー件数
+                                example: 100
                           groups:
                             type: array
                             items:
@@ -2610,8 +2634,10 @@ paths:
                                         example: 手動レビューコメント
                           model:
                             type: string
-                            description: レビュータスクモデル
-                            example: deepseek-r1
+                            description: >-
+                              レビュータスクモデルの表示名。履歴タスクでは `deepseek-r1（廃止済み）`
+                              のように、元のモデルと廃止済みマークが返る場合があります。
+                            example: deepseek-v4-pro
   /api/app-api/sip/platform/v2/review/task/retry:
     post:
       summary: レビュータスクを再試行
@@ -3256,108 +3282,6 @@ components:
       schema:
         type: boolean
         default: false
-    parameters_WorkspaceId:
-      name: workspace_id
-      in: query
-      description: ワークスペース ID
-      required: true
-      schema:
-        type: string
-        example: 1234567890
-    parameters_Category:
-      name: category
-      in: query
-      description: ファイルカテゴリ
-      required: false
-      schema:
-        type: string
-        example: invoice
-    parameters_BatchNumber:
-      name: batch_number
-      in: query
-      description: >
-        バッチ番号。同じバッチ番号で複数回アップロードできます。後からそのバッチ番号を使って、同一バッチ内の複数ファイルの処理結果を取得できます。値が空の場合、システムが最大
-        20 文字の文字列を自動生成します。
-      required: false
-      schema:
-        type: string
-        example: 202412190001
-    parameters_AutoVerifyVat:
-      name: auto_verify_vat
-      in: query
-      description: VAT インボイスを自動検証するかどうか
-      required: false
-      schema:
-        type: boolean
-        default: false
-    parameters_SplitFlag:
-      name: split_flag
-      in: query
-      description: ファイル分割を実行するかどうか
-      required: false
-      schema:
-        type: boolean
-        default: false
-    parameters_CropFlag:
-      name: crop_flag
-      in: query
-      description: 複数画像クロップを実行するかどうか
-      required: false
-      schema:
-        type: boolean
-        default: false
-    parameters_TargetProcess:
-      name: target_process
-      in: query
-      description: |
-        対象処理タイプ。指定可能な値: - classify: 分類 - extract: 抽出
-      required: false
-      schema:
-        type: string
-        enum:
-          - classify
-          - extract
-        example: classify
-    parameters_ParserRemoveWatermark:
-      name: parser_remove_watermark
-      in: query
-      description: '透かし除去（0: いいえ、1: はい）'
-      required: false
-      schema:
-        type: integer
-        default: 0
-    parameters_ParserCropDewarp:
-      name: parser_crop_dewarp
-      in: query
-      description: 'クロップと歪み補正（0: いいえ、1: はい）'
-      required: false
-      schema:
-        type: integer
-        default: 0
-    parameters_ParserApplyMerge:
-      name: parser_apply_merge
-      in: query
-      description: 'ページをまたぐ段落とテーブルを結合（0: いいえ、1: はい）'
-      required: false
-      schema:
-        type: integer
-        default: 1
-    parameters_ParserFormulaLevel:
-      name: parser_formula_level
-      in: query
-      description: '数式認識レベル（0: 表示数式とインライン数式を認識、1: 表示数式のみ認識、2: 数式を認識しない）'
-      required: false
-      schema:
-        type: integer
-        default: 0
-    parameters_ParserTableTextSplitMode:
-      name: parser_table_text_split_mode
-      in: query
-      description: 'テーブル罫線と交差するテキストブロックを分割（0: いいえ、1: はい）'
-      required: false
-      schema:
-        type: integer
-        default: 0
     ParserDpi:
       name: parser_dpi
       in: query
@@ -3391,14 +3315,6 @@ components:
       required: false
       schema:
         type: string
-    parameters_WithTaskDetailUrl:
-      name: with_task_detail_url
-      in: query
-      description: タスク詳細ページ URL を返すかどうか
-      required: false
-      schema:
-        type: boolean
-        default: false
   requestBodies:
     FileUploadRequestBody:
       description: ファイルアップロードのリクエストボディ
@@ -3423,36 +3339,8 @@ components:
                 items:
                   type: string
                   description: ファイル URL
-                  example: https://example.com/file.pdf
-                  pattern: ^https?://.*$
-                maxItems: 10
-            required:
-              - urls
-    request-bodies_FileUploadRequestBody:
-      description: ファイルアップロードのリクエストボディ
-      required: true
-      content:
-        multipart/form-data:
-          schema:
-            type: object
-            properties:
-              file:
-                type: string
-                format: binary
-        application/json:
-          schema:
-            type: object
-            properties:
-              urls:
-                description: |
-                  ファイル URL リスト
-                  1 回のアップロードで最大 10 個のファイル URL に対応し、各ファイルは最大 100MB です
-                type: array
-                items:
-                  type: string
-                  description: ファイル URL
-                  example: https://example.com/file.pdf
-                  pattern: ^https?://.*$
+                  example: 'https://example.com/file.pdf'
+                  pattern: '^https?://.*$'
                 maxItems: 10
             required:
               - urls
@@ -4467,7 +4355,7 @@ components:
         callback_url:
           type: string
           description: コールバック URL
-          example: https://example.com/callback
+          example: 'https://example.com/callback'
         callback_retry_time:
           type: integer
           description: コールバック再試行回数
@@ -4518,7 +4406,7 @@ components:
             match:
               type: string
               description: 抽出結果をマッチングまたはキャプチャする正規表現パターン
-              example: ^(\d{4})-(\d{2})-(\d{2})$
+              example: '^(\d{4})-(\d{2})-(\d{2})$'
             replace:
               type: string
               description: 置換式。$1、$2 などのキャプチャグループ参照をサポートします
@@ -4755,7 +4643,7 @@ components:
           description: 意味抽出プロンプトを使用するかどうか
         alias:
           type: array
-          description: フィールド別名。省略=変更なし、空配列 []=クリア、空でない配列=上書き
+          description: 'フィールド別名。省略=変更なし、空配列 []=クリア、空でない配列=上書き'
           items:
             type: string
           example:

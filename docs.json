@@ -443,44 +443,6 @@
                 ]
               },
               {
-                "group": "シナリオ別サンプル",
-                "pages": [
-                  {
-                    "group": "経費精算シナリオ",
-                    "pages": [
-                      "docflow/ja/00-overview/expense_reimbursement",
-                      "docflow/ja/00-overview/expense_reimbursement_already_configured"
-                    ]
-                  },
-                  {
-                    "group": "AP 照合シナリオ",
-                    "pages": [
-                      "docflow/ja/00-overview/ap_review",
-                      "docflow/ja/00-overview/ap_review_already_configured"
-                    ]
-                  },
-                  {
-                    "group": "契約レビューシナリオ",
-                    "pages": [
-                      "docflow/ja/00-overview/contract_review",
-                      "docflow/ja/00-overview/contract_review_already_configured"
-                    ]
-                  },
-                  {
-                    "group": "基盤機能 - 文書解析",
-                    "pages": [
-                      "docflow/ja/00-overview/atomic_capabilities_parse"
-                    ]
-                  },
-                  {
-                    "group": "基盤機能 - エンティティ抽出",
-                    "pages": [
-                      "docflow/ja/00-overview/atomic_capabilities_extract"
-                    ]
-                  }
-                ]
-              },
-              {
                 "group": "ワークスペース管理",
                 "pages": [
                   "docflow/ja/02-workspace/quickstart"
@@ -564,12 +526,6 @@
                 "group": "文書再試行",
                 "pages": [
                   "docflow/ja/09-retry/quickstart"
-                ]
-              },
-              {
-                "group": "Web ページ連携",
-                "pages": [
-                  "docflow/ja/10-web/iframe"
                 ]
               },
               {

@@ -1,9 +1,0 @@
-ApiId:
-  type: apiKey
-  in: header
-  name: x-ti-app-id
-
-SecretCode:
-  type: apiKey
-  in: header
-  name: x-ti-secret-code

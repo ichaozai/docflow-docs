@@ -6,7 +6,6 @@ This repository contains the Mintlify documentation for Docflow API.
 
 - Chinese: `docflow/cn`
 - English: `docflow/en`
-- Japanese: `docflow/ja`
 
 Language navigation is configured in `docs.json` under `navigation.languages`.
 
@@ -29,10 +28,9 @@ If OpenAPI source files are changed, rebuild the bundled files before previewing
 ```
 openapi bundle docflow/cn/rest-api/openapi.yaml.src -o docflow/cn/rest-api/openapi.bundle.yaml
 openapi bundle docflow/en/rest-api/openapi.yaml.src -o docflow/en/rest-api/openapi.bundle.yaml
-openapi bundle docflow/ja/rest-api/openapi.yaml.src -o docflow/ja/rest-api/openapi.bundle.yaml
 ```
 
-When adding or updating pages, keep `docflow/cn`, `docflow/en`, `docflow/ja`, and `docs.json` in sync.
+When adding or updating pages, keep `docflow/cn`, `docflow/en`, and `docs.json` in sync.
 
 ### Publishing Changes
 

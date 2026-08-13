@@ -230,8 +230,8 @@ client.category.update(
 - On create, omitting this parameter leaves rules unconfigured; dual empty arrays have the same effect.
 - On update, omit it or pass `None` for no change; a valid object replaces all rules; only dual empty arrays clear them. `{}` and blank strings are invalid.
 - In the SDK, a rule group's `group_name` is optional: positive groups default to `group_1`, `group_2`, and so on, while a negative group defaults to `exclude`. It is display/tracking metadata only and does not affect matching or conflict detection; names returned by the API are preserved on a subsequent update.
-- Keyword comparison ignores case and all whitespace. A normalized keyword must be non-empty, unique within its group, and at most 50 characters. A group has at most 20 keywords; a category has at most 10 positive and 1 negative group; `min_hit` must be from 1 to the number of group keywords.
-- Positive and negative rules in the same category cannot share a keyword. Other enabled categories in the workspace cannot have a duplicate same-type rule group. The SDK pre-validates rules it can determine locally; the service performs final validation, and a cross-category conflict returns `1005015019`.
+- Keywords preserve their original case and whitespace. Each keyword must be non-empty and at most 50 characters, and the same original string cannot appear twice within a group. A group has at most 20 keywords; a category has at most 10 positive and 1 negative group; `min_hit` must be from 1 to the number of group keywords.
+- Positive and negative rules in the same category cannot contain the same original keyword string. Other enabled categories in the workspace cannot have a same-type rule group with the same original keyword set. The SDK pre-validates rules it can determine locally; the service performs final validation, and a cross-category conflict returns `1005015019`.
 
 ### Field Management
 

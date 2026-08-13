@@ -77,11 +77,13 @@ curl -X POST \
   -F "category_prompt=增值税发票，包含发票代码、发票号码等字段" \
   -F "extract_model=Acgpt" \
   -F "sample_files=@/path/to/invoice_sample.pdf" \
+  -F 'category_keyword_rules={"positive_rules":[{"group_name":"发票关键字","min_hit":2,"words":["发票代码","发票号码"]}],"negative_rules":[]}' \
   -F 'fields=[{"name":"发票代码","description":"发票代码描述","prompt":"请抽取发票代码"}]' \
   "https://docflow.textin.com/api/app-api/sip/platform/v2/category/create"
 ```
 
 ```python Python icon=python expandable lines
+import json
 import requests
 
 ti_app_id = "<your-app-id>"
@@ -102,7 +104,17 @@ data = {
     'name': '发票',
     'category_prompt': '增值税发票，包含发票代码、发票号码等字段',
     'extract_model': 'Acgpt',
-    'fields': '[{"name":"发票代码","description":"发票代码描述","prompt":"请抽取发票代码"}]'
+    'fields': '[{"name":"发票代码","description":"发票代码描述","prompt":"请抽取发票代码"}]',
+    'category_keyword_rules': json.dumps({
+        'positive_rules': [
+            {
+                'group_name': '发票关键字',
+                'min_hit': 2,
+                'words': ['发票代码', '发票号码'],
+            }
+        ],
+        'negative_rules': [],
+    }, ensure_ascii=False),
 }
 
 resp = requests.post(
@@ -133,6 +145,11 @@ else:
 - `extract_model` (必填): 抽取模型，可选值：`Auto`、`Acgpt`、`Acgpt-VL`、`DF-M1`
 - `sample_files` (必填): 样本文件列表，至少上传一个样本文件；每个类别最多拥有20个样本文件
 - `fields` (必填): 字段配置列表（JSON 字符串），至少配置一个字段，表格字段仅允许配置默认表格中的字段（table_id=-1）
+- `category_keyword_rules` (选填): 用于分类的关键字规则（JSON 字符串），正向规则用于匹配，负向规则用于过滤。正向规则最多配置 10 组，负向规则最多配置 1 组，每组最多支持配置 20 个关键字
+
+<Note>
+  同一规则组中至少命中 **min\_hit** 个关键字时，该规则组命中。多个正向规则组之间是 OR 关系；命中反向规则组时排除该类别。创建时不传或传入两个空数组表示不配置规则。
+</Note>
 
 **响应示例：**
 
@@ -191,6 +208,7 @@ if result.get("code") == 200:
     print(f"共找到 {total} 个文件类别")
     for category in categories:
         print(f"类别ID: {category.get('id')}, 名称: {category.get('name')}")
+        print(f"分类关键字规则: {category.get('category_keyword_rules')}")
 else:
     print(f"获取失败: {result.get('msg')}")
 ```
@@ -218,6 +236,16 @@ else:
         "id": "1234567890",
         "name": "发票",
         "category_prompt": "增值税发票，包含发票代码、发票号码等字段",
+        "category_keyword_rules": {
+          "positive_rules": [
+            {
+              "group_name": "发票关键字",
+              "min_hit": 2,
+              "words": ["发票代码", "发票号码"]
+            }
+          ],
+          "negative_rules": []
+        },
         "extract_model": "Acgpt",
         "enabled": 1
       }
@@ -225,6 +253,8 @@ else:
   }
 }
 ```
+
+已配置分类关键字的类别会在 `category_keyword_rules` 中返回完整规则对象，可用于后续展示或更新。
 
 ## 更新文件类别
 
@@ -242,6 +272,16 @@ curl -X POST \
     "category_id": "1234567890",
     "name": "更新后的类别名称",
     "category_prompt": "更新后的提示词",
+    "category_keyword_rules": {
+      "positive_rules": [
+        {
+          "group_name": "发票关键字",
+          "min_hit": 1,
+          "words": ["增值税发票", "发票号码"]
+        }
+      ],
+      "negative_rules": []
+    },
     "enabled": 1
   }' \
   "https://docflow.textin.com/api/app-api/sip/platform/v2/category/update"
@@ -263,6 +303,16 @@ payload = {
     "category_id": category_id,
     "name": "更新后的类别名称",
     "category_prompt": "更新后的提示词",
+    "category_keyword_rules": {
+        "positive_rules": [
+            {
+                "group_name": "发票关键字",
+                "min_hit": 1,
+                "words": ["增值税发票", "发票号码"],
+            }
+        ],
+        "negative_rules": [],
+    },
     "enabled": 1  # 0: 禁用, 1: 启用, 2: 草稿
 }
 
@@ -290,6 +340,7 @@ else:
 - `category_id` (必填): 文件类别 ID
 - `name` (选填): 文件类别名称，最大长度 50
 - `category_prompt` (选填): 用于分类的提示词，最大长度 500
+- `category_keyword_rules` (选填): 用于分类的关键字规则，正向规则用于匹配，负向规则用于过滤。正向规则最多配置 10 组，负向规则最多配置 1 组，每组最多支持配置 20 个关键字。不传或传 `null` 时不修改，传有效对象时全量替换，传 `{"positive_rules":[],"negative_rules":[]}` 时清空规则
 - `enabled` (选填): 启用状态，0: 禁用, 1: 启用, 2: 草稿
 
 ## 删除文件类别

@@ -871,12 +871,7 @@ paths:
                   example: VAT invoice, including fields such as invoice code, invoice number, etc.
                   maxLength: 150
                 category_keyword_rules:
-                  type: string
-                  format: json
-                  description: |
-                    Optional JSON string of category keyword rules. Omit it when creating to leave rules unconfigured; dual empty arrays are also accepted as no rules.
-                    It must serialize a CategoryKeywordRules object. `{}`, blank strings, and invalid JSON are invalid.
-                  example: '{"positive_rules":[{"group_name":"Core invoice elements","min_hit":2,"words":["invoice number","total amount"]}],"negative_rules":[]}'
+                  $ref: '#/components/schemas/CategoryKeywordRules'
                 description:
                   type: string
                   description: File category description
@@ -4305,6 +4300,58 @@ components:
       required:
         - workspace_id
         - name
+    CategoryKeywordRuleGroup:
+      type: object
+      description: Category keyword rule group. The group matches when at least min_hit keywords match.
+      properties:
+        group_name:
+          type: string
+          description: Rule group name, used for display only
+          maxLength: 50
+          example: Core invoice elements
+        min_hit:
+          type: integer
+          description: Minimum number of keywords required to match the group; from 1 to the number of words
+          minimum: 1
+          example: 2
+        words:
+          type: array
+          description: Keyword list. Keywords are compared case-insensitively and with all whitespace ignored; normalized keywords must be non-empty, unique, and no longer than 50 characters.
+          minItems: 1
+          maxItems: 20
+          items:
+            type: string
+            minLength: 1
+            maxLength: 50
+          example:
+            - invoice number
+            - buyer name
+            - total amount
+      required:
+        - group_name
+        - min_hit
+        - words
+    CategoryKeywordRules:
+      type: object
+      description: |
+        Category keyword rules. Positive groups are ORed; matching a negative group excludes the category.
+        A category supports at most 10 positive groups and 1 negative group. Duplicate same-type groups are not allowed, and positive and negative rules must not contain the same normalized keyword.
+      properties:
+        positive_rules:
+          type: array
+          description: Positive rule groups, combined with OR
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/CategoryKeywordRuleGroup'
+        negative_rules:
+          type: array
+          description: Negative rule group; a match excludes the category
+          maxItems: 1
+          items:
+            $ref: '#/components/schemas/CategoryKeywordRuleGroup'
+      required:
+        - positive_rules
+        - negative_rules
     TransformSettings:
       type: object
       description: Field output transform configuration. Formats the extraction result before output.

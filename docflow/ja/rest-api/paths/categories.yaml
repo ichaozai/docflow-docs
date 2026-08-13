@@ -32,12 +32,7 @@
                 example: "VAT インボイス。インボイスコード、インボイス番号などのフィールドを含みます。"
                 maxLength: 150
               category_keyword_rules:
-                type: string
-                format: json
-                description: |
-                  任意の分類キーワードルール JSON 文字列。作成時に省略するとルールは設定されず、両方の配列が空でもルールなしとして受け付けます。
-                  CategoryKeywordRules オブジェクトをシリアライズする必要があります。`{}`、空白文字列、不正な JSON は無効です。
-                example: '{"positive_rules":[{"group_name":"請求書の主要項目","min_hit":2,"words":["請求書番号","合計金額"]}],"negative_rules":[]}'
+                $ref: '../components/schemas/categories.yaml#/CategoryKeywordRules'
               description:
                 type: string
                 description: ファイルカテゴリの説明

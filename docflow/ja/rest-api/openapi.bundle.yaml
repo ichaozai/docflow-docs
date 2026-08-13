@@ -885,12 +885,7 @@ paths:
                   example: VAT インボイス。インボイスコード、インボイス番号などのフィールドを含みます。
                   maxLength: 150
                 category_keyword_rules:
-                  type: string
-                  format: json
-                  description: |
-                    任意の分類キーワードルール JSON 文字列。作成時に省略するとルールは設定されず、両方の配列が空でもルールなしとして受け付けます。
-                    CategoryKeywordRules オブジェクトをシリアライズする必要があります。`{}`、空白文字列、不正な JSON は無効です。
-                  example: '{"positive_rules":[{"group_name":"請求書の主要項目","min_hit":2,"words":["請求書番号","合計金額"]}],"negative_rules":[]}'
+                  $ref: '#/components/schemas/CategoryKeywordRules'
                 description:
                   type: string
                   description: ファイルカテゴリの説明
@@ -4319,6 +4314,58 @@ components:
       required:
         - workspace_id
         - name
+    CategoryKeywordRuleGroup:
+      type: object
+      description: 分類キーワードルールグループ。グループ内で min_hit 個以上のキーワードに一致した場合に一致と判定します。
+      properties:
+        group_name:
+          type: string
+          description: 表示用のルールグループ名
+          maxLength: 50
+          example: 請求書の主要項目
+        min_hit:
+          type: integer
+          description: グループ一致に必要な最小キーワード数。1 から words の件数までです。
+          minimum: 1
+          example: 2
+        words:
+          type: array
+          description: キーワード一覧。大文字・小文字および各種空白を無視して比較します。正規化後のキーワードは空、重複、50 文字超過にできません。
+          minItems: 1
+          maxItems: 20
+          items:
+            type: string
+            minLength: 1
+            maxLength: 50
+          example:
+            - 請求書番号
+            - 購入者名
+            - 合計金額
+      required:
+        - group_name
+        - min_hit
+        - words
+    CategoryKeywordRules:
+      type: object
+      description: |
+        分類キーワードルール。正方向ルールグループは OR 条件で、反方向ルールグループに一致した場合はこのカテゴリを除外します。
+        1 カテゴリにつき正方向は最大 10 グループ、反方向は最大 1 グループです。同種の重複グループ、および正方向と反方向に同じ正規化済みキーワードを含めることはできません。
+      properties:
+        positive_rules:
+          type: array
+          description: OR 条件で結合される正方向ルールグループ
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/CategoryKeywordRuleGroup'
+        negative_rules:
+          type: array
+          description: 一致時にカテゴリを除外する反方向ルールグループ
+          maxItems: 1
+          items:
+            $ref: '#/components/schemas/CategoryKeywordRuleGroup'
+      required:
+        - positive_rules
+        - negative_rules
     TransformSettings:
       type: object
       description: フィールド出力変換設定。抽出結果を出力前に整形します。

@@ -5,6 +5,8 @@
       Create a new file category in the specified workspace, requiring at least one sample file and at least one field configuration.
 
       Supports one-stop creation: you can pass the `tables` parameter to create tables with nested fields simultaneously.
+
+      Like `fields` and `tables`, pass `category_keyword_rules` as a JSON string form field. Keyword comparison ignores case and all whitespace. Same-type duplicate rule groups are not allowed in other enabled categories in the workspace. Parameter validation error codes: `1005025065`–`1005025069`; cross-category rule-group conflicts reuse `1005015019`.
     operationId: createCategory
     tags:
       - File Category
@@ -29,6 +31,13 @@
                 description: Prompt for classification
                 example: "VAT invoice, including fields such as invoice code, invoice number, etc."
                 maxLength: 150
+              category_keyword_rules:
+                type: string
+                format: json
+                description: |
+                  Optional JSON string of category keyword rules. Omit it when creating to leave rules unconfigured; dual empty arrays are also accepted as no rules.
+                  It must serialize a CategoryKeywordRules object. `{}`, blank strings, and invalid JSON are invalid.
+                example: '{"positive_rules":[{"group_name":"Core invoice elements","min_hit":2,"words":["invoice number","total amount"]}],"negative_rules":[]}'
               description:
                 type: string
                 description: File category description
@@ -102,6 +111,8 @@
                         category_prompt:
                           type: string
                           description: Classification prompt (returned when with_detail=true)
+                        category_keyword_rules:
+                          $ref: '../components/schemas/categories.yaml#/CategoryKeywordRules'
                         extract_model:
                           type: string
                           description: Extraction model (returned when with_detail=true)
@@ -131,7 +142,7 @@
     summary: Get Workspace File Category List
     tags:
       - File Category
-    description: Get workspace file category list
+    description: Get the workspace file category list. Each category item includes its `category_keyword_rules` classification keyword rules when configured.
     operationId: listCategories
     parameters:
       - name: workspace_id
@@ -211,6 +222,8 @@
       Update the specified file category information.
 
       Note: Setting extract_model will cascade override the extraction model of all fields and tables under this category.
+
+      When updating, omit `category_keyword_rules` or set it to `null` to keep existing rules; send a valid object to replace all rules; only `{"positive_rules":[],"negative_rules":[]}` clears them. `{}`, blank strings, and invalid structures return a parameter error. Keyword comparison ignores case and all whitespace. A same-type rule group duplicate in another enabled category in the workspace returns a conflict error. Parameter validation error codes: `1005025065`–`1005025069`; cross-category rule-group conflicts reuse `1005015019`.
     operationId: updateCategory
     tags:
       - File Category
@@ -239,6 +252,14 @@
                 description: Prompt for classification
                 example: "VAT invoice, including fields such as invoice code, invoice number, etc."
                 maxLength: 150
+              category_keyword_rules:
+                type: object
+                allOf:
+                  - $ref: '../components/schemas/categories.yaml#/CategoryKeywordRules'
+                nullable: true
+                description: |
+                  Category keyword rules. Omit or null=no change; a valid object=full replacement; both `positive_rules` and `negative_rules` as empty arrays=clear.
+                  `{}` and blank strings are not accepted.
               enabled:
                 $ref: '../components/schemas/categories.yaml#/EnabledStatus'
               extract_model:
@@ -289,6 +310,8 @@
                         category_prompt:
                           type: string
                           description: Classification prompt
+                        category_keyword_rules:
+                          $ref: '../components/schemas/categories.yaml#/CategoryKeywordRules'
                         extract_model:
                           type: string
                           description: Extraction model

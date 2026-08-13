@@ -32,12 +32,7 @@
                 example: "增值税发票，包含发票代码、发票号码等字段"
                 maxLength: 150
               category_keyword_rules:
-                type: string
-                format: json
-                description: |
-                  可选，分类关键词规则的 JSON 字符串。创建时不传表示不配置；传入双空数组等同于不配置。
-                  必须序列化为 CategoryKeywordRules 对象；`{}`、空白字符串和非法 JSON 均无效。
-                example: '{"positive_rules":[{"group_name":"发票核心要素","min_hit":2,"words":["发票号码","价税合计"]}],"negative_rules":[]}'
+                $ref: '../components/schemas/categories.yaml#/CategoryKeywordRules'
               description:
                 type: string
                 description: 文件类别描述

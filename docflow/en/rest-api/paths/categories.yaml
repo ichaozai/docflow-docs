@@ -32,12 +32,7 @@
                 example: "VAT invoice, including fields such as invoice code, invoice number, etc."
                 maxLength: 150
               category_keyword_rules:
-                type: string
-                format: json
-                description: |
-                  Optional JSON string of category keyword rules. Omit it when creating to leave rules unconfigured; dual empty arrays are also accepted as no rules.
-                  It must serialize a CategoryKeywordRules object. `{}`, blank strings, and invalid JSON are invalid.
-                example: '{"positive_rules":[{"group_name":"Core invoice elements","min_hit":2,"words":["invoice number","total amount"]}],"negative_rules":[]}'
+                $ref: '../components/schemas/categories.yaml#/CategoryKeywordRules'
               description:
                 type: string
                 description: File category description

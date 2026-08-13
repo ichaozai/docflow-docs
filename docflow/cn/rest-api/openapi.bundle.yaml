@@ -867,12 +867,7 @@ paths:
                   example: 增值税发票，包含发票代码、发票号码等字段
                   maxLength: 150
                 category_keyword_rules:
-                  type: string
-                  format: json
-                  description: |
-                    可选，分类关键词规则的 JSON 字符串。创建时不传表示不配置；传入双空数组等同于不配置。
-                    必须序列化为 CategoryKeywordRules 对象；`{}`、空白字符串和非法 JSON 均无效。
-                  example: '{"positive_rules":[{"group_name":"发票核心要素","min_hit":2,"words":["发票号码","价税合计"]}],"negative_rules":[]}'
+                  $ref: '#/components/schemas/CategoryKeywordRules'
                 description:
                   type: string
                   description: 文件类别描述
@@ -4329,6 +4324,58 @@ components:
       required:
         - workspace_id
         - name
+    CategoryKeywordRuleGroup:
+      type: object
+      description: 分类关键词规则组。组内至少命中 min_hit 个关键词时该规则组命中。
+      properties:
+        group_name:
+          type: string
+          description: 规则组名称，仅用于展示
+          maxLength: 50
+          example: 发票核心要素
+        min_hit:
+          type: integer
+          description: 规则组命中所需的最少关键词数，取值为 1 至 words 的数量
+          minimum: 1
+          example: 2
+        words:
+          type: array
+          description: 关键词列表。关键词会忽略大小写及各类空格；规范化后每个关键词不得为空、重复或超过 50 个字符。
+          minItems: 1
+          maxItems: 20
+          items:
+            type: string
+            minLength: 1
+            maxLength: 50
+          example:
+            - 发票号码
+            - 购买方名称
+            - 价税合计
+      required:
+        - group_name
+        - min_hit
+        - words
+    CategoryKeywordRules:
+      type: object
+      description: |
+        分类关键词规则。正向规则组间为 OR；命中任一反向规则组时排除该类别。
+        同一类别最多 10 个正向规则组和 1 个反向规则组；同类型规则组不得重复，正向与反向规则不得包含相同的规范化关键词。
+      properties:
+        positive_rules:
+          type: array
+          description: 正向规则组，规则组之间为 OR
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/CategoryKeywordRuleGroup'
+        negative_rules:
+          type: array
+          description: 反向规则组，命中时排除该类别
+          maxItems: 1
+          items:
+            $ref: '#/components/schemas/CategoryKeywordRuleGroup'
+      required:
+        - positive_rules
+        - negative_rules
     TransformSettings:
       type: object
       description: 字段输出转换配置，对抽取结果进行格式化处理后再输出。

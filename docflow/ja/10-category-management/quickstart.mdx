@@ -77,11 +77,13 @@ curl -X POST \
   -F "category_prompt=VAT invoice with fields such as invoice code, invoice number, etc." \
   -F "extract_model=Acgpt" \
   -F "sample_files=@/path/to/invoice_sample.pdf" \
+  -F 'category_keyword_rules={"positive_rules":[{"group_name":"インボイスキーワード","min_hit":2,"words":["インボイスコード","インボイス番号"]}],"negative_rules":[]}' \
   -F 'fields=[{"name":"Invoice Code","description":"Invoice code description","prompt":"Please extract the invoice code"}]' \
   "https://docflow.textin.ai/api/app-api/sip/platform/v2/category/create"
 ```
 
 ```python Python icon=python expandable lines
+import json
 import requests
 
 ti_app_id = "<your-app-id>"
@@ -102,7 +104,17 @@ data = {
     'name': 'Invoice',
     'category_prompt': 'VAT invoice with fields such as invoice code, invoice number, etc.',
     'extract_model': 'Acgpt',
-    'fields': '[{"name":"Invoice Code","description":"Invoice code description","prompt":"Please extract the invoice code"}]'
+    'fields': '[{"name":"Invoice Code","description":"Invoice code description","prompt":"Please extract the invoice code"}]',
+    'category_keyword_rules': json.dumps({
+        'positive_rules': [
+            {
+                'group_name': 'インボイスキーワード',
+                'min_hit': 2,
+                'words': ['インボイスコード', 'インボイス番号'],
+            }
+        ],
+        'negative_rules': [],
+    }, ensure_ascii=False),
 }
 
 resp = requests.post(
@@ -133,6 +145,11 @@ else:
 - `extract_model`（必須）: 抽出モデル。指定可能な値は `Auto`、`Acgpt`、`Acgpt-VL`、`DF-M1`
 - `sample_files`（必須）: サンプルファイル一覧。少なくとも 1 件のサンプルファイルが必要です。1 カテゴリあたり最大 20 件まで登録できます
 - `fields`（必須）: フィールド設定一覧（JSON 文字列）。少なくとも 1 つのフィールドが必要です。表フィールドはデフォルト表（table_id=-1）にのみ設定できます
+- `category_keyword_rules`（任意）: 分類に使用するキーワードルール（JSON 文字列）。正方向ルールは一致判定、反方向ルールは除外判定に使用します。正方向ルールは最大 10 グループ、反方向ルールは最大 1 グループで、各グループには最大 20 個のキーワードを設定できます
+
+<Note>
+  同一ルールグループ内で `words` のうち `min_hit` 件以上が一致すると、そのグループが一致します。正方向ルールグループは OR 条件で、反方向ルールグループに一致するとカテゴリから除外されます。作成時に省略するか、両方に空配列を渡すと、キーワードルールは設定されません。
+</Note>
 
 **レスポンス例:**
 
@@ -191,6 +208,7 @@ if result.get("code") == 200:
     print(f"Found {total} file categories")
     for category in categories:
         print(f"Category ID: {category.get('id')}, Name: {category.get('name')}")
+        print(f"Category keyword rules: {category.get('category_keyword_rules')}")
 else:
     print(f"Retrieval failed: {result.get('msg')}")
 ```
@@ -218,6 +236,16 @@ else:
         "id": "1234567890",
         "name": "Invoice",
         "category_prompt": "VAT invoice with fields such as invoice code, invoice number, etc.",
+        "category_keyword_rules": {
+          "positive_rules": [
+            {
+              "group_name": "インボイスキーワード",
+              "min_hit": 2,
+              "words": ["インボイスコード", "インボイス番号"]
+            }
+          ],
+          "negative_rules": []
+        },
         "extract_model": "Acgpt",
         "enabled": 1
       }
@@ -225,6 +253,8 @@ else:
   }
 }
 ```
+
+キーワードルールが設定されているカテゴリでは、`category_keyword_rules` に完全なルールオブジェクトが返され、表示や後続の更新に利用できます。
 
 ## ファイルカテゴリを更新
 
@@ -242,6 +272,16 @@ curl -X POST \
     "category_id": "1234567890",
     "name": "Updated Category Name",
     "category_prompt": "Updated prompt",
+    "category_keyword_rules": {
+      "positive_rules": [
+        {
+          "group_name": "インボイスキーワード",
+          "min_hit": 1,
+          "words": ["VAT インボイス", "インボイス番号"]
+        }
+      ],
+      "negative_rules": []
+    },
     "enabled": 1
   }' \
   "https://docflow.textin.ai/api/app-api/sip/platform/v2/category/update"
@@ -263,6 +303,16 @@ payload = {
     "category_id": category_id,
     "name": "Updated Category Name",
     "category_prompt": "Updated prompt",
+    "category_keyword_rules": {
+        "positive_rules": [
+            {
+                "group_name": "インボイスキーワード",
+                "min_hit": 1,
+                "words": ["VAT インボイス", "インボイス番号"],
+            }
+        ],
+        "negative_rules": [],
+    },
     "enabled": 1  # 0: Disabled, 1: Enabled, 2: Draft
 }
 
@@ -290,6 +340,7 @@ else:
 - `category_id`（必須）: ファイルカテゴリ ID
 - `name`（任意）: ファイルカテゴリ名。最大 50 文字
 - `category_prompt`（任意）: 分類用プロンプト。最大 500 文字
+- `category_keyword_rules`（任意）: 分類に使用するキーワードルール。正方向ルールは一致判定、反方向ルールは除外判定に使用します。正方向ルールは最大 10 グループ、反方向ルールは最大 1 グループで、各グループには最大 20 個のキーワードを設定できます。省略または `null` で既存ルールを維持し、有効なオブジェクトで全ルールを置換します。`{"positive_rules":[],"negative_rules":[]}` を渡すとルールをクリアします
 - `enabled`（任意）: ステータス。`0`: 無効、`1`: 有効、`2`: 下書き
 
 ## ファイルカテゴリを削除

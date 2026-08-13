@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: DocFlow API
   description: DocFlow REST API。ファイルアップロードとファイル処理結果の取得機能を提供します。
-  version: 2.10.0
+  version: 2.14.1
   contact:
     name: TextIn
     url: "https://www.textin.com/contact?type=27&sub_type=1"

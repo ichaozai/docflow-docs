@@ -4,6 +4,18 @@ sidebarTitle: "更新履歴"
 description: "DocFlow API ドキュメントの更新履歴"
 ---
 
+## 2026-08-13
+
+### API
+
+#### ファイル結果と翻訳機能の強化
+
+- `/api/app-api/sip/platform/v2/file/translate` を追加しました。タスク単位で、認識済みの通常フィールド、テーブル、印影、手書き文字を翻訳できます。言語には ISO 639-1 コードを使用し、`source_language` を省略または空文字列にすると翻訳元言語を自動検出します。
+- `/api/app-api/sip/platform/v2/file/fetch` に任意のクエリパラメータ `task_id` を追加し、文字列形式のタスク ID による完全一致検索に対応しました。
+- `/api/app-api/sip/platform/v2/file/fetch` に任意のパラメータ `with_image_url` を追加しました。`true` の場合、通常タスク、文書分割タスク、画像切り出しタスクのページ情報に、`angle`、`width`、`height` と対応する `image_url` を返します。画像 URL の有効期間は 30 日です。
+- 翻訳結果が存在する場合、`/api/app-api/sip/platform/v2/file/fetch` はフィールド、テーブル、印影、手書き文字の各オブジェクトに対応する `translated_*` フィールドを返します。既存のレスポンスフィールドとの互換性は維持され。
+- `/api/app-api/sip/platform/v2/auth/token` が返すトークンの有効期間は 1 日です。
+
 ## 2026-07-08
 
 ### API

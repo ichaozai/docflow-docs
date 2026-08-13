@@ -143,7 +143,7 @@ TaskProcessResult:
                     items:
                       type: object
                       properties:
-                        table_name:
+                        tableName:
                           description: 表格名称
                           type: string
                           example: table1
@@ -578,7 +578,7 @@ SubFileDetailInfo:
           items:
             type: object
             properties:
-              table_name:
+              tableName:
                 description: 表格名称
                 type: string
                 example: table1

@@ -4153,7 +4153,7 @@ components:
               items:
                 type: object
                 properties:
-                  table_name:
+                  tableName:
                     description: Table name
                     type: string
                     example: table1
@@ -4501,7 +4501,7 @@ components:
                         items:
                           type: object
                           properties:
-                            table_name:
+                            tableName:
                               description: Table name
                               type: string
                               example: table1

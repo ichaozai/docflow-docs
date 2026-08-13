@@ -58,7 +58,7 @@ CategoryKeywordRuleGroup:
       example: 2
     words:
       type: array
-      description: 关键词列表。关键词会忽略大小写及各类空格；规范化后每个关键词不得为空、重复或超过 50 个字符。
+      description: 关键词列表。每个关键词不得为空或超过 50 个字符，同一规则组内的关键词不得重复。
       minItems: 1
       maxItems: 20
       items:
@@ -75,7 +75,7 @@ CategoryKeywordRules:
   type: object
   description: |
     分类关键词规则。正向规则组间为 OR；命中任一反向规则组时排除该类别。
-    同一类别最多 10 个正向规则组和 1 个反向规则组；同类型规则组不得重复，正向与反向规则不得包含相同的规范化关键词。
+    同一类别最多 10 个正向规则组和 1 个反向规则组；同类型规则组不得重复，正向与反向规则不得包含相同关键词。
   properties:
     positive_rules:
       type: array

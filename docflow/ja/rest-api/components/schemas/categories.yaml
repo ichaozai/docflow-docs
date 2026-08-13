@@ -58,7 +58,7 @@ CategoryKeywordRuleGroup:
       example: 2
     words:
       type: array
-      description: キーワード一覧。大文字・小文字および各種空白を無視して比較します。正規化後のキーワードは空、重複、50 文字超過にできません。
+      description: キーワード一覧。各キーワードは空、グループ内重複、50 文字超過にできません。
       minItems: 1
       maxItems: 20
       items:
@@ -75,7 +75,7 @@ CategoryKeywordRules:
   type: object
   description: |
     分類キーワードルール。正方向ルールグループは OR 条件で、反方向ルールグループに一致した場合はこのカテゴリを除外します。
-    1 カテゴリにつき正方向は最大 10 グループ、反方向は最大 1 グループです。同種の重複グループ、および正方向と反方向に同じ正規化済みキーワードを含めることはできません。
+    1 カテゴリにつき正方向は最大 10 グループ、反方向は最大 1 グループです。同種の重複グループ、および正方向と反方向に同じキーワードを含めることはできません。
   properties:
     positive_rules:
       type: array

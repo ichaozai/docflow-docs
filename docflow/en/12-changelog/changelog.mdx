@@ -4,6 +4,22 @@ sidebarTitle: "Changelog"
 description: "DocFlow API documentation changelog"
 ---
 
+## 2026-08-13
+
+### API
+
+#### Category Keyword Rules
+
+- [Create File Category](/api-reference/file-category/create-file-category) and [Update File Category](/api-reference/file-category/update-file-category) now support `category_keyword_rules`. Positive rules match a category, while negative rules filter it out.
+- [List File Categories](/api-reference/file-category/list-file-categories) now returns `category_keyword_rules` when configured.
+- A rule group matches when at least `min_hit` keywords match. Positive groups are combined with OR, and a matching negative group excludes the category. Each category supports up to 10 positive groups and 1 negative group, with up to 20 keywords per group.
+- On creation, omit the parameter or pass two empty arrays to leave rules unconfigured. On update, omit it or pass `null` for no change, pass two empty arrays to clear the rules, or pass another valid object to replace all rules.
+- Keywords preserve their original case and whitespace. Duplicates within a group, positive/negative conflicts, and cross-category same-type rule-group conflicts are compared using the original keyword strings; whitespace is no longer removed and case is no longer normalized.
+
+### SDK
+
+- Python SDK `1.1.2` adds category keyword-rule support for create, update, response parsing, and conflict prechecks. Keywords are validated and sent unchanged.
+
 ## 2026-07-08
 
 ### API

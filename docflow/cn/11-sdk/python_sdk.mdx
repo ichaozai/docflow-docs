@@ -192,6 +192,45 @@ tables = cat.tables.batch_add(tables=[{
 print(f"表格ID: {tables[0].table_id}")
 ```
 
+### 分类关键词规则
+
+创建或更新类别时，可通过 `category_keyword_rules` 配置分类关键词规则。正向规则组之间为 OR；命中反向规则组时排除该类别。
+
+SDK 默认会分页读取当前工作空间内已启用类别，并在请求前预检同类型规则组的跨类别冲突；可传 `check_keyword_rule_conflicts=False` 关闭该预检以减少请求。服务端仍会执行最终冲突校验。
+
+```python theme={null}
+rules = {
+    "positive_rules": [{
+        "group_name": "发票核心要素",
+        "min_hit": 2,
+        "words": ["发票号码", "购买方名称", "价税合计"],
+    }],
+    "negative_rules": [{
+        "group_name": "排除收据",
+        "min_hit": 1,
+        "words": ["收据", "付款收据"],
+    }],
+}
+
+client.category.create(
+    workspace_id="123", name="增值税发票", extract_model=ExtractModel.Model_1,
+    sample_files=["/path/to/invoice.pdf"], fields=[{"name": "发票号码"}],
+    category_keyword_rules=rules,
+)
+
+# 更新时传入双空数组，显式清空已配置规则
+client.category.update(
+    workspace_id="123", category_id="456",
+    category_keyword_rules={"positive_rules": [], "negative_rules": []},
+)
+```
+
+- 创建时不传该参数表示不配置规则；传入双空数组也等价于不配置。
+- 更新时不传或传 `None` 表示不修改；传有效对象会全量替换；仅双空数组表示清空。`{}` 和空白字符串无效。
+- SDK 中规则组的 `group_name` 可省略：正向组会按顺序自动补为 `group_1`、`group_2`……，反向组补为 `exclude`。它仅用于展示/追踪，不参与分类命中或冲突判断；从接口读取后再更新时会保留服务端返回的名称。
+- 关键词比较会忽略大小写及各类空格。关键词规范化后不得为空、重复或超过 50 个字符；每组最多 20 个关键词，最多 10 个正向组和 1 个反向组；`min_hit` 必须在 1 到该组关键词数之间。
+- 同一类别的正反向规则不能包含相同关键词；同空间其他已启用类别不能有同类型的重复规则组。SDK 会预校验可在本地判断的规则，服务端仍会做最终校验；跨类别冲突返回错误码 `1005015019`。
+
 ### 字段管理
 
 ```python theme={null}
@@ -673,4 +712,3 @@ logging.getLogger("docflow").setLevel(logging.DEBUG)
 * [PyPI 主页](https://pypi.org/project/docflow-sdk/)
 * [快速开始指南](https://github.com/intsig-textin/docflow-python-sdk/blob/master/examples/QUICKSTART.md)
 * [完整 API 文档](https://github.com/intsig-textin/docflow-python-sdk/blob/master/README.md)
-

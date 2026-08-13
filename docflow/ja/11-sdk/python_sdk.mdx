@@ -194,6 +194,45 @@ tables = cat.tables.batch_add(tables=[{
 print(f"テーブル ID: {tables[0].table_id}")
 ```
 
+### 分類キーワードルール
+
+カテゴリを作成または更新するときは、`category_keyword_rules` で分類キーワードルールを設定できます。正方向ルールグループは OR 条件で、反方向ルールグループに一致した場合はカテゴリを除外します。
+
+SDK は既定でワークスペース内の有効なカテゴリをページング取得し、リクエスト前にカテゴリ間の同種ルールグループ競合を事前検証します。追加リクエストを省略するには `check_keyword_rule_conflicts=False` を指定できますが、サーバーでは常に最終的な競合検証が行われます。
+
+```python theme={null}
+rules = {
+    "positive_rules": [{
+        "group_name": "請求書の主要項目",
+        "min_hit": 2,
+        "words": ["請求書番号", "購入者名", "合計金額"],
+    }],
+    "negative_rules": [{
+        "group_name": "領収書を除外",
+        "min_hit": 1,
+        "words": ["領収書", "支払領収書"],
+    }],
+}
+
+client.category.create(
+    workspace_id="123", name="VAT インボイス", extract_model=ExtractModel.Model_1,
+    sample_files=["/path/to/invoice.pdf"], fields=[{"name": "請求書番号"}],
+    category_keyword_rules=rules,
+)
+
+# 更新時は両方の空配列を渡して、設定済みルールを明示的にクリアします。
+client.category.update(
+    workspace_id="123", category_id="456",
+    category_keyword_rules={"positive_rules": [], "negative_rules": []},
+)
+```
+
+- 作成時にこのパラメータを省略するとルールは未設定になります。両方の空配列も同じ意味です。
+- 更新時に省略または `None` を渡すと変更しません。有効なオブジェクトは全置換し、両方の空配列だけがクリアを意味します。`{}` と空白文字列は無効です。
+- SDK ではルールグループの `group_name` は省略可能です。正方向グループには順に `group_1`、`group_2`…、反方向グループには `exclude` が自動設定されます。これは表示・追跡用の情報で、分類の一致判定や競合判定には影響しません。API から取得した名称は、その後の更新時にも保持されます。
+- キーワード比較では大文字・小文字および各種空白を無視します。正規化後のキーワードは空、グループ内重複、50 文字超過にできません。1 グループは最大 20 キーワード、カテゴリは正方向最大 10 グループ・反方向最大 1 グループで、`min_hit` は 1 からグループ内キーワード数までです。
+- 同じカテゴリの正方向と反方向のルールに同じキーワードを含めることはできません。同じワークスペースの他の有効なカテゴリに同種の重複ルールグループも設定できません。SDK はローカルで判断できるルールを事前検証し、サービスが最終検証を行います。カテゴリ間競合のエラーコードは `1005015019` です。
+
 ### フィールド管理
 
 ```python theme={null}

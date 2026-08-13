@@ -5,6 +5,8 @@
       指定したワークスペースに新しいファイルカテゴリを作成します。少なくとも 1 つのサンプルファイルと 1 つのフィールド設定が必要です。
 
       一括作成に対応しています。`tables` パラメータを渡すことで、ネストされたフィールドを含むテーブルも同時に作成できます。
+
+      `fields`、`tables` と同様に、`category_keyword_rules` は JSON 文字列のフォームフィールドとして渡します。キーワード比較では大文字・小文字および各種空白を無視します。同じワークスペースの他の有効なカテゴリに同種の重複ルールグループは設定できません。パラメータ検証エラーコードは `1005025065`–`1005025069`、カテゴリ間のルールグループ競合は `1005015019` を再利用します。
     operationId: createCategory
     tags:
       - ファイルカテゴリ
@@ -29,6 +31,8 @@
                 description: 分類用プロンプト
                 example: "VAT インボイス。インボイスコード、インボイス番号などのフィールドを含みます。"
                 maxLength: 150
+              category_keyword_rules:
+                $ref: '../components/schemas/categories.yaml#/CategoryKeywordRules'
               description:
                 type: string
                 description: ファイルカテゴリの説明
@@ -102,6 +106,8 @@
                         category_prompt:
                           type: string
                           description: 分類プロンプト（with_detail=true の場合に返却）
+                        category_keyword_rules:
+                          $ref: '../components/schemas/categories.yaml#/CategoryKeywordRules'
                         extract_model:
                           type: string
                           description: 抽出モデル（with_detail=true の場合に返却）
@@ -131,7 +137,7 @@
     summary: ワークスペースのファイルカテゴリ一覧を取得
     tags:
       - ファイルカテゴリ
-    description: ワークスペースのファイルカテゴリ一覧を取得します
+    description: ワークスペースのファイルカテゴリ一覧を取得します。設定済みの場合、各カテゴリ項目には分類キーワードルール `category_keyword_rules` が含まれます。
     operationId: listCategories
     parameters:
       - name: workspace_id
@@ -211,6 +217,8 @@
       指定したファイルカテゴリ情報を更新します。
 
       注意: extract_model を設定すると、このカテゴリ配下のすべてのフィールドとテーブルの抽出モデルが連鎖的に上書きされます。
+
+      更新時、`category_keyword_rules` を省略または `null` にすると既存ルールを維持します。有効なオブジェクトを渡すと全置換し、`{"positive_rules":[],"negative_rules":[]}` のみがルールをクリアします。`{}`、空白文字列、不正な構造はパラメータエラーになります。キーワード比較では大文字・小文字および各種空白を無視します。同じワークスペースの他の有効なカテゴリに同種の重複ルールグループがある場合は競合エラーになります。パラメータ検証エラーコードは `1005025065`–`1005025069`、カテゴリ間のルールグループ競合は `1005015019` を再利用します。
     operationId: updateCategory
     tags:
       - ファイルカテゴリ
@@ -239,6 +247,14 @@
                 description: 分類用プロンプト
                 example: "VAT インボイス。インボイスコード、インボイス番号などのフィールドを含みます。"
                 maxLength: 150
+              category_keyword_rules:
+                type: object
+                allOf:
+                  - $ref: '../components/schemas/categories.yaml#/CategoryKeywordRules'
+                nullable: true
+                description: |
+                  分類キーワードルール。省略または null=変更なし、有効なオブジェクト=全置換、`positive_rules` と `negative_rules` がともに空配列=クリア。
+                  `{}` および空白文字列は受け付けません。
               enabled:
                 $ref: '../components/schemas/categories.yaml#/EnabledStatus'
               extract_model:
@@ -289,6 +305,8 @@
                         category_prompt:
                           type: string
                           description: 分類プロンプト
+                        category_keyword_rules:
+                          $ref: '../components/schemas/categories.yaml#/CategoryKeywordRules'
                         extract_model:
                           type: string
                           description: 抽出モデル

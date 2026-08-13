@@ -194,6 +194,45 @@ result = cat.tables.batch_add(tables=[{
 print(f"Table ID: {result.tables[0].table_id}")
 ```
 
+### Category keyword rules
+
+Use `category_keyword_rules` when creating or updating a category. Positive rule groups are combined with OR; a negative rule group match excludes the category.
+
+By default, the SDK paginates through enabled categories in the workspace and prechecks cross-category, same-type rule-group conflicts before sending the request. Set `check_keyword_rule_conflicts=False` to skip this extra client-side check; the server always performs the final conflict validation.
+
+```python theme={null}
+rules = {
+    "positive_rules": [{
+        "group_name": "Core invoice elements",
+        "min_hit": 2,
+        "words": ["invoice number", "buyer name", "total amount"],
+    }],
+    "negative_rules": [{
+        "group_name": "Exclude receipts",
+        "min_hit": 1,
+        "words": ["receipt", "payment receipt"],
+    }],
+}
+
+client.category.create(
+    workspace_id="123", name="VAT invoice", extract_model=ExtractModel.Model_1,
+    sample_files=["/path/to/invoice.pdf"], fields=[{"name": "Invoice number"}],
+    category_keyword_rules=rules,
+)
+
+# On update, send dual empty arrays to explicitly clear configured rules.
+client.category.update(
+    workspace_id="123", category_id="456",
+    category_keyword_rules={"positive_rules": [], "negative_rules": []},
+)
+```
+
+- On create, omitting this parameter leaves rules unconfigured; dual empty arrays have the same effect.
+- On update, omit it or pass `None` for no change; a valid object replaces all rules; only dual empty arrays clear them. `{}` and blank strings are invalid.
+- In the SDK, a rule group's `group_name` is optional: positive groups default to `group_1`, `group_2`, and so on, while a negative group defaults to `exclude`. It is display/tracking metadata only and does not affect matching or conflict detection; names returned by the API are preserved on a subsequent update.
+- Keyword comparison ignores case and all whitespace. A normalized keyword must be non-empty, unique within its group, and at most 50 characters. A group has at most 20 keywords; a category has at most 10 positive and 1 negative group; `min_hit` must be from 1 to the number of group keywords.
+- Positive and negative rules in the same category cannot share a keyword. Other enabled categories in the workspace cannot have a duplicate same-type rule group. The SDK pre-validates rules it can determine locally; the service performs final validation, and a cross-category conflict returns `1005015019`.
+
 ### Field Management
 
 ```python theme={null}
@@ -674,4 +713,3 @@ See the [examples directory](https://github.com/intsig-textin/docflow-python-sdk
 * [PyPI Homepage](https://pypi.org/project/docflow-sdk/)
 * [Quick Start Guide](https://github.com/intsig-textin/docflow-python-sdk/blob/master/examples/QUICKSTART.md)
 * [Complete API Documentation](https://github.com/intsig-textin/docflow-python-sdk/blob/master/README.md)
-

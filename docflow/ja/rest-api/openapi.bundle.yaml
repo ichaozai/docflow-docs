@@ -5,10 +5,12 @@ info:
   version: 2.10.0
   contact:
     name: TextIn
-    url: 'https://www.textin.com/contact?type=27&sub_type=1'
+    url: https://www.textin.com/contact?type=27&sub_type=1
 servers:
-  - url: 'https://docflow.textin.com'
-x-codeSamples: custom
+  - url: https://docflow.textin.com
+security:
+  - ApiId: []
+    SecretCode: []
 tags:
   - name: ワークスペース管理
     description: ワークスペース関連 API
@@ -204,20 +206,20 @@ paths:
             $ref: '#/components/schemas/VerificationStatus'
         - name: start_time
           in: query
-          description: '更新時刻で検索する開始時刻。RFC3339 形式（YYYY-MM-DDTHH:MM:SSZ）'
+          description: 更新時刻で検索する開始時刻。RFC3339 形式（YYYY-MM-DDTHH:MM:SSZ）
           required: false
           schema:
             type: string
             format: date-time
-            example: 2024-01-01T00:00:00.000Z
+            example: '2024-01-01T00:00:00Z'
         - name: end_time
           in: query
-          description: '更新時刻で検索する終了時刻。RFC3339 形式（YYYY-MM-DDTHH:MM:SSZ）'
+          description: 更新時刻で検索する終了時刻。RFC3339 形式（YYYY-MM-DDTHH:MM:SSZ）
           required: false
           schema:
             type: string
             format: date-time
-            example: 2024-01-01T10:00:00.000Z
+            example: '2024-01-01T10:00:00Z'
         - name: with_document
           in: query
           description: 文書の完全なテキスト認識結果を返すかどうか
@@ -513,11 +515,9 @@ paths:
   /api/app-api/sip/platform/v2/file/extract_fields:
     post:
       summary: 特定フィールドを抽出
-      description: >
+      description: |
         抽出が完了したタスクに対して、追加フィールドを抽出するか、既存フィールドを個別に再抽出します。
-
-        すべてのフィールドの完全な抽出結果を返します。戻り構造は `/api/app-api/sip/platform/v2/file/fetch`
-        と同じです。
+        すべてのフィールドの完全な抽出結果を返します。戻り構造は `/api/app-api/sip/platform/v2/file/fetch` と同じです。
       operationId: extractFields
       requestBody:
         required: true
@@ -549,16 +549,11 @@ paths:
                         example: Table1
                       extract_model:
                         type: string
-                        description: >
-                          テーブルレベルの抽出モデル。未指定の場合は Acgpt
-                          がデフォルトです。テーブル内のすべてのフィールドがこのモデルを使用します
-
+                        description: |
+                          テーブルレベルの抽出モデル。未指定の場合は Acgpt がデフォルトです。テーブル内のすべてのフィールドがこのモデルを使用します
                           - Auto: 抽出モデルを自動でマッチング
-
                           - Acgpt: 高速で安定した抽出結果
-
                           - Acgpt-VL: VLM。シンプルな抽出に適しています（≤10 ページ）
-
                           - DF-M1: 複雑な文書理解に適しています
                         example: Acgpt
                         enum:
@@ -882,7 +877,7 @@ paths:
                 callback_url:
                   type: string
                   description: コールバック URL
-                  example: 'https://example.com/callback'
+                  example: https://example.com/callback
                 callback_retry_time:
                   type: integer
                   description: コールバック再試行回数
@@ -937,6 +932,8 @@ paths:
         指定したワークスペースに新しいファイルカテゴリを作成します。少なくとも 1 つのサンプルファイルと 1 つのフィールド設定が必要です。
 
         一括作成に対応しています。`tables` パラメータを渡すことで、ネストされたフィールドを含むテーブルも同時に作成できます。
+
+        `fields`、`tables` と同様に、`category_keyword_rules` は JSON 文字列のフォームフィールドとして渡します。キーワード比較では大文字・小文字および各種空白を無視します。同じワークスペースの他の有効なカテゴリに同種の重複ルールグループは設定できません。パラメータ検証エラーコードは `1005025065`–`1005025069`、カテゴリ間のルールグループ競合は `1005015019` を再利用します。
       operationId: createCategory
       tags:
         - ファイルカテゴリ
@@ -961,6 +958,8 @@ paths:
                   description: 分類用プロンプト
                   example: VAT インボイス。インボイスコード、インボイス番号などのフィールドを含みます。
                   maxLength: 150
+                category_keyword_rules:
+                  $ref: '#/components/schemas/CategoryKeywordRules'
                 description:
                   type: string
                   description: ファイルカテゴリの説明
@@ -980,9 +979,7 @@ paths:
                     - DF-M1
                 sample_files:
                   type: array
-                  description: >-
-                    サンプルファイルリスト。少なくとも 1 つのサンプルファイルをアップロードする必要があります。1 つのカテゴリには最大
-                    20 個のサンプルファイルを設定できます
+                  description: サンプルファイルリスト。少なくとも 1 つのサンプルファイルをアップロードする必要があります。1 つのカテゴリには最大 20 個のサンプルファイルを設定できます
                   items:
                     type: string
                     format: binary
@@ -1001,10 +998,8 @@ paths:
                     $ref: '#/components/schemas/CategoryTableConfig'
                 with_detail:
                   type: boolean
-                  description: >
-                    完全な詳細を返すかどうか。true
-                    の場合、レスポンスにカテゴリの完全な情報（フィールド、テーブル、サンプルを含む）が含まれます。
-
+                  description: |
+                    完全な詳細を返すかどうか。true の場合、レスポンスにカテゴリの完全な情報（フィールド、テーブル、サンプルを含む）が含まれます。
                     未設定または false の場合、category_id のみを返します。
               required:
                 - workspace_id
@@ -1038,6 +1033,8 @@ paths:
                           category_prompt:
                             type: string
                             description: 分類プロンプト（with_detail=true の場合に返却）
+                          category_keyword_rules:
+                            $ref: '#/components/schemas/CategoryKeywordRules'
                           extract_model:
                             type: string
                             description: 抽出モデル（with_detail=true の場合に返却）
@@ -1066,7 +1063,7 @@ paths:
       summary: ワークスペースのファイルカテゴリ一覧を取得
       tags:
         - ファイルカテゴリ
-      description: ワークスペースのファイルカテゴリ一覧を取得します
+      description: ワークスペースのファイルカテゴリ一覧を取得します。設定済みの場合、各カテゴリ項目には分類キーワードルール `category_keyword_rules` が含まれます。
       operationId: listCategories
       parameters:
         - name: workspace_id
@@ -1145,6 +1142,8 @@ paths:
         指定したファイルカテゴリ情報を更新します。
 
         注意: extract_model を設定すると、このカテゴリ配下のすべてのフィールドとテーブルの抽出モデルが連鎖的に上書きされます。
+
+        更新時、`category_keyword_rules` を省略または `null` にすると既存ルールを維持します。有効なオブジェクトを渡すと全置換し、`{"positive_rules":[],"negative_rules":[]}` のみがルールをクリアします。`{}`、空白文字列、不正な構造はパラメータエラーになります。キーワード比較では大文字・小文字および各種空白を無視します。同じワークスペースの他の有効なカテゴリに同種の重複ルールグループがある場合は競合エラーになります。パラメータ検証エラーコードは `1005025065`–`1005025069`、カテゴリ間のルールグループ競合は `1005015019` を再利用します。
       operationId: updateCategory
       tags:
         - ファイルカテゴリ
@@ -1173,6 +1172,14 @@ paths:
                   description: 分類用プロンプト
                   example: VAT インボイス。インボイスコード、インボイス番号などのフィールドを含みます。
                   maxLength: 150
+                category_keyword_rules:
+                  type: object
+                  allOf:
+                    - $ref: '#/components/schemas/CategoryKeywordRules'
+                  nullable: true
+                  description: |
+                    分類キーワードルール。省略または null=変更なし、有効なオブジェクト=全置換、`positive_rules` と `negative_rules` がともに空配列=クリア。
+                    `{}` および空白文字列は受け付けません。
                 enabled:
                   $ref: '#/components/schemas/EnabledStatus'
                 extract_model:
@@ -1223,6 +1230,8 @@ paths:
                           category_prompt:
                             type: string
                             description: 分類プロンプト
+                          category_keyword_rules:
+                            $ref: '#/components/schemas/CategoryKeywordRules'
                           extract_model:
                             type: string
                             description: 抽出モデル
@@ -1254,7 +1263,7 @@ paths:
                   description: 削除するファイルカテゴリ ID のリスト
                   example:
                     - '1234567890'
-                    - 0987654321
+                    - '0987654321'
               required:
                 - workspace_id
                 - category_ids
@@ -1313,8 +1322,7 @@ paths:
   /api/app-api/sip/platform/v2/category/fields/batch_add:
     post:
       summary: ファイルカテゴリのフィールドを追加
-      description: >-
-        指定したファイルカテゴリ配下に複数のフィールドを追加します。全件成功または全件失敗のセマンティクスを採用しており、いずれかのフィールドが検証に失敗するとバッチ全体が失敗します。
+      description: 指定したファイルカテゴリ配下に複数のフィールドを追加します。全件成功または全件失敗のセマンティクスを採用しており、いずれかのフィールドが検証に失敗するとバッチ全体が失敗します。
       operationId: batchAddCategoryFields
       tags:
         - ファイルカテゴリ
@@ -1504,16 +1512,13 @@ paths:
                     type: string
                   example:
                     - '1234567890'
-                    - 0987654321
+                    - '0987654321'
                 table_id:
                   type: string
-                  description: >
+                  description: |
                     テーブル ID
-
                     - 未指定の場合: 通常フィールド（result.fields 内のフィールド）を削除します
-
-                    - テーブル ID を指定した場合:
-                    指定したテーブル配下のテーブルフィールド（result.tables[].fields 内のフィールド）を削除します
+                    - テーブル ID を指定した場合: 指定したテーブル配下のテーブルフィールド（result.tables[].fields 内のフィールド）を削除します
                   example: '1234567890'
               required:
                 - workspace_id
@@ -1590,8 +1595,7 @@ paths:
   /api/app-api/sip/platform/v2/category/tables/batch_add:
     post:
       summary: ファイルカテゴリのテーブルを追加
-      description: >-
-        指定したファイルカテゴリ配下に複数のテーブルを追加します（ネストされたフィールドに対応）。全件成功または全件失敗のセマンティクスを採用しています。
+      description: 指定したファイルカテゴリ配下に複数のテーブルを追加します（ネストされたフィールドに対応）。全件成功または全件失敗のセマンティクスを採用しています。
       operationId: batchAddCategoryTables
       tags:
         - ファイルカテゴリ
@@ -1728,7 +1732,7 @@ paths:
                     type: string
                   example:
                     - '1234567890'
-                    - 0987654321
+                    - '0987654321'
               required:
                 - workspace_id
                 - category_id
@@ -1863,9 +1867,7 @@ paths:
   /api/app-api/sip/platform/v2/category/sample/batch_download:
     post:
       summary: カテゴリサンプルをダウンロード（ZIP）
-      description: >-
-        指定したカテゴリの複数サンプルファイルを ZIP ファイルにまとめてダウンロードします。sample_ids
-        を指定しない場合は、すべてのサンプルをダウンロードします。
+      description: 指定したカテゴリの複数サンプルファイルを ZIP ファイルにまとめてダウンロードします。sample_ids を指定しない場合は、すべてのサンプルをダウンロードします。
       operationId: batchDownloadCategorySample
       tags:
         - ファイルカテゴリサンプル
@@ -1891,7 +1893,7 @@ paths:
                     type: string
                   example:
                     - '1234567890'
-                    - 0987654321
+                    - '0987654321'
               required:
                 - workspace_id
                 - category_id
@@ -1932,7 +1934,7 @@ paths:
                   description: 削除するサンプル ID のリスト
                   example:
                     - '1234567890'
-                    - 0987654321
+                    - '0987654321'
               required:
                 - workspace_id
                 - category_id
@@ -2421,21 +2423,15 @@ paths:
                   example: '1234567890'
                 model:
                   type: string
-                  description: >
+                  description: |
                     レビュータスクモデル（任意）。指定可能な値：`deepseek-v4-pro`、`qwen3.6-plus`、`qwen3.7-max`、`ORM-O1`。省略した場合は、ルールリポジトリのデフォルトレビューモデルが使用されます。
-
 
                     2026-07-08 以降、以下の旧モデルは廃止されました。対応する代替モデルを使用してください：
 
-
                     | 旧モデル | 代替モデル |
-
                     | --- | --- |
-
                     | `deepseek-r1` | `deepseek-v4-pro` |
-
                     | `qwq-32b` | `qwen3.6-plus` |
-
                     | `qwen3-max` | `qwen3.7-max` |
                   example: deepseek-v4-pro
               required:
@@ -2461,8 +2457,7 @@ paths:
                             example: '31415926'
                           model:
                             type: string
-                            description: >-
-                              このタスクで実際に使用されたレビューモデルの表示名。廃止済みのデフォルトモデルがプラットフォームルールにより代替された場合は、代替後のモデル表示名を返します。
+                            description: このタスクで実際に使用されたレビューモデルの表示名。廃止済みのデフォルトモデルがプラットフォームルールにより代替された場合は、代替後のモデル表示名を返します。
                             example: deepseek-v4-pro
   /api/app-api/sip/platform/v2/review/task/delete:
     post:
@@ -2634,8 +2629,7 @@ paths:
                                         example: レビュー判定理由
                                       anchors:
                                         type: array
-                                        description: >-
-                                          レビュー判定理由の位置アンカー情報。元テキスト内のレビュー判定理由の位置を特定するために使用します
+                                        description: レビュー判定理由の位置アンカー情報。元テキスト内のレビュー判定理由の位置を特定するために使用します
                                         items:
                                           type: object
                                           properties:
@@ -2708,9 +2702,7 @@ paths:
                                         example: 手動レビューコメント
                           model:
                             type: string
-                            description: >-
-                              レビュータスクモデルの表示名。履歴タスクでは `deepseek-r1（廃止済み）`
-                              のように、元のモデルと廃止済みマークが返る場合があります。
+                            description: レビュータスクモデルの表示名。履歴タスクでは `deepseek-r1（廃止済み）` のように、元のモデルと廃止済みマークが返る場合があります。
                             example: deepseek-v4-pro
   /api/app-api/sip/platform/v2/review/task/retry:
     post:
@@ -2786,13 +2778,10 @@ paths:
   /api/app-api/sip/platform/v2/category/fields/add:
     post:
       summary: 単一ファイルカテゴリフィールドを追加
-      description: >
+      description: |
         指定したファイルカテゴリ配下に新しいフィールドを追加します。通常フィールドとテーブルフィールドの両方に対応しています
 
-
-        > ⚠️ このエンドポイントは現在も利用できますが、今後メンテナンスされません。代わりに
-        [ファイルカテゴリのフィールドを追加](/api-reference/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA%E3%81%AE%E3%83%95%E3%82%A3%E3%83%BC%E3%83%AB%E3%83%89%E3%82%92%E8%BF%BD%E5%8A%A0)
-        を使用してください。
+        > ⚠️ このエンドポイントは現在も利用できますが、今後メンテナンスされません。代わりに [ファイルカテゴリのフィールドを追加](/api-reference/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA%E3%81%AE%E3%83%95%E3%82%A3%E3%83%BC%E3%83%AB%E3%83%89%E3%82%92%E8%BF%BD%E5%8A%A0) を使用してください。
       operationId: addCategoryField
       tags:
         - 廃止済み
@@ -2815,26 +2804,18 @@ paths:
                   example: '1234567890'
                 table_id:
                   type: string
-                  description: >
+                  description: |
                     テーブル ID
-
                     - 未指定または空の場合: 通常フィールドを作成し、結果は result.fields に表示されます
-
-                    - テーブル ID を指定した場合: 指定したテーブル配下にテーブルフィールドを作成し、結果は
-                    result.tables[].fields に表示されます
+                    - テーブル ID を指定した場合: 指定したテーブル配下にテーブルフィールドを作成し、結果は result.tables[].fields に表示されます
                   example: '1234567890'
                 extract_model:
                   type: string
-                  description: >
-                    任意。フィールドレベルの抽出モデル。通常フィールド（テーブルフィールド以外）のみ対応し、未指定の場合は分類レベルの設定に従います（分類レベルが
-                    mixed または null の場合は Auto がデフォルト）
-
+                  description: |
+                    任意。フィールドレベルの抽出モデル。通常フィールド（テーブルフィールド以外）のみ対応し、未指定の場合は分類レベルの設定に従います（分類レベルが mixed または null の場合は Auto がデフォルト）
                     - Auto: 抽出モデルを自動でマッチング
-
                     - Acgpt: 高速で安定した抽出結果
-
                     - Acgpt-VL: VLM。シンプルな抽出に適しています（≤10 ページ）
-
                     - DF-M1: 複雑な文書理解に適しています
                   example: Acgpt
                   enum:
@@ -2907,13 +2888,10 @@ paths:
   /api/app-api/sip/platform/v2/category/fields/update:
     post:
       summary: 単一ファイルカテゴリフィールドを更新
-      description: >
+      description: |
         指定したファイルカテゴリフィールドを更新します。通常フィールドとテーブルフィールドの両方に対応しています
 
-
-        > ⚠️ このエンドポイントは現在も利用できますが、今後メンテナンスされません。代わりに
-        [ファイルカテゴリのフィールドを更新](/api-reference/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA%E3%81%AE%E3%83%95%E3%82%A3%E3%83%BC%E3%83%AB%E3%83%89%E3%82%92%E6%9B%B4%E6%96%B0)
-        を使用してください。
+        > ⚠️ このエンドポイントは現在も利用できますが、今後メンテナンスされません。代わりに [ファイルカテゴリのフィールドを更新](/api-reference/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA%E3%81%AE%E3%83%95%E3%82%A3%E3%83%BC%E3%83%AB%E3%83%89%E3%82%92%E6%9B%B4%E6%96%B0) を使用してください。
       operationId: updateCategoryField
       tags:
         - 廃止済み
@@ -2960,13 +2938,10 @@ paths:
   /api/app-api/sip/platform/v2/category/tables/add:
     post:
       summary: 単一ファイルカテゴリテーブルを追加
-      description: >
+      description: |
         指定したファイルカテゴリ配下に新しいテーブルを追加します
 
-
-        > ⚠️ このエンドポイントは現在も利用できますが、今後メンテナンスされません。代わりに
-        [ファイルカテゴリのテーブルを追加](/api-reference/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA%E3%81%AE%E3%83%86%E3%83%BC%E3%83%96%E3%83%AB%E3%82%92%E8%BF%BD%E5%8A%A0)
-        を使用してください。
+        > ⚠️ このエンドポイントは現在も利用できますが、今後メンテナンスされません。代わりに [ファイルカテゴリのテーブルを追加](/api-reference/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA%E3%81%AE%E3%83%86%E3%83%BC%E3%83%96%E3%83%AB%E3%82%92%E8%BF%BD%E5%8A%A0) を使用してください。
       operationId: addCategoryTable
       tags:
         - 廃止済み
@@ -3064,13 +3039,10 @@ paths:
   /api/app-api/sip/platform/v2/category/tables/update:
     post:
       summary: 単一ファイルカテゴリテーブルを更新
-      description: >
+      description: |
         指定したファイルカテゴリテーブルの情報を更新します
 
-
-        > ⚠️ このエンドポイントは現在も利用できますが、今後メンテナンスされません。代わりに
-        [ファイルカテゴリのテーブルを更新](/api-reference/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA%E3%81%AE%E3%83%86%E3%83%BC%E3%83%96%E3%83%AB%E3%82%92%E6%9B%B4%E6%96%B0)
-        を使用してください。
+        > ⚠️ このエンドポイントは現在も利用できますが、今後メンテナンスされません。代わりに [ファイルカテゴリのテーブルを更新](/api-reference/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA%E3%81%AE%E3%83%86%E3%83%BC%E3%83%96%E3%83%AB%E3%82%92%E6%9B%B4%E6%96%B0) を使用してください。
       operationId: updateCategoryTable
       tags:
         - 廃止済み
@@ -3139,13 +3111,10 @@ paths:
   /api/app-api/sip/platform/v2/category/sample/upload:
     post:
       summary: 単一カテゴリサンプルをアップロード
-      description: >
+      description: |
         指定したファイルカテゴリにサンプルファイルをアップロードします
 
-
-        > ⚠️ このエンドポイントは現在も利用できますが、今後メンテナンスされません。代わりに
-        [カテゴリサンプルをアップロード](/api-reference/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA%E3%82%B5%E3%83%B3%E3%83%97%E3%83%AB/%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA%E3%82%B5%E3%83%B3%E3%83%97%E3%83%AB%E3%82%92%E3%82%A2%E3%83%83%E3%83%97%E3%83%AD%E3%83%BC%E3%83%89)
-        を使用してください。
+        > ⚠️ このエンドポイントは現在も利用できますが、今後メンテナンスされません。代わりに [カテゴリサンプルをアップロード](/api-reference/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA%E3%82%B5%E3%83%B3%E3%83%97%E3%83%AB/%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA%E3%82%B5%E3%83%B3%E3%83%97%E3%83%AB%E3%82%92%E3%82%A2%E3%83%83%E3%83%97%E3%83%AD%E3%83%BC%E3%83%89) を使用してください。
       operationId: uploadCategorySample
       tags:
         - 廃止済み
@@ -3204,13 +3173,10 @@ paths:
   /api/app-api/sip/platform/v2/category/sample/download:
     get:
       summary: 単一カテゴリサンプルをダウンロード
-      description: >
+      description: |
         指定したカテゴリサンプルファイルをダウンロードします
 
-
-        > ⚠️ このエンドポイントは現在も利用できますが、今後メンテナンスされません。代わりに
-        [カテゴリサンプルをダウンロード（ZIP）](/api-reference/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA%E3%82%B5%E3%83%B3%E3%83%97%E3%83%AB/%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA%E3%82%B5%E3%83%B3%E3%83%97%E3%83%AB%E3%82%92%E3%83%80%E3%82%A6%E3%83%B3%E3%83%AD%E3%83%BC%E3%83%89%EF%BC%88ZIP%EF%BC%89)
-        を使用してください。
+        > ⚠️ このエンドポイントは現在も利用できますが、今後メンテナンスされません。代わりに [カテゴリサンプルをダウンロード（ZIP）](/api-reference/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA%E3%82%B5%E3%83%B3%E3%83%97%E3%83%AB/%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA%E3%82%B5%E3%83%B3%E3%83%97%E3%83%AB%E3%82%92%E3%83%80%E3%82%A6%E3%83%B3%E3%83%AD%E3%83%BC%E3%83%89%EF%BC%88ZIP%EF%BC%89) を使用してください。
       operationId: downloadCategorySample
       tags:
         - 廃止済み
@@ -3265,9 +3231,8 @@ components:
     BatchNumber:
       name: batch_number
       in: query
-      description: >
-        バッチ番号。同じバッチ番号で複数回アップロードできます。後からそのバッチ番号を使って、同一バッチ内の複数ファイルの処理結果を取得できます。値が空の場合、システムが最大
-        20 文字の文字列を自動生成します。
+      description: |
+        バッチ番号。同じバッチ番号で複数回アップロードできます。後からそのバッチ番号を使って、同一バッチ内の複数ファイルの処理結果を取得できます。値が空の場合、システムが最大 20 文字の文字列を自動生成します。
       required: false
       schema:
         type: string
@@ -3413,8 +3378,8 @@ components:
                 items:
                   type: string
                   description: ファイル URL
-                  example: 'https://example.com/file.pdf'
-                  pattern: '^https?://.*$'
+                  example: https://example.com/file.pdf
+                  pattern: ^https?://.*$
                 maxItems: 10
             required:
               - urls
@@ -3443,19 +3408,12 @@ components:
         - msg
     TaskType:
       type: integer
-      description: >
+      description: |
         タスクタイプ
-
-        - 0: **ファイル分割サブタスク**:
-        「ファイル分割」スイッチを有効にしたファイルタスクが正常に実行されると、そのファイルバッチタスク内のファイル分割操作で生成されたサブタスクは分割サブタスクとなり、ファイルカテゴリ配下の実際のファイルセット数に応じて分割されます
-
+        - 0: **ファイル分割サブタスク**: 「ファイル分割」スイッチを有効にしたファイルタスクが正常に実行されると、そのファイルバッチタスク内のファイル分割操作で生成されたサブタスクは分割サブタスクとなり、ファイルカテゴリ配下の実際のファイルセット数に応じて分割されます
         - 1: **通常タスク**: 「ファイル分割」および「複数画像クロップ」スイッチが有効でないファイルタスク
-
-        - 2: **親タスク**:
-        「ファイル分割」または「複数画像クロップ」スイッチを有効にしたファイルタスクの実行後、そのファイルバッチタスク内の各ファイルは親タスクになります
-
-        - 3: **クロップサブタスク**:
-        「複数画像クロップ」スイッチを有効にしたファイルタスクが正常に実行されると、そのファイルバッチタスク内の複数画像クロップ操作で生成されたサブタスクはクロップサブタスクとなり、ファイルカテゴリ配下の実際のクロップ結果数に応じて分割されます
+        - 2: **親タスク**: 「ファイル分割」または「複数画像クロップ」スイッチを有効にしたファイルタスクの実行後、そのファイルバッチタスク内の各ファイルは親タスクになります
+        - 3: **クロップサブタスク**: 「複数画像クロップ」スイッチを有効にしたファイルタスクが正常に実行されると、そのファイルバッチタスク内の複数画像クロップ操作で生成されたサブタスクはクロップサブタスクとなり、ファイルカテゴリ配下の実際のクロップ結果数に応じて分割されます
       example: 1
     RecognitionStatus:
       type: integer
@@ -3493,9 +3451,8 @@ components:
         - 5
     PagesInfo:
       type: array
-      description: >
-        ファイルの各ページをレンダリングするためのデータ。data.fields の page および position
-        フィールドと組み合わせることで、ページ上のフィールド位置を正確に描画できます。
+      description: |
+        ファイルの各ページをレンダリングするためのデータ。data.fields の page および position フィールドと組み合わせることで、ページ上のフィールド位置を正確に描画できます。
       items:
         type: object
         properties:
@@ -3545,9 +3502,7 @@ components:
             description: フィールドが存在するページ。pages 配列のインデックスです
           vertices:
             type: array
-            description: >-
-              フィールド値の外接四角形座標。画像の左上を原点とし、配列値は [左上 x, 左上 y, 右上 x, 右上 y, 右下 x, 右下
-              y, 左下 x, 左下 y] です
+            description: フィールド値の外接四角形座標。画像の左上を原点とし、配列値は [左上 x, 左上 y, 右上 x, 右上 y, 右下 x, 右下 y, 左下 x, 左下 y] です
             items:
               type: integer
             minItems: 8
@@ -3947,9 +3902,7 @@ components:
                     description: テーブル単位の実際にヒットしたモデル（Acgpt / Acgpt-VL / DF-M1）
                     type: string
                   configModel:
-                    description: >-
-                      テーブル単位の設定モデル（Auto / Acgpt / Acgpt-VL /
-                      DF-M1）；既存データで未設定の場合は null
+                    description: テーブル単位の設定モデル（Auto / Acgpt / Acgpt-VL / DF-M1）；既存データで未設定の場合は null
                     type: string
                   items:
                     type: array
@@ -4288,9 +4241,7 @@ components:
                               description: テーブル単位の実際にヒットしたモデル（Acgpt / Acgpt-VL / DF-M1）
                               type: string
                             configModel:
-                              description: >-
-                                テーブル単位の設定モデル（Auto / Acgpt / Acgpt-VL /
-                                DF-M1）；既存データで未設定の場合は null
+                              description: テーブル単位の設定モデル（Auto / Acgpt / Acgpt-VL / DF-M1）；既存データで未設定の場合は null
                               type: string
                             items:
                               type: array
@@ -4707,7 +4658,7 @@ components:
         callback_url:
           type: string
           description: コールバック URL
-          example: 'https://example.com/callback'
+          example: https://example.com/callback
         callback_retry_time:
           type: integer
           description: コールバック再試行回数
@@ -4715,6 +4666,58 @@ components:
       required:
         - workspace_id
         - name
+    CategoryKeywordRuleGroup:
+      type: object
+      description: 分類キーワードルールグループ。グループ内で min_hit 個以上のキーワードに一致した場合に一致と判定します。
+      properties:
+        group_name:
+          type: string
+          description: 表示用のルールグループ名
+          maxLength: 50
+          example: 請求書の主要項目
+        min_hit:
+          type: integer
+          description: グループ一致に必要な最小キーワード数。1 から words の件数までです。
+          minimum: 1
+          example: 2
+        words:
+          type: array
+          description: キーワード一覧。大文字・小文字および各種空白を無視して比較します。正規化後のキーワードは空、重複、50 文字超過にできません。
+          minItems: 1
+          maxItems: 20
+          items:
+            type: string
+            minLength: 1
+            maxLength: 50
+          example:
+            - 請求書番号
+            - 購入者名
+            - 合計金額
+      required:
+        - group_name
+        - min_hit
+        - words
+    CategoryKeywordRules:
+      type: object
+      description: |
+        分類キーワードルール。正方向ルールグループは OR 条件で、反方向ルールグループに一致した場合はこのカテゴリを除外します。
+        1 カテゴリにつき正方向は最大 10 グループ、反方向は最大 1 グループです。同種の重複グループ、および正方向と反方向に同じ正規化済みキーワードを含めることはできません。
+      properties:
+        positive_rules:
+          type: array
+          description: OR 条件で結合される正方向ルールグループ
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/CategoryKeywordRuleGroup'
+        negative_rules:
+          type: array
+          description: 一致時にカテゴリを除外する反方向ルールグループ
+          maxItems: 1
+          items:
+            $ref: '#/components/schemas/CategoryKeywordRuleGroup'
+      required:
+        - positive_rules
+        - negative_rules
     TransformSettings:
       type: object
       description: フィールド出力変換設定。抽出結果を出力前に整形します。
@@ -4758,7 +4761,7 @@ components:
             match:
               type: string
               description: 抽出結果をマッチングまたはキャプチャする正規表現パターン
-              example: '^(\d{4})-(\d{2})-(\d{2})$'
+              example: ^(\d{4})-(\d{2})-(\d{2})$
             replace:
               type: string
               description: 置換式。$1、$2 などのキャプチャグループ参照をサポートします
@@ -4872,19 +4875,13 @@ components:
               $ref: '#/components/schemas/EnabledStatus'
             extract_model:
               type: string
-              description: >
+              description: |
                 フィールド抽出モデル
-
                 - Auto: 抽出モデルを自動でマッチング
-
                 - Acgpt: 高速で安定した抽出結果
-
                 - Acgpt-VL: VLM。シンプルな抽出に適しています（≤10 ページ）
-
                 - DF-M1: 複雑な文書理解に適しています
-
-                -
-                テーブルフィールドではテーブルモデルを継承し、通常フィールドではフィールド単位の設定を使用します。既存データはカテゴリ設定から推定されます
+                - テーブルフィールドではテーブルモデルを継承し、通常フィールドではフィールド単位の設定を使用します。既存データはカテゴリ設定から推定されます
               example: Acgpt
     CategoryTable:
       type: object
@@ -4952,6 +4949,8 @@ components:
           type: string
           description: 分類用プロンプト
           example: VAT インボイス。インボイスコード、インボイス番号などのフィールドを含みます。
+        category_keyword_rules:
+          $ref: '#/components/schemas/CategoryKeywordRules'
         extract_model:
           type: string
           description: |
@@ -4995,7 +4994,7 @@ components:
           description: 意味抽出プロンプトを使用するかどうか
         alias:
           type: array
-          description: 'フィールド別名。省略=変更なし、空配列 []=クリア、空でない配列=上書き'
+          description: フィールド別名。省略=変更なし、空配列 []=クリア、空でない配列=上書き
           items:
             type: string
           example:
@@ -5224,6 +5223,4 @@ components:
         - 5
         - 6
         - 7
-security:
-  - ApiId: []
-    SecretCode: []
+x-codeSamples: custom

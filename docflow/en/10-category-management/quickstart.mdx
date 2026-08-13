@@ -77,11 +77,13 @@ curl -X POST \
   -F "category_prompt=VAT invoice with fields such as invoice code, invoice number, etc." \
   -F "extract_model=Acgpt" \
   -F "sample_files=@/path/to/invoice_sample.pdf" \
+  -F 'category_keyword_rules={"positive_rules":[{"group_name":"Invoice keywords","min_hit":2,"words":["invoice code","invoice number"]}],"negative_rules":[]}' \
   -F 'fields=[{"name":"Invoice Code","description":"Invoice code description","prompt":"Please extract the invoice code"}]' \
   "https://docflow.textin.com/api/app-api/sip/platform/v2/category/create"
 ```
 
 ```python Python icon=python expandable lines
+import json
 import requests
 
 ti_app_id = "<your-app-id>"
@@ -102,7 +104,17 @@ data = {
     'name': 'Invoice',
     'category_prompt': 'VAT invoice with fields such as invoice code, invoice number, etc.',
     'extract_model': 'Acgpt',
-    'fields': '[{"name":"Invoice Code","description":"Invoice code description","prompt":"Please extract the invoice code"}]'
+    'fields': '[{"name":"Invoice Code","description":"Invoice code description","prompt":"Please extract the invoice code"}]',
+    'category_keyword_rules': json.dumps({
+        'positive_rules': [
+            {
+                'group_name': 'Invoice keywords',
+                'min_hit': 2,
+                'words': ['invoice code', 'invoice number'],
+            }
+        ],
+        'negative_rules': [],
+    }),
 }
 
 resp = requests.post(
@@ -133,6 +145,11 @@ else:
 - `extract_model` (required): Extraction model, options: `Auto`, `Acgpt`, `Acgpt-VL`, `DF-M1`
 - `sample_files` (required): Sample file list, at least one sample file required; maximum 20 sample files per category
 - `fields` (required): Field configuration list (JSON string), at least one field required, table fields can only be configured in the default table (table_id=-1)
+- `category_keyword_rules` (optional): Keyword rules for classification (JSON string). Positive rules are used for matching, while negative rules are used for filtering. You can configure up to 10 positive rule groups and 1 negative rule group, with up to 20 keywords in each group
+
+<Note>
+  A rule group matches when at least `min_hit` entries in `words` match. Positive rule groups are combined with OR; matching a negative rule group excludes the category. On creation, omitting this parameter or passing two empty arrays leaves keyword rules unconfigured.
+</Note>
 
 **Response Example:**
 
@@ -191,6 +208,7 @@ if result.get("code") == 200:
     print(f"Found {total} file categories")
     for category in categories:
         print(f"Category ID: {category.get('id')}, Name: {category.get('name')}")
+        print(f"Category keyword rules: {category.get('category_keyword_rules')}")
 else:
     print(f"Retrieval failed: {result.get('msg')}")
 ```
@@ -218,6 +236,16 @@ else:
         "id": "1234567890",
         "name": "Invoice",
         "category_prompt": "VAT invoice with fields such as invoice code, invoice number, etc.",
+        "category_keyword_rules": {
+          "positive_rules": [
+            {
+              "group_name": "Invoice keywords",
+              "min_hit": 2,
+              "words": ["invoice code", "invoice number"]
+            }
+          ],
+          "negative_rules": []
+        },
         "extract_model": "Acgpt",
         "enabled": 1
       }
@@ -225,6 +253,8 @@ else:
   }
 }
 ```
+
+For categories with keyword rules configured, `category_keyword_rules` contains the complete rule object for display or later updates.
 
 ## Update File Category
 
@@ -242,6 +272,16 @@ curl -X POST \
     "category_id": "1234567890",
     "name": "Updated Category Name",
     "category_prompt": "Updated prompt",
+    "category_keyword_rules": {
+      "positive_rules": [
+        {
+          "group_name": "Invoice keywords",
+          "min_hit": 1,
+          "words": ["VAT invoice", "invoice number"]
+        }
+      ],
+      "negative_rules": []
+    },
     "enabled": 1
   }' \
   "https://docflow.textin.com/api/app-api/sip/platform/v2/category/update"
@@ -263,6 +303,16 @@ payload = {
     "category_id": category_id,
     "name": "Updated Category Name",
     "category_prompt": "Updated prompt",
+    "category_keyword_rules": {
+        "positive_rules": [
+            {
+                "group_name": "Invoice keywords",
+                "min_hit": 1,
+                "words": ["VAT invoice", "invoice number"],
+            }
+        ],
+        "negative_rules": [],
+    },
     "enabled": 1  # 0: Disabled, 1: Enabled, 2: Draft
 }
 
@@ -290,6 +340,7 @@ else:
 - `category_id` (required): File category ID
 - `name` (optional): File category name, max length 50
 - `category_prompt` (optional): Prompt for classification, max length 500
+- `category_keyword_rules` (optional): Keyword rules for classification. Positive rules are used for matching, while negative rules are used for filtering. You can configure up to 10 positive rule groups and 1 negative rule group, with up to 20 keywords in each group. Omit it or pass `null` to keep existing rules, pass a valid object to replace all rules, or pass `{"positive_rules":[],"negative_rules":[]}` to clear them
 - `enabled` (optional): Status, 0: Disabled, 1: Enabled, 2: Draft
 
 ## Delete File Category

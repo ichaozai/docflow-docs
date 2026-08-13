@@ -5,6 +5,8 @@
       在指定空间中创建一个新的文件类别，需要上传至少一个样本文件并配置至少一个字段。
 
       支持一站式创建：可同时传入 `tables` 参数，创建表格及表格内嵌字段。
+
+      `category_keyword_rules` 与 `fields`、`tables` 一样以 JSON 字符串表单字段传递。规则中的关键词比较时忽略大小写及各类空格；同空间其他已启用类别不得存在同类型的重复规则组。参数校验错误码：`1005025065`–`1005025069`；跨类别规则组冲突复用 `1005015019`。
     operationId: createCategory
     tags:
       - 文件类别
@@ -29,6 +31,8 @@
                 description: 用于分类的提示词
                 example: "增值税发票，包含发票代码、发票号码等字段"
                 maxLength: 150
+              category_keyword_rules:
+                $ref: '../components/schemas/categories.yaml#/CategoryKeywordRules'
               description:
                 type: string
                 description: 文件类别描述
@@ -102,6 +106,8 @@
                         category_prompt:
                           type: string
                           description: 分类提示词（with_detail=true 时返回）
+                        category_keyword_rules:
+                          $ref: '../components/schemas/categories.yaml#/CategoryKeywordRules'
                         extract_model:
                           type: string
                           description: 抽取模型（with_detail=true 时返回）
@@ -131,7 +137,7 @@
     summary: 获取空间文件类别列表
     tags:
       - 文件类别
-    description: 获取空间文件类别列表
+    description: 获取空间文件类别列表。每个类别项在已配置时都会返回 `category_keyword_rules` 分类关键词规则。
     operationId: listCategories
     parameters:
       - name: workspace_id
@@ -211,6 +217,8 @@
       更新指定文件类别的信息。
 
       注意：设置 extract_model 时将级联覆盖该分类下所有字段和表格的抽取模型。
+
+      `category_keyword_rules` 不传或传 `null` 时不修改既有规则；传入有效对象时全量替换；仅传入 `{"positive_rules":[],"negative_rules":[]}` 时清空。`{}`、空白字符串和非法结构均返回参数错误。关键词比较时忽略大小写及各类空格；与同空间其他已启用类别的同类型规则组重复时返回冲突错误。参数校验错误码：`1005025065`–`1005025069`；跨类别规则组冲突复用 `1005015019`。
     operationId: updateCategory
     tags:
       - 文件类别
@@ -239,6 +247,14 @@
                 description: 用于分类的提示词
                 example: "增值税发票，包含发票代码、发票号码等字段"
                 maxLength: 150
+              category_keyword_rules:
+                type: object
+                allOf:
+                  - $ref: '../components/schemas/categories.yaml#/CategoryKeywordRules'
+                nullable: true
+                description: |
+                  分类关键词规则。不传或 null=不修改；有效对象=全量替换；`positive_rules`、`negative_rules` 都为空数组=清空。
+                  不接受 `{}` 或空白字符串。
               enabled:
                 $ref: '../components/schemas/categories.yaml#/EnabledStatus'
               extract_model:
@@ -289,6 +305,8 @@
                         category_prompt:
                           type: string
                           description: 分类提示词
+                        category_keyword_rules:
+                          $ref: '../components/schemas/categories.yaml#/CategoryKeywordRules'
                         extract_model:
                           type: string
                           description: 抽取模型

@@ -143,10 +143,14 @@ TaskProcessResult:
                     items:
                       type: object
                       properties:
-                        tableName:
+                        table_name:
                           description: 表格名称
                           type: string
                           example: table1
+                        translated_table_name:
+                          description: 表格名称的翻译结果
+                          type: string
+                          nullable: true
                         tableType:
                           description: 表格类型， 0， 系统配置， 1 手动添加。
                           type: string
@@ -262,6 +266,14 @@ KeyValue:
     value:
       type: string
       description: 字段值
+    translated_key:
+      type: string
+      nullable: true
+      description: 字段名的翻译结果
+    translated_value:
+      type: string
+      nullable: true
+      description: 字段值的翻译结果
     position:
       $ref: "#/KeyValuePosition"
 
@@ -277,6 +289,14 @@ FieldRespKeyValue:
     value:
       type: string
       description: 字段值
+    translated_key:
+      type: string
+      nullable: true
+      description: 字段名的翻译结果
+    translated_value:
+      type: string
+      nullable: true
+      description: 字段值的翻译结果
     position:
       $ref: "#/KeyValuePosition"
     confidence:
@@ -312,6 +332,22 @@ StampValue:
     shape:
       type: string
       description: 印章形状
+    translated_text:
+      type: string
+      nullable: true
+      description: 印章文本的翻译结果
+    translated_type:
+      type: string
+      nullable: true
+      description: 印章类型的翻译结果
+    translated_color:
+      type: string
+      nullable: true
+      description: 印章颜色的翻译结果
+    translated_shape:
+      type: string
+      nullable: true
+      description: 印章形状的翻译结果
     position:
       type: array
       description: 位置信息
@@ -331,6 +367,10 @@ HandWritingValue:
     text:
       type: string
       description: 印章文本内容
+    translated_text:
+      type: string
+      nullable: true
+      description: 手写体文本的翻译结果
     position:
       $ref: "#/KeyValuePosition"
 
@@ -414,6 +454,14 @@ CommonFieldDetailRespVO:
     value:
       type: string
       description: 字段值
+    translated_key:
+      type: string
+      nullable: true
+      description: 字段名的翻译结果
+    translated_value:
+      type: string
+      nullable: true
+      description: 字段值的翻译结果
     textInLines:
       deprecated: true
       type: array
@@ -530,10 +578,14 @@ SubFileDetailInfo:
           items:
             type: object
             properties:
-              tableName:
+              table_name:
                 description: 表格名称
                 type: string
                 example: table1
+              translated_table_name:
+                description: 表格名称的翻译结果
+                type: string
+                nullable: true
               tableType:
                 description: 表格类型， 0， 系统配置， 1 手动添加。
                 type: string
@@ -696,6 +748,193 @@ PagesInfo:
         type: integer
         description: PDF转图片时的分辨率。非PDF文件该值为`0`.
         example: 144
+      image_url:
+        type: string
+        format: uri
+        nullable: true
+        description: |
+          当前任务当前页的图片URL，仅当请求参数`with_image_url=true`时返回。
+          普通/父任务与拆套/切图子任务分别返回各自页面图片，且与同一对象中的
+          `page`、`angle`、`width`、`height`按页面索引一一对应。
+          链接有效期为30天。图片尚未生成、URL为空或页面信息越界时返回`null`；关闭开关时该字段不输出。
+        example: https://example.com/pages/202412190001/0.png
+
+FileTranslateRequest:
+  type: object
+  required:
+    - task_id
+    - target_language
+  properties:
+    task_id:
+      type: string
+      description: 已完成识别的任务ID。雪花ID必须作为字符串传递，禁止转换为JavaScript Number。
+      example: "1978297791713619968"
+    source_language:
+      $ref: '#/TranslateSourceLanguage'
+    target_language:
+      $ref: '#/TranslateTargetLanguage'
+
+FileTranslateResult:
+  type: object
+  properties:
+    result:
+      type: object
+      required:
+        - fields
+        - tables
+        - stamps
+        - handwritings
+      properties:
+        fields:
+          type: array
+          description: 普通字段翻译结果
+          items:
+            $ref: '#/CommonFieldTranslate'
+        tables:
+          type: array
+          description: 表格翻译结果
+          items:
+            $ref: '#/TableDetailTranslate'
+        stamps:
+          type: array
+          description: 印章翻译结果
+          items:
+            $ref: '#/StampTranslateResult'
+        handwritings:
+          type: array
+          description: 手写体翻译结果
+          items:
+            $ref: '#/HandwritingTranslateResult'
+
+TranslateSourceLanguage:
+  type: string
+  description: 翻译源语言，使用 ISO 639-1 编码；省略或空字符串均表示自动检测。
+  enum:
+    - ""
+    - zh-CN
+    - zh-TW
+    - ja
+    - ko
+    - en
+    - fr
+    - pt
+    - de
+    - it
+    - es
+    - ru
+    - th
+    - vi
+    - ms
+    - id
+    - hi
+    - bn
+    - ar
+    - pl
+  example: ""
+
+TranslateTargetLanguage:
+  type: string
+  description: 翻译目标语言，使用 ISO 639-1 编码，必填且必须是具体语言。
+  enum:
+    - zh-CN
+    - zh-TW
+    - ja
+    - ko
+    - en
+    - fr
+    - pt
+    - de
+    - it
+    - es
+    - ru
+    - th
+    - vi
+    - ms
+    - id
+    - hi
+    - bn
+    - ar
+    - pl
+  example: zh-CN
+
+CommonFieldTranslate:
+  type: object
+  properties:
+    key:
+      type: string
+      description: 原字段key
+      example: invoiceNumber
+    translated_key:
+      type: string
+      nullable: true
+      description: 字段key翻译结果；表格单元格通常不使用
+    index:
+      type: integer
+      description: 同名字段索引，从0开始
+      example: 0
+    value:
+      type: string
+      nullable: true
+      description: 字段值翻译结果
+
+TableFieldHeadTranslate:
+  type: object
+  properties:
+    key:
+      type: string
+      description: 原表头key
+    translated_key:
+      type: string
+      nullable: true
+      description: 表头key翻译结果
+
+TableDetailTranslate:
+  type: object
+  properties:
+    table_name:
+      type: string
+      description: 原表格名称
+    translated_table_name:
+      type: string
+      nullable: true
+      description: 表格名称翻译结果
+    items:
+      type: array
+      description: 表格数据翻译结果，外层为行、内层为单元格
+      items:
+        type: array
+        items:
+          $ref: '#/CommonFieldTranslate'
+    item_headers:
+      type: array
+      description: 表头翻译结果
+      items:
+        $ref: '#/TableFieldHeadTranslate'
+
+StampTranslateResult:
+  type: object
+  properties:
+    key: { type: string, description: "印章唯一标识，格式为stamp-${page}-${index}" }
+    page: { type: integer, description: 页码 }
+    index: { type: integer, description: 页内序号，从0开始 }
+    stamp_prefix: { type: string, nullable: true, description: 印章前缀翻译结果 }
+    type_key: { type: string, nullable: true, description: 印章类型key翻译结果 }
+    type: { type: string, nullable: true, description: 印章类型翻译结果 }
+    color_key: { type: string, nullable: true, description: 印章颜色key翻译结果 }
+    color: { type: string, nullable: true, description: 印章颜色翻译结果 }
+    stamp_shape_key: { type: string, nullable: true, description: 印章形状key翻译结果 }
+    stamp_shape: { type: string, nullable: true, description: 印章形状翻译结果 }
+    value_key: { type: string, nullable: true, description: 印章文字key翻译结果 }
+    value: { type: string, nullable: true, description: 印章文字翻译结果 }
+
+HandwritingTranslateResult:
+  type: object
+  properties:
+    key: { type: string, description: "手写体唯一标识，格式为handwriting-${page}-${lineIndex}" }
+    page: { type: integer, description: 页码 }
+    index: { type: integer, description: 页内序号，从0开始 }
+    handwriting_prefix: { type: string, nullable: true, description: 手写体前缀翻译结果 }
+    text: { type: string, nullable: true, description: 手写体文字翻译结果 }
 
 DocumentParserParam:
   type: object

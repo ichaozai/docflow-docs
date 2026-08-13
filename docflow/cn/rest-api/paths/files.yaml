@@ -104,7 +104,14 @@
 /api/app-api/sip/platform/v2/file/fetch:
   get:
     summary: 获取文件处理结果列表
-    description: ""
+    description: |
+      查询任务的识别结果。任务已有翻译结果时，接口保留原始识别字段，并在对应对象中追加译文：
+      - 普通字段及旧版单表字段：`data.fields[]`、`data.items[][]`中的`translated_key`、`translated_value`
+      - 多表结果：`data.tables[]`中的`translated_table_name`，以及`data.tables[].items[][]`中的`translated_key`、`translated_value`
+      - 印章：`data.stamps[]`中的`translated_color`、`translated_text`、`translated_shape`、`translated_type`
+      - 手写体：`data.handwritings[]`中的`translated_text`
+
+      翻译字段仅在对应内容存在译文时有值，不会覆盖原始的`key`、`value`、`tableName`等字段。
     operationId: getFiles
     parameters:
       - name: page
@@ -136,6 +143,12 @@
       - name: file_id
         in: query
         description: 文件ID
+        required: false
+        schema:
+          type: string
+      - name: task_id
+        in: query
+        description: 任务ID。按任务精确查询时传入，雪花ID需使用字符串，避免精度丢失。
         required: false
         schema:
           type: string
@@ -186,6 +199,18 @@
         schema:
           type: boolean
           default: false
+      - name: with_image_url
+        in: query
+        description: |
+          是否返回每页图片URL，默认`false`。
+          开启后，普通任务或父任务的`files[].pages[]`，以及拆套或切图子任务的
+          `files[].child_files[].pages[]`都会返回对应任务自身的`image_url`。
+          图片URL与同一页面对象中的`page`、`angle`、`width`、`height`按页面索引一一对应；
+          链接有效期为30天。图片尚未生成或URL不可用时返回`null`。关闭或不传时不输出`image_url`字段。
+        required: false
+        schema:
+          type: boolean
+          default: false
     responses:
       '200':
         description: 成功获取文件列表
@@ -195,6 +220,41 @@
               allOf:
               - $ref: '../components/schemas/common.yaml#/CodeMessage'
               - $ref: '../components/schemas/files.yaml#/TaskProcessResult'
+
+/api/app-api/sip/platform/v2/file/translate:
+  post:
+    summary: 翻译文件抽取结果
+    description: |
+      语言使用 ISO 639-1 编码，中文按地区区分为`zh-CN`和`zh-TW`。
+      `source_language`省略或传空字符串时自动检测源语言；指定源语言时不能与`target_language`相同。
+      调用接口后执行翻译并同步开启前端详情展示。并发请求会返回“任务正在翻译中，请稍后重试”。
+
+      常见业务错误码：
+      - `1005025065`：任务识别失败，无法执行翻译
+      - `1005025066`：任务尚未完成识别
+      - `1005025067`：任务正在翻译中
+      - `1005025068`：翻译源语言和目标语言相同
+      - `1005025069`：目标语言为空或不是具体语言编码
+    operationId: translateFile
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/files.yaml#/FileTranslateRequest'
+          example:
+            task_id: "202412190001"
+            source_language: ""
+            target_language: zh-CN
+    responses:
+      '200':
+        description: 翻译请求处理完成；具体结果以响应中的业务code为准
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas/common.yaml#/CodeMessage'
+                - $ref: '../components/schemas/files.yaml#/FileTranslateResult'
 
 /api/app-api/sip/platform/v2/file/delete:
   post:

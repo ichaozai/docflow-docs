@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: DocFlow API
   description: DocFlow REST API, providing file upload and file processing result retrieval capabilities
-  version: 2.8.4
+  version: 2.10.0
 servers:
 - url: https://docflow.textin.com
   
@@ -16,6 +16,8 @@ paths:
     $ref: './paths/files.yaml#/~1api~1app-api~1sip~1platform~1v2~1file~1upload~1sync'
   /api/app-api/sip/platform/v2/file/fetch:
     $ref: './paths/files.yaml#/~1api~1app-api~1sip~1platform~1v2~1file~1fetch'
+  /api/app-api/sip/platform/v2/file/translate:
+    $ref: './paths/files.yaml#/~1api~1app-api~1sip~1platform~1v2~1file~1translate'
   /api/app-api/sip/platform/v2/file/update:
     $ref: './paths/files.yaml#/~1api~1app-api~1sip~1platform~1v2~1file~1update'
   /api/app-api/sip/platform/v2/file/delete:

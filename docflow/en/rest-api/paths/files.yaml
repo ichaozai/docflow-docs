@@ -104,7 +104,18 @@
 /api/app-api/sip/platform/v2/file/fetch:
   get:
     summary: Get File Processing Result List
-    description: ""
+    description: |
+      Queries task recognition results. When stored translations exist, original recognition
+      fields are preserved and translated values are added to the corresponding objects:
+      - Regular fields and legacy single-table fields: `translated_key` and `translated_value` in
+        `data.fields[]` and `data.items[][]`
+      - Multi-table results: `translated_table_name` in `data.tables[]`, and `translated_key` and
+        `translated_value` in `data.tables[].items[][]`
+      - Stamps: `translated_color`, `translated_text`, `translated_shape`, and `translated_type` in `data.stamps[]`
+      - Handwriting: `translated_text` in `data.handwritings[]`
+
+      Translation fields have values only when translations exist for the corresponding content.
+      Original fields such as `key`, `value`, and `tableName` are not overwritten.
     operationId: getFiles
     parameters:
       - name: page
@@ -136,6 +147,12 @@
       - name: file_id
         in: query
         description: File ID
+        required: false
+        schema:
+          type: string
+      - name: task_id
+        in: query
+        description: Task ID for an exact task query. Send Snowflake IDs as strings to avoid precision loss.
         required: false
         schema:
           type: string
@@ -186,6 +203,20 @@
         schema:
           type: boolean
           default: false
+      - name: with_image_url
+        in: query
+        description: |
+          Whether to return the image URL for each page. The default is `false`.
+          When enabled, `files[].pages[]` for regular/parent tasks and
+          `files[].child_files[].pages[]` for split/crop child tasks return the image URL
+          owned by the corresponding task. The URL is aligned by page index with `page`,
+          `angle`, `width`, and `height` in the same page object. If an image has not been
+          generated or its URL is unavailable, `image_url` is `null`. The URL is valid for 30 days. The field is omitted
+          when this parameter is false or not provided.
+        required: false
+        schema:
+          type: boolean
+          default: false
     responses:
       '200':
         description: Successfully retrieved file list
@@ -195,6 +226,43 @@
               allOf:
               - $ref: '../components/schemas/common.yaml#/CodeMessage'
               - $ref: '../components/schemas/files.yaml#/TaskProcessResult'
+
+/api/app-api/sip/platform/v2/file/translate:
+  post:
+    summary: Translate file extraction results
+    description: |
+      Languages use ISO 639-1 codes; Chinese is region-qualified as `zh-CN` or `zh-TW`.
+      Omitting `source_language` or sending an empty string enables automatic source-language detection.
+      A concrete source language must differ from `target_language`.
+      Calling this endpoint translates the task and enables translation in the frontend task detail view.
+      A concurrent request returns a "task is being translated" error.
+
+      Common business error codes:
+      - `1005025065`: task recognition failed and cannot be translated
+      - `1005025066`: task recognition has not completed
+      - `1005025067`: task translation is already in progress
+      - `1005025068`: source and target languages are the same
+      - `1005025069`: target language is empty or is not a concrete language code
+    operationId: translateFile
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/files.yaml#/FileTranslateRequest'
+          example:
+            task_id: "202412190001"
+            source_language: ""
+            target_language: zh-CN
+    responses:
+      '200':
+        description: The request has been processed. Check the business code in the response for the outcome.
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas/common.yaml#/CodeMessage'
+                - $ref: '../components/schemas/files.yaml#/FileTranslateResult'
 
 /api/app-api/sip/platform/v2/file/delete:
   post:

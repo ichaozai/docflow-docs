@@ -1,7 +1,7 @@
 /api/app-api/sip/platform/v2/auth/token:
   get:
     summary: 生成短时间有效的token
-    description: 生成短时间有效的token(用于iframe场景)
+    description: 生成短时间有效的token（用于iframe场景），token有效期为1天。
     operationId: authToken
     responses:
       '200':

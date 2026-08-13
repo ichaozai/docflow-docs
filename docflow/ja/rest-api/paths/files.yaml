@@ -104,7 +104,17 @@
 /api/app-api/sip/platform/v2/file/fetch:
   get:
     summary: ファイル処理結果一覧を取得
-    description: ""
+    description: |
+      タスクの認識結果を照会します。保存済みの翻訳結果がある場合、元の認識フィールドを保持したまま、
+      対応するオブジェクトに翻訳フィールドを追加します。
+      - 通常フィールドおよび旧単一テーブル：`data.fields[]`、`data.items[][]` の `translated_key`、`translated_value`
+      - 複数テーブル：`data.tables[]` の `translated_table_name`、および `data.tables[].items[][]` の
+        `translated_key`、`translated_value`
+      - 印章：`data.stamps[]` の `translated_color`、`translated_text`、`translated_shape`、`translated_type`
+      - 手書き文字：`data.handwritings[]` の `translated_text`
+
+      対応する翻訳が存在する場合にのみ翻訳フィールドに値が設定されます。`key`、`value`、
+      `tableName` などの元フィールドは上書きされません。
     operationId: getFiles
     parameters:
       - name: page
@@ -136,6 +146,12 @@
       - name: file_id
         in: query
         description: ファイル ID
+        required: false
+        schema:
+          type: string
+      - name: task_id
+        in: query
+        description: タスクを指定して照会するためのタスク ID。精度損失を防ぐため、Snowflake ID は文字列で送信してください。
         required: false
         schema:
           type: string
@@ -186,6 +202,19 @@
         schema:
           type: boolean
           default: false
+      - name: with_image_url
+        in: query
+        description: |
+          各ページの画像 URL を返すかどうか。デフォルトは `false` です。
+          有効にすると、通常/親タスクの `files[].pages[]` と、分割/画像切り出し子タスクの
+          `files[].child_files[].pages[]` に、それぞれのタスクが所有する `image_url` が返されます。
+          URL は同じページオブジェクトの `page`、`angle`、`width`、`height` とページインデックスで対応します。
+          URL の有効期間は30日です。画像が未生成、または URL が利用できない場合は `null` です。false または未指定の場合、
+          `image_url` フィールドは出力されません。
+        required: false
+        schema:
+          type: boolean
+          default: false
     responses:
       '200':
         description: ファイル一覧の取得に成功
@@ -195,6 +224,43 @@
               allOf:
               - $ref: '../components/schemas/common.yaml#/CodeMessage'
               - $ref: '../components/schemas/files.yaml#/TaskProcessResult'
+
+/api/app-api/sip/platform/v2/file/translate:
+  post:
+    summary: ファイル抽出結果を翻訳
+    description: |
+      言語には ISO 639-1 コードを使用し、中国語は地域別に `zh-CN` と `zh-TW` を使用します。
+      `source_language` を省略するか空文字列を送信すると、翻訳元言語を自動検出します。
+      翻訳元言語を明示する場合、`target_language` と同じ値は指定できません。
+      このエンドポイントを呼び出すと翻訳を実行し、フロントエンドのタスク詳細画面で翻訳表示を有効にします。
+      同時リクエストには「タスクを翻訳中です。しばらくしてから再試行してください」というエラーが返されます。
+
+      主なビジネスエラーコード：
+      - `1005025065`: タスク認識失敗のため翻訳不可
+      - `1005025066`: タスク認識が未完了
+      - `1005025067`: タスクを翻訳中
+      - `1005025068`: 翻訳元言語と翻訳先言語が同じ
+      - `1005025069`: 翻訳先言語が空、または具体的な言語コードではない
+    operationId: translateFile
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/files.yaml#/FileTranslateRequest'
+          example:
+            task_id: "202412190001"
+            source_language: ""
+            target_language: zh-CN
+    responses:
+      '200':
+        description: リクエスト処理完了。結果はレスポンスのビジネス code を確認してください。
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas/common.yaml#/CodeMessage'
+                - $ref: '../components/schemas/files.yaml#/FileTranslateResult'
 
 /api/app-api/sip/platform/v2/file/delete:
   post:

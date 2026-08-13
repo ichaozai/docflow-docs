@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: DocFlow API
   description: DocFlow REST API。ファイルアップロードとファイル処理結果の取得機能を提供します。
-  version: 2.8.4
+  version: 2.10.0
   contact:
     name: TextIn
     url: 'https://www.textin.com/contact?type=27&sub_type=1'
@@ -125,7 +125,26 @@ paths:
   /api/app-api/sip/platform/v2/file/fetch:
     get:
       summary: ファイル処理結果一覧を取得
-      description: ''
+      description: >
+        タスクの認識結果を照会します。保存済みの翻訳結果がある場合、元の認識フィールドを保持したまま、
+
+        対応するオブジェクトに翻訳フィールドを追加します。
+
+        - 通常フィールドおよび旧単一テーブル：`data.fields[]`、`data.items[][]` の
+        `translated_key`、`translated_value`
+
+        - 複数テーブル：`data.tables[]` の `translated_table_name`、および
+        `data.tables[].items[][]` の
+          `translated_key`、`translated_value`
+        - 印章：`data.stamps[]` の
+        `translated_color`、`translated_text`、`translated_shape`、`translated_type`
+
+        - 手書き文字：`data.handwritings[]` の `translated_text`
+
+
+        対応する翻訳が存在する場合にのみ翻訳フィールドに値が設定されます。`key`、`value`、
+
+        `tableName` などの元フィールドは上書きされません。
       operationId: getFiles
       parameters:
         - name: page
@@ -157,6 +176,12 @@ paths:
         - name: file_id
           in: query
           description: ファイル ID
+          required: false
+          schema:
+            type: string
+        - name: task_id
+          in: query
+          description: タスクを指定して照会するためのタスク ID。精度損失を防ぐため、Snowflake ID は文字列で送信してください。
           required: false
           schema:
             type: string
@@ -207,6 +232,19 @@ paths:
           schema:
             type: boolean
             default: false
+        - name: with_image_url
+          in: query
+          description: |
+            各ページの画像 URL を返すかどうか。デフォルトは `false` です。
+            有効にすると、通常/親タスクの `files[].pages[]` と、分割/画像切り出し子タスクの
+            `files[].child_files[].pages[]` に、それぞれのタスクが所有する `image_url` が返されます。
+            URL は同じページオブジェクトの `page`、`angle`、`width`、`height` とページインデックスで対応します。
+            URL の有効期間は30日です。画像が未生成、または URL が利用できない場合は `null` です。false または未指定の場合、
+            `image_url` フィールドは出力されません。
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: ファイル一覧の取得に成功
@@ -216,6 +254,42 @@ paths:
                 allOf:
                   - $ref: '#/components/schemas/CodeMessage'
                   - $ref: '#/components/schemas/TaskProcessResult'
+  /api/app-api/sip/platform/v2/file/translate:
+    post:
+      summary: ファイル抽出結果を翻訳
+      description: |
+        言語には ISO 639-1 コードを使用し、中国語は地域別に `zh-CN` と `zh-TW` を使用します。
+        `source_language` を省略するか空文字列を送信すると、翻訳元言語を自動検出します。
+        翻訳元言語を明示する場合、`target_language` と同じ値は指定できません。
+        このエンドポイントを呼び出すと翻訳を実行し、フロントエンドのタスク詳細画面で翻訳表示を有効にします。
+        同時リクエストには「タスクを翻訳中です。しばらくしてから再試行してください」というエラーが返されます。
+
+        主なビジネスエラーコード：
+        - `1005025065`: タスク認識失敗のため翻訳不可
+        - `1005025066`: タスク認識が未完了
+        - `1005025067`: タスクを翻訳中
+        - `1005025068`: 翻訳元言語と翻訳先言語が同じ
+        - `1005025069`: 翻訳先言語が空、または具体的な言語コードではない
+      operationId: translateFile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileTranslateRequest'
+            example:
+              task_id: '202412190001'
+              source_language: ''
+              target_language: zh-CN
+      responses:
+        '200':
+          description: リクエスト処理完了。結果はレスポンスのビジネス code を確認してください。
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - $ref: '#/components/schemas/FileTranslateResult'
   /api/app-api/sip/platform/v2/file/update:
     post:
       summary: ファイル処理結果を更新
@@ -615,7 +689,7 @@ paths:
   /api/app-api/sip/platform/v2/auth/token:
     get:
       summary: 短期有効トークンを生成
-      description: 短期有効トークンを生成します（iframe シナリオ用）
+      description: 短期有効トークンを生成します（iframe シナリオ用）。トークンの有効期間は1日です。
       operationId: authToken
       responses:
         '200':
@@ -3449,6 +3523,17 @@ components:
             type: integer
             description: PDF を画像に変換する際の解像度。PDF 以外のファイルでは、この値は 0 です。
             example: 144
+          image_url:
+            type: string
+            format: uri
+            nullable: true
+            description: |
+              現在のタスクにおけるこのページの画像 URL。`with_image_url=true` の場合のみ返されます。
+              通常/親タスクと分割/画像切り出し子タスクは、それぞれ自身のページ画像を返します。
+              URL は同じオブジェクトの `page`、`angle`、`width`、`height` とページインデックスで対応します。
+              画像が未生成、URL が空、またはページ情報が範囲外の場合は `null` です。
+              URL の有効期間は30日です。オプションが無効な場合、このフィールドは出力されません。
+            example: 'https://example.com/pages/202412190001/0.png'
     KeyValuePosition:
       description: フィールド値の位置。フィールド値はページや行をまたぐ場合があるため、配列として表示されます。
       type: array
@@ -3479,6 +3564,14 @@ components:
         value:
           type: string
           description: フィールド値
+        translated_key:
+          type: string
+          nullable: true
+          description: フィールド名の翻訳結果
+        translated_value:
+          type: string
+          nullable: true
+          description: フィールド値の翻訳結果
         position:
           $ref: '#/components/schemas/KeyValuePosition'
         confidence:
@@ -3501,6 +3594,14 @@ components:
         value:
           type: string
           description: フィールド値
+        translated_key:
+          type: string
+          nullable: true
+          description: フィールド名の翻訳結果
+        translated_value:
+          type: string
+          nullable: true
+          description: フィールド値の翻訳結果
         position:
           $ref: '#/components/schemas/KeyValuePosition'
     TextInLines:
@@ -3548,6 +3649,14 @@ components:
         value:
           type: string
           description: フィールド値
+        translated_key:
+          type: string
+          nullable: true
+          description: フィールド名の翻訳結果
+        translated_value:
+          type: string
+          nullable: true
+          description: フィールド値の翻訳結果
         textInLines:
           deprecated: true
           type: array
@@ -3587,6 +3696,22 @@ components:
         shape:
           type: string
           description: 印影形状
+        translated_text:
+          type: string
+          nullable: true
+          description: 印影テキストの翻訳結果
+        translated_type:
+          type: string
+          nullable: true
+          description: 印影タイプの翻訳結果
+        translated_color:
+          type: string
+          nullable: true
+          description: 印影色の翻訳結果
+        translated_shape:
+          type: string
+          nullable: true
+          description: 印影形状の翻訳結果
         position:
           type: array
           description: 位置情報
@@ -3605,6 +3730,10 @@ components:
         text:
           type: string
           description: 手書きテキスト内容
+        translated_text:
+          type: string
+          nullable: true
+          description: 手書きテキストの翻訳結果
         position:
           $ref: '#/components/schemas/KeyValuePosition'
     Document:
@@ -3801,10 +3930,14 @@ components:
               items:
                 type: object
                 properties:
-                  tableName:
+                  table_name:
                     description: テーブル名
                     type: string
                     example: table1
+                  translated_table_name:
+                    description: テーブル名の翻訳結果
+                    type: string
+                    nullable: true
                   tableType:
                     description: |
                       テーブルタイプ。0: システム設定、1: 手動追加。
@@ -4138,10 +4271,14 @@ components:
                         items:
                           type: object
                           properties:
-                            tableName:
+                            table_name:
                               description: テーブル名
                               type: string
                               example: table1
+                            translated_table_name:
+                              description: テーブル名の翻訳結果
+                              type: string
+                              nullable: true
                             tableType:
                               description: |
                                 テーブルタイプ。0: システム設定、1: 手動追加。
@@ -4281,6 +4418,221 @@ components:
                   - recognition_status
                   - verification_status
                   - category
+    TranslateSourceLanguage:
+      type: string
+      description: ISO 639-1 コードの翻訳元言語。省略または空文字列の場合は自動検出します。
+      enum:
+        - ''
+        - zh-CN
+        - zh-TW
+        - ja
+        - ko
+        - en
+        - fr
+        - pt
+        - de
+        - it
+        - es
+        - ru
+        - th
+        - vi
+        - ms
+        - id
+        - hi
+        - bn
+        - ar
+        - pl
+      example: ''
+    TranslateTargetLanguage:
+      type: string
+      description: 必須の翻訳先言語。具体的な ISO 639-1 コードを指定してください。
+      enum:
+        - zh-CN
+        - zh-TW
+        - ja
+        - ko
+        - en
+        - fr
+        - pt
+        - de
+        - it
+        - es
+        - ru
+        - th
+        - vi
+        - ms
+        - id
+        - hi
+        - bn
+        - ar
+        - pl
+      example: zh-CN
+    FileTranslateRequest:
+      type: object
+      required:
+        - task_id
+        - target_language
+      properties:
+        task_id:
+          type: string
+          description: >-
+            認識が完了したタスクの ID。Snowflake ID は文字列として送信し、JavaScript Number
+            に変換しないでください。
+          example: '1978297791713619968'
+        source_language:
+          $ref: '#/components/schemas/TranslateSourceLanguage'
+        target_language:
+          $ref: '#/components/schemas/TranslateTargetLanguage'
+    CommonFieldTranslate:
+      type: object
+      properties:
+        key:
+          type: string
+          description: 元のフィールド key
+          example: invoiceNumber
+        translated_key:
+          type: string
+          nullable: true
+          description: フィールド key の翻訳結果。通常、テーブルセルでは使用しません
+        index:
+          type: integer
+          description: 同じ key を持つフィールドの0始まりインデックス
+          example: 0
+        value:
+          type: string
+          nullable: true
+          description: フィールド値の翻訳結果
+    TableFieldHeadTranslate:
+      type: object
+      properties:
+        key:
+          type: string
+          description: 元のヘッダー key
+        translated_key:
+          type: string
+          nullable: true
+          description: ヘッダー key の翻訳結果
+    TableDetailTranslate:
+      type: object
+      properties:
+        table_name:
+          type: string
+          description: 元のテーブル名
+        translated_table_name:
+          type: string
+          nullable: true
+          description: テーブル名の翻訳結果
+        items:
+          type: array
+          description: テーブルデータの翻訳結果。外側の配列が行、内側の配列がセルです。
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/CommonFieldTranslate'
+        item_headers:
+          type: array
+          description: テーブルヘッダーの翻訳結果
+          items:
+            $ref: '#/components/schemas/TableFieldHeadTranslate'
+    StampTranslateResult:
+      type: object
+      properties:
+        key:
+          type: string
+          description: 'stamp-${page}-${index} 形式の印影一意キー'
+        page:
+          type: integer
+          description: ページ番号
+        index:
+          type: integer
+          description: ページ内の0始まりインデックス
+        stamp_prefix:
+          type: string
+          nullable: true
+          description: 印影プレフィックスの翻訳結果
+        type_key:
+          type: string
+          nullable: true
+          description: 印影タイプ key の翻訳結果
+        type:
+          type: string
+          nullable: true
+          description: 印影タイプの翻訳結果
+        color_key:
+          type: string
+          nullable: true
+          description: 印影色 key の翻訳結果
+        color:
+          type: string
+          nullable: true
+          description: 印影色の翻訳結果
+        stamp_shape_key:
+          type: string
+          nullable: true
+          description: 印影形状 key の翻訳結果
+        stamp_shape:
+          type: string
+          nullable: true
+          description: 印影形状の翻訳結果
+        value_key:
+          type: string
+          nullable: true
+          description: 印影文字 key の翻訳結果
+        value:
+          type: string
+          nullable: true
+          description: 印影文字の翻訳結果
+    HandwritingTranslateResult:
+      type: object
+      properties:
+        key:
+          type: string
+          description: 'handwriting-${page}-${lineIndex} 形式の手書き文字一意キー'
+        page:
+          type: integer
+          description: ページ番号
+        index:
+          type: integer
+          description: ページ内の0始まりインデックス
+        handwriting_prefix:
+          type: string
+          nullable: true
+          description: 手書き文字プレフィックスの翻訳結果
+        text:
+          type: string
+          nullable: true
+          description: 手書き文字の翻訳結果
+    FileTranslateResult:
+      type: object
+      properties:
+        result:
+          type: object
+          required:
+            - fields
+            - tables
+            - stamps
+            - handwritings
+          properties:
+            fields:
+              type: array
+              description: 通常フィールドの翻訳結果
+              items:
+                $ref: '#/components/schemas/CommonFieldTranslate'
+            tables:
+              type: array
+              description: テーブルの翻訳結果
+              items:
+                $ref: '#/components/schemas/TableDetailTranslate'
+            stamps:
+              type: array
+              description: 印影の翻訳結果
+              items:
+                $ref: '#/components/schemas/StampTranslateResult'
+            handwritings:
+              type: array
+              description: 手書き文字の翻訳結果
+              items:
+                $ref: '#/components/schemas/HandwritingTranslateResult'
     ExtractFieldReqVO:
       type: object
       properties:

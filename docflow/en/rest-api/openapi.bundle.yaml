@@ -4,7 +4,7 @@ info:
   description: >-
     DocFlow REST API, providing file upload and file processing result retrieval
     capabilities
-  version: 2.8.4
+  version: 2.10.0
 servers:
   - url: 'https://docflow.textin.com'
 x-codeSamples: custom
@@ -115,7 +115,30 @@ paths:
   /api/app-api/sip/platform/v2/file/fetch:
     get:
       summary: Get File Processing Result List
-      description: ''
+      description: >
+        Queries task recognition results. When stored translations exist,
+        original recognition
+
+        fields are preserved and translated values are added to the
+        corresponding objects:
+
+        - Regular fields and legacy single-table fields: `translated_key` and
+        `translated_value` in
+          `data.fields[]` and `data.items[][]`
+        - Multi-table results: `translated_table_name` in `data.tables[]`, and
+        `translated_key` and
+          `translated_value` in `data.tables[].items[][]`
+        - Stamps: `translated_color`, `translated_text`, `translated_shape`, and
+        `translated_type` in `data.stamps[]`
+
+        - Handwriting: `translated_text` in `data.handwritings[]`
+
+
+        Translation fields have values only when translations exist for the
+        corresponding content.
+
+        Original fields such as `key`, `value`, and `tableName` are not
+        overwritten.
       operationId: getFiles
       parameters:
         - name: page
@@ -147,6 +170,14 @@ paths:
         - name: file_id
           in: query
           description: File ID
+          required: false
+          schema:
+            type: string
+        - name: task_id
+          in: query
+          description: >-
+            Task ID for an exact task query. Send Snowflake IDs as strings to
+            avoid precision loss.
           required: false
           schema:
             type: string
@@ -205,6 +236,31 @@ paths:
           schema:
             type: boolean
             default: false
+        - name: with_image_url
+          in: query
+          description: >
+            Whether to return the image URL for each page. The default is
+            `false`.
+
+            When enabled, `files[].pages[]` for regular/parent tasks and
+
+            `files[].child_files[].pages[]` for split/crop child tasks return
+            the image URL
+
+            owned by the corresponding task. The URL is aligned by page index
+            with `page`,
+
+            `angle`, `width`, and `height` in the same page object. If an image
+            has not been
+
+            generated or its URL is unavailable, `image_url` is `null`. The URL
+            is valid for 30 days. The field is omitted
+
+            when this parameter is false or not provided.
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: Successfully retrieved file list
@@ -214,6 +270,58 @@ paths:
                 allOf:
                   - $ref: '#/components/schemas/CodeMessage'
                   - $ref: '#/components/schemas/TaskProcessResult'
+  /api/app-api/sip/platform/v2/file/translate:
+    post:
+      summary: Translate file extraction results
+      description: >
+        Languages use ISO 639-1 codes; Chinese is region-qualified as `zh-CN` or
+        `zh-TW`.
+
+        Omitting `source_language` or sending an empty string enables automatic
+        source-language detection.
+
+        A concrete source language must differ from `target_language`.
+
+        Calling this endpoint translates the task and enables translation in the
+        frontend task detail view.
+
+        A concurrent request returns a "task is being translated" error.
+
+
+        Common business error codes:
+
+        - `1005025065`: task recognition failed and cannot be translated
+
+        - `1005025066`: task recognition has not completed
+
+        - `1005025067`: task translation is already in progress
+
+        - `1005025068`: source and target languages are the same
+
+        - `1005025069`: target language is empty or is not a concrete language
+        code
+      operationId: translateFile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileTranslateRequest'
+            example:
+              task_id: '202412190001'
+              source_language: ''
+              target_language: zh-CN
+      responses:
+        '200':
+          description: >-
+            The request has been processed. Check the business code in the
+            response for the outcome.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - $ref: '#/components/schemas/FileTranslateResult'
   /api/app-api/sip/platform/v2/file/update:
     post:
       summary: Update File Processing Result
@@ -634,7 +742,9 @@ paths:
   /api/app-api/sip/platform/v2/auth/token:
     get:
       summary: Generate a short-lived token
-      description: Generate a short-lived token (for iframe scenarios)
+      description: >-
+        Generate a short-lived token (for iframe scenarios). The token is valid
+        for 1 day.
       operationId: authToken
       responses:
         '200':
@@ -3615,6 +3725,26 @@ components:
               Resolution when converting PDF to image. For non-PDF files, this
               value is 0.
             example: 144
+          image_url:
+            type: string
+            format: uri
+            nullable: true
+            description: >
+              Image URL for this page of the current task. Returned only when
+              `with_image_url=true`.
+
+              Regular/parent tasks and split/crop child tasks return their own
+              page images. The URL
+
+              is aligned by page index with `page`, `angle`, `width`, and
+              `height` in the same object.
+
+              The value is `null` when the image is not generated, the URL is
+              empty, or page metadata
+
+              is out of range. The URL is valid for 30 days. The field is
+              omitted when the option is disabled.
+            example: 'https://example.com/pages/202412190001/0.png'
     KeyValuePosition:
       description: >-
         Position of the field value. Field values may span pages or rows, so
@@ -3651,6 +3781,14 @@ components:
         value:
           type: string
           description: Field value
+        translated_key:
+          type: string
+          nullable: true
+          description: Translated field name
+        translated_value:
+          type: string
+          nullable: true
+          description: Translated field value
         position:
           $ref: '#/components/schemas/KeyValuePosition'
         confidence:
@@ -3675,6 +3813,14 @@ components:
         value:
           type: string
           description: Field value
+        translated_key:
+          type: string
+          nullable: true
+          description: Translated field name
+        translated_value:
+          type: string
+          nullable: true
+          description: Translated field value
         position:
           $ref: '#/components/schemas/KeyValuePosition'
     TextInLines:
@@ -3722,6 +3868,14 @@ components:
         value:
           type: string
           description: Field value
+        translated_key:
+          type: string
+          nullable: true
+          description: Translated field name
+        translated_value:
+          type: string
+          nullable: true
+          description: Translated field value
         textInLines:
           deprecated: true
           type: array
@@ -3761,6 +3915,22 @@ components:
         shape:
           type: string
           description: Stamp shape
+        translated_text:
+          type: string
+          nullable: true
+          description: Translated stamp text
+        translated_type:
+          type: string
+          nullable: true
+          description: Translated stamp type
+        translated_color:
+          type: string
+          nullable: true
+          description: Translated stamp color
+        translated_shape:
+          type: string
+          nullable: true
+          description: Translated stamp shape
         position:
           type: array
           description: Position information
@@ -3779,6 +3949,10 @@ components:
         text:
           type: string
           description: Handwriting text content
+        translated_text:
+          type: string
+          nullable: true
+          description: Translated handwriting text
         position:
           $ref: '#/components/schemas/KeyValuePosition'
     Document:
@@ -3979,10 +4153,14 @@ components:
               items:
                 type: object
                 properties:
-                  tableName:
+                  table_name:
                     description: Table name
                     type: string
                     example: table1
+                  translated_table_name:
+                    description: Translated table name
+                    type: string
+                    nullable: true
                   tableType:
                     description: |
                       Table type, 0: system configured, 1: manually added.
@@ -4323,10 +4501,14 @@ components:
                         items:
                           type: object
                           properties:
-                            tableName:
+                            table_name:
                               description: Table name
                               type: string
                               example: table1
+                            translated_table_name:
+                              description: Translated table name
+                              type: string
+                              nullable: true
                             tableType:
                               description: >
                                 Table type, 0: system configured, 1: manually
@@ -4474,6 +4656,227 @@ components:
                   - recognition_status
                   - verification_status
                   - category
+    TranslateSourceLanguage:
+      type: string
+      description: >-
+        Source language as an ISO 639-1 code. Omit it or send an empty string to
+        enable automatic detection.
+      enum:
+        - ''
+        - zh-CN
+        - zh-TW
+        - ja
+        - ko
+        - en
+        - fr
+        - pt
+        - de
+        - it
+        - es
+        - ru
+        - th
+        - vi
+        - ms
+        - id
+        - hi
+        - bn
+        - ar
+        - pl
+      example: ''
+    TranslateTargetLanguage:
+      type: string
+      description: Required target language as a concrete ISO 639-1 code.
+      enum:
+        - zh-CN
+        - zh-TW
+        - ja
+        - ko
+        - en
+        - fr
+        - pt
+        - de
+        - it
+        - es
+        - ru
+        - th
+        - vi
+        - ms
+        - id
+        - hi
+        - bn
+        - ar
+        - pl
+      example: zh-CN
+    FileTranslateRequest:
+      type: object
+      required:
+        - task_id
+        - target_language
+      properties:
+        task_id:
+          type: string
+          description: >-
+            ID of a task that completed recognition. Send Snowflake IDs as
+            strings; do not convert them to JavaScript Number.
+          example: '1978297791713619968'
+        source_language:
+          $ref: '#/components/schemas/TranslateSourceLanguage'
+        target_language:
+          $ref: '#/components/schemas/TranslateTargetLanguage'
+    CommonFieldTranslate:
+      type: object
+      properties:
+        key:
+          type: string
+          description: Original field key
+          example: invoiceNumber
+        translated_key:
+          type: string
+          nullable: true
+          description: Translated field key; normally unused for table cells
+        index:
+          type: integer
+          description: Zero-based index for fields with the same key
+          example: 0
+        value:
+          type: string
+          nullable: true
+          description: Translated field value
+    TableFieldHeadTranslate:
+      type: object
+      properties:
+        key:
+          type: string
+          description: Original header key
+        translated_key:
+          type: string
+          nullable: true
+          description: Translated header key
+    TableDetailTranslate:
+      type: object
+      properties:
+        table_name:
+          type: string
+          description: Original table name
+        translated_table_name:
+          type: string
+          nullable: true
+          description: Translated table name
+        items:
+          type: array
+          description: >-
+            Translated table data. The outer array contains rows and the inner
+            array contains cells.
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/CommonFieldTranslate'
+        item_headers:
+          type: array
+          description: Translated table headers
+          items:
+            $ref: '#/components/schemas/TableFieldHeadTranslate'
+    StampTranslateResult:
+      type: object
+      properties:
+        key:
+          type: string
+          description: 'Unique stamp key in the format stamp-${page}-${index}'
+        page:
+          type: integer
+          description: Page number
+        index:
+          type: integer
+          description: Zero-based index on the page
+        stamp_prefix:
+          type: string
+          nullable: true
+          description: Translated stamp prefix
+        type_key:
+          type: string
+          nullable: true
+          description: Translated stamp type key
+        type:
+          type: string
+          nullable: true
+          description: Translated stamp type
+        color_key:
+          type: string
+          nullable: true
+          description: Translated stamp color key
+        color:
+          type: string
+          nullable: true
+          description: Translated stamp color
+        stamp_shape_key:
+          type: string
+          nullable: true
+          description: Translated stamp shape key
+        stamp_shape:
+          type: string
+          nullable: true
+          description: Translated stamp shape
+        value_key:
+          type: string
+          nullable: true
+          description: Translated stamp text key
+        value:
+          type: string
+          nullable: true
+          description: Translated stamp text
+    HandwritingTranslateResult:
+      type: object
+      properties:
+        key:
+          type: string
+          description: >-
+            Unique handwriting key in the format
+            handwriting-${page}-${lineIndex}
+        page:
+          type: integer
+          description: Page number
+        index:
+          type: integer
+          description: Zero-based index on the page
+        handwriting_prefix:
+          type: string
+          nullable: true
+          description: Translated handwriting prefix
+        text:
+          type: string
+          nullable: true
+          description: Translated handwriting text
+    FileTranslateResult:
+      type: object
+      properties:
+        result:
+          type: object
+          required:
+            - fields
+            - tables
+            - stamps
+            - handwritings
+          properties:
+            fields:
+              type: array
+              description: Translated regular fields
+              items:
+                $ref: '#/components/schemas/CommonFieldTranslate'
+            tables:
+              type: array
+              description: Translated tables
+              items:
+                $ref: '#/components/schemas/TableDetailTranslate'
+            stamps:
+              type: array
+              description: Translated stamps
+              items:
+                $ref: '#/components/schemas/StampTranslateResult'
+            handwritings:
+              type: array
+              description: Translated handwriting
+              items:
+                $ref: '#/components/schemas/HandwritingTranslateResult'
     ExtractFieldReqVO:
       type: object
       properties:

@@ -6,7 +6,7 @@
 
       Supports one-stop creation: you can pass the `tables` parameter to create tables with nested fields simultaneously.
 
-      Like `fields` and `tables`, pass `category_keyword_rules` as a JSON string form field. Keyword comparison ignores case and all whitespace. Same-type duplicate rule groups are not allowed in other enabled categories in the workspace. Parameter validation error codes: `1005025065`–`1005025069`; cross-category rule-group conflicts reuse `1005015019`.
+      Like `fields` and `tables`, pass `category_keyword_rules` as a JSON string form field. Same-type duplicate rule groups are not allowed in other enabled categories in the workspace. Parameter validation error codes: `1005025065`–`1005025069`; cross-category rule-group conflicts reuse `1005015019`.
     operationId: createCategory
     tags:
       - File Category
@@ -218,7 +218,7 @@
 
       Note: Setting extract_model will cascade override the extraction model of all fields and tables under this category.
 
-      When updating, omit `category_keyword_rules` or set it to `null` to keep existing rules; send a valid object to replace all rules; only `{"positive_rules":[],"negative_rules":[]}` clears them. `{}`, blank strings, and invalid structures return a parameter error. Keyword comparison ignores case and all whitespace. A same-type rule group duplicate in another enabled category in the workspace returns a conflict error. Parameter validation error codes: `1005025065`–`1005025069`; cross-category rule-group conflicts reuse `1005015019`.
+      When updating, omit `category_keyword_rules` or set it to `null` to keep existing rules; send a valid object to replace all rules; only `{"positive_rules":[],"negative_rules":[]}` clears them. `{}`, blank strings, and invalid structures return a parameter error. A same-type rule group duplicate in another enabled category in the workspace returns a conflict error. Parameter validation error codes: `1005025065`–`1005025069`; cross-category rule-group conflicts reuse `1005015019`.
     operationId: updateCategory
     tags:
       - File Category

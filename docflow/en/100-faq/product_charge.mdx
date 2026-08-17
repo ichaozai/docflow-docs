@@ -4,7 +4,7 @@ title: "Product Pricing"
 
 ## 01 Product Specifications and Top-up
 
-You can visit "[DocFlow Document Automation - Product Specifications](https://www.textin.com/product/textin_docflow)" on the TextIn official website to view detailed product pricing information.From there, you can top up **T-Coins** to meet your usage needs.
+You can visit "[Enterprise Document Processing Agent Platform - DocFlow Pricing](https://www.textin.com/product/textin_docflow#:~:text=DocFlow%20%E5%AE%9A%E4%BB%B7)" on the TextIn official website to view detailed product pricing information.From there, you can top up **T-Coins** to meet your usage needs.
 
 ## 02 **Pricing Inquiry**
 
@@ -20,7 +20,7 @@ The platform provides three usage methods: SaaS platform usage, API usage, and p
 
 You can access the SaaS platform product by clicking "[Docflow Document Automation Platform](https://docflow.textin.com/)". Its billing rules are as follows:
 
-#### **1. File Processing Billing**
+#### **1. File Operation Billing**
 
 - Billing is based on the number of pages successfully classified **for the first time** after upload.
 - Pages classified as `undefined` during the first upload will **not** be billed.
@@ -34,7 +34,7 @@ You can access the SaaS platform product by clicking "[Docflow Document Automati
 
 ![Card](../images/12-en.png)
 
-(3) Other file types: 0.3 RMB/page
+(3) Other file types: 0.3 RMB/page.
 
 #### 2. Invoice Verification Billing
 
@@ -42,7 +42,7 @@ The billing standard for invoice verification service is 0.2 RMB/time, charged a
 
 #### 3. Other Operation Billing
 
-(1) When using file splitting and multi-image cropping functions, the same content will not be charged repeatedly, avoiding unnecessary expenses due to function usage.
+(1) When using file splitting and multi-image cropping functions, associated files are charged at 0.3 RMB per page.
 
 (2) For pages that have already been charged, subsequent operations such as re-recognition, category modification, field correction, intelligent review, etc., will not incur additional charges, ensuring clear and controllable costs during your usage.
 
@@ -51,6 +51,8 @@ After successful document automation processing, you can query historical proces
 ### 3.2 API Interface
 
 When calling platform functions through API interfaces, the billing logic is consistent with the SaaS platform, following the above SaaS platform billing rules. If API requests fail, no billing will occur, ensuring cost security during interface calls.
+
+**Exception: [Extract Specific Fields API](/docflow/en/06-extract/extract_specific_fields)** (`POST /api/app-api/sip/platform/v2/file/extract_fields`, used to extract additional fields or re-extract fields for tasks that have completed extraction) — each call is billed independently based on the number of pages of the task's document, at the "other file types" rate (0.3 RMB/page) regardless of file type. Billing occurs only when the extraction result is returned successfully; failed requests, failed extractions, or requests without any fields to extract are not billed. When the account balance is insufficient, this API returns error code `1005025075` (insufficient quota or billing check failed).
 
 ### 3.3 Private Deployment
 

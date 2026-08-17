@@ -4,6 +4,17 @@ sidebarTitle: "Changelog"
 description: "DocFlow API documentation changelog"
 ---
 
+## 2026-08-17
+
+### API
+
+#### Billing Enabled for the Extract Specific Fields API
+
+- The Extract Specific Fields API (`POST /api/app-api/sip/platform/v2/file/extract_fields`) is now billed per page: each call is billed independently based on the number of pages of the task's document, at the "other file types" rate (0.3 RMB/page) regardless of file type.
+- Billing occurs only when the extraction result is returned successfully; failed requests, failed extractions, or requests without any fields to extract are not billed.
+- When the account balance is insufficient, the API returns error code `1005025075` (insufficient quota or billing check failed).
+- See [Product Pricing](/docflow/en/100-faq/product_charge) for details.
+
 ## 2026-08-13
 
 ### API
@@ -15,6 +26,18 @@ description: "DocFlow API documentation changelog"
 - Added the optional `with_image_url` parameter to `/api/app-api/sip/platform/v2/file/fetch`. When set to `true`, page data for regular, document-split, and image-crop tasks includes the corresponding `image_url` together with `angle`, `width`, and `height`. Image URLs are valid for 30 days.
 - When translations are available, `/api/app-api/sip/platform/v2/file/fetch` returns the corresponding `translated_*` fields in field, table, stamp, and handwriting objects. Existing response fields remain compatible.
 - Tokens returned by `/api/app-api/sip/platform/v2/auth/token` are valid for 1 day.
+
+#### Category Keyword Rules
+
+- [Create File Category](/api-reference/file-category/create-file-category) and [Update File Category](/api-reference/file-category/update-file-category) now support `category_keyword_rules`. Positive rules match a category, while negative rules filter it out.
+- [List File Categories](/api-reference/file-category/list-file-categories) now returns `category_keyword_rules` when configured.
+- A rule group matches when at least `min_hit` keywords match. Positive groups are combined with OR, and a matching negative group excludes the category. Each category supports up to 10 positive groups and 1 negative group, with up to 20 keywords per group.
+- On creation, omit the parameter or pass two empty arrays to leave rules unconfigured. On update, omit it or pass `null` for no change, pass two empty arrays to clear the rules, or pass another valid object to replace all rules.
+- Keywords preserve their original case and whitespace. Duplicates within a group, positive/negative conflicts, and cross-category same-type rule-group conflicts are compared using the original keyword strings; whitespace is no longer removed and case is no longer normalized.
+
+### SDK
+
+- Python SDK `1.1.2` adds category keyword-rule support for create, update, response parsing, and conflict prechecks. Keywords are validated and sent unchanged.
 
 ## 2026-07-08
 

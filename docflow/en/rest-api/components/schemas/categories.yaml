@@ -58,7 +58,7 @@ CategoryKeywordRuleGroup:
       example: 2
     words:
       type: array
-      description: Keyword list. Keywords are compared case-insensitively and with all whitespace ignored; normalized keywords must be non-empty, unique, and no longer than 50 characters.
+      description: Keyword list. Each keyword must be non-empty, unique within its group, and no longer than 50 characters.
       minItems: 1
       maxItems: 20
       items:
@@ -75,7 +75,7 @@ CategoryKeywordRules:
   type: object
   description: |
     Category keyword rules. Positive groups are ORed; matching a negative group excludes the category.
-    A category supports at most 10 positive groups and 1 negative group. Duplicate same-type groups are not allowed, and positive and negative rules must not contain the same normalized keyword.
+    A category supports at most 10 positive groups and 1 negative group. Duplicate same-type groups are not allowed, and positive and negative rules must not contain the same keyword.
   properties:
     positive_rules:
       type: array

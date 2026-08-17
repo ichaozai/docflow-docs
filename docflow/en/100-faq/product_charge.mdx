@@ -52,6 +52,8 @@ After successful document automation processing, you can query historical proces
 
 When calling platform functions through API interfaces, the billing logic is consistent with the SaaS platform, following the above SaaS platform billing rules. If API requests fail, no billing will occur, ensuring cost security during interface calls.
 
+**Exception: [Extract Specific Fields API](/docflow/en/06-extract/extract_specific_fields)** (`POST /api/app-api/sip/platform/v2/file/extract_fields`, used to extract additional fields or re-extract fields for tasks that have completed extraction) — each call is billed independently based on the number of pages of the task's document, at the "other file types" rate (0.3 RMB/page) regardless of file type. Billing occurs only when the extraction result is returned successfully; failed requests, failed extractions, or requests without any fields to extract are not billed. When the account balance is insufficient, this API returns error code `1005025075` (insufficient quota or billing check failed).
+
 ### 3.3 Private Deployment
 
 If you have private deployment needs, we provide three flexible payment plans:

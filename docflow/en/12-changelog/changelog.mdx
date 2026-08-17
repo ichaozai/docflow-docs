@@ -4,6 +4,17 @@ sidebarTitle: "Changelog"
 description: "DocFlow API documentation changelog"
 ---
 
+## 2026-08-17
+
+### API
+
+#### Billing Enabled for the Extract Specific Fields API
+
+- The Extract Specific Fields API (`POST /api/app-api/sip/platform/v2/file/extract_fields`) is now billed per page: each call is billed independently based on the number of pages of the task's document, at the "other file types" rate (0.3 RMB/page) regardless of file type.
+- Billing occurs only when the extraction result is returned successfully; failed requests, failed extractions, or requests without any fields to extract are not billed.
+- When the account balance is insufficient, the API returns error code `1005025075` (insufficient quota or billing check failed).
+- See [Product Pricing](/docflow/en/100-faq/product_charge) for details.
+
 ## 2026-08-13
 
 ### API

@@ -147,6 +147,10 @@ TaskProcessResult:
                           description: Table name
                           type: string
                           example: table1
+                        translated_table_name:
+                          description: Translated table name
+                          type: string
+                          nullable: true
                         tableType:
                           description: |
                             Table type, 0: system configured, 1: manually added.
@@ -262,6 +266,14 @@ KeyValue:
     value:
       type: string
       description: Field value
+    translated_key:
+      type: string
+      nullable: true
+      description: Translated field name
+    translated_value:
+      type: string
+      nullable: true
+      description: Translated field value
     position:
       $ref: "#/KeyValuePosition"
 
@@ -277,6 +289,14 @@ FieldRespKeyValue:
     value:
       type: string
       description: Field value
+    translated_key:
+      type: string
+      nullable: true
+      description: Translated field name
+    translated_value:
+      type: string
+      nullable: true
+      description: Translated field value
     position:
       $ref: "#/KeyValuePosition"
     confidence:
@@ -312,6 +332,22 @@ StampValue:
     shape:
       type: string
       description: Stamp shape
+    translated_text:
+      type: string
+      nullable: true
+      description: Translated stamp text
+    translated_type:
+      type: string
+      nullable: true
+      description: Translated stamp type
+    translated_color:
+      type: string
+      nullable: true
+      description: Translated stamp color
+    translated_shape:
+      type: string
+      nullable: true
+      description: Translated stamp shape
     position:
       type: array
       description: Position information
@@ -331,6 +367,10 @@ HandWritingValue:
     text:
       type: string
       description: Handwriting text content
+    translated_text:
+      type: string
+      nullable: true
+      description: Translated handwriting text
     position:
       $ref: "#/KeyValuePosition"
 
@@ -414,6 +454,14 @@ CommonFieldDetailRespVO:
     value:
       type: string
       description: Field value
+    translated_key:
+      type: string
+      nullable: true
+      description: Translated field name
+    translated_value:
+      type: string
+      nullable: true
+      description: Translated field value
     textInLines:
       deprecated: true
       type: array
@@ -534,6 +582,10 @@ SubFileDetailInfo:
                 description: Table name
                 type: string
                 example: table1
+              translated_table_name:
+                description: Translated table name
+                type: string
+                nullable: true
               tableType:
                 description: |
                   Table type, 0: system configured, 1: manually added.
@@ -698,6 +750,119 @@ PagesInfo:
         type: integer
         description: Resolution when converting PDF to image. For non-PDF files, this value is 0.
         example: 144
+      image_url:
+        type: string
+        format: uri
+        nullable: true
+        description: |
+          Image URL for this page of the current task. Returned only when `with_image_url=true`.
+          Regular/parent tasks and split/crop child tasks return their own page images. The URL
+          is aligned by page index with `page`, `angle`, `width`, and `height` in the same object.
+          The value is `null` when the image is not generated, the URL is empty, or page metadata
+          is out of range. The URL is valid for 30 days. The field is omitted when the option is disabled.
+        example: https://example.com/pages/202412190001/0.png
+
+FileTranslateRequest:
+  type: object
+  required: [task_id, target_language]
+  properties:
+    task_id:
+      type: string
+      description: ID of a task that completed recognition. Send Snowflake IDs as strings; do not convert them to JavaScript Number.
+      example: "1978297791713619968"
+    source_language: { $ref: '#/TranslateSourceLanguage' }
+    target_language: { $ref: '#/TranslateTargetLanguage' }
+
+FileTranslateResult:
+  type: object
+  properties:
+    result:
+      type: object
+      required: [fields, tables, stamps, handwritings]
+      properties:
+        fields:
+          type: array
+          description: Translated regular fields
+          items: { $ref: '#/CommonFieldTranslate' }
+        tables:
+          type: array
+          description: Translated tables
+          items: { $ref: '#/TableDetailTranslate' }
+        stamps:
+          type: array
+          description: Translated stamps
+          items: { $ref: '#/StampTranslateResult' }
+        handwritings:
+          type: array
+          description: Translated handwriting
+          items: { $ref: '#/HandwritingTranslateResult' }
+
+TranslateSourceLanguage:
+  type: string
+  description: Source language as an ISO 639-1 code. Omit it or send an empty string to enable automatic detection.
+  enum: ["", zh-CN, zh-TW, ja, ko, en, fr, pt, de, it, es, ru, th, vi, ms, id, hi, bn, ar, pl]
+  example: ""
+
+TranslateTargetLanguage:
+  type: string
+  description: Required target language as a concrete ISO 639-1 code.
+  enum: [zh-CN, zh-TW, ja, ko, en, fr, pt, de, it, es, ru, th, vi, ms, id, hi, bn, ar, pl]
+  example: zh-CN
+
+CommonFieldTranslate:
+  type: object
+  properties:
+    key: { type: string, description: Original field key, example: invoiceNumber }
+    translated_key: { type: string, nullable: true, description: Translated field key; normally unused for table cells }
+    index: { type: integer, description: Zero-based index for fields with the same key, example: 0 }
+    value: { type: string, nullable: true, description: Translated field value }
+
+TableFieldHeadTranslate:
+  type: object
+  properties:
+    key: { type: string, description: Original header key }
+    translated_key: { type: string, nullable: true, description: Translated header key }
+
+TableDetailTranslate:
+  type: object
+  properties:
+    table_name: { type: string, description: Original table name }
+    translated_table_name: { type: string, nullable: true, description: Translated table name }
+    items:
+      type: array
+      description: Translated table data. The outer array contains rows and the inner array contains cells.
+      items:
+        type: array
+        items: { $ref: '#/CommonFieldTranslate' }
+    item_headers:
+      type: array
+      description: Translated table headers
+      items: { $ref: '#/TableFieldHeadTranslate' }
+
+StampTranslateResult:
+  type: object
+  properties:
+    key: { type: string, description: "Unique stamp key in the format stamp-${page}-${index}" }
+    page: { type: integer, description: Page number }
+    index: { type: integer, description: Zero-based index on the page }
+    stamp_prefix: { type: string, nullable: true, description: Translated stamp prefix }
+    type_key: { type: string, nullable: true, description: Translated stamp type key }
+    type: { type: string, nullable: true, description: Translated stamp type }
+    color_key: { type: string, nullable: true, description: Translated stamp color key }
+    color: { type: string, nullable: true, description: Translated stamp color }
+    stamp_shape_key: { type: string, nullable: true, description: Translated stamp shape key }
+    stamp_shape: { type: string, nullable: true, description: Translated stamp shape }
+    value_key: { type: string, nullable: true, description: Translated stamp text key }
+    value: { type: string, nullable: true, description: Translated stamp text }
+
+HandwritingTranslateResult:
+  type: object
+  properties:
+    key: { type: string, description: "Unique handwriting key in the format handwriting-${page}-${lineIndex}" }
+    page: { type: integer, description: Page number }
+    index: { type: integer, description: Zero-based index on the page }
+    handwriting_prefix: { type: string, nullable: true, description: Translated handwriting prefix }
+    text: { type: string, nullable: true, description: Translated handwriting text }
 
 DocumentParserParam:
   type: object

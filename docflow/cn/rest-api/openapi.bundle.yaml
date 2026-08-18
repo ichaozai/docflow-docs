@@ -2,12 +2,10 @@ openapi: 3.0.0
 info:
   title: DocFlow API
   description: DocFlow REST API，提供文件上传和获取文件处理结果能力
-  version: 2.8.4
+  version: 2.14.1
 servers:
-  - url: https://docflow.textin.com
-security:
-  - ApiId: []
-    SecretCode: []
+  - url: 'https://docflow.textin.com'
+x-codeSamples: custom
 paths:
   /api/app-api/sip/platform/v2/file/upload:
     post:
@@ -113,7 +111,22 @@ paths:
   /api/app-api/sip/platform/v2/file/fetch:
     get:
       summary: 获取文件处理结果列表
-      description: ''
+      description: >
+        查询任务的识别结果。任务已有翻译结果时，接口保留原始识别字段，并在对应对象中追加译文：
+
+        -
+        普通字段及旧版单表字段：`data.fields[]`、`data.items[][]`中的`translated_key`、`translated_value`
+
+        -
+        多表结果：`data.tables[]`中的`translated_table_name`，以及`data.tables[].items[][]`中的`translated_key`、`translated_value`
+
+        -
+        印章：`data.stamps[]`中的`translated_color`、`translated_text`、`translated_shape`、`translated_type`
+
+        - 手写体：`data.handwritings[]`中的`translated_text`
+
+
+        翻译字段仅在对应内容存在译文时有值，不会覆盖原始的`key`、`value`、`tableName`等字段。
       operationId: getFiles
       parameters:
         - name: page
@@ -148,6 +161,12 @@ paths:
           required: false
           schema:
             type: string
+        - name: task_id
+          in: query
+          description: 任务ID。按任务精确查询时传入，雪花ID需使用字符串，避免精度丢失。
+          required: false
+          schema:
+            type: string
         - name: category
           in: query
           description: 文件类别
@@ -167,20 +186,20 @@ paths:
             $ref: '#/components/schemas/VerificationStatus'
         - name: start_time
           in: query
-          description: 以更新时间搜索的开始时间, RFC3339格式(YYYY-MM-DDTHH:MM:SSZ)
+          description: '以更新时间搜索的开始时间, RFC3339格式(YYYY-MM-DDTHH:MM:SSZ)'
           required: false
           schema:
             type: string
             format: date-time
-            example: '2024-01-01T00:00:00Z'
+            example: 2024-01-01T00:00:00.000Z
         - name: end_time
           in: query
-          description: 以更新时间搜索的结束时间, RFC3339格式(YYYY-MM-DDTHH:MM:SSZ)
+          description: '以更新时间搜索的结束时间, RFC3339格式(YYYY-MM-DDTHH:MM:SSZ)'
           required: false
           schema:
             type: string
             format: date-time
-            example: '2024-01-01T10:00:00Z'
+            example: 2024-01-01T10:00:00.000Z
         - name: with_document
           in: query
           description: 是否返回文档的全部文字识别结果
@@ -195,6 +214,18 @@ paths:
           schema:
             type: boolean
             default: false
+        - name: with_image_url
+          in: query
+          description: |
+            是否返回每页图片URL，默认`false`。
+            开启后，普通任务或父任务的`files[].pages[]`，以及拆套或切图子任务的
+            `files[].child_files[].pages[]`都会返回对应任务自身的`image_url`。
+            图片URL与同一页面对象中的`page`、`angle`、`width`、`height`按页面索引一一对应；
+            链接有效期为30天。图片尚未生成或URL不可用时返回`null`。关闭或不传时不输出`image_url`字段。
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: 成功获取文件列表
@@ -204,6 +235,40 @@ paths:
                 allOf:
                   - $ref: '#/components/schemas/CodeMessage'
                   - $ref: '#/components/schemas/TaskProcessResult'
+  /api/app-api/sip/platform/v2/file/translate:
+    post:
+      summary: 翻译文件抽取结果
+      description: |
+        语言使用 ISO 639-1 编码，中文按地区区分为`zh-CN`和`zh-TW`。
+        `source_language`省略或传空字符串时自动检测源语言；指定源语言时不能与`target_language`相同。
+        调用接口后执行翻译并同步开启前端详情展示。并发请求会返回“任务正在翻译中，请稍后重试”。
+
+        常见业务错误码：
+        - `1005025065`：任务识别失败，无法执行翻译
+        - `1005025066`：任务尚未完成识别
+        - `1005025067`：任务正在翻译中
+        - `1005025068`：翻译源语言和目标语言相同
+        - `1005025069`：目标语言为空或不是具体语言编码
+      operationId: translateFile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileTranslateRequest'
+            example:
+              task_id: '202412190001'
+              source_language: ''
+              target_language: zh-CN
+      responses:
+        '200':
+          description: 翻译请求处理完成；具体结果以响应中的业务code为准
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - $ref: '#/components/schemas/FileTranslateResult'
   /api/app-api/sip/platform/v2/file/update:
     post:
       summary: 更新文件处理结果
@@ -360,11 +425,16 @@ paths:
       x-codeSamples:
         - lang: bash
           label: cURL
-          source: |
+          source: >
             curl -X POST \
+
             -H 'x-ti-app-id: 1234567890' \
+
             -H 'x-ti-secret-code: 1234567890' \
-            -d '[{"workspace_id": "1234567890", "file_id": "202412190001", "data": {"fields": [{"key": "发票代码", "value": "3100231130"}]}}]' \
+
+            -d '[{"workspace_id": "1234567890", "file_id": "202412190001",
+            "data": {"fields": [{"key": "发票代码", "value": "3100231130"}]}}]' \
+
             'https://docflow.textin.com/api/app-api/sip/platform/v2/file/update'
   /api/app-api/sip/platform/v2/file/delete:
     post:
@@ -605,7 +675,7 @@ paths:
   /api/app-api/sip/platform/v2/auth/token:
     get:
       summary: 生成短时间有效的token
-      description: 生成短时间有效的token(用于iframe场景)
+      description: 生成短时间有效的token（用于iframe场景），token有效期为1天。
       operationId: authToken
       responses:
         '200':
@@ -642,7 +712,7 @@ paths:
                   maxLength: 200
                 auth_scope:
                   type: integer
-                  description: 协作范围 0:仅自己可见 1:企业成员可见
+                  description: '协作范围 0:仅自己可见 1:企业成员可见'
                   example: 1
                   enum:
                     - 0
@@ -777,7 +847,7 @@ paths:
                   maxLength: 500
                 auth_scope:
                   type: integer
-                  description: 协作范围 0:仅自己可见 1:企业成员可见
+                  description: '协作范围 0:仅自己可见 1:企业成员可见'
                   example: 1
                   enum:
                     - 0
@@ -785,7 +855,7 @@ paths:
                 callback_url:
                   type: string
                   description: 回调URL
-                  example: https://example.com/callback
+                  example: 'https://example.com/callback'
                 callback_retry_time:
                   type: integer
                   description: 回调重试次数
@@ -836,12 +906,16 @@ paths:
   /api/app-api/sip/platform/v2/category/create:
     post:
       summary: 创建文件类别
-      description: |
+      description: >
         在指定空间中创建一个新的文件类别，需要上传至少一个样本文件并配置至少一个字段。
+
 
         支持一站式创建：可同时传入 `tables` 参数，创建表格及表格内嵌字段。
 
-        `category_keyword_rules` 与 `fields`、`tables` 一样以 JSON 字符串表单字段传递。同空间其他已启用类别不得存在同类型的重复规则组。参数校验错误码：`1005025065`–`1005025069`；跨类别规则组冲突复用 `1005015019`。
+
+        `category_keyword_rules` 与 `fields`、`tables` 一样以 JSON
+        字符串表单字段传递。同空间其他已启用类别不得存在同类型的重复规则组。参数校验错误码：`1005025065`–`1005025069`；跨类别规则组冲突复用
+        `1005015019`。
       operationId: createCategory
       tags:
         - 文件类别
@@ -1046,12 +1120,17 @@ paths:
   /api/app-api/sip/platform/v2/category/update:
     post:
       summary: 更新文件类别
-      description: |
+      description: >
         更新指定文件类别的信息。
+
 
         注意：设置 extract_model 时将级联覆盖该分类下所有字段和表格的抽取模型。
 
-        `category_keyword_rules` 不传或传 `null` 时不修改既有规则；传入有效对象时全量替换；仅传入 `{"positive_rules":[],"negative_rules":[]}` 时清空。`{}`、空白字符串和非法结构均返回参数错误。与同空间其他已启用类别的同类型规则组重复时返回冲突错误。参数校验错误码：`1005025065`–`1005025069`；跨类别规则组冲突复用 `1005015019`。
+
+        `category_keyword_rules` 不传或传 `null` 时不修改既有规则；传入有效对象时全量替换；仅传入
+        `{"positive_rules":[],"negative_rules":[]}`
+        时清空。`{}`、空白字符串和非法结构均返回参数错误。与同空间其他已启用类别的同类型规则组重复时返回冲突错误。参数校验错误码：`1005025065`–`1005025069`；跨类别规则组冲突复用
+        `1005015019`。
       operationId: updateCategory
       tags:
         - 文件类别
@@ -1085,8 +1164,11 @@ paths:
                   allOf:
                     - $ref: '#/components/schemas/CategoryKeywordRules'
                   nullable: true
-                  description: |
-                    分类关键词规则。不传或 null=不修改；有效对象=全量替换；`positive_rules`、`negative_rules` 都为空数组=清空。
+                  description: >
+                    分类关键词规则。不传或
+                    null=不修改；有效对象=全量替换；`positive_rules`、`negative_rules`
+                    都为空数组=清空。
+
                     不接受 `{}` 或空白字符串。
                 enabled:
                   $ref: '#/components/schemas/EnabledStatus'
@@ -1171,7 +1253,7 @@ paths:
                   description: 要删除的文件类别ID列表
                   example:
                     - '1234567890'
-                    - '0987654321'
+                    - 0987654321
               required:
                 - workspace_id
                 - category_ids
@@ -1420,7 +1502,7 @@ paths:
                     type: string
                   example:
                     - '1234567890'
-                    - '0987654321'
+                    - 0987654321
                 table_id:
                   type: string
                   description: |
@@ -1653,7 +1735,7 @@ paths:
                     type: string
                   example:
                     - '1234567890'
-                    - '0987654321'
+                    - 0987654321
               required:
                 - workspace_id
                 - category_id
@@ -1814,7 +1896,7 @@ paths:
                     type: string
                   example:
                     - '1234567890'
-                    - '0987654321'
+                    - 0987654321
               required:
                 - workspace_id
                 - category_id
@@ -1855,7 +1937,7 @@ paths:
                   description: 要删除的样本ID列表
                   example:
                     - '1234567890'
-                    - '0987654321'
+                    - 0987654321
               required:
                 - workspace_id
                 - category_id
@@ -1986,7 +2068,7 @@ paths:
   /api/app-api/sip/platform/v2/review/rule_repo/list:
     get:
       summary: 获取审核规则库列表
-      description: 获取审核规则库列表, 包含规则库下的规则组和规则信息
+      description: '获取审核规则库列表, 包含规则库下的规则组和规则信息'
       operationId: listReviewRuleRepo
       tags:
         - 智能审核
@@ -2344,15 +2426,21 @@ paths:
                   example: '1234567890'
                 model:
                   type: string
-                  description: |
+                  description: >
                     审核任务模型（选填）。可选值：`deepseek-v4-pro`、`qwen3.6-plus`、`qwen3.7-max`、`ORM-O1`。不传时使用规则库默认审核模型。
+
 
                     2026-07-08 起，以下旧模型已下架，请改用对应替代模型：
 
+
                     | 旧模型 | 替代模型 |
+
                     | --- | --- |
+
                     | `deepseek-r1` | `deepseek-v4-pro` |
+
                     | `qwq-32b` | `qwen3.6-plus` |
+
                     | `qwen3-max` | `qwen3.7-max` |
                   example: deepseek-v4-pro
               required:
@@ -2623,7 +2711,9 @@ paths:
                                         example: 人工复核批注
                           model:
                             type: string
-                            description: 审核任务模型展示名称。历史任务可能继续返回原模型及已下架标记（如 `deepseek-r1（已下架）`）。
+                            description: >-
+                              审核任务模型展示名称。历史任务可能继续返回原模型及已下架标记（如
+                              `deepseek-r1（已下架）`）。
                             example: deepseek-v4-pro
   /api/app-api/sip/platform/v2/review/task/retry:
     post:
@@ -2699,10 +2789,12 @@ paths:
   /api/app-api/sip/platform/v2/category/fields/add:
     post:
       summary: 新增单个文件类别字段
-      description: |
+      description: >
         在指定文件类别下新增一个字段，支持新增普通字段和表格字段
 
-        > ⚠️ 该接口目前仍在提供服务，但后续将停止维护。推荐使用 [新增文件类别字段](/api-reference/文件类别/新增文件类别字段) 接口替代。
+
+        > ⚠️ 该接口目前仍在提供服务，但后续将停止维护。推荐使用 [新增文件类别字段](/api-reference/文件类别/新增文件类别字段)
+        接口替代。
       operationId: addCategoryField
       tags:
         - 已废弃
@@ -2732,11 +2824,16 @@ paths:
                   example: '1234567890'
                 extract_model:
                   type: string
-                  description: |
-                    选填，字段级抽取模型，仅普通字段（非表格字段）支持，不填则跟随分类级配置（分类级为 mixed 或 null 时默认 Auto）
+                  description: >
+                    选填，字段级抽取模型，仅普通字段（非表格字段）支持，不填则跟随分类级配置（分类级为 mixed 或 null 时默认
+                    Auto）
+
                     - Auto: 智能匹配抽取模型
+
                     - Acgpt: 速度快，抽取结果稳定
+
                     - Acgpt-VL: 多模态，适用简单抽取（≤10 页）
+
                     - DF-M1: 适用复杂文档理解
                   example: Acgpt
                   enum:
@@ -2809,10 +2906,12 @@ paths:
   /api/app-api/sip/platform/v2/category/fields/update:
     post:
       summary: 更新单个文件类别字段
-      description: |
+      description: >
         更新指定文件类别字段的信息，支持普通字段和表格字段
 
-        > ⚠️ 该接口目前仍在提供服务，但后续将停止维护。推荐使用 [更新文件类别字段](/api-reference/文件类别/更新文件类别字段) 接口替代。
+
+        > ⚠️ 该接口目前仍在提供服务，但后续将停止维护。推荐使用 [更新文件类别字段](/api-reference/文件类别/更新文件类别字段)
+        接口替代。
       operationId: updateCategoryField
       tags:
         - 已废弃
@@ -2865,10 +2964,12 @@ paths:
   /api/app-api/sip/platform/v2/category/tables/add:
     post:
       summary: 新增单个文件类别表格
-      description: |
+      description: >
         在指定文件类别下新增一个表格
 
-        > ⚠️ 该接口目前仍在提供服务，但后续将停止维护。推荐使用 [新增文件类别表格](/api-reference/文件类别/新增文件类别表格) 接口替代。
+
+        > ⚠️ 该接口目前仍在提供服务，但后续将停止维护。推荐使用 [新增文件类别表格](/api-reference/文件类别/新增文件类别表格)
+        接口替代。
       operationId: addCategoryTable
       tags:
         - 已废弃
@@ -2966,10 +3067,12 @@ paths:
   /api/app-api/sip/platform/v2/category/tables/update:
     post:
       summary: 更新单个文件类别表格
-      description: |
+      description: >
         更新指定文件类别表格的信息
 
-        > ⚠️ 该接口目前仍在提供服务，但后续将停止维护。推荐使用 [更新文件类别表格](/api-reference/文件类别/更新文件类别表格) 接口替代。
+
+        > ⚠️ 该接口目前仍在提供服务，但后续将停止维护。推荐使用 [更新文件类别表格](/api-reference/文件类别/更新文件类别表格)
+        接口替代。
       operationId: updateCategoryTable
       tags:
         - 已废弃
@@ -3044,10 +3147,12 @@ paths:
   /api/app-api/sip/platform/v2/category/sample/upload:
     post:
       summary: 上传单个类别样本
-      description: |
+      description: >
         为指定文件类别上传样本文件
 
-        > ⚠️ 该接口目前仍在提供服务，但后续将停止维护。推荐使用 [上传类别样本](/api-reference/文件类别样本/上传类别样本) 接口替代。
+
+        > ⚠️ 该接口目前仍在提供服务，但后续将停止维护。推荐使用 [上传类别样本](/api-reference/文件类别样本/上传类别样本)
+        接口替代。
       operationId: uploadCategorySample
       tags:
         - 已废弃
@@ -3106,10 +3211,12 @@ paths:
   /api/app-api/sip/platform/v2/category/sample/download:
     get:
       summary: 下载单个类别样本
-      description: |
+      description: >
         下载指定的类别样本文件
 
-        > ⚠️ 该接口目前仍在提供服务，但后续将停止维护。推荐使用 [下载类别样本（ZIP）](/api-reference/文件类别样本/下载类别样本（ZIP）) 接口替代。
+
+        > ⚠️ 该接口目前仍在提供服务，但后续将停止维护。推荐使用
+        [下载类别样本（ZIP）](/api-reference/文件类别样本/下载类别样本（ZIP）) 接口替代。
       operationId: downloadCategorySample
       tags:
         - 已废弃
@@ -3214,7 +3321,7 @@ components:
     ParserRemoveWatermark:
       name: parser_remove_watermark
       in: query
-      description: 是否去水印（0:不去水印、1:去水印）
+      description: '是否去水印（0:不去水印、1:去水印）'
       required: false
       schema:
         type: integer
@@ -3222,7 +3329,7 @@ components:
     ParserCropDewarp:
       name: parser_crop_dewarp
       in: query
-      description: 是否进行切边矫正（0:不进行切边矫正、1:进行切边矫正）
+      description: '是否进行切边矫正（0:不进行切边矫正、1:进行切边矫正）'
       required: false
       schema:
         type: integer
@@ -3230,7 +3337,7 @@ components:
     ParserApplyMerge:
       name: parser_apply_merge
       in: query
-      description: 是否进行跨页段落表格合并（0:不合并、1:合并）
+      description: '是否进行跨页段落表格合并（0:不合并、1:合并）'
       required: false
       schema:
         type: integer
@@ -3246,7 +3353,7 @@ components:
     ParserTableTextSplitMode:
       name: parser_table_text_split_mode
       in: query
-      description: 表格线是否分割ocr文本（0:不切割、1:切割）
+      description: '表格线是否分割ocr文本（0:不切割、1:切割）'
       required: false
       schema:
         type: integer
@@ -3262,7 +3369,7 @@ components:
     ParserDpi:
       name: parser_dpi
       in: query
-      description: 文件分辨率（144:默认、216:高精度）
+      description: '文件分辨率（144:默认、216:高精度）'
       required: false
       schema:
         type: integer
@@ -3316,8 +3423,8 @@ components:
                 items:
                   type: string
                   description: 文件URL
-                  example: https://example.com/file.pdf
-                  pattern: ^https?://.*$
+                  example: 'https://example.com/file.pdf'
+                  pattern: '^https?://.*$'
                 maxItems: 10
             required:
               - urls
@@ -3346,12 +3453,18 @@ components:
         - msg
     TaskType:
       type: integer
-      description: |
+      description: >
         任务类型
-        - `0`: **文件拆分子任务**：打开"文件拆分"开关的文件任务执行成功后，该文件批次任务中因文件拆分操作产生的子任务即为拆分子任务，按照文件类别下实际文件套数区分子任务
+
+        - `0`:
+        **文件拆分子任务**：打开"文件拆分"开关的文件任务执行成功后，该文件批次任务中因文件拆分操作产生的子任务即为拆分子任务，按照文件类别下实际文件套数区分子任务
+
         - `1`: **普通任务**：未打开"文件拆分"和"多图切分"开关的文件任务
+
         - `2`: **父任务**：打开"文件拆分"或"多图切分"开关的文件任务执行后，该文件批次任务中的每份文件即为父任务
-        - `3`: **切图子任务**：打开"多图切分"开关的文件任务执行成功后，该文件批次任务中因多图切分操作产生的子任务即为切分子任务，按照文件类别下实际切图结果数量区分子任务
+
+        - `3`:
+        **切图子任务**：打开"多图切分"开关的文件任务执行成功后，该文件批次任务中因多图切分操作产生的子任务即为切分子任务，按照文件类别下实际切图结果数量区分子任务
       example: 1
     RecognitionStatus:
       type: integer
@@ -3397,7 +3510,7 @@ components:
         properties:
           page:
             type: integer
-            description: 页码,从0开始
+            description: '页码,从0开始'
             example: 1
           angle:
             type: integer
@@ -3419,6 +3532,16 @@ components:
             type: integer
             description: PDF转图片时的分辨率。非PDF文件该值为`0`.
             example: 144
+          image_url:
+            type: string
+            format: uri
+            nullable: true
+            description: |
+              当前任务当前页的图片URL，仅当请求参数`with_image_url=true`时返回。
+              普通/父任务与拆套/切图子任务分别返回各自页面图片，且与同一对象中的
+              `page`、`angle`、`width`、`height`按页面索引一一对应。
+              链接有效期为30天。图片尚未生成、URL为空或页面信息越界时返回`null`；关闭开关时该字段不输出。
+            example: 'https://example.com/pages/202412190001/0.png'
     KeyValuePosition:
       description: 字段值的位置。字段值可能跨页或跨行，因此用数组展示。
       type: array
@@ -3430,7 +3553,9 @@ components:
             description: 字段所在页。是`pages`数组的索引
           vertices:
             type: array
-            description: 字段值的外接四边形坐标。图像以左上为原点，数组值为 [左上角x, 左上角y, 右上角x, 右上角y, 右下角x, 右下角y, 左下角x, 左下角y]
+            description: >-
+              字段值的外接四边形坐标。图像以左上为原点，数组值为 [左上角x, 左上角y, 右上角x, 右上角y, 右下角x, 右下角y,
+              左下角x, 左下角y]
             items:
               type: integer
             minItems: 8
@@ -3447,6 +3572,14 @@ components:
         value:
           type: string
           description: 字段值
+        translated_key:
+          type: string
+          nullable: true
+          description: 字段名的翻译结果
+        translated_value:
+          type: string
+          nullable: true
+          description: 字段值的翻译结果
         position:
           $ref: '#/components/schemas/KeyValuePosition'
         confidence:
@@ -3469,6 +3602,14 @@ components:
         value:
           type: string
           description: 字段值
+        translated_key:
+          type: string
+          nullable: true
+          description: 字段名的翻译结果
+        translated_value:
+          type: string
+          nullable: true
+          description: 字段值的翻译结果
         position:
           $ref: '#/components/schemas/KeyValuePosition'
     TextInLines:
@@ -3516,6 +3657,14 @@ components:
         value:
           type: string
           description: 字段值
+        translated_key:
+          type: string
+          nullable: true
+          description: 字段名的翻译结果
+        translated_value:
+          type: string
+          nullable: true
+          description: 字段值的翻译结果
         textInLines:
           deprecated: true
           type: array
@@ -3555,6 +3704,22 @@ components:
         shape:
           type: string
           description: 印章形状
+        translated_text:
+          type: string
+          nullable: true
+          description: 印章文本的翻译结果
+        translated_type:
+          type: string
+          nullable: true
+          description: 印章类型的翻译结果
+        translated_color:
+          type: string
+          nullable: true
+          description: 印章颜色的翻译结果
+        translated_shape:
+          type: string
+          nullable: true
+          description: 印章形状的翻译结果
         position:
           type: array
           description: 位置信息
@@ -3573,6 +3738,10 @@ components:
         text:
           type: string
           description: 印章文本内容
+        translated_text:
+          type: string
+          nullable: true
+          description: 手写体文本的翻译结果
         position:
           $ref: '#/components/schemas/KeyValuePosition'
     Document:
@@ -3773,6 +3942,10 @@ components:
                     description: 表格名称
                     type: string
                     example: table1
+                  translated_table_name:
+                    description: 表格名称的翻译结果
+                    type: string
+                    nullable: true
                   tableType:
                     description: 表格类型， 0， 系统配置， 1 手动添加。
                     type: string
@@ -3865,7 +4038,7 @@ components:
               properties:
                 invoiceVerifyStatus:
                   type: integer
-                  description: 发票验真是否成功(0:否,1:是, null:未验真)
+                  description: '发票验真是否成功(0:否,1:是, null:未验真)'
                   example: 0
                 invoiceVerifyErrorCode:
                   type: integer
@@ -3873,7 +4046,7 @@ components:
                   example: 0
                 invoiceVerifyCanRetry:
                   type: integer
-                  description: 发票验真是否可以重试/发起(0:否,1:是)
+                  description: '发票验真是否可以重试/发起(0:否,1:是)'
                   example: 0
                 invoiceVerifyFailMsg:
                   type: string
@@ -4105,6 +4278,10 @@ components:
                               description: 表格名称
                               type: string
                               example: table1
+                            translated_table_name:
+                              description: 表格名称的翻译结果
+                              type: string
+                              nullable: true
                             tableType:
                               description: 表格类型， 0， 系统配置， 1 手动添加。
                               type: string
@@ -4116,7 +4293,9 @@ components:
                               description: 整表抽取模型（实际命中模型），Acgpt / Acgpt-VL / DF-M1
                               type: string
                             configModel:
-                              description: 整表配置模型（配置值），Auto / Acgpt / Acgpt-VL / DF-M1；存量未配置为 null
+                              description: >-
+                                整表配置模型（配置值），Auto / Acgpt / Acgpt-VL /
+                                DF-M1；存量未配置为 null
                               type: string
                             items:
                               type: array
@@ -4200,7 +4379,7 @@ components:
                         properties:
                           invoiceVerifyStatus:
                             type: integer
-                            description: 发票验真是否成功(0:否,1:是, null:未验真)
+                            description: '发票验真是否成功(0:否,1:是, null:未验真)'
                             example: 0
                           invoiceVerifyErrorCode:
                             type: integer
@@ -4208,7 +4387,7 @@ components:
                             example: 0
                           invoiceVerifyCanRetry:
                             type: integer
-                            description: 发票验真是否可以重试/发起(0:否,1:是)
+                            description: '发票验真是否可以重试/发起(0:否,1:是)'
                             example: 0
                           invoiceVerifyFailMsg:
                             type: string
@@ -4242,6 +4421,219 @@ components:
                   - recognition_status
                   - verification_status
                   - category
+    TranslateSourceLanguage:
+      type: string
+      description: 翻译源语言，使用 ISO 639-1 编码；省略或空字符串均表示自动检测。
+      enum:
+        - ''
+        - zh-CN
+        - zh-TW
+        - ja
+        - ko
+        - en
+        - fr
+        - pt
+        - de
+        - it
+        - es
+        - ru
+        - th
+        - vi
+        - ms
+        - id
+        - hi
+        - bn
+        - ar
+        - pl
+      example: ''
+    TranslateTargetLanguage:
+      type: string
+      description: 翻译目标语言，使用 ISO 639-1 编码，必填且必须是具体语言。
+      enum:
+        - zh-CN
+        - zh-TW
+        - ja
+        - ko
+        - en
+        - fr
+        - pt
+        - de
+        - it
+        - es
+        - ru
+        - th
+        - vi
+        - ms
+        - id
+        - hi
+        - bn
+        - ar
+        - pl
+      example: zh-CN
+    FileTranslateRequest:
+      type: object
+      required:
+        - task_id
+        - target_language
+      properties:
+        task_id:
+          type: string
+          description: 已完成识别的任务ID。雪花ID必须作为字符串传递，禁止转换为JavaScript Number。
+          example: '1978297791713619968'
+        source_language:
+          $ref: '#/components/schemas/TranslateSourceLanguage'
+        target_language:
+          $ref: '#/components/schemas/TranslateTargetLanguage'
+    CommonFieldTranslate:
+      type: object
+      properties:
+        key:
+          type: string
+          description: 原字段key
+          example: invoiceNumber
+        translated_key:
+          type: string
+          nullable: true
+          description: 字段key翻译结果；表格单元格通常不使用
+        index:
+          type: integer
+          description: 同名字段索引，从0开始
+          example: 0
+        value:
+          type: string
+          nullable: true
+          description: 字段值翻译结果
+    TableFieldHeadTranslate:
+      type: object
+      properties:
+        key:
+          type: string
+          description: 原表头key
+        translated_key:
+          type: string
+          nullable: true
+          description: 表头key翻译结果
+    TableDetailTranslate:
+      type: object
+      properties:
+        table_name:
+          type: string
+          description: 原表格名称
+        translated_table_name:
+          type: string
+          nullable: true
+          description: 表格名称翻译结果
+        items:
+          type: array
+          description: 表格数据翻译结果，外层为行、内层为单元格
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/CommonFieldTranslate'
+        item_headers:
+          type: array
+          description: 表头翻译结果
+          items:
+            $ref: '#/components/schemas/TableFieldHeadTranslate'
+    StampTranslateResult:
+      type: object
+      properties:
+        key:
+          type: string
+          description: '印章唯一标识，格式为stamp-${page}-${index}'
+        page:
+          type: integer
+          description: 页码
+        index:
+          type: integer
+          description: 页内序号，从0开始
+        stamp_prefix:
+          type: string
+          nullable: true
+          description: 印章前缀翻译结果
+        type_key:
+          type: string
+          nullable: true
+          description: 印章类型key翻译结果
+        type:
+          type: string
+          nullable: true
+          description: 印章类型翻译结果
+        color_key:
+          type: string
+          nullable: true
+          description: 印章颜色key翻译结果
+        color:
+          type: string
+          nullable: true
+          description: 印章颜色翻译结果
+        stamp_shape_key:
+          type: string
+          nullable: true
+          description: 印章形状key翻译结果
+        stamp_shape:
+          type: string
+          nullable: true
+          description: 印章形状翻译结果
+        value_key:
+          type: string
+          nullable: true
+          description: 印章文字key翻译结果
+        value:
+          type: string
+          nullable: true
+          description: 印章文字翻译结果
+    HandwritingTranslateResult:
+      type: object
+      properties:
+        key:
+          type: string
+          description: '手写体唯一标识，格式为handwriting-${page}-${lineIndex}'
+        page:
+          type: integer
+          description: 页码
+        index:
+          type: integer
+          description: 页内序号，从0开始
+        handwriting_prefix:
+          type: string
+          nullable: true
+          description: 手写体前缀翻译结果
+        text:
+          type: string
+          nullable: true
+          description: 手写体文字翻译结果
+    FileTranslateResult:
+      type: object
+      properties:
+        result:
+          type: object
+          required:
+            - fields
+            - tables
+            - stamps
+            - handwritings
+          properties:
+            fields:
+              type: array
+              description: 普通字段翻译结果
+              items:
+                $ref: '#/components/schemas/CommonFieldTranslate'
+            tables:
+              type: array
+              description: 表格翻译结果
+              items:
+                $ref: '#/components/schemas/TableDetailTranslate'
+            stamps:
+              type: array
+              description: 印章翻译结果
+              items:
+                $ref: '#/components/schemas/StampTranslateResult'
+            handwritings:
+              type: array
+              description: 手写体翻译结果
+              items:
+                $ref: '#/components/schemas/HandwritingTranslateResult'
     ExtractFieldReqVO:
       type: object
       properties:
@@ -4300,7 +4692,7 @@ components:
           example: 这是一个用于处理发票的工作空间
         auth_scope:
           type: integer
-          description: 协作范围 0:仅自己可见 1:企业成员可见
+          description: '协作范围 0:仅自己可见 1:企业成员可见'
           example: 1
           enum:
             - 0
@@ -4316,7 +4708,7 @@ components:
         callback_url:
           type: string
           description: 回调URL
-          example: https://example.com/callback
+          example: 'https://example.com/callback'
         callback_retry_time:
           type: integer
           description: 回调重试次数
@@ -4419,7 +4811,7 @@ components:
             match:
               type: string
               description: 匹配正则表达式，用于校验或捕获抽取结果
-              example: ^(\d{4})-(\d{2})-(\d{2})$
+              example: '^(\d{4})-(\d{2})-(\d{2})$'
             replace:
               type: string
               description: 替换表达式，支持 $1、$2 等捕获组引用
@@ -4460,7 +4852,7 @@ components:
           description: 是否使用语义提示词
         alias:
           type: array
-          description: 字段别名。更新时：不传=不修改，传空数组[]=清空别名，传非空数组=覆盖
+          description: '字段别名。更新时：不传=不修改，传空数组[]=清空别名，传非空数组=覆盖'
           items:
             type: string
           example:
@@ -4653,7 +5045,7 @@ components:
           description: 是否使用语义提示词
         alias:
           type: array
-          description: 字段别名。不传=不修改，传空数组[]=清空别名，传非空数组=覆盖
+          description: '字段别名。不传=不修改，传空数组[]=清空别名，传非空数组=覆盖'
           items:
             type: string
           example:
@@ -4883,4 +5275,6 @@ components:
         - 6
         - 7
         - 8
-x-codeSamples: custom
+security:
+  - ApiId: []
+    SecretCode: []

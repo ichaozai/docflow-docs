@@ -19,6 +19,14 @@ description: "DocFlow API documentation changelog"
 
 ### API
 
+#### File Results and Translation Enhancements
+
+- Added `/api/app-api/sip/platform/v2/file/translate` to translate recognized regular fields, tables, stamps, and handwriting by task. Languages use ISO 639-1 codes; omitting `source_language` or sending an empty string enables automatic source-language detection.
+- Added the optional `task_id` query parameter to `/api/app-api/sip/platform/v2/file/fetch` for exact lookup using a string task ID.
+- Added the optional `with_image_url` parameter to `/api/app-api/sip/platform/v2/file/fetch`. When set to `true`, page data for regular, document-split, and image-crop tasks includes the corresponding `image_url` together with `angle`, `width`, and `height`. Image URLs are valid for 30 days.
+- When translations are available, `/api/app-api/sip/platform/v2/file/fetch` returns the corresponding `translated_*` fields in field, table, stamp, and handwriting objects. Existing response fields remain compatible.
+- Tokens returned by `/api/app-api/sip/platform/v2/auth/token` are valid for 1 day.
+
 #### Category Keyword Rules
 
 - [Create File Category](/api-reference/file-category/create-file-category) and [Update File Category](/api-reference/file-category/update-file-category) now support `category_keyword_rules`. Positive rules match a category, while negative rules filter it out.

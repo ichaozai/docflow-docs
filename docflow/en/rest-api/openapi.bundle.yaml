@@ -1,13 +1,13 @@
 openapi: 3.0.0
 info:
   title: DocFlow API
-  description: DocFlow REST API, providing file upload and file processing result retrieval capabilities
-  version: 2.8.4
+  description: >-
+    DocFlow REST API, providing file upload and file processing result retrieval
+    capabilities
+  version: 2.14.1
 servers:
-  - url: https://docflow.textin.com
-security:
-  - ApiId: []
-    SecretCode: []
+  - url: 'https://docflow.textin.com'
+x-codeSamples: custom
 paths:
   /api/app-api/sip/platform/v2/file/upload:
     post:
@@ -80,7 +80,9 @@ paths:
   /api/app-api/sip/platform/v2/file/upload/sync:
     post:
       summary: Upload File Synchronously
-      description: Upload file and wait for processing to complete, returning processing results directly
+      description: >-
+        Upload file and wait for processing to complete, returning processing
+        results directly
       operationId: uploadFileSync
       parameters:
         - $ref: '#/components/parameters/WorkspaceId'
@@ -113,19 +115,42 @@ paths:
   /api/app-api/sip/platform/v2/file/fetch:
     get:
       summary: Get File Processing Result List
-      description: ''
+      description: >
+        Queries task recognition results. When stored translations exist,
+        original recognition
+
+        fields are preserved and translated values are added to the
+        corresponding objects:
+
+        - Regular fields and legacy single-table fields: `translated_key` and
+        `translated_value` in
+          `data.fields[]` and `data.items[][]`
+        - Multi-table results: `translated_table_name` in `data.tables[]`, and
+        `translated_key` and
+          `translated_value` in `data.tables[].items[][]`
+        - Stamps: `translated_color`, `translated_text`, `translated_shape`, and
+        `translated_type` in `data.stamps[]`
+
+        - Handwriting: `translated_text` in `data.handwritings[]`
+
+
+        Translation fields have values only when translations exist for the
+        corresponding content.
+
+        Original fields such as `key`, `value`, and `tableName` are not
+        overwritten.
       operationId: getFiles
       parameters:
         - name: page
           in: query
-          description: Page number, default 1
+          description: 'Page number, default 1'
           required: false
           schema:
             type: integer
             default: 1
         - name: page_size
           in: query
-          description: Number of items per page, default 1000
+          description: 'Number of items per page, default 1000'
           required: false
           schema:
             type: integer
@@ -148,6 +173,14 @@ paths:
           required: false
           schema:
             type: string
+        - name: task_id
+          in: query
+          description: >-
+            Task ID for an exact task query. Send Snowflake IDs as strings to
+            avoid precision loss.
+          required: false
+          schema:
+            type: string
         - name: category
           in: query
           description: File Category
@@ -161,29 +194,37 @@ paths:
             $ref: '#/components/schemas/RecognitionStatus'
         - name: verification_status
           in: query
-          description: 'File verification status 0: Pending verification 2: Confirmed 3: Rejected 4: Deleted 5: Deferred processing'
+          description: >-
+            File verification status 0: Pending verification 2: Confirmed 3:
+            Rejected 4: Deleted 5: Deferred processing
           required: false
           schema:
             $ref: '#/components/schemas/VerificationStatus'
         - name: start_time
           in: query
-          description: Start time for search by update time, RFC3339 format (YYYY-MM-DDTHH:MM:SSZ)
+          description: >-
+            Start time for search by update time, RFC3339 format
+            (YYYY-MM-DDTHH:MM:SSZ)
           required: false
           schema:
             type: string
             format: date-time
-            example: '2024-01-01T00:00:00Z'
+            example: 2024-01-01T00:00:00.000Z
         - name: end_time
           in: query
-          description: End time for search by update time, RFC3339 format (YYYY-MM-DDTHH:MM:SSZ)
+          description: >-
+            End time for search by update time, RFC3339 format
+            (YYYY-MM-DDTHH:MM:SSZ)
           required: false
           schema:
             type: string
             format: date-time
-            example: '2024-01-01T10:00:00Z'
+            example: 2024-01-01T10:00:00.000Z
         - name: with_document
           in: query
-          description: Whether to return the complete text recognition result of the document
+          description: >-
+            Whether to return the complete text recognition result of the
+            document
           required: false
           schema:
             type: boolean
@@ -191,6 +232,31 @@ paths:
         - name: with_task_detail_url
           in: query
           description: Whether to return the task details page URL
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: with_image_url
+          in: query
+          description: >
+            Whether to return the image URL for each page. The default is
+            `false`.
+
+            When enabled, `files[].pages[]` for regular/parent tasks and
+
+            `files[].child_files[].pages[]` for split/crop child tasks return
+            the image URL
+
+            owned by the corresponding task. The URL is aligned by page index
+            with `page`,
+
+            `angle`, `width`, and `height` in the same page object. If an image
+            has not been
+
+            generated or its URL is unavailable, `image_url` is `null`. The URL
+            is valid for 30 days. The field is omitted
+
+            when this parameter is false or not provided.
           required: false
           schema:
             type: boolean
@@ -204,10 +270,65 @@ paths:
                 allOf:
                   - $ref: '#/components/schemas/CodeMessage'
                   - $ref: '#/components/schemas/TaskProcessResult'
+  /api/app-api/sip/platform/v2/file/translate:
+    post:
+      summary: Translate file extraction results
+      description: >
+        Languages use ISO 639-1 codes; Chinese is region-qualified as `zh-CN` or
+        `zh-TW`.
+
+        Omitting `source_language` or sending an empty string enables automatic
+        source-language detection.
+
+        A concrete source language must differ from `target_language`.
+
+        Calling this endpoint translates the task and enables translation in the
+        frontend task detail view.
+
+        A concurrent request returns a "task is being translated" error.
+
+
+        Common business error codes:
+
+        - `1005025065`: task recognition failed and cannot be translated
+
+        - `1005025066`: task recognition has not completed
+
+        - `1005025067`: task translation is already in progress
+
+        - `1005025068`: source and target languages are the same
+
+        - `1005025069`: target language is empty or is not a concrete language
+        code
+      operationId: translateFile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileTranslateRequest'
+            example:
+              task_id: '202412190001'
+              source_language: ''
+              target_language: zh-CN
+      responses:
+        '200':
+          description: >-
+            The request has been processed. Check the business code in the
+            response for the outcome.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CodeMessage'
+                  - $ref: '#/components/schemas/FileTranslateResult'
   /api/app-api/sip/platform/v2/file/update:
     post:
       summary: Update File Processing Result
-      description: Update file processing result. Usually used after manual review and proofreading to upload modified key-value pairs, overriding automatically recognized results.
+      description: >-
+        Update file processing result. Usually used after manual review and
+        proofreading to upload modified key-value pairs, overriding
+        automatically recognized results.
       operationId: updateFile
       requestBody:
         required: true
@@ -227,13 +348,23 @@ paths:
                     description: File ID
                     example: 202412190001
                   data:
-                    description: |
+                    description: >
                       Full field update.
-                      Note: Even if only updating partial fields, all fields must be included.
-                      If the incoming fields are more than the original fields, the additional fields will be added.
-                      If the incoming fields are fewer than the original fields, the missing fields will be deleted.
-                      If the incoming field values differ from the original field values, the field values will be updated.
-                      If the incoming fields are identical to the original fields, the fields will be preserved.
+
+                      Note: Even if only updating partial fields, all fields
+                      must be included.
+
+                      If the incoming fields are more than the original fields,
+                      the additional fields will be added.
+
+                      If the incoming fields are fewer than the original fields,
+                      the missing fields will be deleted.
+
+                      If the incoming field values differ from the original
+                      field values, the field values will be updated.
+
+                      If the incoming fields are identical to the original
+                      fields, the fields will be preserved.
                     type: object
                     properties:
                       fields:
@@ -360,7 +491,9 @@ paths:
   /api/app-api/sip/platform/v2/file/delete:
     post:
       summary: Delete Tasks
-      description: Delete files by conditions. Files matching any condition will be deleted.
+      description: >-
+        Delete files by conditions. Files matching any condition will be
+        deleted.
       operationId: deleteFile
       requestBody:
         required: true
@@ -427,9 +560,12 @@ paths:
   /api/app-api/sip/platform/v2/file/extract_fields:
     post:
       summary: Extract Specific Fields
-      description: |
-        For tasks that have completed extraction, extract additional fields for the task, or re-extract individual existing fields.
-        Returns the complete extraction result of all fields. The return structure is the same as `/api/app-api/sip/platform/v2/file/fetch`.
+      description: >
+        For tasks that have completed extraction, extract additional fields for
+        the task, or re-extract individual existing fields.
+
+        Returns the complete extraction result of all fields. The return
+        structure is the same as `/api/app-api/sip/platform/v2/file/fetch`.
       operationId: extractFields
       requestBody:
         required: true
@@ -461,11 +597,17 @@ paths:
                         example: Table1
                       extract_model:
                         type: string
-                        description: |
-                          Table-level extraction model, defaults to Acgpt if not specified. All fields within the table use this model
+                        description: >
+                          Table-level extraction model, defaults to Acgpt if not
+                          specified. All fields within the table use this model
+
                           - Auto: Automatically matches the extraction model
+
                           - Acgpt: Fast speed with stable extraction results
-                          - Acgpt-VL: VLM, suitable for simple extraction (≤10 pages)
+
+                          - Acgpt-VL: VLM, suitable for simple extraction (≤10
+                          pages)
+
                           - DF-M1: Suitable for complex document understanding
                         example: Acgpt
                         enum:
@@ -525,10 +667,14 @@ paths:
   /api/app-api/sip/platform/v2/file/amend_category:
     post:
       summary: Amend File Category
-      description: |
+      description: >
         - For regular tasks, modify the file category of the regular task
-        - For document splitting tasks, modify the file type and page numbers of the split files
-        - For multi-image cropping tasks, modify the file type of the cropped files
+
+        - For document splitting tasks, modify the file type and page numbers of
+        the split files
+
+        - For multi-image cropping tasks, modify the file type of the cropped
+        files
       operationId: amendCategory
       requestBody:
         content:
@@ -564,7 +710,7 @@ paths:
                         type: array
                         items:
                           type: integer
-                          description: Subfile page numbers, starting from 0
+                          description: 'Subfile page numbers, starting from 0'
                         example:
                           - 0
                           - 1
@@ -596,7 +742,9 @@ paths:
   /api/app-api/sip/platform/v2/auth/token:
     get:
       summary: Generate a short-lived token
-      description: Generate a short-lived token (for iframe scenarios)
+      description: >-
+        Generate a short-lived token (for iframe scenarios). The token is valid
+        for 1 day.
       operationId: authToken
       responses:
         '200':
@@ -638,7 +786,9 @@ paths:
                   example: 12345
                 auth_scope:
                   type: integer
-                  description: 'Collaboration scope 0: Visible only to self 1: Visible to enterprise members'
+                  description: >-
+                    Collaboration scope 0: Visible only to self 1: Visible to
+                    enterprise members
                   example: 1
                   enum:
                     - 0
@@ -781,7 +931,9 @@ paths:
                   maxLength: 500
                 auth_scope:
                   type: integer
-                  description: 'Collaboration scope 0: Visible only to self 1: Visible to enterprise members'
+                  description: >-
+                    Collaboration scope 0: Visible only to self 1: Visible to
+                    enterprise members
                   example: 1
                   enum:
                     - 0
@@ -789,7 +941,7 @@ paths:
                 callback_url:
                   type: string
                   description: Callback URL
-                  example: https://example.com/callback
+                  example: 'https://example.com/callback'
                 callback_retry_time:
                   type: integer
                   description: Callback retry count
@@ -840,12 +992,20 @@ paths:
   /api/app-api/sip/platform/v2/category/create:
     post:
       summary: Create File Category
-      description: |
-        Create a new file category in the specified workspace, requiring at least one sample file and at least one field configuration.
+      description: >
+        Create a new file category in the specified workspace, requiring at
+        least one sample file and at least one field configuration.
 
-        Supports one-stop creation: you can pass the `tables` parameter to create tables with nested fields simultaneously.
 
-        Like `fields` and `tables`, pass `category_keyword_rules` as a JSON string form field. Same-type duplicate rule groups are not allowed in other enabled categories in the workspace. Parameter validation error codes: `1005025065`–`1005025069`; cross-category rule-group conflicts reuse `1005015019`.
+        Supports one-stop creation: you can pass the `tables` parameter to
+        create tables with nested fields simultaneously.
+
+
+        Like `fields` and `tables`, pass `category_keyword_rules` as a JSON
+        string form field. Same-type duplicate rule groups are not allowed in
+        other enabled categories in the workspace. Parameter validation error
+        codes: `1005025065`–`1005025069`; cross-category rule-group conflicts
+        reuse `1005015019`.
       operationId: createCategory
       tags:
         - File Category
@@ -868,7 +1028,9 @@ paths:
                 category_prompt:
                   type: string
                   description: Prompt for classification
-                  example: VAT invoice, including fields such as invoice code, invoice number, etc.
+                  example: >-
+                    VAT invoice, including fields such as invoice code, invoice
+                    number, etc.
                   maxLength: 150
                 category_keyword_rules:
                   $ref: '#/components/schemas/CategoryKeywordRules'
@@ -891,7 +1053,9 @@ paths:
                     - DF-M1
                 sample_files:
                   type: array
-                  description: Sample file list, at least one sample file must be uploaded, a category can have at most 20 sample files
+                  description: >-
+                    Sample file list, at least one sample file must be uploaded,
+                    a category can have at most 20 sample files
                   items:
                     type: string
                     format: binary
@@ -899,19 +1063,26 @@ paths:
                   maxItems: 10
                 fields:
                   type: array
-                  description: Field configuration list, at least one field must be configured
+                  description: >-
+                    Field configuration list, at least one field must be
+                    configured
                   items:
                     $ref: '#/components/schemas/CategoryFieldConfig'
                   minItems: 1
                 tables:
                   type: array
-                  description: Optional, table configuration list (one-stop creation), supports nested fields
+                  description: >-
+                    Optional, table configuration list (one-stop creation),
+                    supports nested fields
                   items:
                     $ref: '#/components/schemas/CategoryTableConfig'
                 with_detail:
                   type: boolean
-                  description: |
-                    Whether to return full details. When true, the response includes complete category info (with fields, tables, samples).
+                  description: >
+                    Whether to return full details. When true, the response
+                    includes complete category info (with fields, tables,
+                    samples).
+
                     When not set or false, only category_id is returned.
               required:
                 - workspace_id
@@ -938,13 +1109,19 @@ paths:
                             example: '1234567890'
                           name:
                             type: string
-                            description: File category name (returned when with_detail=true)
+                            description: >-
+                              File category name (returned when
+                              with_detail=true)
                           description:
                             type: string
-                            description: File category description (returned when with_detail=true)
+                            description: >-
+                              File category description (returned when
+                              with_detail=true)
                           category_prompt:
                             type: string
-                            description: Classification prompt (returned when with_detail=true)
+                            description: >-
+                              Classification prompt (returned when
+                              with_detail=true)
                           category_keyword_rules:
                             $ref: '#/components/schemas/CategoryKeywordRules'
                           extract_model:
@@ -975,7 +1152,9 @@ paths:
       summary: Get Workspace File Category List
       tags:
         - File Category
-      description: Get the workspace file category list. Each category item includes its `category_keyword_rules` classification keyword rules when configured.
+      description: >-
+        Get the workspace file category list. Each category item includes its
+        `category_keyword_rules` classification keyword rules when configured.
       operationId: listCategories
       parameters:
         - name: workspace_id
@@ -1050,12 +1229,22 @@ paths:
   /api/app-api/sip/platform/v2/category/update:
     post:
       summary: Update File Category
-      description: |
+      description: >
         Update the specified file category information.
 
-        Note: Setting extract_model will cascade override the extraction model of all fields and tables under this category.
 
-        When updating, omit `category_keyword_rules` or set it to `null` to keep existing rules; send a valid object to replace all rules; only `{"positive_rules":[],"negative_rules":[]}` clears them. `{}`, blank strings, and invalid structures return a parameter error. A same-type rule group duplicate in another enabled category in the workspace returns a conflict error. Parameter validation error codes: `1005025065`–`1005025069`; cross-category rule-group conflicts reuse `1005015019`.
+        Note: Setting extract_model will cascade override the extraction model
+        of all fields and tables under this category.
+
+
+        When updating, omit `category_keyword_rules` or set it to `null` to keep
+        existing rules; send a valid object to replace all rules; only
+        `{"positive_rules":[],"negative_rules":[]}` clears them. `{}`, blank
+        strings, and invalid structures return a parameter error. A same-type
+        rule group duplicate in another enabled category in the workspace
+        returns a conflict error. Parameter validation error codes:
+        `1005025065`–`1005025069`; cross-category rule-group conflicts reuse
+        `1005015019`.
       operationId: updateCategory
       tags:
         - File Category
@@ -1082,15 +1271,20 @@ paths:
                 category_prompt:
                   type: string
                   description: Prompt for classification
-                  example: VAT invoice, including fields such as invoice code, invoice number, etc.
+                  example: >-
+                    VAT invoice, including fields such as invoice code, invoice
+                    number, etc.
                   maxLength: 150
                 category_keyword_rules:
                   type: object
                   allOf:
                     - $ref: '#/components/schemas/CategoryKeywordRules'
                   nullable: true
-                  description: |
-                    Category keyword rules. Omit or null=no change; a valid object=full replacement; both `positive_rules` and `negative_rules` as empty arrays=clear.
+                  description: >
+                    Category keyword rules. Omit or null=no change; a valid
+                    object=full replacement; both `positive_rules` and
+                    `negative_rules` as empty arrays=clear.
+
                     `{}` and blank strings are not accepted.
                 enabled:
                   $ref: '#/components/schemas/EnabledStatus'
@@ -1110,8 +1304,11 @@ paths:
                     - DF-M1
                 with_detail:
                   type: boolean
-                  description: |
-                    Whether to return full details. When true, the response returns category self info (without child-level fields/tables).
+                  description: >
+                    Whether to return full details. When true, the response
+                    returns category self info (without child-level
+                    fields/tables).
+
                     When not set or false, only code/msg is returned.
               required:
                 - workspace_id
@@ -1127,7 +1324,9 @@ paths:
                   - type: object
                     properties:
                       result:
-                        description: Category self info when with_detail=true, otherwise null
+                        description: >-
+                          Category self info when with_detail=true, otherwise
+                          null
                         type: object
                         properties:
                           id:
@@ -1175,7 +1374,7 @@ paths:
                   description: List of file category IDs to delete
                   example:
                     - '1234567890'
-                    - '0987654321'
+                    - 0987654321
               required:
                 - workspace_id
                 - category_ids
@@ -1189,7 +1388,9 @@ paths:
   /api/app-api/sip/platform/v2/category/fields/list:
     get:
       summary: Get File Category Field List
-      description: Get file category field list, including regular fields and tables (with table fields)
+      description: >-
+        Get file category field list, including regular fields and tables (with
+        table fields)
       operationId: listCategoryFields
       tags:
         - File Category
@@ -1234,7 +1435,9 @@ paths:
   /api/app-api/sip/platform/v2/category/fields/batch_add:
     post:
       summary: Add File Category Fields
-      description: Add multiple fields under the specified file category. All-or-nothing semantics — if any field fails validation, the entire batch fails.
+      description: >-
+        Add multiple fields under the specified file category. All-or-nothing
+        semantics — if any field fails validation, the entire batch fails.
       operationId: batchAddCategoryFields
       tags:
         - File Category
@@ -1255,10 +1458,13 @@ paths:
                   example: '1234567890'
                 table_id:
                   type: string
-                  description: |
+                  description: >
                     Table ID
+
                     - Not provided or empty: Creates regular fields
-                    - Provide table ID: Creates table fields under the specified table
+
+                    - Provide table ID: Creates table fields under the specified
+                    table
                 fields:
                   type: array
                   description: List of fields to add
@@ -1284,7 +1490,7 @@ paths:
                     properties:
                       result:
                         type: array
-                        description: Creation result list, in same order as request
+                        description: 'Creation result list, in same order as request'
                         items:
                           type: object
                           properties:
@@ -1321,7 +1527,9 @@ paths:
   /api/app-api/sip/platform/v2/category/fields/batch_update:
     post:
       summary: Update File Category Fields
-      description: Update multiple fields under the specified file category. All-or-nothing semantics.
+      description: >-
+        Update multiple fields under the specified file category. All-or-nothing
+        semantics.
       operationId: batchUpdateCategoryFields
       tags:
         - File Category
@@ -1365,7 +1573,9 @@ paths:
                     properties:
                       result:
                         type: array
-                        description: Updated field list when with_detail=true, otherwise null
+                        description: >-
+                          Updated field list when with_detail=true, otherwise
+                          null
                         items:
                           type: object
                           properties:
@@ -1398,7 +1608,9 @@ paths:
   /api/app-api/sip/platform/v2/category/fields/delete:
     post:
       summary: Delete File Category Fields
-      description: Delete the specified file category fields, supports batch deletion of regular fields and table fields
+      description: >-
+        Delete the specified file category fields, supports batch deletion of
+        regular fields and table fields
       operationId: deleteCategoryFields
       tags:
         - File Category
@@ -1424,13 +1636,17 @@ paths:
                     type: string
                   example:
                     - '1234567890'
-                    - '0987654321'
+                    - 0987654321
                 table_id:
                   type: string
-                  description: |
+                  description: >
                     Table ID
-                    - Not provided: Deletes regular fields (fields in result.fields)
-                    - Provide table ID: Deletes table fields under the specified table (fields in result.tables[].fields)
+
+                    - Not provided: Deletes regular fields (fields in
+                    result.fields)
+
+                    - Provide table ID: Deletes table fields under the specified
+                    table (fields in result.tables[].fields)
                   example: '1234567890'
               required:
                 - workspace_id
@@ -1495,19 +1711,25 @@ paths:
                                 prompt:
                                   type: string
                                   description: Table semantic extraction prompt
-                                  example: Extract item name, quantity and amount from each row
+                                  example: >-
+                                    Extract item name, quantity and amount from
+                                    each row
                                 collect_from_multi_table:
                                   type: boolean
                                   description: Merge multiple tables
                                   example: true
                                 extract_model:
                                   type: string
-                                  description: Table-level extraction model (Auto/Acgpt/Acgpt-VL/DF-M1)
+                                  description: >-
+                                    Table-level extraction model
+                                    (Auto/Acgpt/Acgpt-VL/DF-M1)
                                   example: Acgpt
   /api/app-api/sip/platform/v2/category/tables/batch_add:
     post:
       summary: Add File Category Tables
-      description: Add multiple tables under the specified file category (supports nested fields). All-or-nothing semantics.
+      description: >-
+        Add multiple tables under the specified file category (supports nested
+        fields). All-or-nothing semantics.
       operationId: batchAddCategoryTables
       tags:
         - File Category
@@ -1534,7 +1756,9 @@ paths:
                   minItems: 1
                 with_detail:
                   type: boolean
-                  description: Whether to return full details for each table (with field list)
+                  description: >-
+                    Whether to return full details for each table (with field
+                    list)
               required:
                 - workspace_id
                 - category_id
@@ -1551,7 +1775,7 @@ paths:
                     properties:
                       result:
                         type: array
-                        description: Creation result list, in same order as request
+                        description: 'Creation result list, in same order as request'
                         items:
                           type: object
                           properties:
@@ -1571,7 +1795,9 @@ paths:
                               type: string
                             fields:
                               type: array
-                              description: Table field list (returned when with_detail=true)
+                              description: >-
+                                Table field list (returned when
+                                with_detail=true)
                               items:
                                 $ref: '#/components/schemas/CategoryField'
                           required:
@@ -1579,7 +1805,9 @@ paths:
   /api/app-api/sip/platform/v2/category/tables/batch_update:
     post:
       summary: Update File Category Tables
-      description: Update multiple tables under the specified file category. All-or-nothing semantics.
+      description: >-
+        Update multiple tables under the specified file category. All-or-nothing
+        semantics.
       operationId: batchUpdateCategoryTables
       tags:
         - File Category
@@ -1618,7 +1846,7 @@ paths:
   /api/app-api/sip/platform/v2/category/tables/delete:
     post:
       summary: Delete File Category Tables
-      description: Delete the specified file category tables, supports batch deletion
+      description: 'Delete the specified file category tables, supports batch deletion'
       operationId: deleteCategoryTables
       tags:
         - File Category
@@ -1644,7 +1872,7 @@ paths:
                     type: string
                   example:
                     - '1234567890'
-                    - '0987654321'
+                    - 0987654321
               required:
                 - workspace_id
                 - category_id
@@ -1659,7 +1887,9 @@ paths:
   /api/app-api/sip/platform/v2/category/sample/batch_upload:
     post:
       summary: Upload Category Samples
-      description: Upload multiple sample files for the specified file category, maximum 20 files
+      description: >-
+        Upload multiple sample files for the specified file category, maximum 20
+        files
       operationId: batchUploadCategorySample
       tags:
         - File Category Samples
@@ -1680,7 +1910,7 @@ paths:
                   example: '1234567890'
                 files:
                   type: array
-                  description: Sample file list, maximum 20 files
+                  description: 'Sample file list, maximum 20 files'
                   items:
                     type: string
                     format: binary
@@ -1688,7 +1918,9 @@ paths:
                   maxItems: 10
                 with_detail:
                   type: boolean
-                  description: When true, the response returns the full sample list of this category
+                  description: >-
+                    When true, the response returns the full sample list of this
+                    category
               required:
                 - workspace_id
                 - category_id
@@ -1708,7 +1940,9 @@ paths:
                         properties:
                           samples:
                             type: array
-                            description: Full sample list of this category (returned when with_detail=true)
+                            description: >-
+                              Full sample list of this category (returned when
+                              with_detail=true)
                             items:
                               $ref: '#/components/schemas/CategorySample'
   /api/app-api/sip/platform/v2/category/sample/list:
@@ -1779,7 +2013,9 @@ paths:
   /api/app-api/sip/platform/v2/category/sample/batch_download:
     post:
       summary: Download Category Samples (ZIP)
-      description: Download multiple sample files of the specified category, packaged as a ZIP file. When sample_ids is not provided, all samples are downloaded.
+      description: >-
+        Download multiple sample files of the specified category, packaged as a
+        ZIP file. When sample_ids is not provided, all samples are downloaded.
       operationId: batchDownloadCategorySample
       tags:
         - File Category Samples
@@ -1800,12 +2036,14 @@ paths:
                   example: '1234567890'
                 sample_ids:
                   type: array
-                  description: List of sample IDs to download. When not provided, all samples of this category are downloaded.
+                  description: >-
+                    List of sample IDs to download. When not provided, all
+                    samples of this category are downloaded.
                   items:
                     type: string
                   example:
                     - '1234567890'
-                    - '0987654321'
+                    - 0987654321
               required:
                 - workspace_id
                 - category_id
@@ -1846,7 +2084,7 @@ paths:
                   description: List of sample IDs to delete
                   example:
                     - '1234567890'
-                    - '0987654321'
+                    - 0987654321
               required:
                 - workspace_id
                 - category_id
@@ -1977,7 +2215,9 @@ paths:
   /api/app-api/sip/platform/v2/review/rule_repo/list:
     get:
       summary: Get Review Rule Repository List
-      description: Get review rule repository list, including rule groups and rules information under the repository
+      description: >-
+        Get review rule repository list, including rule groups and rules
+        information under the repository
       operationId: listReviewRuleRepo
       tags:
         - Intelligent Review
@@ -2335,15 +2575,25 @@ paths:
                   example: '1234567890'
                 model:
                   type: string
-                  description: |
-                    Review task model (optional). Available values: `deepseek-v4-pro`, `qwen3.6-plus`, `qwen3.7-max`, `ORM-O1`. If omitted, the rule repository's default review model is used.
+                  description: >
+                    Review task model (optional). Available values:
+                    `deepseek-v4-pro`, `qwen3.6-plus`, `qwen3.7-max`, `ORM-O1`.
+                    If omitted, the rule repository's default review model is
+                    used.
 
-                    Starting July 8, 2026, the following legacy models were deprecated. Use the corresponding replacement model:
+
+                    Starting July 8, 2026, the following legacy models were
+                    deprecated. Use the corresponding replacement model:
+
 
                     | Legacy model | Replacement model |
+
                     | --- | --- |
+
                     | `deepseek-r1` | `deepseek-v4-pro` |
+
                     | `qwq-32b` | `qwen3.6-plus` |
+
                     | `qwen3-max` | `qwen3.7-max` |
                   example: deepseek-v4-pro
               required:
@@ -2369,7 +2619,11 @@ paths:
                             example: '31415926'
                           model:
                             type: string
-                            description: Display name of the review model actually used for this task. If a deprecated default model was replaced by platform rules, this field returns the replacement model display name.
+                            description: >-
+                              Display name of the review model actually used for
+                              this task. If a deprecated default model was
+                              replaced by platform rules, this field returns the
+                              replacement model display name.
                             example: deepseek-v4-pro
   /api/app-api/sip/platform/v2/review/task/delete:
     post:
@@ -2541,13 +2795,18 @@ paths:
                                         example: Review reasoning
                                       anchors:
                                         type: array
-                                        description: Position anchor information for review reasoning, used to locate the position of review reasoning in the original text
+                                        description: >-
+                                          Position anchor information for review
+                                          reasoning, used to locate the position
+                                          of review reasoning in the original text
                                         items:
                                           type: object
                                           properties:
                                             start_pos:
                                               type: integer
-                                              description: Starting character position in `reasoning`
+                                              description: >-
+                                                Starting character position in
+                                                `reasoning`
                                             end_pos:
                                               type: integer
                                               description: Ending character position in `reasoning`
@@ -2558,7 +2817,9 @@ paths:
                                               type: array
                                               items:
                                                 type: integer
-                                                description: Bounding quadrilateral coordinates of original text
+                                                description: >-
+                                                  Bounding quadrilateral coordinates of
+                                                  original text
                                                 example:
                                                   - 0
                                                   - 0
@@ -2614,7 +2875,11 @@ paths:
                                         example: Manual review comments
                           model:
                             type: string
-                            description: Review task model display name. Historical tasks may continue to return the original model with a deprecated marker, such as `deepseek-r1 (deprecated)`.
+                            description: >-
+                              Review task model display name. Historical tasks
+                              may continue to return the original model with a
+                              deprecated marker, such as `deepseek-r1
+                              (deprecated)`.
                             example: deepseek-v4-pro
   /api/app-api/sip/platform/v2/review/task/retry:
     post:
@@ -2690,10 +2955,14 @@ paths:
   /api/app-api/sip/platform/v2/category/fields/add:
     post:
       summary: Add Single File Category Field
-      description: |
-        Add a new field under the specified file category, supports both regular fields and table fields
+      description: >
+        Add a new field under the specified file category, supports both regular
+        fields and table fields
 
-        > ⚠️ This endpoint is still available but will no longer be maintained. Please use [Add File Category Fields](/api-reference/file-category/add-file-category-fields) instead.
+
+        > ⚠️ This endpoint is still available but will no longer be maintained.
+        Please use [Add File Category
+        Fields](/api-reference/file-category/add-file-category-fields) instead.
       operationId: addCategoryField
       tags:
         - Deprecated
@@ -2716,18 +2985,29 @@ paths:
                   example: '1234567890'
                 table_id:
                   type: string
-                  description: |
+                  description: >
                     Table ID
-                    - Not provided or empty: Creates a regular field, result appears in result.fields
-                    - Provide table ID: Creates a table field under the specified table, result appears in result.tables[].fields
+
+                    - Not provided or empty: Creates a regular field, result
+                    appears in result.fields
+
+                    - Provide table ID: Creates a table field under the
+                    specified table, result appears in result.tables[].fields
                   example: '1234567890'
                 extract_model:
                   type: string
-                  description: |
-                    Optional, field-level extraction model, only supported for regular fields (not table fields); if omitted, follows the category-level config (defaults to Auto when the category level is mixed or null)
+                  description: >
+                    Optional, field-level extraction model, only supported for
+                    regular fields (not table fields); if omitted, follows the
+                    category-level config (defaults to Auto when the category
+                    level is mixed or null)
+
                     - Auto: Automatically matches the extraction model
+
                     - Acgpt: Fast speed with stable extraction results
+
                     - Acgpt-VL: VLM, suitable for simple extraction (≤10 pages)
+
                     - DF-M1: Suitable for complex document understanding
                   example: Acgpt
                   enum:
@@ -2737,8 +3017,10 @@ paths:
                     - DF-M1
                 with_detail:
                   type: boolean
-                  description: |
-                    Whether to return full details. When true, the response includes complete field info.
+                  description: >
+                    Whether to return full details. When true, the response
+                    includes complete field info.
+
                     When not set or false, only field_id is returned.
               required:
                 - workspace_id
@@ -2769,10 +3051,14 @@ paths:
                             description: Field description (returned when with_detail=true)
                           prompt:
                             type: string
-                            description: Semantic extraction prompt (returned when with_detail=true)
+                            description: >-
+                              Semantic extraction prompt (returned when
+                              with_detail=true)
                           use_prompt:
                             type: boolean
-                            description: Whether to use semantic prompt (returned when with_detail=true)
+                            description: >-
+                              Whether to use semantic prompt (returned when
+                              with_detail=true)
                           alias:
                             type: array
                             items:
@@ -2783,15 +3069,21 @@ paths:
                             description: Export field name (returned when with_detail=true)
                           multi_value:
                             type: boolean
-                            description: Whether multi-value extraction is enabled (returned when with_detail=true)
+                            description: >-
+                              Whether multi-value extraction is enabled
+                              (returned when with_detail=true)
                           duplicate_value_distinct:
                             type: boolean
-                            description: Whether deduplication is enabled (returned when with_detail=true)
+                            description: >-
+                              Whether deduplication is enabled (returned when
+                              with_detail=true)
                           transform_settings:
                             $ref: '#/components/schemas/TransformSettings'
                           extract_model:
                             type: string
-                            description: Field extraction model (returned when with_detail=true)
+                            description: >-
+                              Field extraction model (returned when
+                              with_detail=true)
                           enabled:
                             type: integer
                             description: Enabled status (returned when with_detail=true)
@@ -2800,10 +3092,15 @@ paths:
   /api/app-api/sip/platform/v2/category/fields/update:
     post:
       summary: Update Single File Category Field
-      description: |
-        Update the specified file category field, supports both regular fields and table fields
+      description: >
+        Update the specified file category field, supports both regular fields
+        and table fields
 
-        > ⚠️ This endpoint is still available but will no longer be maintained. Please use [Update File Category Fields](/api-reference/file-category/update-file-category-fields) instead.
+
+        > ⚠️ This endpoint is still available but will no longer be maintained.
+        Please use [Update File Category
+        Fields](/api-reference/file-category/update-file-category-fields)
+        instead.
       operationId: updateCategoryField
       tags:
         - Deprecated
@@ -2826,15 +3123,20 @@ paths:
                   example: '1234567890'
                 table_id:
                   type: string
-                  description: |
+                  description: >
                     Table ID
+
                     - Not required for regular fields
-                    - Required for table fields (provide the table ID the field belongs to)
+
+                    - Required for table fields (provide the table ID the field
+                    belongs to)
                   example: '1234567890'
                 with_detail:
                   type: boolean
-                  description: |
-                    Whether to return full details. When true, the response returns the updated field's complete info.
+                  description: >
+                    Whether to return full details. When true, the response
+                    returns the updated field's complete info.
+
                     When not set or false, only code/msg is returned.
               required:
                 - workspace_id
@@ -2850,10 +3152,13 @@ paths:
   /api/app-api/sip/platform/v2/category/tables/add:
     post:
       summary: Add Single File Category Table
-      description: |
+      description: >
         Add a new table under the specified file category
 
-        > ⚠️ This endpoint is still available but will no longer be maintained. Please use [Add File Category Tables](/api-reference/file-category/add-file-category-tables) instead.
+
+        > ⚠️ This endpoint is still available but will no longer be maintained.
+        Please use [Add File Category
+        Tables](/api-reference/file-category/add-file-category-tables) instead.
       operationId: addCategoryTable
       tags:
         - Deprecated
@@ -2880,7 +3185,7 @@ paths:
                 prompt:
                   type: string
                   description: Table semantic extraction prompt
-                  example: Extract item name, quantity and amount from each row
+                  example: 'Extract item name, quantity and amount from each row'
                   maxLength: 200
                 collect_from_multi_table:
                   type: boolean
@@ -2902,8 +3207,10 @@ paths:
                     - DF-M1
                 with_detail:
                   type: boolean
-                  description: |
-                    Whether to return full details. When true, the response includes complete table info (with field list).
+                  description: >
+                    Whether to return full details. When true, the response
+                    includes complete table info (with field list).
+
                     When not set or false, only table_id is returned.
               required:
                 - workspace_id
@@ -2934,13 +3241,19 @@ paths:
                             description: Table description (returned when with_detail=true)
                           prompt:
                             type: string
-                            description: Table semantic extraction prompt (returned when with_detail=true)
+                            description: >-
+                              Table semantic extraction prompt (returned when
+                              with_detail=true)
                           collect_from_multi_table:
                             type: boolean
-                            description: Merge multiple tables (returned when with_detail=true)
+                            description: >-
+                              Merge multiple tables (returned when
+                              with_detail=true)
                           extract_model:
                             type: string
-                            description: Table-level extraction model (returned when with_detail=true)
+                            description: >-
+                              Table-level extraction model (returned when
+                              with_detail=true)
                           fields:
                             type: array
                             description: Table field list (returned when with_detail=true)
@@ -2951,10 +3264,14 @@ paths:
   /api/app-api/sip/platform/v2/category/tables/update:
     post:
       summary: Update Single File Category Table
-      description: |
+      description: >
         Update the specified file category table information
 
-        > ⚠️ This endpoint is still available but will no longer be maintained. Please use [Update File Category Tables](/api-reference/file-category/update-file-category-tables) instead.
+
+        > ⚠️ This endpoint is still available but will no longer be maintained.
+        Please use [Update File Category
+        Tables](/api-reference/file-category/update-file-category-tables)
+        instead.
       operationId: updateCategoryTable
       tags:
         - Deprecated
@@ -2985,11 +3302,13 @@ paths:
                 prompt:
                   type: string
                   description: Table semantic extraction prompt
-                  example: Extract item name, quantity and amount from each row
+                  example: 'Extract item name, quantity and amount from each row'
                   maxLength: 200
                 collect_from_multi_table:
                   type: boolean
-                  description: Merge multiple tables, Acgpt-VL does not support multi-table merge
+                  description: >-
+                    Merge multiple tables, Acgpt-VL does not support multi-table
+                    merge
                   example: true
                 extract_model:
                   type: string
@@ -3023,10 +3342,14 @@ paths:
   /api/app-api/sip/platform/v2/category/sample/upload:
     post:
       summary: Upload Single Category Sample
-      description: |
+      description: >
         Upload a sample file for the specified file category
 
-        > ⚠️ This endpoint is still available but will no longer be maintained. Please use [Upload Category Samples](/api-reference/file-category-samples/upload-category-samples) instead.
+
+        > ⚠️ This endpoint is still available but will no longer be maintained.
+        Please use [Upload Category
+        Samples](/api-reference/file-category-samples/upload-category-samples)
+        instead.
       operationId: uploadCategorySample
       tags:
         - Deprecated
@@ -3051,8 +3374,10 @@ paths:
                   description: Sample file
                 with_detail:
                   type: boolean
-                  description: |
-                    Whether to return full details. When true, the response additionally returns the full sample list of this category.
+                  description: >
+                    Whether to return full details. When true, the response
+                    additionally returns the full sample list of this category.
+
                     When not set or false, only sample_id is returned.
               required:
                 - workspace_id
@@ -3077,7 +3402,9 @@ paths:
                             example: '1234567890'
                           samples:
                             type: array
-                            description: Full sample list of this category (returned when with_detail=true)
+                            description: >-
+                              Full sample list of this category (returned when
+                              with_detail=true)
                             items:
                               $ref: '#/components/schemas/CategorySample'
                         required:
@@ -3085,10 +3412,14 @@ paths:
   /api/app-api/sip/platform/v2/category/sample/download:
     get:
       summary: Download Single Category Sample
-      description: |
+      description: >
         Download the specified category sample file
 
-        > ⚠️ This endpoint is still available but will no longer be maintained. Please use [Download Category Samples (ZIP)](/api-reference/file-category-samples/download-category-samples-zip) instead.
+
+        > ⚠️ This endpoint is still available but will no longer be maintained.
+        Please use [Download Category Samples
+        (ZIP)](/api-reference/file-category-samples/download-category-samples-zip)
+        instead.
       operationId: downloadCategorySample
       tags:
         - Deprecated
@@ -3143,8 +3474,11 @@ components:
     BatchNumber:
       name: batch_number
       in: query
-      description: |
-        Batch Number.            You can upload multiple times with the same batch number, and later retrieve processing results for multiple files in that batch using the batch number.            If the value is empty, the system automatically generates a string up to 20 characters long.
+      description: >
+        Batch Number.            You can upload multiple times with the same
+        batch number, and later retrieve processing results for multiple files
+        in that batch using the batch number.            If the value is empty,
+        the system automatically generates a string up to 20 characters long.
       required: false
       schema:
         type: string
@@ -3176,8 +3510,9 @@ components:
     TargetProcess:
       name: target_process
       in: query
-      description: |
-        Target processing type.            Optional values:            - classify: Classification            - extract: Extraction
+      description: >
+        Target processing type.            Optional values:            -
+        classify: Classification            - extract: Extraction
       required: false
       schema:
         type: string
@@ -3188,7 +3523,7 @@ components:
     ParserRemoveWatermark:
       name: parser_remove_watermark
       in: query
-      description: Remove watermark (0 no, 1 yes)
+      description: 'Remove watermark (0 no, 1 yes)'
       required: false
       schema:
         type: integer
@@ -3196,7 +3531,7 @@ components:
     ParserCropDewarp:
       name: parser_crop_dewarp
       in: query
-      description: Crop and dewarp (0 no, 1 yes)
+      description: 'Crop and dewarp (0 no, 1 yes)'
       required: false
       schema:
         type: integer
@@ -3204,7 +3539,7 @@ components:
     ParserApplyMerge:
       name: parser_apply_merge
       in: query
-      description: Merge cross-page paragraphs and tables (0 no, 1 yes)
+      description: 'Merge cross-page paragraphs and tables (0 no, 1 yes)'
       required: false
       schema:
         type: integer
@@ -3212,7 +3547,9 @@ components:
     ParserFormulaLevel:
       name: parser_formula_level
       in: query
-      description: Formula recognition level (0 recognizes both display and inline formulas, 1 recognizes display formulas only, 2 recognizes no formulas)
+      description: >-
+        Formula recognition level (0 recognizes both display and inline
+        formulas, 1 recognizes display formulas only, 2 recognizes no formulas)
       required: false
       schema:
         type: integer
@@ -3220,7 +3557,7 @@ components:
     ParserTableTextSplitMode:
       name: parser_table_text_split_mode
       in: query
-      description: Split text blocks crossed by table lines (0 no, 1 yes)
+      description: 'Split text blocks crossed by table lines (0 no, 1 yes)'
       required: false
       schema:
         type: integer
@@ -3236,7 +3573,7 @@ components:
     ParserDpi:
       name: parser_dpi
       in: query
-      description: File resolution (144 default, 216 high precision)
+      description: 'File resolution (144 default, 216 high precision)'
       required: false
       schema:
         type: integer
@@ -3283,15 +3620,17 @@ components:
             type: object
             properties:
               urls:
-                description: |
+                description: >
                   File URL list
-                  Supports up to 10 file URLs per upload, each file maximum 100MB
+
+                  Supports up to 10 file URLs per upload, each file maximum
+                  100MB
                 type: array
                 items:
                   type: string
                   description: File URL
-                  example: https://example.com/file.pdf
-                  pattern: ^https?://.*$
+                  example: 'https://example.com/file.pdf'
+                  pattern: '^https?://.*$'
                 maxItems: 10
             required:
               - urls
@@ -3320,26 +3659,50 @@ components:
         - msg
     TaskType:
       type: integer
-      description: |
+      description: >
         Task type
-        - 0: **File split subtask**: When a file task with "File split" switch enabled executes successfully, the subtasks generated by file split operations in that file batch task are split subtasks, divided according to the actual number of file sets under the file category
-        - 1: **Regular task**: File tasks without "File split" and "Multi-image crop" switches enabled
-        - 2: **Parent task**: After file tasks with "File split" or "Multi-image crop" switches enabled execute, each file in that file batch task becomes a parent task
-        - 3: **Crop subtask**: When a file task with "Multi-image crop" switch enabled executes successfully, the subtasks generated by multi-image crop operations in that file batch task are crop subtasks, divided according to the actual number of crop results under the file category
+
+        - 0: **File split subtask**: When a file task with "File split" switch
+        enabled executes successfully, the subtasks generated by file split
+        operations in that file batch task are split subtasks, divided according
+        to the actual number of file sets under the file category
+
+        - 1: **Regular task**: File tasks without "File split" and "Multi-image
+        crop" switches enabled
+
+        - 2: **Parent task**: After file tasks with "File split" or "Multi-image
+        crop" switches enabled execute, each file in that file batch task
+        becomes a parent task
+
+        - 3: **Crop subtask**: When a file task with "Multi-image crop" switch
+        enabled executes successfully, the subtasks generated by multi-image
+        crop operations in that file batch task are crop subtasks, divided
+        according to the actual number of crop results under the file category
       example: 1
     RecognitionStatus:
       type: integer
-      description: |
+      description: >
         File recognition status: 
+
         - 0: Pending recognition
+
         - 1: Recognition successful
+
         - 2: Recognition failed
+
         - 3: Classifying
+
         - 4: Extracting
+
         - 5: Preparing
+
         - 6: File splitting
+
         - 7: Image cropping
-        - 10: Classification completed (only available when upload interface target_process is classify)
+
+        - 10: Classification completed (only available when upload interface
+        target_process is classify)
+
         - 20: Parsing
       enum:
         - 0
@@ -3354,7 +3717,9 @@ components:
         - 20
     VerificationStatus:
       type: integer
-      description: 'File verification status 0: Pending verification 2: Confirmed 3: Rejected 4: Deleted 5: Deferred processing'
+      description: >-
+        File verification status 0: Pending verification 2: Confirmed 3:
+        Rejected 4: Deleted 5: Deferred processing
       enum:
         - 0
         - 2
@@ -3363,14 +3728,16 @@ components:
         - 5
     PagesInfo:
       type: array
-      description: |
-        Data for rendering each page of the file.            Combined with the page and position fields in data.fields, you can accurately draw the position of fields on the page.
+      description: >
+        Data for rendering each page of the file.            Combined with the
+        page and position fields in data.fields, you can accurately draw the
+        position of fields on the page.
       items:
         type: object
         properties:
           page:
             type: integer
-            description: Page number, starting from 0
+            description: 'Page number, starting from 0'
             example: 1
           angle:
             type: integer
@@ -3390,20 +3757,50 @@ components:
             example: 1024
           dpi:
             type: integer
-            description: Resolution when converting PDF to image. For non-PDF files, this value is 0.
+            description: >-
+              Resolution when converting PDF to image. For non-PDF files, this
+              value is 0.
             example: 144
+          image_url:
+            type: string
+            format: uri
+            nullable: true
+            description: >
+              Image URL for this page of the current task. Returned only when
+              `with_image_url=true`.
+
+              Regular/parent tasks and split/crop child tasks return their own
+              page images. The URL
+
+              is aligned by page index with `page`, `angle`, `width`, and
+              `height` in the same object.
+
+              The value is `null` when the image is not generated, the URL is
+              empty, or page metadata
+
+              is out of range. The URL is valid for 30 days. The field is
+              omitted when the option is disabled.
+            example: 'https://example.com/pages/202412190001/0.png'
     KeyValuePosition:
-      description: Position of the field value. Field values may span pages or rows, so they are displayed as arrays.
+      description: >-
+        Position of the field value. Field values may span pages or rows, so
+        they are displayed as arrays.
       type: array
       items:
         type: object
         properties:
           page:
             type: integer
-            description: Page where the field is located. It is the index of the pages array
+            description: >-
+              Page where the field is located. It is the index of the pages
+              array
           vertices:
             type: array
-            description: Bounding quadrilateral coordinates of the field value. The image uses the top-left as origin, array values are [top-left x, top-left y, top-right x, top-right y, bottom-right x, bottom-right y, bottom-left x, bottom-left y]
+            description: >-
+              Bounding quadrilateral coordinates of the field value. The image
+              uses the top-left as origin, array values are [top-left x,
+              top-left y, top-right x, top-right y, bottom-right x, bottom-right
+              y, bottom-left x, bottom-left y]
             items:
               type: integer
             minItems: 8
@@ -3420,19 +3817,29 @@ components:
         value:
           type: string
           description: Field value
+        translated_key:
+          type: string
+          nullable: true
+          description: Translated field name
+        translated_value:
+          type: string
+          nullable: true
+          description: Translated field value
         position:
           $ref: '#/components/schemas/KeyValuePosition'
         confidence:
           type: number
           format: float
-          description: Confidence score, range 0~1
+          description: 'Confidence score, range 0~1'
           example: 0.95
         extractModel:
           type: string
           description: Actual hit model (Acgpt / Acgpt-VL / DF-M1)
         configModel:
           type: string
-          description: Configured model (Auto / Acgpt / Acgpt-VL / DF-M1); null for legacy data that was not configured
+          description: >-
+            Configured model (Auto / Acgpt / Acgpt-VL / DF-M1); null for legacy
+            data that was not configured
     KeyValue:
       type: object
       properties:
@@ -3442,6 +3849,14 @@ components:
         value:
           type: string
           description: Field value
+        translated_key:
+          type: string
+          nullable: true
+          description: Translated field name
+        translated_value:
+          type: string
+          nullable: true
+          description: Translated field value
         position:
           $ref: '#/components/schemas/KeyValuePosition'
     TextInLines:
@@ -3489,6 +3904,14 @@ components:
         value:
           type: string
           description: Field value
+        translated_key:
+          type: string
+          nullable: true
+          description: Translated field name
+        translated_value:
+          type: string
+          nullable: true
+          description: Translated field value
         textInLines:
           deprecated: true
           type: array
@@ -3505,7 +3928,7 @@ components:
         confidence:
           type: number
           format: float
-          description: Confidence score, range 0~1
+          description: 'Confidence score, range 0~1'
           example: 0.95
     StampValue:
       type: object
@@ -3528,6 +3951,22 @@ components:
         shape:
           type: string
           description: Stamp shape
+        translated_text:
+          type: string
+          nullable: true
+          description: Translated stamp text
+        translated_type:
+          type: string
+          nullable: true
+          description: Translated stamp type
+        translated_color:
+          type: string
+          nullable: true
+          description: Translated stamp color
+        translated_shape:
+          type: string
+          nullable: true
+          description: Translated stamp shape
         position:
           type: array
           description: Position information
@@ -3546,6 +3985,10 @@ components:
         text:
           type: string
           description: Handwriting text content
+        translated_text:
+          type: string
+          nullable: true
+          description: Translated handwriting text
         position:
           $ref: '#/components/schemas/KeyValuePosition'
     Document:
@@ -3593,7 +4036,9 @@ components:
       properties:
         page:
           type: integer
-          description: Page index of the original file, 0 represents the first page of the source file
+          description: >-
+            Page index of the original file, 0 represents the first page of the
+            source file
         imageAngle:
           type: string
           description: Angle information of the cropped image
@@ -3737,7 +4182,9 @@ components:
                           - 0
                           - 100
             tables:
-              description: Complete table data list (including system tables and manually configured tables)
+              description: >-
+                Complete table data list (including system tables and manually
+                configured tables)
               type: array
               items:
                 type: object
@@ -3746,6 +4193,10 @@ components:
                     description: Table name
                     type: string
                     example: table1
+                  translated_table_name:
+                    description: Translated table name
+                    type: string
+                    nullable: true
                   tableType:
                     description: |
                       Table type, 0: system configured, 1: manually added.
@@ -3755,7 +4206,9 @@ components:
                     description: Table-level actual hit model (Acgpt / Acgpt-VL / DF-M1)
                     type: string
                   configModel:
-                    description: Table-level configured model (Auto / Acgpt / Acgpt-VL / DF-M1); null for legacy data that was not configured
+                    description: >-
+                      Table-level configured model (Auto / Acgpt / Acgpt-VL /
+                      DF-M1); null for legacy data that was not configured
                     type: string
                   items:
                     type: array
@@ -3839,8 +4292,9 @@ components:
               properties:
                 invoiceVerifyStatus:
                   type: integer
-                  description: |
-                    Whether invoice verification is successful (0: No, 1: Yes, null: Not verified)
+                  description: >
+                    Whether invoice verification is successful (0: No, 1: Yes,
+                    null: Not verified)
                   example: 0
                 invoiceVerifyErrorCode:
                   type: integer
@@ -3848,8 +4302,9 @@ components:
                   example: 0
                 invoiceVerifyCanRetry:
                   type: integer
-                  description: |
-                    Whether invoice verification can be retried/initiated (0: No, 1: Yes)
+                  description: >
+                    Whether invoice verification can be retried/initiated (0:
+                    No, 1: Yes)
                   example: 0
                 invoiceVerifyFailMsg:
                   type: string
@@ -3871,27 +4326,30 @@ components:
       properties:
         formula_level:
           type: integer
-          description: Formula recognition level (0 recognizes both display and inline formulas, 1 recognizes display formulas only, 2 recognizes no formulas)
+          description: >-
+            Formula recognition level (0 recognizes both display and inline
+            formulas, 1 recognizes display formulas only, 2 recognizes no
+            formulas)
           example: 0
         apply_merge:
           type: integer
-          description: Merge cross-page paragraphs and tables (0 no, 1 yes)
+          description: 'Merge cross-page paragraphs and tables (0 no, 1 yes)'
           example: 1
         table_text_split_mode:
           type: integer
-          description: Split text blocks crossed by table lines (0 no, 1 yes)
+          description: 'Split text blocks crossed by table lines (0 no, 1 yes)'
           example: 0
         crop_dewarp:
           type: integer
-          description: Crop and dewarp (0 no, 1 yes)
+          description: 'Crop and dewarp (0 no, 1 yes)'
           example: 0
         remove_watermark:
           type: integer
-          description: Remove watermark (0 no, 1 yes)
+          description: 'Remove watermark (0 no, 1 yes)'
           example: 0
         dpi:
           type: integer
-          description: File resolution (144 default, 216 high precision)
+          description: 'File resolution (144 default, 216 high precision)'
           example: 144
           enum:
             - 144
@@ -4072,7 +4530,9 @@ components:
                                     - 0
                                     - 100
                       tables:
-                        description: Complete table data list (including system tables and manually configured tables)
+                        description: >-
+                          Complete table data list (including system tables and
+                          manually configured tables)
                         type: array
                         items:
                           type: object
@@ -4081,16 +4541,26 @@ components:
                               description: Table name
                               type: string
                               example: table1
+                            translated_table_name:
+                              description: Translated table name
+                              type: string
+                              nullable: true
                             tableType:
-                              description: |
-                                Table type, 0: system configured, 1: manually added.
+                              description: >
+                                Table type, 0: system configured, 1: manually
+                                added.
                               type: string
                               example: 0
                             extractModel:
-                              description: Table-level actual hit model (Acgpt / Acgpt-VL / DF-M1)
+                              description: >-
+                                Table-level actual hit model (Acgpt / Acgpt-VL /
+                                DF-M1)
                               type: string
                             configModel:
-                              description: Table-level configured model (Auto / Acgpt / Acgpt-VL / DF-M1); null for legacy data that was not configured
+                              description: >-
+                                Table-level configured model (Auto / Acgpt /
+                                Acgpt-VL / DF-M1); null for legacy data that was
+                                not configured
                               type: string
                             items:
                               type: array
@@ -4174,8 +4644,9 @@ components:
                         properties:
                           invoiceVerifyStatus:
                             type: integer
-                            description: |
-                              Whether invoice verification is successful (0: No, 1: Yes, null: Not verified)
+                            description: >
+                              Whether invoice verification is successful (0: No,
+                              1: Yes, null: Not verified)
                             example: 0
                           invoiceVerifyErrorCode:
                             type: integer
@@ -4183,8 +4654,9 @@ components:
                             example: 0
                           invoiceVerifyCanRetry:
                             type: integer
-                            description: |
-                              Whether invoice verification can be retried/initiated (0: No, 1: Yes)
+                            description: >
+                              Whether invoice verification can be
+                              retried/initiated (0: No, 1: Yes)
                             example: 0
                           invoiceVerifyFailMsg:
                             type: string
@@ -4199,9 +4671,11 @@ components:
                       $ref: '#/components/schemas/SubFileDetailInfo'
                   duration_ms:
                     type: integer
-                    description: |
+                    description: >
                       Task processing time, unit: milliseconds
-                      Calculated from the start of the task to completion (success or failure), excluding queue waiting time.
+
+                      Calculated from the start of the task to completion
+                      (success or failure), excluding queue waiting time.
                     example: 10000
                   total_page_num:
                     type: integer
@@ -4218,6 +4692,227 @@ components:
                   - recognition_status
                   - verification_status
                   - category
+    TranslateSourceLanguage:
+      type: string
+      description: >-
+        Source language as an ISO 639-1 code. Omit it or send an empty string to
+        enable automatic detection.
+      enum:
+        - ''
+        - zh-CN
+        - zh-TW
+        - ja
+        - ko
+        - en
+        - fr
+        - pt
+        - de
+        - it
+        - es
+        - ru
+        - th
+        - vi
+        - ms
+        - id
+        - hi
+        - bn
+        - ar
+        - pl
+      example: ''
+    TranslateTargetLanguage:
+      type: string
+      description: Required target language as a concrete ISO 639-1 code.
+      enum:
+        - zh-CN
+        - zh-TW
+        - ja
+        - ko
+        - en
+        - fr
+        - pt
+        - de
+        - it
+        - es
+        - ru
+        - th
+        - vi
+        - ms
+        - id
+        - hi
+        - bn
+        - ar
+        - pl
+      example: zh-CN
+    FileTranslateRequest:
+      type: object
+      required:
+        - task_id
+        - target_language
+      properties:
+        task_id:
+          type: string
+          description: >-
+            ID of a task that completed recognition. Send Snowflake IDs as
+            strings; do not convert them to JavaScript Number.
+          example: '1978297791713619968'
+        source_language:
+          $ref: '#/components/schemas/TranslateSourceLanguage'
+        target_language:
+          $ref: '#/components/schemas/TranslateTargetLanguage'
+    CommonFieldTranslate:
+      type: object
+      properties:
+        key:
+          type: string
+          description: Original field key
+          example: invoiceNumber
+        translated_key:
+          type: string
+          nullable: true
+          description: Translated field key; normally unused for table cells
+        index:
+          type: integer
+          description: Zero-based index for fields with the same key
+          example: 0
+        value:
+          type: string
+          nullable: true
+          description: Translated field value
+    TableFieldHeadTranslate:
+      type: object
+      properties:
+        key:
+          type: string
+          description: Original header key
+        translated_key:
+          type: string
+          nullable: true
+          description: Translated header key
+    TableDetailTranslate:
+      type: object
+      properties:
+        table_name:
+          type: string
+          description: Original table name
+        translated_table_name:
+          type: string
+          nullable: true
+          description: Translated table name
+        items:
+          type: array
+          description: >-
+            Translated table data. The outer array contains rows and the inner
+            array contains cells.
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/CommonFieldTranslate'
+        item_headers:
+          type: array
+          description: Translated table headers
+          items:
+            $ref: '#/components/schemas/TableFieldHeadTranslate'
+    StampTranslateResult:
+      type: object
+      properties:
+        key:
+          type: string
+          description: 'Unique stamp key in the format stamp-${page}-${index}'
+        page:
+          type: integer
+          description: Page number
+        index:
+          type: integer
+          description: Zero-based index on the page
+        stamp_prefix:
+          type: string
+          nullable: true
+          description: Translated stamp prefix
+        type_key:
+          type: string
+          nullable: true
+          description: Translated stamp type key
+        type:
+          type: string
+          nullable: true
+          description: Translated stamp type
+        color_key:
+          type: string
+          nullable: true
+          description: Translated stamp color key
+        color:
+          type: string
+          nullable: true
+          description: Translated stamp color
+        stamp_shape_key:
+          type: string
+          nullable: true
+          description: Translated stamp shape key
+        stamp_shape:
+          type: string
+          nullable: true
+          description: Translated stamp shape
+        value_key:
+          type: string
+          nullable: true
+          description: Translated stamp text key
+        value:
+          type: string
+          nullable: true
+          description: Translated stamp text
+    HandwritingTranslateResult:
+      type: object
+      properties:
+        key:
+          type: string
+          description: >-
+            Unique handwriting key in the format
+            handwriting-${page}-${lineIndex}
+        page:
+          type: integer
+          description: Page number
+        index:
+          type: integer
+          description: Zero-based index on the page
+        handwriting_prefix:
+          type: string
+          nullable: true
+          description: Translated handwriting prefix
+        text:
+          type: string
+          nullable: true
+          description: Translated handwriting text
+    FileTranslateResult:
+      type: object
+      properties:
+        result:
+          type: object
+          required:
+            - fields
+            - tables
+            - stamps
+            - handwritings
+          properties:
+            fields:
+              type: array
+              description: Translated regular fields
+              items:
+                $ref: '#/components/schemas/CommonFieldTranslate'
+            tables:
+              type: array
+              description: Translated tables
+              items:
+                $ref: '#/components/schemas/TableDetailTranslate'
+            stamps:
+              type: array
+              description: Translated stamps
+              items:
+                $ref: '#/components/schemas/StampTranslateResult'
+            handwritings:
+              type: array
+              description: Translated handwriting
+              items:
+                $ref: '#/components/schemas/HandwritingTranslateResult'
     ExtractFieldReqVO:
       type: object
       properties:
@@ -4231,13 +4926,19 @@ components:
           example: Only keep the year part
         extract_model:
           type: string
-          description: |
+          description: >
             Field-level extraction model, defaults to Acgpt if not specified
+
             - Auto: Automatically matches the extraction model
+
             - Acgpt: Fast speed with stable extraction results
+
             - Acgpt-VL: VLM, suitable for simple extraction (≤10 pages)
+
             - DF-M1: Suitable for complex document understanding
-            Note: For table fields, the extraction model is determined by the table-level extract_model, this field is ignored
+
+            Note: For table fields, the extraction model is determined by the
+            table-level extract_model, this field is ignored
           example: Acgpt
           enum:
             - Auto
@@ -4256,7 +4957,7 @@ components:
               example: abcd
             expiry:
               type: integer
-              description: Expiration time (in epoch timestamp format, unit is seconds)
+              description: 'Expiration time (in epoch timestamp format, unit is seconds)'
               example: 1700000000
     Workspace:
       type: object
@@ -4276,7 +4977,9 @@ components:
           example: This is a workspace for invoice processing
         auth_scope:
           type: integer
-          description: 'Collaboration scope 0: Visible only to self 1: Visible to enterprise members'
+          description: >-
+            Collaboration scope 0: Visible only to self 1: Visible to enterprise
+            members
           example: 1
           enum:
             - 0
@@ -4292,7 +4995,7 @@ components:
         callback_url:
           type: string
           description: Callback URL
-          example: https://example.com/callback
+          example: 'https://example.com/callback'
         callback_retry_time:
           type: integer
           description: Callback retry count
@@ -4302,21 +5005,27 @@ components:
         - name
     CategoryKeywordRuleGroup:
       type: object
-      description: Category keyword rule group. The group matches when at least min_hit keywords match.
+      description: >-
+        Category keyword rule group. The group matches when at least min_hit
+        keywords match.
       properties:
         group_name:
           type: string
-          description: Rule group name, used for display only
+          description: 'Rule group name, used for display only'
           maxLength: 50
           example: Core invoice elements
         min_hit:
           type: integer
-          description: Minimum number of keywords required to match the group; from 1 to the number of words
+          description: >-
+            Minimum number of keywords required to match the group; from 1 to
+            the number of words
           minimum: 1
           example: 2
         words:
           type: array
-          description: Keyword list. Each keyword must be non-empty, unique within its group, and no longer than 50 characters.
+          description: >-
+            Keyword list. Each keyword must be non-empty, unique within its
+            group, and no longer than 50 characters.
           minItems: 1
           maxItems: 20
           items:
@@ -4333,13 +5042,17 @@ components:
         - words
     CategoryKeywordRules:
       type: object
-      description: |
-        Category keyword rules. Positive groups are ORed; matching a negative group excludes the category.
-        A category supports at most 10 positive groups and 1 negative group. Duplicate same-type groups are not allowed, and positive and negative rules must not contain the same keyword.
+      description: >
+        Category keyword rules. Positive groups are ORed; matching a negative
+        group excludes the category.
+
+        A category supports at most 10 positive groups and 1 negative group.
+        Duplicate same-type groups are not allowed, and positive and negative
+        rules must not contain the same keyword.
       properties:
         positive_rules:
           type: array
-          description: Positive rule groups, combined with OR
+          description: 'Positive rule groups, combined with OR'
           maxItems: 10
           items:
             $ref: '#/components/schemas/CategoryKeywordRuleGroup'
@@ -4354,15 +5067,23 @@ components:
         - negative_rules
     TransformSettings:
       type: object
-      description: Field output transform configuration. Formats the extraction result before output.
+      description: >-
+        Field output transform configuration. Formats the extraction result
+        before output.
       properties:
         type:
           type: string
-          description: |
+          description: >
             Transform type, determines which transform rule to apply:
-            - `datetime`: Normalize the extraction result to a specified date format
-            - `enumerate`: Restrict the extraction result to one of the preset enumeration values
-            - `regex`: Match and replace the extraction result using regular expressions
+
+            - `datetime`: Normalize the extraction result to a specified date
+            format
+
+            - `enumerate`: Restrict the extraction result to one of the preset
+            enumeration values
+
+            - `regex`: Match and replace the extraction result using regular
+            expressions
           enum:
             - datetime
             - enumerate
@@ -4373,7 +5094,9 @@ components:
           properties:
             format:
               type: string
-              description: Target date format. The extraction result will be normalized to this format.
+              description: >-
+                Target date format. The extraction result will be normalized to
+                this format.
               example: yyyy-MM-dd
         enumerate_settings:
           type: object
@@ -4381,7 +5104,9 @@ components:
           properties:
             items:
               type: array
-              description: Allowed enumeration values. If the extraction result is not in this list, mismatch_action applies.
+              description: >-
+                Allowed enumeration values. If the extraction result is not in
+                this list, mismatch_action applies.
               items:
                 type: string
               example:
@@ -4395,21 +5120,27 @@ components:
             match:
               type: string
               description: Regex pattern for matching or capturing the extraction result
-              example: ^(\d{4})-(\d{2})-(\d{2})$
+              example: '^(\d{4})-(\d{2})-(\d{2})$'
             replace:
               type: string
-              description: Replacement expression, supports $1, $2 capture group references
+              description: 'Replacement expression, supports $1, $2 capture group references'
               example: $1/$2/$3
         mismatch_action:
           type: object
-          description: How to handle extraction results that don't match the transform rule (applies to all types, optional).
+          description: >-
+            How to handle extraction results that don't match the transform rule
+            (applies to all types, optional).
           properties:
             mode:
               type: string
-              description: |
+              description: >
                 Handling mode:
-                - `default`: Output the specified default value (requires default_value)
-                - `warning`: Keep the original extraction result, flag a warning for manual review
+
+                - `default`: Output the specified default value (requires
+                default_value)
+
+                - `warning`: Keep the original extraction result, flag a warning
+                for manual review
               enum:
                 - default
                 - warning
@@ -4436,7 +5167,9 @@ components:
           description: Whether to use semantic prompt
         alias:
           type: array
-          description: 'Field aliases. On update: omit=no change, empty array []=clear aliases, non-empty array=override'
+          description: >-
+            Field aliases. On update: omit=no change, empty array []=clear
+            aliases, non-empty array=override
           items:
             type: string
           example:
@@ -4444,14 +5177,18 @@ components:
             - Bill Number
         identity:
           type: string
-          description: 'Export field name. On update: omit=no change, empty string ""=clear, non-empty=override'
+          description: >-
+            Export field name. On update: omit=no change, empty string ""=clear,
+            non-empty=override
           example: invoice_number
         multi_value:
           type: boolean
           description: Whether to enable multi-value extraction
         duplicate_value_distinct:
           type: boolean
-          description: Whether to deduplicate values, only effective when multi_value is true
+          description: >-
+            Whether to deduplicate values, only effective when multi_value is
+            true
         transform_settings:
           $ref: '#/components/schemas/TransformSettings'
     CategoryTableConfig:
@@ -4509,13 +5246,20 @@ components:
               $ref: '#/components/schemas/EnabledStatus'
             extract_model:
               type: string
-              description: |
+              description: >
                 Field extraction model
+
                 - Auto: Automatically matches the extraction model
+
                 - Acgpt: Fast speed with stable extraction results
+
                 - Acgpt-VL: VLM, suitable for simple extraction (≤10 pages)
+
                 - DF-M1: Suitable for complex document understanding
-                - For table fields, inherits from the table model; for regular fields, uses field-level config; legacy data inferred from category config
+
+                - For table fields, inherits from the table model; for regular
+                fields, uses field-level config; legacy data inferred from
+                category config
               example: Acgpt
     CategoryTable:
       type: object
@@ -4535,7 +5279,7 @@ components:
         prompt:
           type: string
           description: Table semantic extraction prompt
-          example: Extract item name, quantity and amount from each row
+          example: 'Extract item name, quantity and amount from each row'
         collect_from_multi_table:
           type: boolean
           description: Merge multiple tables
@@ -4582,18 +5326,26 @@ components:
         category_prompt:
           type: string
           description: Prompt for classification
-          example: VAT invoice, including fields such as invoice code, invoice number, etc.
+          example: >-
+            VAT invoice, including fields such as invoice code, invoice number,
+            etc.
         category_keyword_rules:
           $ref: '#/components/schemas/CategoryKeywordRules'
         extract_model:
           type: string
-          description: |
+          description: >
             Extraction model
+
             - Auto: Automatically matches the extraction model
+
             - Acgpt: Fast speed with stable extraction results
+
             - Acgpt-VL: VLM, suitable for simple extraction (≤10 pages)
+
             - DF-M1: Suitable for complex document understanding
-            - mixed: Only in responses, indicates different models are used across fields/tables in this category
+
+            - mixed: Only in responses, indicates different models are used
+            across fields/tables in this category
           example: Acgpt
           enum:
             - Auto
@@ -4608,7 +5360,9 @@ components:
         - name
     CategoryFieldUpdateItem:
       type: object
-      description: Field update item (multi_value/duplicate_value_distinct cannot be modified via this endpoint)
+      description: >-
+        Field update item (multi_value/duplicate_value_distinct cannot be
+        modified via this endpoint)
       properties:
         field_id:
           type: string
@@ -4628,7 +5382,9 @@ components:
           description: Whether to use semantic prompt
         alias:
           type: array
-          description: Field aliases. omit=no change, empty array []=clear, non-empty=override
+          description: >-
+            Field aliases. omit=no change, empty array []=clear,
+            non-empty=override
           items:
             type: string
           example:
@@ -4636,24 +5392,34 @@ components:
             - Bill Number
         identity:
           type: string
-          description: Export field name. omit=no change, empty string ""=clear, non-empty=override
+          description: >-
+            Export field name. omit=no change, empty string ""=clear,
+            non-empty=override
           example: invoice_number
         multi_value:
           type: boolean
           description: Whether to enable multi-value extraction. Omit=no change
         duplicate_value_distinct:
           type: boolean
-          description: Whether to deduplicate values. Only effective when multi_value is true. Omit=no change
+          description: >-
+            Whether to deduplicate values. Only effective when multi_value is
+            true. Omit=no change
         transform_settings:
           $ref: '#/components/schemas/TransformSettings'
         extract_model:
           type: string
-          description: |
-            Field-level extraction model. Only regular fields can be set independently; table fields cannot.
+          description: >
+            Field-level extraction model. Only regular fields can be set
+            independently; table fields cannot.
+
             Omit to keep existing config.
+
             - Auto: Automatically matches the extraction model
+
             - Acgpt: Fast speed with stable extraction results
+
             - Acgpt-VL: VLM, suitable for simple extraction (≤10 pages)
+
             - DF-M1: Suitable for complex document understanding
           example: Acgpt
           enum:
@@ -4857,4 +5623,6 @@ components:
         - 5
         - 6
         - 7
-x-codeSamples: custom
+security:
+  - ApiId: []
+    SecretCode: []

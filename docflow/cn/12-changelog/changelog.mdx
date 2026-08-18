@@ -19,6 +19,14 @@ description: "DocFlow API 文档更新记录"
 
 ### API
 
+#### 文件结果与翻译能力增强
+
+- 新增 `/api/app-api/sip/platform/v2/file/translate` 接口，可按任务翻译已识别的普通字段、表格、印章和手写体结果。语言使用 ISO 639-1 编码；`source_language` 省略或传空字符串时自动检测源语言。
+- `/api/app-api/sip/platform/v2/file/fetch` 新增可选查询参数 `task_id`，支持使用字符串形式的任务 ID 精确查询。
+- `/api/app-api/sip/platform/v2/file/fetch` 新增可选参数 `with_image_url`。设为 `true` 时，普通任务、拆套任务和切图任务的页面信息返回对应的 `image_url`，并与同页的 `angle`、`width`、`height` 配套；图片 URL 有效期为 30 天。
+- 任务已有翻译结果时，`/api/app-api/sip/platform/v2/file/fetch` 在字段、表格、印章和手写体对象中返回对应的 `translated_*` 字段。原有响应字段保持兼容。
+- `/api/app-api/sip/platform/v2/auth/token` 返回的 token 有效期为 1 天。
+
 #### 新增分类关键字规则
 
 - [创建文件类别](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E5%88%9B%E5%BB%BA%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB) 和 [更新文件类别](/api-reference/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB/%E6%9B%B4%E6%96%B0%E6%96%87%E4%BB%B6%E7%B1%BB%E5%88%AB) 新增 `category_keyword_rules`，支持通过正向规则匹配类别、通过反向规则过滤类别。

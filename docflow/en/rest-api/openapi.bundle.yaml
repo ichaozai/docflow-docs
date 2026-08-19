@@ -290,16 +290,16 @@ paths:
 
         Common business error codes:
 
-        - `1005025065`: task recognition failed and cannot be translated
+        - `1005025070`: task recognition failed and cannot be translated
 
-        - `1005025066`: task recognition has not completed
+        - `1005025071`: task recognition has not completed
 
-        - `1005025067`: task translation is already in progress
+        - `1005025072`: task translation is already in progress
 
-        - `1005025068`: source and target languages are the same
+        - `1005025073`: source and target languages are the same
 
-        - `1005025069`: target language is empty or is not a concrete language
-        code
+        - `1020005001`: source or target language is empty, unsupported, or
+        invalid
       operationId: translateFile
       requestBody:
         required: true

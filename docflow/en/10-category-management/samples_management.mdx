@@ -4,7 +4,7 @@ description: "Manage sample files for file categories"
 ---
 
 <Tip>
-  Sample files are example documents for file categories, used to train and optimize document classification and extraction models. Each file category requires at least one sample file, with a maximum of ten sample files. This guide introduces how to manage sample files for file categories via API.
+  Sample files are example documents for file categories, used to train and optimize document classification and extraction models. Each file category requires at least one sample file, with a maximum of 20 sample files. This guide introduces how to manage sample files for file categories via API.
 </Tip>
 
 ## Upload Sample
@@ -71,7 +71,7 @@ else:
 **Request Parameters:**
 - `workspace_id` (required): Workspace ID
 - `category_id` (required): File category ID
-- `files` (required): Sample file(s), supports uploading multiple files in one request
+- `files` (required): Sample files; a single request can contain at most 20 files, and the category total after upload cannot exceed 20, so the actual upload capacity is `20 - current sample count`
 
 **Response Example:**
 
@@ -89,6 +89,7 @@ else:
   **Sample file requirements**:
   - Sample files should be typical representative documents of the category
   - Recommended to upload 3-5 sample files to improve classification accuracy
+  - Each category can retain at most 20 samples; subtract the existing sample count when adding more
   - Supported file formats refer to the supported formats for document upload
 </Note>
 

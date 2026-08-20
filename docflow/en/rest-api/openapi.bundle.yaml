@@ -1054,13 +1054,13 @@ paths:
                 sample_files:
                   type: array
                   description: >-
-                    Sample file list, at least one sample file must be uploaded,
-                    a category can have at most 20 sample files
+                    Sample file list; at least one file is required, and a
+                    category can contain at most 20 sample files in total
                   items:
                     type: string
                     format: binary
                   minItems: 1
-                  maxItems: 10
+                  maxItems: 20
                 fields:
                   type: array
                   description: >-
@@ -1888,8 +1888,9 @@ paths:
     post:
       summary: Upload Category Samples
       description: >-
-        Upload multiple sample files for the specified file category, maximum 20
-        files
+        Upload sample files for the specified category in a batch. A single
+        request can contain at most 20 files, and the category total after
+        upload cannot exceed 20 samples.
       operationId: batchUploadCategorySample
       tags:
         - File Category Samples
@@ -1910,12 +1911,14 @@ paths:
                   example: '1234567890'
                 files:
                   type: array
-                  description: 'Sample file list, maximum 20 files'
+                  description: >-
+                    Sample files in this request, up to 20; the actual number
+                    allowed also depends on the category's existing sample count
                   items:
                     type: string
                     format: binary
                   minItems: 1
-                  maxItems: 10
+                  maxItems: 20
                 with_detail:
                   type: boolean
                   description: >-

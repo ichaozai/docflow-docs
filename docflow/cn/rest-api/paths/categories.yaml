@@ -52,12 +52,12 @@
                   - DF-M1
               sample_files:
                 type: array
-                description: 样本文件列表，至少上传一个样本文件，一个类别最多有20个样本文件
+                description: 样本文件列表，至少上传一个样本文件；单个类别的样本总数最多为 20 个
                 items:
                   type: string
                   format: binary
                 minItems: 1
-                maxItems: 10
+                maxItems: 20
               fields:
                 type: array
                 description: 字段配置列表，至少配置一个字段
@@ -1255,7 +1255,7 @@
 /api/app-api/sip/platform/v2/category/sample/batch_upload:
   post:
     summary: 上传类别样本
-    description: 为指定文件类别上传多个样本文件，最多20个
+    description: 为指定文件类别批量上传样本文件。单次请求最多上传 20 个；上传后该类别的样本总数不能超过 20 个。
     operationId: batchUploadCategorySample
     tags:
       - 文件类别样本
@@ -1276,12 +1276,12 @@
                 example: "1234567890"
               files:
                 type: array
-                description: 样本文件列表，最多20个
+                description: 本次上传的样本文件列表，单次最多 20 个；实际可上传数量还受该类别已有样本数限制
                 items:
                   type: string
                   format: binary
                 minItems: 1
-                maxItems: 10
+                maxItems: 20
               with_detail:
                 type: boolean
                 description: 传 true 时响应返回该分类的全部样本列表

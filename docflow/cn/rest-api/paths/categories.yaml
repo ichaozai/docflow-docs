@@ -180,6 +180,14 @@
             - "1"
             - "0"
             - "2"
+      - name: exclude_unadded_preset_categories
+        in: query
+        description: |
+          是否排除尚未添加到空间的预置类别。设为 true 时，尚未添加到当前空间的预置类别不会返回；自定义类别不受影响。可与 `enabled` 参数组合使用。
+        required: false
+        schema:
+          type: boolean
+          default: false
     responses:
       '200':
         description: 成功获取空间文件类别列表

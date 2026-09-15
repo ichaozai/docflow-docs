@@ -180,6 +180,14 @@
             - "1"
             - "0"
             - "2"
+      - name: exclude_unadded_preset_categories
+        in: query
+        description: |
+          Whether to exclude preset categories that have not yet been added to the workspace. When true, unadded preset categories are omitted; custom categories are unaffected. Can be used together with the `enabled` parameter.
+        required: false
+        schema:
+          type: boolean
+          default: false
     responses:
       '200':
         description: Successfully retrieved workspace file category list

@@ -1732,6 +1732,171 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CodeMessage'
+  /api/app-api/sip/platform/v2/split-config/get:
+    get:
+      summary: 获取拆套配置
+      description: 读取指定空间或类别保存的拆套配置。
+      operationId: getSplitConfig
+      tags:
+        - 拆套配置
+      parameters:
+        - name: workspace_id
+          in: query
+          required: true
+          description: 工作空间 ID。调用方需要 WORKSPACE_CONFIG 权限及该空间的访问权限。
+          schema:
+            type: string
+        - name: scope
+          in: query
+          required: true
+          description: 配置范围：workspace 表示空间，category 表示类别。当 scope 为 category 时，必须同时传入 category_id。
+          schema:
+            type: string
+            enum:
+              - workspace
+              - category
+        - name: category_id
+          in: query
+          required: false
+          description: 类别 ID；scope=category 时必填，且必须属于指定空间；scope=workspace 时不要传入。
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 请求成功时，code 为 200，result 返回拆套配置；请求失败时，code 返回错误码，msg 说明失败原因。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SplitConfigResponse'
+              examples:
+                success:
+                  value:
+                    code: 200
+                    msg: success
+                    result:
+                      workspace_id: '2081651727503572992'
+                      scope: workspace
+                      rule_mode: custom
+                      rule_order:
+                        - page_reset
+                        - llm_judge
+                      constraint: none
+                      llm_prompt_mode: default
+                categoryNotFound:
+                  value:
+                    code: 1005025000
+                    msg: 'category对应的文件类别不存在: 2081651727503572993'
+                    data: null
+        '400':
+          description: 请求校验失败。具体原因见响应 code、msg 和错误示例。JSON 或 ID 格式错误使用通用 HTTP 400 响应。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SplitConfigError'
+              examples:
+                error1005025100:
+                  value:
+                    code: 1005025100
+                    msg: 拆套配置作用域或类别参数不合法
+                    result: null
+  /api/app-api/sip/platform/v2/split-config/update:
+    post:
+      summary: 更新拆套配置
+      description: 更新指定空间或类别的拆套规则、约束和提示词。
+      operationId: updateSplitConfig
+      tags:
+        - 拆套配置
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SplitConfigUpdateRequest'
+            example:
+              workspace_id: '2081651727503572992'
+              scope: workspace
+              rule_mode: custom
+              rule_order:
+                - page_reset
+                - llm_judge
+      responses:
+        '200':
+          description: 请求成功时，code 为 200，result 返回拆套配置；请求失败时，code 返回错误码，msg 说明失败原因。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SplitConfigResponse'
+              examples:
+                success:
+                  value:
+                    code: 200
+                    msg: success
+                    result:
+                      workspace_id: '2081651727503572992'
+                      scope: workspace
+                      rule_mode: custom
+                      rule_order:
+                        - page_reset
+                        - llm_judge
+                      constraint: none
+                      llm_prompt_mode: default
+                categoryNotFound:
+                  value:
+                    code: 1005025000
+                    msg: 'category对应的文件类别不存在: 2081651727503572993'
+                    data: null
+        '400':
+          description: 请求校验失败。具体原因见响应 code、msg 和错误示例。JSON 或 ID 格式错误使用通用 HTTP 400 响应。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SplitConfigError'
+              examples:
+                error1005025100:
+                  value:
+                    code: 1005025100
+                    msg: 拆套配置作用域或类别参数不合法
+                    result: null
+                error1005025101:
+                  value:
+                    code: 1005025101
+                    msg: 拆套规则模式缺失或不适用于当前作用域
+                    result: null
+                error1005025102:
+                  value:
+                    code: 1005025102
+                    msg: 拆套规则列表缺失或包含未知规则
+                    result: null
+                error1005025103:
+                  value:
+                    code: 1005025103
+                    msg: 拆套规则不能重复
+                    result: null
+                error1005025104:
+                  value:
+                    code: 1005025104
+                    msg: 拆套规则最多只能配置 7 条
+                    result: null
+                error1005025105:
+                  value:
+                    code: 1005025105
+                    msg: 拆套约束不合法或不适用于当前作用域
+                    result: null
+                error1005025106:
+                  value:
+                    code: 1005025106
+                    msg: 拆套提示词模式不合法
+                    result: null
+                error1005025107:
+                  value:
+                    code: 1005025107
+                    msg: llm_judge 使用自定义提示词时内容不能为空
+                    result: null
+                error1005025108:
+                  value:
+                    code: 1005025108
+                    msg: 拆套配置目标已不存在
+                    result: null
   /api/app-api/sip/platform/v2/category/sample/batch_upload:
     post:
       summary: 上传类别样本
@@ -5057,6 +5222,166 @@ components:
           description: 多表合并
       required:
         - table_id
+    SplitRule:
+      type: string
+      enum:
+        - page_same
+        - page_reset
+        - invoice_diff
+        - invoice_same
+        - page_seq
+        - table_continue
+        - llm_judge
+      description: 拆套规则代码。llm_judge 表示由模型判断页面连续性；提示词通过 llm_prompt_mode 和 llm_prompt 配置。
+    SplitConfig:
+      type: object
+      description: 成功时返回当前空间或类别保存的拆套配置；失败时为空或不返回。
+      required:
+        - workspace_id
+        - scope
+        - rule_mode
+        - rule_order
+        - constraint
+        - llm_prompt_mode
+      properties:
+        workspace_id:
+          type: string
+          description: 工作空间 ID
+          example: '2081651727503572992'
+        scope:
+          type: string
+          description: 配置范围：workspace 为空间，category 为类别。
+          enum:
+            - workspace
+            - category
+        category_id:
+          type: string
+          nullable: true
+          description: 类别 ID；scope 为 category 时返回
+        rule_mode:
+          type: string
+          description: 规则来源：空间支持 default（系统默认）和 custom（自定义）；类别支持 inherit（跟随空间）和 custom（自定义）。 类别选择 inherit 时，使用空间的规则和提示词，但 constraint 仍使用类别自己的设置。
+          enum:
+            - default
+            - inherit
+            - custom
+        rule_order:
+          type: array
+          description: 本级保存的规则，按数组顺序从前到后排列优先级。default/inherit 模式传空数组；custom 模式允许 0–7 条，不能重复。继承模式不在此展开空间规则。
+          items:
+            $ref: '#/components/schemas/SplitRule'
+        constraint:
+          type: string
+          description: 类别的拆套约束：none 不限制；strict_single_page 每份文档严格单页；strict_multi_page 每份文档严格多页；strict_once 该类别只出现一份文档。空间级仅支持 none。
+          enum:
+            - none
+            - strict_single_page
+            - strict_multi_page
+            - strict_once
+        llm_prompt_mode:
+          type: string
+          description: llm_judge 规则的提示词来源：default 使用系统默认提示词；custom 使用 llm_prompt。它不是一条拆套规则。
+          enum:
+            - default
+            - custom
+        llm_prompt:
+          type: string
+          nullable: true
+          description: llm_judge 的自定义提示词，例如“结合标题和上下文判断相邻页是否属于同一份文档”。启用该规则且 llm_prompt_mode=custom 时，内容不能是空白。 未设置时不返回此字段。
+      nullable: true
+    SplitConfigResponse:
+      type: object
+      additionalProperties: true
+      required:
+        - code
+        - msg
+      properties:
+        code:
+          type: integer
+          format: int64
+          description: 业务状态码：200 表示成功，其他值表示失败。
+          example: 200
+        msg:
+          type: string
+          description: 响应说明；失败时说明具体原因。
+          example: success
+        result:
+          $ref: '#/components/schemas/SplitConfig'
+    SplitConfigError:
+      type: object
+      required:
+        - code
+        - msg
+        - result
+      properties:
+        code:
+          type: integer
+          format: int64
+          description: 业务错误码，客户端应按此字段判断错误类型。
+        msg:
+          type: string
+          description: 错误原因，内容随响应语言变化。各错误码的说明见响应示例。
+        result:
+          type: object
+          nullable: true
+          enum:
+            - null
+          example: null
+          description: 请求失败时为 null。
+    SplitConfigUpdateRequest:
+      type: object
+      required:
+        - workspace_id
+        - scope
+        - rule_mode
+        - rule_order
+      properties:
+        workspace_id:
+          type: string
+          description: 工作空间 ID。调用方需要 WORKSPACE_CONFIG 权限及该空间的访问权限。
+        scope:
+          type: string
+          enum:
+            - workspace
+            - category
+          description: 配置范围：workspace 表示空间，category 表示类别。当 scope 为 category 时，必须同时传入 category_id。
+        category_id:
+          type: string
+          description: 类别 ID；scope=category 时必填，且必须属于指定空间；scope=workspace 时不要传入。
+        rule_mode:
+          type: string
+          description: 规则来源：空间支持 default（系统默认）和 custom（自定义）；类别支持 inherit（跟随空间）和 custom（自定义）。 类别选择 inherit 时，使用空间的规则和提示词，但 constraint 仍使用类别自己的设置。
+          enum:
+            - default
+            - inherit
+            - custom
+        rule_order:
+          type: array
+          description: 本级保存的规则，按数组顺序从前到后排列优先级。default/inherit 模式传空数组；custom 模式允许 0–7 条，不能重复。继承模式不在此展开空间规则。
+          maxItems: 7
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/SplitRule'
+        constraint:
+          type: string
+          default: none
+          enum:
+            - none
+            - strict_single_page
+            - strict_multi_page
+            - strict_once
+          description: 类别的拆套约束：none 不限制；strict_single_page 每份文档严格单页；strict_multi_page 每份文档严格多页；strict_once 该类别只出现一份文档。空间级仅支持 none。
+        llm_prompt_mode:
+          type: string
+          default: default
+          enum:
+            - default
+            - custom
+          description: llm_judge 规则的提示词来源：default 使用系统默认提示词；custom 使用 llm_prompt。它不是一条拆套规则。
+        llm_prompt:
+          type: string
+          nullable: true
+          description: llm_judge 的自定义提示词，例如“结合标题和上下文判断相邻页是否属于同一份文档”。启用该规则且 llm_prompt_mode=custom 时，内容不能是空白。
     RiskLevel:
       type: integer
       description: |

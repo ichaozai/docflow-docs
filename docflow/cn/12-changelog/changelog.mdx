@@ -4,6 +4,17 @@ sidebarTitle: "更新日志"
 description: "DocFlow API 文档更新记录"
 ---
 
+## 2026-10-10
+
+### API
+
+- 新增 `GET /api/app-api/sip/platform/v2/split-config/get`，用于获取工作空间级或类别级本级保存的拆套配置。
+- 新增 `POST /api/app-api/sip/platform/v2/split-config/update`，用于更新拆套规则、业务约束和模型提示词；完整替换所选作用域的拆套配置，省略可选字段时使用默认值，并发更新以最后一次数据库写入为准；请求和响应不含公开版本字段。新增明确的规则校验错误码（HTTP 400）。
+
+### SDK
+
+- Python SDK `1.1.5` 新增拆套配置读取与更新方法。
+
 ## 2026-09-15
 
 ### API

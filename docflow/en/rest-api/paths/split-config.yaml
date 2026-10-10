@@ -1,0 +1,169 @@
+/api/app-api/sip/platform/v2/split-config/get:
+  get:
+    summary: Get Split Configuration
+    description: Read the split configuration saved for a workspace or category.
+    operationId: getSplitConfig
+    tags:
+    - Split Configuration
+    parameters:
+    - name: workspace_id
+      in: query
+      required: true
+      description: Workspace ID. Requires WORKSPACE_CONFIG permission and access to this workspace.
+      schema:
+        type: string
+    - name: scope
+      in: query
+      required: true
+      description: 'Configuration scope: workspace or category. When scope is category, category_id is required.'
+      schema:
+        type: string
+        enum:
+        - workspace
+        - category
+    - name: category_id
+      in: query
+      required: false
+      description: Required for category scope and must belong to the specified workspace. Omit for workspace scope.
+      schema:
+        type: string
+    responses:
+      '200':
+        description: On success, code is 200 and result contains the split configuration. On failure, code identifies
+          the error and msg explains the reason.
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/split-config.yaml#/SplitConfigResponse
+            examples:
+              success:
+                value:
+                  code: 200
+                  msg: success
+                  result:
+                    workspace_id: '2081651727503572992'
+                    scope: workspace
+                    rule_mode: custom
+                    rule_order:
+                    - page_reset
+                    - llm_judge
+                    constraint: none
+                    llm_prompt_mode: default
+              categoryNotFound:
+                value:
+                  code: 1005025000
+                  msg: 'Category does not exist: 2081651727503572993'
+                  data: null
+      '400':
+        description: Request validation failed. See code, msg, and the error examples. Malformed JSON or IDs use
+          the common HTTP 400 response.
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/split-config.yaml#/SplitConfigError
+            examples:
+              error1005025100:
+                value:
+                  code: 1005025100
+                  msg: Invalid split configuration scope or category parameter
+                  result: null
+/api/app-api/sip/platform/v2/split-config/update:
+  post:
+    summary: Update Split Configuration
+    description: Update the split rules, constraints, and prompt for a workspace or category.
+    operationId: updateSplitConfig
+    tags:
+    - Split Configuration
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/split-config.yaml#/SplitConfigUpdateRequest
+          example:
+            workspace_id: '2081651727503572992'
+            scope: workspace
+            rule_mode: custom
+            rule_order:
+            - page_reset
+            - llm_judge
+    responses:
+      '200':
+        description: On success, code is 200 and result contains the split configuration. On failure, code identifies
+          the error and msg explains the reason.
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/split-config.yaml#/SplitConfigResponse
+            examples:
+              success:
+                value:
+                  code: 200
+                  msg: success
+                  result:
+                    workspace_id: '2081651727503572992'
+                    scope: workspace
+                    rule_mode: custom
+                    rule_order:
+                    - page_reset
+                    - llm_judge
+                    constraint: none
+                    llm_prompt_mode: default
+              categoryNotFound:
+                value:
+                  code: 1005025000
+                  msg: 'Category does not exist: 2081651727503572993'
+                  data: null
+      '400':
+        description: Request validation failed. See code, msg, and the error examples. Malformed JSON or IDs use
+          the common HTTP 400 response.
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/split-config.yaml#/SplitConfigError
+            examples:
+              error1005025100:
+                value:
+                  code: 1005025100
+                  msg: Invalid split configuration scope or category parameter
+                  result: null
+              error1005025101:
+                value:
+                  code: 1005025101
+                  msg: Missing or invalid rule mode for this scope
+                  result: null
+              error1005025102:
+                value:
+                  code: 1005025102
+                  msg: Missing rule order or unknown rule
+                  result: null
+              error1005025103:
+                value:
+                  code: 1005025103
+                  msg: Duplicate split rule
+                  result: null
+              error1005025104:
+                value:
+                  code: 1005025104
+                  msg: At most 7 split rules are allowed
+                  result: null
+              error1005025105:
+                value:
+                  code: 1005025105
+                  msg: Invalid split constraint for this scope
+                  result: null
+              error1005025106:
+                value:
+                  code: 1005025106
+                  msg: Invalid split prompt mode
+                  result: null
+              error1005025107:
+                value:
+                  code: 1005025107
+                  msg: Custom prompt is required when llm_judge is enabled
+                  result: null
+              error1005025108:
+                value:
+                  code: 1005025108
+                  msg: Split configuration target no longer exists
+                  result: null

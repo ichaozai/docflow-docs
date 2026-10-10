@@ -1,0 +1,165 @@
+/api/app-api/sip/platform/v2/split-config/get:
+  get:
+    summary: 获取拆套配置
+    description: 读取指定空间或类别保存的拆套配置。
+    operationId: getSplitConfig
+    tags:
+    - 拆套配置
+    parameters:
+    - name: workspace_id
+      in: query
+      required: true
+      description: 工作空间 ID。调用方需要 WORKSPACE_CONFIG 权限及该空间的访问权限。
+      schema:
+        type: string
+    - name: scope
+      in: query
+      required: true
+      description: 配置范围：workspace 表示空间，category 表示类别。当 scope 为 category 时，必须同时传入 category_id。
+      schema:
+        type: string
+        enum:
+        - workspace
+        - category
+    - name: category_id
+      in: query
+      required: false
+      description: 类别 ID；scope=category 时必填，且必须属于指定空间；scope=workspace 时不要传入。
+      schema:
+        type: string
+    responses:
+      '200':
+        description: 请求成功时，code 为 200，result 返回拆套配置；请求失败时，code 返回错误码，msg 说明失败原因。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/split-config.yaml#/SplitConfigResponse
+            examples:
+              success:
+                value:
+                  code: 200
+                  msg: success
+                  result:
+                    workspace_id: '2081651727503572992'
+                    scope: workspace
+                    rule_mode: custom
+                    rule_order:
+                    - page_reset
+                    - llm_judge
+                    constraint: none
+                    llm_prompt_mode: default
+              categoryNotFound:
+                value:
+                  code: 1005025000
+                  msg: 'category对应的文件类别不存在: 2081651727503572993'
+                  data: null
+      '400':
+        description: 请求校验失败。具体原因见响应 code、msg 和错误示例。JSON 或 ID 格式错误使用通用 HTTP 400 响应。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/split-config.yaml#/SplitConfigError
+            examples:
+              error1005025100:
+                value:
+                  code: 1005025100
+                  msg: 拆套配置作用域或类别参数不合法
+                  result: null
+/api/app-api/sip/platform/v2/split-config/update:
+  post:
+    summary: 更新拆套配置
+    description: 更新指定空间或类别的拆套规则、约束和提示词。
+    operationId: updateSplitConfig
+    tags:
+    - 拆套配置
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/split-config.yaml#/SplitConfigUpdateRequest
+          example:
+            workspace_id: '2081651727503572992'
+            scope: workspace
+            rule_mode: custom
+            rule_order:
+            - page_reset
+            - llm_judge
+    responses:
+      '200':
+        description: 请求成功时，code 为 200，result 返回拆套配置；请求失败时，code 返回错误码，msg 说明失败原因。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/split-config.yaml#/SplitConfigResponse
+            examples:
+              success:
+                value:
+                  code: 200
+                  msg: success
+                  result:
+                    workspace_id: '2081651727503572992'
+                    scope: workspace
+                    rule_mode: custom
+                    rule_order:
+                    - page_reset
+                    - llm_judge
+                    constraint: none
+                    llm_prompt_mode: default
+              categoryNotFound:
+                value:
+                  code: 1005025000
+                  msg: 'category对应的文件类别不存在: 2081651727503572993'
+                  data: null
+      '400':
+        description: 请求校验失败。具体原因见响应 code、msg 和错误示例。JSON 或 ID 格式错误使用通用 HTTP 400 响应。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/split-config.yaml#/SplitConfigError
+            examples:
+              error1005025100:
+                value:
+                  code: 1005025100
+                  msg: 拆套配置作用域或类别参数不合法
+                  result: null
+              error1005025101:
+                value:
+                  code: 1005025101
+                  msg: 拆套规则模式缺失或不适用于当前作用域
+                  result: null
+              error1005025102:
+                value:
+                  code: 1005025102
+                  msg: 拆套规则列表缺失或包含未知规则
+                  result: null
+              error1005025103:
+                value:
+                  code: 1005025103
+                  msg: 拆套规则不能重复
+                  result: null
+              error1005025104:
+                value:
+                  code: 1005025104
+                  msg: 拆套规则最多只能配置 7 条
+                  result: null
+              error1005025105:
+                value:
+                  code: 1005025105
+                  msg: 拆套约束不合法或不适用于当前作用域
+                  result: null
+              error1005025106:
+                value:
+                  code: 1005025106
+                  msg: 拆套提示词模式不合法
+                  result: null
+              error1005025107:
+                value:
+                  code: 1005025107
+                  msg: llm_judge 使用自定义提示词时内容不能为空
+                  result: null
+              error1005025108:
+                value:
+                  code: 1005025108
+                  msg: 拆套配置目标已不存在
+                  result: null

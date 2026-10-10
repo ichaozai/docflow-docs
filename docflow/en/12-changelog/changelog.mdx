@@ -4,6 +4,17 @@ sidebarTitle: "Changelog"
 description: "DocFlow API documentation changelog"
 ---
 
+## 2026-10-10
+
+### API
+
+- Added `GET /api/app-api/sip/platform/v2/split-config/get` to retrieve workspace- or category-level saved split configuration.
+- Added `POST /api/app-api/sip/platform/v2/split-config/update` to update split rules, business constraints, and the LLM prompt by fully replacing the split configuration at the selected scope. Omitted optional fields use defaults; the last database write wins. Requests and responses have no public version field. Added specific rule validation error codes (HTTP 400).
+
+### SDK
+
+- Python SDK `1.1.5` adds methods for reading and updating split configuration.
+
 ## 2026-09-15
 
 ### API

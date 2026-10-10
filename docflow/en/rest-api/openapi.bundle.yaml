@@ -1731,6 +1731,171 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CodeMessage'
+  /api/app-api/sip/platform/v2/split-config/get:
+    get:
+      summary: Get Split Configuration
+      description: Read the split configuration saved for a workspace or category.
+      operationId: getSplitConfig
+      tags:
+        - Split Configuration
+      parameters:
+        - name: workspace_id
+          in: query
+          required: true
+          description: Workspace ID. Requires WORKSPACE_CONFIG permission and access to this workspace.
+          schema:
+            type: string
+        - name: scope
+          in: query
+          required: true
+          description: 'Configuration scope: workspace or category. When scope is category, category_id is required.'
+          schema:
+            type: string
+            enum:
+              - workspace
+              - category
+        - name: category_id
+          in: query
+          required: false
+          description: Required for category scope and must belong to the specified workspace. Omit for workspace scope.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: On success, code is 200 and result contains the split configuration. On failure, code identifies the error and msg explains the reason.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SplitConfigResponse'
+              examples:
+                success:
+                  value:
+                    code: 200
+                    msg: success
+                    result:
+                      workspace_id: '2081651727503572992'
+                      scope: workspace
+                      rule_mode: custom
+                      rule_order:
+                        - page_reset
+                        - llm_judge
+                      constraint: none
+                      llm_prompt_mode: default
+                categoryNotFound:
+                  value:
+                    code: 1005025000
+                    msg: 'Category does not exist: 2081651727503572993'
+                    data: null
+        '400':
+          description: Request validation failed. See code, msg, and the error examples. Malformed JSON or IDs use the common HTTP 400 response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SplitConfigError'
+              examples:
+                error1005025100:
+                  value:
+                    code: 1005025100
+                    msg: Invalid split configuration scope or category parameter
+                    result: null
+  /api/app-api/sip/platform/v2/split-config/update:
+    post:
+      summary: Update Split Configuration
+      description: Update the split rules, constraints, and prompt for a workspace or category.
+      operationId: updateSplitConfig
+      tags:
+        - Split Configuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SplitConfigUpdateRequest'
+            example:
+              workspace_id: '2081651727503572992'
+              scope: workspace
+              rule_mode: custom
+              rule_order:
+                - page_reset
+                - llm_judge
+      responses:
+        '200':
+          description: On success, code is 200 and result contains the split configuration. On failure, code identifies the error and msg explains the reason.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SplitConfigResponse'
+              examples:
+                success:
+                  value:
+                    code: 200
+                    msg: success
+                    result:
+                      workspace_id: '2081651727503572992'
+                      scope: workspace
+                      rule_mode: custom
+                      rule_order:
+                        - page_reset
+                        - llm_judge
+                      constraint: none
+                      llm_prompt_mode: default
+                categoryNotFound:
+                  value:
+                    code: 1005025000
+                    msg: 'Category does not exist: 2081651727503572993'
+                    data: null
+        '400':
+          description: Request validation failed. See code, msg, and the error examples. Malformed JSON or IDs use the common HTTP 400 response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SplitConfigError'
+              examples:
+                error1005025100:
+                  value:
+                    code: 1005025100
+                    msg: Invalid split configuration scope or category parameter
+                    result: null
+                error1005025101:
+                  value:
+                    code: 1005025101
+                    msg: Missing or invalid rule mode for this scope
+                    result: null
+                error1005025102:
+                  value:
+                    code: 1005025102
+                    msg: Missing rule order or unknown rule
+                    result: null
+                error1005025103:
+                  value:
+                    code: 1005025103
+                    msg: Duplicate split rule
+                    result: null
+                error1005025104:
+                  value:
+                    code: 1005025104
+                    msg: At most 7 split rules are allowed
+                    result: null
+                error1005025105:
+                  value:
+                    code: 1005025105
+                    msg: Invalid split constraint for this scope
+                    result: null
+                error1005025106:
+                  value:
+                    code: 1005025106
+                    msg: Invalid split prompt mode
+                    result: null
+                error1005025107:
+                  value:
+                    code: 1005025107
+                    msg: Custom prompt is required when llm_judge is enabled
+                    result: null
+                error1005025108:
+                  value:
+                    code: 1005025108
+                    msg: Split configuration target no longer exists
+                    result: null
   /api/app-api/sip/platform/v2/category/sample/batch_upload:
     post:
       summary: Upload Category Samples
@@ -5042,6 +5207,166 @@ components:
           description: Merge multiple tables
       required:
         - table_id
+    SplitRule:
+      type: string
+      enum:
+        - page_same
+        - page_reset
+        - invoice_diff
+        - invoice_same
+        - page_seq
+        - table_continue
+        - llm_judge
+      description: Split rule code. llm_judge asks the model to judge page continuity; configure its prompt with llm_prompt_mode and llm_prompt.
+    SplitConfig:
+      type: object
+      description: Saved split configuration on success; null or omitted on failure.
+      required:
+        - workspace_id
+        - scope
+        - rule_mode
+        - rule_order
+        - constraint
+        - llm_prompt_mode
+      properties:
+        workspace_id:
+          type: string
+          description: Workspace ID
+          example: '2081651727503572992'
+        scope:
+          type: string
+          description: 'Configuration scope: workspace or category.'
+          enum:
+            - workspace
+            - category
+        category_id:
+          type: string
+          nullable: true
+          description: Category ID; returned for category scope
+        rule_mode:
+          type: string
+          description: 'Rule source: workspaces support default (system defaults) or custom; categories support inherit (follow the workspace) or custom. An inheriting category uses workspace rules and prompts but retains its own constraint.'
+          enum:
+            - default
+            - inherit
+            - custom
+        rule_order:
+          type: array
+          description: Rules saved for this scope, ordered from highest to lowest priority. Send an empty array for default/inherit. Custom mode accepts 0–7 unique rules. Inherited workspace rules are not expanded here.
+          items:
+            $ref: '#/components/schemas/SplitRule'
+        constraint:
+          type: string
+          description: 'Category constraint: none; strict_single_page (single-page documents); strict_multi_page (multi-page documents); strict_once (one document in this category). Workspace scope only supports none.'
+          enum:
+            - none
+            - strict_single_page
+            - strict_multi_page
+            - strict_once
+        llm_prompt_mode:
+          type: string
+          description: 'Prompt source for the llm_judge rule: default uses the system prompt; custom uses llm_prompt. This setting is not a split rule.'
+          enum:
+            - default
+            - custom
+        llm_prompt:
+          type: string
+          nullable: true
+          description: 'Custom instructions for llm_judge, for example: use titles and context to decide whether adjacent pages belong to the same document. Must be nonblank when this rule is enabled and llm_prompt_mode=custom. Omitted when not configured.'
+      nullable: true
+    SplitConfigResponse:
+      type: object
+      additionalProperties: true
+      required:
+        - code
+        - msg
+      properties:
+        code:
+          type: integer
+          format: int64
+          description: 'Business status code: 200 indicates success; other values indicate failure.'
+          example: 200
+        msg:
+          type: string
+          description: Response message; explains the reason when the request fails.
+          example: success
+        result:
+          $ref: '#/components/schemas/SplitConfig'
+    SplitConfigError:
+      type: object
+      required:
+        - code
+        - msg
+        - result
+      properties:
+        code:
+          type: integer
+          format: int64
+          description: Business error code. Use this field to identify the error type.
+        msg:
+          type: string
+          description: Localized explanation of the error. See response examples for each error code.
+        result:
+          type: object
+          nullable: true
+          enum:
+            - null
+          example: null
+          description: Null when the request fails.
+    SplitConfigUpdateRequest:
+      type: object
+      required:
+        - workspace_id
+        - scope
+        - rule_mode
+        - rule_order
+      properties:
+        workspace_id:
+          type: string
+          description: Workspace ID. Requires WORKSPACE_CONFIG permission and access to this workspace.
+        scope:
+          type: string
+          enum:
+            - workspace
+            - category
+          description: 'Configuration scope: workspace or category. When scope is category, category_id is required.'
+        category_id:
+          type: string
+          description: Required for category scope and must belong to the specified workspace. Omit for workspace scope.
+        rule_mode:
+          type: string
+          description: 'Rule source: workspaces support default (system defaults) or custom; categories support inherit (follow the workspace) or custom. An inheriting category uses workspace rules and prompts but retains its own constraint.'
+          enum:
+            - default
+            - inherit
+            - custom
+        rule_order:
+          type: array
+          description: Rules saved for this scope, ordered from highest to lowest priority. Send an empty array for default/inherit. Custom mode accepts 0–7 unique rules. Inherited workspace rules are not expanded here.
+          maxItems: 7
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/SplitRule'
+        constraint:
+          type: string
+          default: none
+          enum:
+            - none
+            - strict_single_page
+            - strict_multi_page
+            - strict_once
+          description: 'Category constraint: none; strict_single_page (single-page documents); strict_multi_page (multi-page documents); strict_once (one document in this category). Workspace scope only supports none.'
+        llm_prompt_mode:
+          type: string
+          default: default
+          enum:
+            - default
+            - custom
+          description: 'Prompt source for the llm_judge rule: default uses the system prompt; custom uses llm_prompt. This setting is not a split rule.'
+        llm_prompt:
+          type: string
+          nullable: true
+          description: 'Custom instructions for llm_judge, for example: use titles and context to decide whether adjacent pages belong to the same document. Must be nonblank when this rule is enabled and llm_prompt_mode=custom.'
     RiskLevel:
       type: integer
       description: |

@@ -113,14 +113,11 @@ paths:
   /api/app-api/sip/platform/v2/file/fetch:
     get:
       summary: 获取文件处理结果列表
-      description: |
-        查询任务的识别结果。任务已有翻译结果时，接口保留原始识别字段，并在对应对象中追加译文：
-        - 普通字段及旧版单表字段：`data.fields[]`、`data.items[][]`中的`translated_key`、`translated_value`
-        - 多表结果：`data.tables[]`中的`translated_table_name`，以及`data.tables[].items[][]`中的`translated_key`、`translated_value`
-        - 印章：`data.stamps[]`中的`translated_color`、`translated_text`、`translated_shape`、`translated_type`
-        - 手写体：`data.handwritings[]`中的`translated_text`
-
-        翻译字段仅在对应内容存在译文时有值，不会覆盖原始的`key`、`value`、`tableName`等字段。
+      description: 查询文件任务的识别与处理结果。
+      x-mint:
+        metadata:
+          description: ''
+        content: 查询文件任务的识别与处理结果。
       operationId: getFiles
       parameters:
         - name: page
@@ -232,17 +229,11 @@ paths:
   /api/app-api/sip/platform/v2/file/translate:
     post:
       summary: 翻译文件抽取结果
-      description: |
-        语言使用 ISO 639-1 编码，中文按地区区分为`zh-CN`和`zh-TW`。
-        `source_language`省略或传空字符串时自动检测源语言；指定源语言时不能与`target_language`相同。
-        调用接口后执行翻译并同步开启前端详情展示。并发请求会返回“任务正在翻译中，请稍后重试”。
-
-        常见业务错误码：
-        - `1005025065`：任务识别失败，无法执行翻译
-        - `1005025066`：任务尚未完成识别
-        - `1005025067`：任务正在翻译中
-        - `1005025068`：翻译源语言和目标语言相同
-        - `1005025069`：目标语言为空或不是具体语言编码
+      description: 将文件任务的抽取结果翻译为指定目标语言。
+      x-mint:
+        metadata:
+          description: ''
+        content: 将文件任务的抽取结果翻译为指定目标语言。
       operationId: translateFile
       requestBody:
         required: true
@@ -256,7 +247,7 @@ paths:
               target_language: zh-CN
       responses:
         '200':
-          description: 翻译请求处理完成；具体结果以响应中的业务code为准
+          description: 翻译请求的处理结果
           content:
             application/json:
               schema:
@@ -3953,7 +3944,7 @@ components:
           $ref: '#/components/schemas/PagesInfo'
         data:
           type: object
-          description: 处理结果
+          description: 处理结果。`translated_*` 为译文字段，仅在有译文时有值，原始字段保持不变。
           properties:
             fields:
               description: 字段列表
@@ -4289,7 +4280,7 @@ components:
                     $ref: '#/components/schemas/PagesInfo'
                   data:
                     type: object
-                    description: 处理结果
+                    description: 处理结果。`translated_*` 为译文字段，仅在有译文时有值，原始字段保持不变。
                     properties:
                       fields:
                         description: 字段列表
@@ -4538,7 +4529,7 @@ components:
                   - category
     TranslateSourceLanguage:
       type: string
-      description: 翻译源语言，使用 ISO 639-1 编码；省略或空字符串均表示自动检测。
+      description: 源语言（ISO 639-1 编码）。省略或传空字符串时自动检测，指定时不能与目标语言相同。
       enum:
         - ''
         - zh-CN
@@ -4563,7 +4554,7 @@ components:
       example: ''
     TranslateTargetLanguage:
       type: string
-      description: 翻译目标语言，使用 ISO 639-1 编码，必填且必须是具体语言。
+      description: 目标语言（ISO 639-1 编码），不能为空。中文使用 `zh-CN`（简体）或 `zh-TW`（繁体）。
       enum:
         - zh-CN
         - zh-TW
@@ -4593,7 +4584,7 @@ components:
       properties:
         task_id:
           type: string
-          description: 已完成识别的任务ID。雪花ID必须作为字符串传递，禁止转换为JavaScript Number。
+          description: 已完成识别的任务ID，使用字符串传递。
           example: '1978297791713619968'
         source_language:
           $ref: '#/components/schemas/TranslateSourceLanguage'

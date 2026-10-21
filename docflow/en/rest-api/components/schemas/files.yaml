@@ -89,7 +89,7 @@ TaskProcessResult:
                 $ref: '#/PagesInfo'
               data:
                 type: object
-                description: Processing result
+                description: Processing result. `translated_*` fields contain available translations; original fields remain unchanged.
                 properties:
                   fields:
                     description: Field list
@@ -524,7 +524,7 @@ SubFileDetailInfo:
       $ref: '#/PagesInfo'
     data:
       type: object
-      description: Processing result
+      description: Processing result. `translated_*` fields contain available translations; original fields remain unchanged.
       properties:
         fields:
           description: Field list
@@ -768,7 +768,7 @@ FileTranslateRequest:
   properties:
     task_id:
       type: string
-      description: ID of a task that completed recognition. Send Snowflake IDs as strings; do not convert them to JavaScript Number.
+      description: ID of a task that completed recognition. Send as a string.
       example: "1978297791713619968"
     source_language: { $ref: '#/TranslateSourceLanguage' }
     target_language: { $ref: '#/TranslateTargetLanguage' }
@@ -799,13 +799,13 @@ FileTranslateResult:
 
 TranslateSourceLanguage:
   type: string
-  description: Source language as an ISO 639-1 code. Omit it or send an empty string to enable automatic detection.
+  description: Source language (ISO 639-1). Omit or send an empty string for automatic detection; an explicit value must differ from the target language.
   enum: ["", zh-CN, zh-TW, ja, ko, en, fr, pt, de, it, es, ru, th, vi, ms, id, hi, bn, ar, pl]
   example: ""
 
 TranslateTargetLanguage:
   type: string
-  description: Required target language as a concrete ISO 639-1 code.
+  description: Target language (ISO 639-1), non-empty. Use `zh-CN` for Simplified Chinese or `zh-TW` for Traditional Chinese.
   enum: [zh-CN, zh-TW, ja, ko, en, fr, pt, de, it, es, ru, th, vi, ms, id, hi, bn, ar, pl]
   example: zh-CN
 

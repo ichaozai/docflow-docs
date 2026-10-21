@@ -113,18 +113,11 @@ paths:
   /api/app-api/sip/platform/v2/file/fetch:
     get:
       summary: Get File Processing Result List
-      description: |
-        Queries task recognition results. When stored translations exist, original recognition
-        fields are preserved and translated values are added to the corresponding objects:
-        - Regular fields and legacy single-table fields: `translated_key` and `translated_value` in
-          `data.fields[]` and `data.items[][]`
-        - Multi-table results: `translated_table_name` in `data.tables[]`, and `translated_key` and
-          `translated_value` in `data.tables[].items[][]`
-        - Stamps: `translated_color`, `translated_text`, `translated_shape`, and `translated_type` in `data.stamps[]`
-        - Handwriting: `translated_text` in `data.handwritings[]`
-
-        Translation fields have values only when translations exist for the corresponding content.
-        Original fields such as `key`, `value`, and `tableName` are not overwritten.
+      description: Query recognition and processing results for file tasks.
+      x-mint:
+        metadata:
+          description: ''
+        content: Query recognition and processing results for file tasks.
       operationId: getFiles
       parameters:
         - name: page
@@ -238,19 +231,15 @@ paths:
   /api/app-api/sip/platform/v2/file/translate:
     post:
       summary: Translate file extraction results
-      description: |
-        Languages use ISO 639-1 codes; Chinese is region-qualified as `zh-CN` or `zh-TW`.
-        Omitting `source_language` or sending an empty string enables automatic source-language detection.
-        A concrete source language must differ from `target_language`.
-        Calling this endpoint translates the task and enables translation in the frontend task detail view.
-        A concurrent request returns a "task is being translated" error.
-
-        Common business error codes:
-        - `1005025065`: task recognition failed and cannot be translated
-        - `1005025066`: task recognition has not completed
-        - `1005025067`: task translation is already in progress
-        - `1005025068`: source and target languages are the same
-        - `1005025069`: target language is empty or is not a concrete language code
+      description: >-
+        Translate a file task's extraction results into the specified target
+        language.
+      x-mint:
+        metadata:
+          description: ''
+        content: >-
+          Translate a file task's extraction results into the specified target
+          language.
       operationId: translateFile
       requestBody:
         required: true
@@ -264,7 +253,7 @@ paths:
               target_language: zh-CN
       responses:
         '200':
-          description: The request has been processed. Check the business code in the response for the outcome.
+          description: Translation request result
           content:
             application/json:
               schema:
@@ -3935,7 +3924,9 @@ components:
           $ref: '#/components/schemas/PagesInfo'
         data:
           type: object
-          description: Processing result
+          description: >-
+            Processing result. `translated_*` fields contain available
+            translations; original fields remain unchanged.
           properties:
             fields:
               description: Field list
@@ -4274,7 +4265,9 @@ components:
                     $ref: '#/components/schemas/PagesInfo'
                   data:
                     type: object
-                    description: Processing result
+                    description: >-
+                      Processing result. `translated_*` fields contain available
+                      translations; original fields remain unchanged.
                     properties:
                       fields:
                         description: Field list
@@ -4523,7 +4516,9 @@ components:
                   - category
     TranslateSourceLanguage:
       type: string
-      description: Source language as an ISO 639-1 code. Omit it or send an empty string to enable automatic detection.
+      description: >-
+        Source language (ISO 639-1). Omit or send an empty string for automatic
+        detection; an explicit value must differ from the target language.
       enum:
         - ''
         - zh-CN
@@ -4548,7 +4543,9 @@ components:
       example: ''
     TranslateTargetLanguage:
       type: string
-      description: Required target language as a concrete ISO 639-1 code.
+      description: >-
+        Target language (ISO 639-1), non-empty. Use `zh-CN` for Simplified
+        Chinese or `zh-TW` for Traditional Chinese.
       enum:
         - zh-CN
         - zh-TW
@@ -4578,7 +4575,7 @@ components:
       properties:
         task_id:
           type: string
-          description: ID of a task that completed recognition. Send Snowflake IDs as strings; do not convert them to JavaScript Number.
+          description: ID of a task that completed recognition. Send as a string.
           example: '1978297791713619968'
         source_language:
           $ref: '#/components/schemas/TranslateSourceLanguage'

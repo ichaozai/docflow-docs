@@ -89,7 +89,7 @@ TaskProcessResult:
                 $ref: '#/PagesInfo'
               data:
                 type: object
-                description: 处理结果
+                description: 处理结果。`translated_*` 为译文字段，仅在有译文时有值，原始字段保持不变。
                 properties:
                   fields:
                     description: 字段列表
@@ -524,7 +524,7 @@ SubFileDetailInfo:
       $ref: '#/PagesInfo'
     data:
       type: object
-      description: 处理结果
+      description: 处理结果。`translated_*` 为译文字段，仅在有译文时有值，原始字段保持不变。
       properties:
         fields:
           description: 字段列表
@@ -767,7 +767,7 @@ FileTranslateRequest:
   properties:
     task_id:
       type: string
-      description: 已完成识别的任务ID。雪花ID必须作为字符串传递，禁止转换为JavaScript Number。
+      description: 已完成识别的任务ID，使用字符串传递。
       example: "1978297791713619968"
     source_language:
       $ref: '#/TranslateSourceLanguage'
@@ -808,7 +808,7 @@ FileTranslateResult:
 
 TranslateSourceLanguage:
   type: string
-  description: 翻译源语言，使用 ISO 639-1 编码；省略或空字符串均表示自动检测。
+  description: 源语言（ISO 639-1 编码）。省略或传空字符串时自动检测，指定时不能与目标语言相同。
   enum:
     - ""
     - zh-CN
@@ -834,7 +834,7 @@ TranslateSourceLanguage:
 
 TranslateTargetLanguage:
   type: string
-  description: 翻译目标语言，使用 ISO 639-1 编码，必填且必须是具体语言。
+  description: 目标语言（ISO 639-1 编码），不能为空。中文使用 `zh-CN`（简体）或 `zh-TW`（繁体）。
   enum:
     - zh-CN
     - zh-TW

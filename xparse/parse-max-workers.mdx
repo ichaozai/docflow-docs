@@ -44,7 +44,7 @@ if __name__ == "__main__":
 ```
 
 <Tip>
-  这里使用[快速启动](/xparse/parse-quickstart)中的示例文件进行多并发测试：[文档解析pdf示例.pdf](https://dllf.intsig.net/download/2025/Solution/textin/sample/pdf_to_markdown/sample_02.pdf)
+  这里使用[快速启动](/xparse/parse-quickstart)中的示例文件进行多并发测试：[文档解析pdf示例.pdf](https://dllf.intsig.net/download/2025/Solution/textin/sample/pdf_to_markdown/sample_02.pdf?se=2036-11-02T07%3A10%3A41Z&sp=r&sv=2024-11-04&sr=b&sig=6gVBBp1H80aRa1WrlUlXvXCL5EppBQpIa0RLiQFdXt0%3D)
 </Tip>
 
 - 测试脚本如下：参考[快速启动](/xparse/parse-quickstart)，解析位于URL的文件并保存结果；需替换您自己的 x-ti-app-id 和 x-ti-secret-code
@@ -95,7 +95,7 @@ def main():
     client = OCRClient("你的x-ti-app-id", "你的x-ti-secret-code")
 
     # 文件URL，这里为你提供了一份真实可用的示例URL
-    file_content = "https://dllf.intsig.net/download/2025/Solution/textin/sample/pdf_to_markdown/sample_02.pdf"
+    file_content = "https://dllf.intsig.net/download/2025/Solution/textin/sample/pdf_to_markdown/sample_02.pdf?se=2036-11-02T07%3A10%3A41Z&sp=r&sv=2024-11-04&sr=b&sig=6gVBBp1H80aRa1WrlUlXvXCL5EppBQpIa0RLiQFdXt0%3D"
 
     # 设置URL参数，可按需设置，这里已为你默认设置了一些参数
     options = dict(
